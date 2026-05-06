@@ -407,7 +407,7 @@ export const GET_BOARD_ARTICLE = gql`
 			}
 		}
 	}
-`;
+`;  
 
 export const GET_BOARD_ARTICLES = gql`
 	query GetBoardArticles($input: BoardArticlesInquiry!) {

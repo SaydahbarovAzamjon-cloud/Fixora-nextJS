@@ -100,8 +100,8 @@ export function initializeApollo(initialState = null) {
 	return _apolloClient;
 }
 
-export function useApollo(initialState: any) {
-	return useMemo(() => initializeApollo(initialState), [initialState]);
+export function useApollo(initialState: any) { /* Apollo ni componentga beradi */
+	return useMemo(() => initializeApollo(initialState), [initialState]); /* Apollo ni qayta-qayta create qilmaydi */
 }
 
 /**

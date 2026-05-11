@@ -6,6 +6,7 @@ import { light } from '../scss/MaterialTheme';
 import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
+
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';

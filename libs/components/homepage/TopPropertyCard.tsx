@@ -12,10 +12,11 @@ import { userVar } from '../../../apollo/store';
 
 interface TopPropertyCardProps {
 	property: Property;
+	likePropertyHandler: any;
 }
 
 const TopPropertyCard = (props: TopPropertyCardProps) => {
-	const { property } = props;
+	const { property, likePropertyHandler } = props;
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
@@ -109,7 +110,7 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 							{property.propertyBarter ? 'Barter' : ''}
 						</p>
 						<div className="view-like-box">
-							<IconButton color={'default'}>
+							<IconButton color={'default'}  onclick={() => likePropertyHandler(user, property?._id)}>
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>

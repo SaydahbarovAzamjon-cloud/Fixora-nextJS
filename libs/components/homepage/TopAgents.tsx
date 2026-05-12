@@ -8,6 +8,9 @@ import { Autoplay, Navigation, Pagination } from 'swiper';
 import TopAgentCard from './TopAgentCard';
 import { Member } from '../../types/member/member';
 import { AgentsInquiry } from '../../types/member/member.input';
+import { useQuery } from '@apollo/client';
+import { GET_AGENTS } from '../../../apollo/user/query';
+import { T } from '../../types/common';
 
 interface TopAgentsProps {
 	initialInput: AgentsInquiry;
@@ -18,8 +21,27 @@ const TopAgents = (props: TopAgentsProps) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const [topAgents, setTopAgents] = useState<Member[]>([]);
+	console.log('initialInput:', initialInput);
 
 	/** APOLLO REQUESTS **/
+		const {
+			loading: getAgentsLoading, 
+			data: getAgentsData,
+			error: getAgentsError,
+			refetch: getAgentsRefetch,
+		} = useQuery(GET_AGENTS, {
+			fetchPolicy: "cache-and-network",
+			variables: {input: initialInput},
+			notifyOnNetworkStatusChange: true,
+			onCompleted: (data:T) =>{
+				 console.log(' DATA:', data);
+                 console.log('LIST:', data?.getAgents?.list);
+			   setTopAgents(data?.getAgents?.list);
+			},
+		})
+		console.log('ERROR:', getAgentsError);
+        console.log('LOADING:', getAgentsLoading);
+         console.log('topAgents:', topAgents);
 	/** HANDLERS **/
 
 	if (device === 'mobile') {
@@ -105,7 +127,8 @@ TopAgents.defaultProps = {
 		limit: 10,
 		sort: 'memberRank',
 		direction: 'DESC',
-		search: {},
+		search:{
+        },
 	},
 };
 

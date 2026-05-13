@@ -58,11 +58,11 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 							{property.propertyBarter ? 'Barter' : ''}
 						</p>
 						<div className="view-like-box">
-							<IconButton color={'default'}  onclick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton color={'default'}>
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'}>
+							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (
@@ -110,11 +110,11 @@ const TopPropertyCard = (props: TopPropertyCardProps) => {
 							{property.propertyBarter ? 'Barter' : ''}
 						</p>
 						<div className="view-like-box">
-							<IconButton color={'default'}  onclick={() => likePropertyHandler(user, property?._id)}>
+							<IconButton color={'default'}>
 								<RemoveRedEyeIcon />
 							</IconButton>
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
-							<IconButton color={'default'}>
+							<IconButton color={'default'} onClick={() => likePropertyHandler(user, property?._id)}>
 								{property?.meLiked && property?.meLiked[0]?.myFavorite ? (
 									<FavoriteIcon style={{ color: 'red' }} />
 								) : (

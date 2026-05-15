@@ -158,7 +158,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 				variables: { input: id },
 			});
 
-			await getPropertyRefetch({ input: property?._id });
+			await getPropertyRefetch({ input: id });
 			await getPropertiesRefetch({
 				input: {
 					page: 1,

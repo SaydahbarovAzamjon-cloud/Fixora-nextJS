@@ -68,7 +68,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 		error: getPropertyError,
 		refetch: getPropertyRefetch,
 	} = useQuery(GET_PROPERTY, {
-		fetchPolicy: 'cache-and-network',
+		fetchPolicy: 'network-only',
 		variables: { input: propertyId },
 		skip: !propertyId,
 		notifyOnNetworkStatusChange: true,
@@ -86,7 +86,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 		error: getPropertiesError,
 		refetch: getPropertiesRefetch,
 	} = useQuery(GET_PROPERTIES, {
-		fetchPolicy: 'cache-and-network',
+		fetchPolicy: 'network-only',
 		variables: {
 			input: {
 				page: 1,
@@ -193,7 +193,8 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 			await getCommentsRefetch({ input: commentInquiry });
 		} catch (err: any) {
 			await sweetErrorHandling(err);
-		}
+		};
+
 		if (getPropertyLoading) {
 			return (
 				<Stack

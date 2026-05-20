@@ -39,7 +39,7 @@ const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
 				<Stack className="article-list-box">
 					{boardArticles?.length > 0 ? (
 						boardArticles?.map((boardArticle: BoardArticle) => {
-							return <CommunityCard boardArticle={boardArticle} key={boardArticle?._id} size={'small'} />;
+							return <CommunityCard boardArticle={boardArticle} key={boardArticle?._id} size={'small'} likeArticleHandler={undefined} />;
 						})
 					) : (
 						<div className={'no-data'}>

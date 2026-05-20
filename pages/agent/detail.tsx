@@ -152,9 +152,9 @@ import { T } from '../../libs/types/common';
 	};
 
 	const createCommentHandler = async () => {
-  	try {
-    	if (!user._id) throw new Error(Messages.error2);
-    	if (user._id === agentId) throw new Error('Cannot write a review for yourself');
+		try {
+			if (!user._id) throw new Error(Messages.error2);
+			if (user._id === agentId) throw new Error('Cannot write a review for yourself');
 
     await createComment({
     	variables: {

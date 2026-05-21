@@ -39,10 +39,10 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
     } = useQuery(GET_MEMBER_FOLLOWINGS, {
       fetchPolicy: 'network-only',
       variables: { input: followInquiry },
-      skip: !followInquiry?.search?.followingId,
+      skip: !followInquiry?.search?.followerId,
       notifyOnNetworkStatusChange: true,
       onCompleted: (data: T) => {
-        setMemberFollowings(data?.getMemberFollowers?.list);
+        setMemberFollowings(data?.getMemberFollowings?.list);
         setTotal(data?.getMemberFollowings?.metaCounter[0]?.total);
       },
     });
@@ -51,7 +51,7 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 		if (router.query.memberId)
 			setFollowInquiry({ ...followInquiry, search: { followerId: router.query.memberId as string } });
 		else setFollowInquiry({ ...followInquiry, search: { followerId: user?._id } });
-	}, [router]);
+	}, [router.query.memberId]);
 
 	useEffect(() => {
     getMemberFollowingsRefetch({input: followInquiry }).then()

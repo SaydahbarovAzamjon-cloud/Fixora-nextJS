@@ -31,31 +31,32 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 	const user = useReactiveVar(userVar);
 
 	/** APOLLO REQUESTS **/
-    const {
-      loading: getMemberFollowingsLoading,
-      data: getMemberFollowingsData,
-      error: getMemberFollowingsError,
-      refetch: getMemberFollowingsRefetch,
-    } = useQuery(GET_MEMBER_FOLLOWINGS, {
-      fetchPolicy: 'network-only',
-      variables: { input: followInquiry },
-      skip: !followInquiry?.search?.followerId,
-      notifyOnNetworkStatusChange: true,
-      onCompleted: (data: T) => {
-        setMemberFollowings(data?.getMemberFollowings?.list);
-        setTotal(data?.getMemberFollowings?.metaCounter[0]?.total);
-      },
-    });
+	const {
+		loading: getMemberFollowingsLoading,
+		data: getMemberFollowingsData,
+		error: getMemberFollowingsError,
+		refetch: getMemberFollowingsRefetch,
+	} = useQuery(GET_MEMBER_FOLLOWINGS, {
+		fetchPolicy: 'network-only',
+		variables: { input: followInquiry },
+		skip: !followInquiry?.search?.followerId,
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setMemberFollowings(data?.getMemberFollowings?.list);
+			setTotal(data?.getMemberFollowings?.metaCounter[0]?.total);
+		},
+	});
+
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (router.query.memberId)
 			setFollowInquiry({ ...followInquiry, search: { followerId: router.query.memberId as string } });
 		else setFollowInquiry({ ...followInquiry, search: { followerId: user?._id } });
-	}, [router.query.memberId]);
+	}, [router]);
 
 	useEffect(() => {
-    getMemberFollowingsRefetch({input: followInquiry }).then()
-  }, [followInquiry]);
+		getMemberFollowingsRefetch({ input: followInquiry }).then();
+	}, [followInquiry]);
 
 	/** HANDLERS **/
 	const paginationHandler = async (event: ChangeEvent<unknown>, value: number) => {
@@ -110,11 +111,18 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 									</Box>
 									<Box className={'info-box'} component={'div'}>
 										{follower?.meLiked && follower?.meLiked[0]?.myFavorite ? (
-											<FavoriteIcon color="primary" onClick={() => 
-                        likeMemberHandler( follower?.followingData?._id, getMemberFollowingsRefetch,followInquiry )} />
+											<FavoriteIcon
+												color="primary"
+												onClick={() => {
+													likeMemberHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry);
+												}}
+											/>
 										) : (
-											<FavoriteBorderIcon onClick={() => 
-                        likeMemberHandler( follower?.followingData?._id, getMemberFollowingsRefetch,followInquiry )} />
+											<FavoriteBorderIcon
+												onClick={() => {
+													likeMemberHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry);
+												}}
+											/>
 										)}
 										<span>({follower?.followingData?.memberLikes})</span>
 									</Box>
@@ -127,7 +135,9 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 												<Button
 													variant="outlined"
 													sx={{ background: '#f78181', ':hover': { background: '#f06363' } }}
-													onClick={() => unsubscribeHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry)}
+													onClick={() =>
+														unsubscribeHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry)
+													}
 												>
 													Unfollow
 												</Button>
@@ -136,7 +146,9 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 											<Button
 												variant="contained"
 												sx={{ background: '#60eb60d4', ':hover': { background: '#60eb60d4' } }}
-												onClick={() => subscribeHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry)}
+												onClick={() =>
+													subscribeHandler(follower?.followingData?._id, getMemberFollowingsRefetch, followInquiry)
+												}
 											>
 												Follow
 											</Button>

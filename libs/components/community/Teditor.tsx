@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+  import React, { useMemo, useRef, useState } from 'react';
 import { Box, Button, FormControl, MenuItem, Stack, Typography, Select, TextField } from '@mui/material';
 import { BoardArticleCategory } from '../../enums/board-article.enum';
 import { Editor } from '@toast-ui/react-editor';
@@ -7,7 +7,7 @@ import { REACT_APP_API_URL } from '../../config';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { T } from '../../types/common';
-// import '@toast-ui/editor/dist/toastui-editor.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
 import { useMutation } from '@apollo/client';
 import { CREATE_BOARD_ARTICLE } from '../../../apollo/user/mutation';
 import { sweetTopSuccessAlert, sweetErrorHandling } from '../../sweetAlert';
@@ -21,6 +21,7 @@ const TuiEditor = () => {
 
 	/** APOLLO REQUESTS **/
 const [createboardArticle] = useMutation(CREATE_BOARD_ARTICLE);
+
 	const memoizedValues = useMemo(() => {
 		const articleTitle = '',
 			articleContent = '',

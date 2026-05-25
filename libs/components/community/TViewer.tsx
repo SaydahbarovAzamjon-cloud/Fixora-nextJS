@@ -53,7 +53,7 @@ const TViewer = (props: any) => {
 						}}
 					/>
 				) : (
-					<CircularProgress />
+					<CircularProgress /> 
 				)}
 			</Box>
 		</Stack>

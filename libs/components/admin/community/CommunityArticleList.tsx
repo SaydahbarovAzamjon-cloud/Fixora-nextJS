@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import {
 	Box,
@@ -24,6 +24,9 @@ import { REACT_APP_API_URL } from '../../../config';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import { BoardArticleStatus } from '../../../enums/board-article.enum';
+import { useMutation, useQuery } from '@apollo/client';
+import { REMOVE_BOARD_ARTICLE_BY_ADMIN, UPDATE_BOARD_ARTICLE_BY_ADMIN } from '../../../../apollo/admin/mutation';
+import { GET_ALL_BOARD_ARTICLES_BY_ADMIN } from '../../../../apollo/admin/query';
 
 interface Data {
 	category: string;
@@ -131,6 +134,45 @@ interface CommunityArticleListProps {
 const CommunityArticleList = (props: CommunityArticleListProps) => {
 	const { articles, anchorEl, menuIconClickHandler, menuIconCloseHandler, updateArticleHandler, removeArticleHandler } =
 		props;
+
+/** APOLLO REQUESTS **/
+const [updateBoardArticleByAdmin] = useMutation(UPDATE_BOARD_ARTICLE_BY_ADMIN);
+const [removeBoardArticleByAdmin] = useMutation(REMOVE_BOARD_ARTICLE_BY_ADMIN);
+
+// const {
+// 	loading: getAllBoardArticleByAdminLoading,
+// 	data: getAllBoardArticlesByAdminData,
+// 	error: getAllBoardArticleByAdminError,
+// 	refetch: getAllBoardArticleByAdminRefetch,
+// } = useQuery(GET_ALL_BOARD_ARTICLES_BY_ADMIN, {
+// 	fetchPolicy: 'network-only',
+// 	variables: { input: communityInquiry },
+// 	notifyOnNetworkStatusChange: true,
+// 	onCompleted: (data: T) => {
+// 		setArticles(data?.getAllBoardArticlesByAdmin?.list);
+// 		setArticleTotal(data?.getAllBoardArticlesByAdmin?.metaCounter[0]?.total ?? 0);
+// 	},
+// });
+
+// /** LIFECYCLES **/
+// useEffect(() => {
+// 	getAllBoardArticleByAdminRefetch({ input: communityInquiry }).then();
+// }, [communityInquiry]);
+
+// /** HANDLERS **/
+// const changePageHandler = async (event: unknown, newPage: number) => {
+// 	communityInquiry.page = newPage + 1;
+// 	await getAllBoardArticleByAdminRefetch({ input: communityInquiry });
+// 	setCommunityInquiry({ ...communityInquiry });
+// };
+
+// const changeRowsPerPageHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+// 	communityInquiry.limit = parseInt(event.target.value, 10);
+// 	communityInquiry.page = 1;
+// 	await getAllBoardArticleByAdminRefetch({ input: communityInquiry });
+// 	setCommunityInquiry({ ...communityInquiry });
+// };
+
 
 	return (
 		<Stack>

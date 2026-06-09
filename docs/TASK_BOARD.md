@@ -25,10 +25,10 @@
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
 | P3-01 | Next.js app exists | ✅ Done | `fixora-next` — Fixora branding applied |
-| P3-02 | Dark/orange Fixora theme | ⬜ Todo | MUI theme + SCSS tokens — **current focus** |
-| P3-02a | Replace legacy colors/fonts globally | ⬜ Todo | Orange ~`#FF6B00`, bg ~`#0D0D0D` — part of P3-02 |
-| P3-02b | Dark glass card component pattern | ⬜ Todo | From `auth/auth-login-signup-hifi.png` — part of P3-02 |
-| P3-02c | Light theme token placeholders | ⬜ Todo | CSS variables ready for P4-05 — part of P3-02 |
+| P3-02 | Dark/orange Fixora theme | ✅ Done | MUI `fixoraDark` + SCSS tokens |
+| P3-02a | Replace legacy colors/fonts globally | ✅ Done | `--fixora-*` in `scss/variables.scss` |
+| P3-02b | Dark glass card component pattern | ✅ Done | `libs/components/ui/` + `scss/fixora-ui.scss` |
+| P3-02c | Light theme token placeholders | ✅ Done | CSS vars in `:root` — inactive until P4-05 |
 
 ---
 
@@ -85,8 +85,8 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-02` — Design system + dark/orange Fixora theme (extract tokens from `docs/design/auth/auth-login-signup-hifi.png`)
+**Next task:** `P3-03` — Auth flow UI (`docs/design/auth/auth-login-signup-hifi.png`)
 
-**Then:** `P3-03` — Auth pages
+**Then:** `P3-04` — Homepage
 
 See `AI_HANDOFF.md` for last agent and session notes.

@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-09 |
 | **Last agent** | Cursor |
-| **Last session** | Design mockups indexed in `docs/design/` — renamed files, README index, updated AGENTS.md + TASK_BOARD.md |
-| **Next agent should start with** | `P3-02` — Design system + dark/orange Fixora theme |
+| **Last session** | P3-02 design system — dark/orange MUI theme, SCSS tokens, UI kit (Button, Input, GlassCard, KakaoButton) |
+| **Next agent should start with** | `P3-03` — Auth UI per `docs/design/auth/` mockups |
 
 ---
 
@@ -19,7 +19,7 @@
 | Decisions | ✅ Locked — `DECISIONS.md` |
 | Agent handoff (Cursor + Codex) | ✅ This file + `TASK_BOARD.md` |
 | Design mockups | ✅ Uploaded — `docs/design/README.md` |
-| Fixora UI migration | ⬜ In progress — branding updated; pages still legacy real-estate UI |
+| Fixora UI migration | 🔄 In progress — theme + UI kit done; pages still legacy real-estate UI |
 | Backend API (FIXORAB) | ⚠️ Separate repo — still nestar domain |
 
 ---

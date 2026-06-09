@@ -18,7 +18,7 @@ This folder (`docs/ai-context/`) is extra working context for **Codex in VS Code
 
 ## Last Agent
 
-Cursor — 2026-06-09 (design mockups indexed in `docs/design/`)
+Cursor — 2026-06-09 (P3-02 dark/orange theme + UI kit complete)
 
 ## Extended Notes
 
@@ -26,6 +26,8 @@ Cursor — 2026-06-09 (design mockups indexed in `docs/design/`)
 - **Backend:** FIXORAB repo — stub GraphQL if API not ready yet.
 - **Current UI:** legacy real-estate template — migrate terminology and layouts to Fixora.
 - **Design mockups:** `docs/design/README.md` — auth, customer, technician PNGs ready.
-- **Next task:** P3-02 design system (dark/orange theme from mockup tokens).
+- **Theme:** `fixoraDark` MUI theme active in `_app.tsx`; tokens in `scss/variables.scss`.
+- **UI kit:** `libs/components/ui/` — FixoraButton, FixoraInput, FixoraGlassCard, FixoraKakaoButton.
+- **Next task:** P3-03 Auth UI per `docs/design/auth/` mockups.
 
 See `../AI_HANDOFF.md` for full state, blockers, and session template.

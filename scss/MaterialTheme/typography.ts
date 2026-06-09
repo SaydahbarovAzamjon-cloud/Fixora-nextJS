@@ -66,7 +66,7 @@ export default {
 	// BUTTON
 	button: {
 		fontSize: 14,
-		fontWeight: 400,
+		fontWeight: 600,
 		textTransform: 'none',
 	},
 };

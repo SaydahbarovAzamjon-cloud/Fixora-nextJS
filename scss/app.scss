@@ -1,49 +1,66 @@
 /** IMPORTS **/
 @import 'variables.scss';
 @import 'reset.scss';
+@import 'fixora-ui.scss';
 
 a {
 	white-space: nowrap;
 	text-decoration: none;
-	color: #212121;
+	color: var(--fixora-text-secondary);
+
+	&:hover {
+		color: var(--fixora-primary-hover);
+	}
 }
+
 button {
 	text-transform: none;
 	box-shadow: none;
 	padding: 0;
 }
+
 button.outline {
-	border: 1px solid #eee;
+	border: 1px solid var(--fixora-border-subtle);
 }
+
 button.contain {
-	color: #fff;
+	color: var(--fixora-text-primary);
 }
+
 span,
 p {
 	line-height: 1.2;
 }
+
 body {
 	font-family: $font;
+	background: var(--fixora-bg);
+	color: var(--fixora-text-primary);
+
 	&::-webkit-scrollbar {
 		width: 9px;
 	}
+
 	&::-webkit-scrollbar-thumb {
 		height: 30%;
-		background: #bdbdbd;
+		background: var(--fixora-text-muted);
 		border-radius: 10px;
 	}
+
 	&::-webkit-scrollbar-track {
-		background: #eee;
+		background: var(--fixora-surface);
 	}
 
 	.MuiPopover-paper {
 		box-shadow: none;
+		background-color: var(--fixora-surface-elevated);
 	}
 }
+
 hr {
 	border-width: 0;
 	border-bottom-width: thin;
-	border-color: #eee;
+	border-color: var(--fixora-border-subtle);
 	margin: auto;
 }
 

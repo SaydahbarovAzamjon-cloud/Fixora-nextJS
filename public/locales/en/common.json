@@ -18,5 +18,7 @@
   "my page": "my page",
   "Community Detail": "Community Detail",
   "Login/Signup": "Login/Signup",
-  "Member Page": "Member Page"
+  "Member Page": "Member Page",
+  "ui.continueWithKakao": "Continue with Kakao",
+  "ui.signUpWithKakao": "Sign Up with Kakao"
 }

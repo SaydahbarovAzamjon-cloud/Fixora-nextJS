@@ -1,5 +1,36 @@
-/** VARIABLES **/
+/** FIXORA DESIGN TOKENS **/
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 $font: 'Poppins', sans-serif;
+
+:root {
+	/* Dark theme (MVP active) */
+	--fixora-primary: #ff6b00;
+	--fixora-primary-hover: #ff8533;
+	--fixora-primary-dark: #e55a00;
+	--fixora-bg: #0d0d0d;
+	--fixora-surface: #1a1a1a;
+	--fixora-surface-elevated: #242424;
+	--fixora-border: rgba(255, 107, 0, 0.35);
+	--fixora-border-subtle: rgba(255, 107, 0, 0.25);
+	--fixora-text-primary: #ffffff;
+	--fixora-text-secondary: #a0a0a0;
+	--fixora-text-muted: #6b6b6b;
+	--fixora-error: #ff4d4f;
+	--fixora-success: #52c41a;
+	--fixora-glass-bg: rgba(26, 26, 26, 0.85);
+	--fixora-glow: 0 0 24px rgba(255, 107, 0, 0.15);
+
+	/* Light theme placeholders (Phase 4 — not active in MVP) */
+	--fixora-light-bg: #f5f5f7;
+	--fixora-light-surface: #ffffff;
+	--fixora-light-text: #181a20;
+}
+
+[data-theme='light'],
+.theme-light {
+	--fixora-bg: var(--fixora-light-bg);
+	--fixora-surface: var(--fixora-light-surface);
+	--fixora-text-primary: var(--fixora-light-text);
+}

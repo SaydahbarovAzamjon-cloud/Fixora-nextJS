@@ -20,5 +20,11 @@
   "Login/Signup": "Login/Signup",
   "Member Page": "Member Page",
   "ui.continueWithKakao": "Continue with Kakao",
-  "ui.signUpWithKakao": "Sign Up with Kakao"
+  "ui.signUpWithKakao": "Sign Up with Kakao",
+  "hero.title": "What's wrong with your Apple device?",
+  "hero.subtitle": "Describe the problem — AI finds the best repair technicians near you",
+  "hero.placeholder": "e.g. iPhone 14 screen cracked after drop, touch not working...",
+  "hero.search": "Find Technicians",
+  "hero.recommendedTechnicians": "Recommended Technicians",
+  "hero.selectTechnicianHint": "Select a technician to view profile and book repair"
 }

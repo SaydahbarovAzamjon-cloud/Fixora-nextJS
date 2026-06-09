@@ -11,18 +11,20 @@ Works with **Cursor** and **Codex (VS Code)**. Both tools share the same handoff
 | Order | File | Purpose |
 |-------|------|---------|
 | 1 | [docs/AI_HANDOFF.md](docs/AI_HANDOFF.md) | **Read first** — current state, last agent, next task |
-| 2 | [docs/TASK_BOARD.md](docs/TASK_BOARD.md) | Task status |
-| 3 | [docs/DECISIONS.md](docs/DECISIONS.md) | Approved decisions — do not contradict |
-| 4 | [docs/FIXORA-ANALIZ.md](docs/FIXORA-ANALIZ.md) | Full spec — UI mockups §9, ER model §4.9 |
-| 5 | [docs/FRONTEND_API.md](docs/FRONTEND_API.md) | GraphQL contract — sync copy from FIXORAB |
-| 6 | FIXORAB `apps/fixora-api/src/graphql/schema.gql` | Generated schema — operation & type names |
-| 7 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
-| 8 | [.cursor/skills/fixora-ui/SKILL.md](.cursor/skills/fixora-ui/SKILL.md) | UI implementation — overview |
-| 9 | [.cursor/skills/fixora-theme/SKILL.md](.cursor/skills/fixora-theme/SKILL.md) | Colors, MUI theme, SCSS tokens (P3-02) |
-| 10 | [.cursor/skills/fixora-ui-kit/SKILL.md](.cursor/skills/fixora-ui-kit/SKILL.md) | Button, Input, GlassCard (P3-02b) |
-| 11 | [.cursor/skills/fixora-navbar/SKILL.md](.cursor/skills/fixora-navbar/SKILL.md) | Navbar / Top.tsx (P3-04) |
+| 2 | [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md) | **Active task prompt** — execute this session's work |
+| 3 | [docs/TASK_BOARD.md](docs/TASK_BOARD.md) | Task status |
+| 4 | [docs/DECISIONS.md](docs/DECISIONS.md) | Approved decisions — do not contradict |
+| 5 | [docs/FIXORA-ANALIZ.md](docs/FIXORA-ANALIZ.md) | Full spec — UI mockups §9, ER model §4.9 |
+| 6 | [docs/FRONTEND_API.md](docs/FRONTEND_API.md) | GraphQL contract — sync copy from FIXORAB |
+| 7 | [docs/schema.gql](docs/schema.gql) | Generated schema — operation & type names |
+| 8 | [docs/AUTH_API.md](docs/AUTH_API.md) | Auth flows — OAuth, signup, refresh |
+| 9 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
+| 10 | [.cursor/skills/fixora-ui/SKILL.md](.cursor/skills/fixora-ui/SKILL.md) | UI implementation — overview |
+| 11 | [.cursor/skills/fixora-theme/SKILL.md](.cursor/skills/fixora-theme/SKILL.md) | Colors, MUI theme, SCSS tokens (P3-02) |
+| 12 | [.cursor/skills/fixora-ui-kit/SKILL.md](.cursor/skills/fixora-ui-kit/SKILL.md) | Button, Input, GlassCard (P3-02b) |
+| 13 | [.cursor/skills/fixora-navbar/SKILL.md](.cursor/skills/fixora-navbar/SKILL.md) | Navbar / Top.tsx (P3-04) |
 
-Keep FixoraF `docs/DECISIONS.md`, `docs/FRONTEND_API.md`, and `schema.gql` **in sync** with FIXORAB when the backend contract changes.
+Keep FixoraF `docs/DECISIONS.md`, `docs/FRONTEND_API.md`, `docs/schema.gql`, and `docs/AUTH_API.md` **in sync** with FIXORAB when the backend contract changes.
 
 ---
 

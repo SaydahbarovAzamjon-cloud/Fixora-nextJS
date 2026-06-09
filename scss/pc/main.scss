@@ -3,6 +3,7 @@
 @import '/scss/pc/general.scss';
 
 @import '/scss/pc/homepage/homepage';
+@import '/scss/pc/homepage/hero.scss';
 
 @import '/scss/pc/property/property';
 @import '/scss/pc/property/detail.scss';
@@ -25,6 +26,7 @@
 @import '/scss/pc/cs/cs.scss';
 
 @import '/scss/pc/about/about.scss';
+@import '/scss/pc/auth/auth.scss';
 @import '/scss/pc/account/join.scss';
 @import '/scss/pc/admin/admin.scss';
 
@@ -179,6 +181,13 @@ body::-webkit-scrollbar {
 		height: 860px;
 		background-image: url('/img/banner/header1.svg');
 		background-size: cover;
+
+		&--fixora {
+			height: auto;
+			min-height: 520px;
+			background: radial-gradient(ellipse at top, rgba(255, 107, 0, 0.12) 0%, var(--fixora-bg) 55%);
+			background-image: none;
+		}
 		.container {
 			position: relative;
 			margin-top: 20px;

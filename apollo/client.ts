@@ -91,12 +91,17 @@ function  createIsomorphicLink() {
 		});
 
 const errorLink = onError(({ graphQLErrors, networkError, response }) => {
-	if (graphQLErrors) {
-		graphQLErrors.map(({ message, locations, path, extensions }) => {
-			console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
-			if (!message.includes('input')) sweetErrorAlert(message);
-		});
-	}
+		if (graphQLErrors) {
+			graphQLErrors.map(({ message, locations, path }) => {
+				console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+				const isAuthMutation =
+					path?.[0] === 'login' ||
+					path?.[0] === 'signup' ||
+					path?.[0] === 'loginWithOAuth' ||
+					path?.[0] === 'completeOAuthSignup';
+				if (!message.includes('input') && !isAuthMutation) sweetErrorAlert(message);
+			});
+		}
 
 	if (networkError) console.log(`[Network error]: ${networkError}`);
 	// @ts-ignore

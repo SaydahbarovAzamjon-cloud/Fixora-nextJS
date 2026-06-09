@@ -18,16 +18,14 @@ This folder (`docs/ai-context/`) is extra working context for **Codex in VS Code
 
 ## Last Agent
 
-Cursor — 2026-06-09 (P3-02 dark/orange theme + UI kit complete)
+Cursor — 2026-06-09 (OAuth Google/Kakao + Hero AI complete)
 
 ## Extended Notes
 
-- **Scope:** UI, pages, components, Apollo client, SCSS — not NestJS/backend.
-- **Backend:** FIXORAB repo — stub GraphQL if API not ready yet.
-- **Current UI:** legacy real-estate template — migrate terminology and layouts to Fixora.
-- **Design mockups:** `docs/design/README.md` — auth, customer, technician PNGs ready.
-- **Theme:** `fixoraDark` MUI theme active in `_app.tsx`; tokens in `scss/variables.scss`.
-- **UI kit:** `libs/components/ui/` — FixoraButton, FixoraInput, FixoraGlassCard, FixoraKakaoButton.
-- **Next task:** P3-03 Auth UI per `docs/design/auth/` mockups.
+- **OAuth:** Google GIS `initCodeClient` + Kakao SDK → `loginWithOAuth`; OAuth onboarding via `/register/role?oauth=1` + `completeOAuthSignup`.
+- **Auth API:** `apollo/user/auth.ts` — Fixora `login`, `signup`, OAuth mutations; email login uses `userEmail`.
+- **Hero:** `HeroRepairSearch` → `heroRepairSearch` query; user clicks technician (BIZ-07).
+- **Env required:** `NEXT_PUBLIC_GRAPHQL_URL`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_KAKAO_JS_KEY` in `.env.local`.
+- **Next task:** P3-04 homepage sections beyond hero.
 
 See `../AI_HANDOFF.md` for full state, blockers, and session template.

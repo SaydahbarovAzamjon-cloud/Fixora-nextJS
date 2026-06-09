@@ -1,0 +1,155 @@
+#pc-wrap,
+#mobile-wrap {
+	.fixora-hero {
+		width: 100%;
+		padding: 48px 20px 32px;
+
+		&__content {
+			max-width: 720px;
+			margin: 0 auto;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		&__title {
+			margin: 0;
+			font-size: 36px;
+			font-weight: 700;
+			color: var(--fixora-text-primary);
+			line-height: 1.2;
+		}
+
+		&__subtitle {
+			margin: 0;
+			font-size: 16px;
+			color: var(--fixora-text-secondary);
+		}
+
+		&__search {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		&__input {
+			width: 100%;
+			padding: 16px;
+			border-radius: 12px;
+			border: 1px solid var(--fixora-border-subtle);
+			background: var(--fixora-surface);
+			color: var(--fixora-text-primary);
+			font-family: $font;
+			font-size: 14px;
+			resize: vertical;
+			min-height: 88px;
+
+			&::placeholder {
+				color: var(--fixora-text-muted);
+			}
+
+			&:focus {
+				outline: none;
+				border-color: var(--fixora-primary);
+				box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+			}
+		}
+
+		&__btn {
+			align-self: flex-start;
+		}
+
+		&__classification {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		&__chip {
+			padding: 6px 12px;
+			border-radius: 999px;
+			font-size: 12px;
+			font-weight: 600;
+			background: rgba(255, 107, 0, 0.15);
+			border: 1px solid var(--fixora-border-subtle);
+			color: var(--fixora-primary);
+
+			&--muted {
+				background: var(--fixora-surface);
+				color: var(--fixora-text-secondary);
+			}
+		}
+
+		&__results {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+
+			h2 {
+				margin: 0;
+				font-size: 20px;
+				color: var(--fixora-text-primary);
+			}
+		}
+
+		&__hint {
+			margin: 0;
+			font-size: 13px;
+			color: var(--fixora-text-muted);
+		}
+
+		&__cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+			gap: 12px;
+		}
+
+		&__card {
+			display: flex;
+			gap: 12px;
+			padding: 14px;
+			border-radius: 12px;
+			border: 1px solid var(--fixora-border-subtle);
+			background: var(--fixora-surface);
+			cursor: pointer;
+			text-align: left;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+			&:hover {
+				border-color: var(--fixora-primary);
+				box-shadow: var(--fixora-glow);
+			}
+
+			img {
+				width: 48px;
+				height: 48px;
+				border-radius: 50%;
+				object-fit: cover;
+				flex-shrink: 0;
+			}
+
+			div {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				min-width: 0;
+			}
+
+			strong {
+				font-size: 14px;
+				color: var(--fixora-text-primary);
+			}
+
+			span {
+				font-size: 12px;
+				color: var(--fixora-text-secondary);
+			}
+
+			small {
+				font-size: 11px;
+				color: var(--fixora-text-muted);
+				line-height: 1.3;
+			}
+		}
+	}
+}

@@ -18,5 +18,13 @@
 	"my page": "моя страница",
 	"Community Detail": "Детали сообщества",
 	"Login/Signup": "Логин/регистрация",
-	"Member Page": "Страница участника"
+	"Member Page": "Страница участника",
+	"ui.continueWithKakao": "Продолжить с Kakao",
+	"ui.signUpWithKakao": "Регистрация через Kakao",
+	"hero.title": "Что случилось с вашим Apple устройством?",
+	"hero.subtitle": "Опишите проблему — AI найдёт лучших техников",
+	"hero.placeholder": "Например: разбит экран iPhone 14...",
+	"hero.search": "Найти техников",
+	"hero.recommendedTechnicians": "Рекомендуемые техники",
+	"hero.selectTechnicianHint": "Выберите техника для профиля и записи"
 }

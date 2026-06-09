@@ -36,8 +36,9 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P3-03 | Auth flow UI | ⬜ Todo | Mockups: `docs/design/auth/` — Login, Sign Up, Role, Tech onboarding |
-| P3-04 | Homepage | ⬜ Todo | Mockup: `docs/design/customer/homepage.png` |
+| P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech onboarding — mockup-based |
+| P3-03b | OAuth wiring (Google + Kakao) | ✅ Done | GIS `initCodeClient` + Kakao SDK → `loginWithOAuth` |
+| P3-04 | Homepage | 🔄 In Progress | Hero AI done — remaining sections per mockup |
 | P3-05 | Search + Technician Profile | ⬜ Todo | Mockup: `docs/design/customer/customer-pages-full.png` §2–3 |
 | P3-06 | Booking flow UI | ⬜ Todo | No mockup yet — follow `FIXORA-ANALIZ.md` §9.2 |
 | P3-07 | Messages UI | ⬜ Todo | Mockup: `customer-pages-full.png` §6 |
@@ -53,7 +54,7 @@
 |----|------|--------|-------|
 | P3-11 | Rename UI copy: Property → Device | ⬜ Todo | Labels, routes, components |
 | P3-12 | Rename UI copy: Agent → Technician | ⬜ Todo | Labels, routes, components |
-| P3-13 | Update Apollo queries for Fixora schema | ⬜ Todo | When FIXORAB APIs ready |
+| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | FIXORAB MVP ready — `docs/FRONTEND_API.md`, `docs/schema.gql` synced |
 | P3-14 | ON_SITE "Coming Soon" UI | ⬜ Todo | Badge only — no flow |
 | P3-15 | Admin UI (incremental) | ⬜ Todo | No mockup — see `docs/design/admin/README.md` |
 | P3-15a | Admin shell (light, Fixora orange) | ⬜ Todo | Adapt `LayoutAdmin` — part of P3-15 |
@@ -85,8 +86,8 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-03` — Auth flow UI (`docs/design/auth/auth-login-signup-hifi.png`)
+**Next task:** `P3-04` — Homepage remaining sections (top technicians, how it works, articles, testimonials)
 
-**Then:** `P3-04` — Homepage
+**Then:** `P3-05` — Search + Technician Profile
 
 See `AI_HANDOFF.md` for last agent and session notes.

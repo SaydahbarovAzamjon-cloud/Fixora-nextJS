@@ -1,0 +1,91 @@
+/** Fixora-themed SweetAlert2 dialogs **/
+
+.fixora-swal {
+	background: var(--fixora-glass-bg) !important;
+	border: 1px solid var(--fixora-border-subtle) !important;
+	border-radius: 16px !important;
+	box-shadow: var(--fixora-glow), 0 24px 48px rgba(0, 0, 0, 0.45) !important;
+	backdrop-filter: blur(12px);
+	padding: 28px 24px 24px !important;
+	font-family: $font;
+
+	&__title {
+		color: var(--fixora-text-primary) !important;
+		font-size: 1.05rem !important;
+		font-weight: 600 !important;
+		line-height: 1.45 !important;
+		padding: 0 0.5rem !important;
+	}
+
+	&__text {
+		color: var(--fixora-text-secondary) !important;
+		font-size: 0.9rem !important;
+		line-height: 1.5 !important;
+	}
+
+	.swal2-icon {
+		margin: 0.75rem auto 1rem !important;
+		transform: scale(0.9);
+		border-width: 2px !important;
+
+		&.swal2-error {
+			border-color: var(--fixora-error) !important;
+			color: var(--fixora-error) !important;
+
+			[class^='swal2-x-mark-line'] {
+				background-color: var(--fixora-error) !important;
+			}
+		}
+
+		&.swal2-success {
+			border-color: var(--fixora-success) !important;
+
+			[class^='swal2-success-line'] {
+				background-color: var(--fixora-success) !important;
+			}
+
+			.swal2-success-ring {
+				border-color: rgba(82, 196, 26, 0.35) !important;
+			}
+		}
+
+		&.swal2-question {
+			border-color: var(--fixora-primary) !important;
+			color: var(--fixora-primary) !important;
+		}
+	}
+
+	.swal2-actions {
+		margin: 1.25rem 0 0 !important;
+		gap: 10px;
+	}
+
+	&__confirm.fixora-btn {
+		min-width: 120px;
+		padding: 12px 28px;
+	}
+
+	&__cancel.fixora-btn {
+		min-width: 100px;
+		padding: 12px 24px;
+	}
+}
+
+.fixora-swal-toast {
+	background: var(--fixora-surface-elevated) !important;
+	border: 1px solid var(--fixora-border-subtle) !important;
+	border-radius: 12px !important;
+	box-shadow: var(--fixora-glow) !important;
+	color: var(--fixora-text-primary) !important;
+
+	.swal2-title {
+		color: var(--fixora-text-primary) !important;
+		font-family: $font;
+		font-size: 0.9rem !important;
+		font-weight: 500 !important;
+	}
+
+	.swal2-timer-progress-bar {
+		background: var(--fixora-primary) !important;
+	}
+}

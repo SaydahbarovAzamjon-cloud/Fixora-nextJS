@@ -1,0 +1,1095 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AAdminSearch {
+  articleCategory: ArticleCategory
+  articleStatus: ArticleStatus
+}
+
+input ABSearch {
+  bookingStatus: BookingStatus
+  bookingType: BookingType
+  deviceId: String
+  technicianId: String
+  text: String
+  userId: String
+}
+
+input ADSearch {
+  deviceCategory: DeviceCategory
+  deviceStatus: DeviceStatus
+  text: String
+  userId: String
+}
+
+input AISearch {
+  articleCategory: ArticleCategory
+  text: String
+  userId: String
+}
+
+input APSearch {
+  bookingId: String
+  paymentMethod: PaymentMethod
+  paymentStatus: PaymentStatus
+  paymentType: PaymentType
+  technicianId: String
+  userId: String
+}
+
+input AddProgressUpdateInput {
+  bookingId: String!
+  note: String
+  step: String!
+}
+
+type AiClassification {
+  classifiedAt: DateTime
+  confidenceScore: Float
+  deviceType: DeviceCategory
+  issueCategory: IssueCategory
+  keywords: [String!]
+  repairComplexity: RepairComplexity
+}
+
+input AiClassificationInput {
+  confidenceScore: Float
+  deviceType: DeviceCategory
+  issueCategory: IssueCategory
+  keywords: [String!]
+  repairComplexity: RepairComplexity
+}
+
+input AllArticlesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: AAdminSearch!
+  sort: String
+}
+
+input AllBookingsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: ABSearch!
+  sort: String
+}
+
+input AllDevicesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: ADSearch!
+  sort: String
+}
+
+input AllPaymentsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: APSearch!
+  sort: String
+}
+
+type Article {
+  _id: String!
+  articleCategory: ArticleCategory
+  articleComments: Int!
+  articleContent: String!
+  articleExcerpt: String
+  articleImage: String
+  articleLikes: Int!
+  articleStatus: ArticleStatus!
+  articleTitle: String!
+  articleViews: Int!
+  authorData: User
+  createdAt: DateTime!
+  deletedAt: DateTime
+  meLiked: [MeLiked!]
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum ArticleCategory {
+  FREE
+  HUMOR
+  NEWS
+  RECOMMEND
+}
+
+input ArticleInput {
+  articleCategory: ArticleCategory
+  articleContent: String!
+  articleExcerpt: String
+  articleImage: String
+  articleStatus: ArticleStatus
+  articleTitle: String!
+}
+
+enum ArticleStatus {
+  ACTIVE
+  DELETE
+  DRAFT
+  PUBLISHED
+}
+
+input ArticleUpdate {
+  _id: String!
+  articleContent: String
+  articleExcerpt: String
+  articleImage: String
+  articleStatus: ArticleStatus
+  articleTitle: String
+}
+
+type Articles {
+  list: [Article!]!
+  metaCounter: [TotalCounter!]
+}
+
+input ArticlesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: AISearch!
+  sort: String
+}
+
+enum AuthProvider {
+  APPLE
+  EMAIL
+  GOOGLE
+  KAKAO
+}
+
+input BISearch {
+  bookingStatus: BookingStatus
+  bookingType: BookingType
+  text: String
+}
+
+enum BadgeLevel {
+  NEW
+  PREMIUM_PRO
+  VERIFIED
+}
+
+type Booking {
+  _id: String!
+  aiClassification: AiClassification
+  bookingDate: DateTime
+  bookingStatus: BookingStatus!
+  bookingType: BookingType!
+  cancelledAt: DateTime
+  completedAt: DateTime
+  createdAt: DateTime!
+  deletedAt: DateTime
+  deviceId: String!
+  estimatedPrice: Float
+  finalPrice: Float
+  isPaid: Boolean!
+  problemDescription: String
+  problemTitle: String!
+  progressUpdates: [ProgressUpdate!]
+  technicianId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+input BookingInput {
+  aiClassification: AiClassificationInput
+  bookingDate: DateTime
+  bookingType: BookingType
+  deviceId: String!
+  estimatedPrice: Float
+  problemDescription: String
+  problemTitle: String!
+  technicianId: String!
+}
+
+enum BookingStatus {
+  ACCEPTED
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+  PENDING
+  REJECTED
+}
+
+enum BookingType {
+  ON_SITE
+  SHOP_VISIT
+}
+
+type Bookings {
+  list: [Booking!]!
+  metaCounter: [TotalCounter!]
+}
+
+input BookingsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: BISearch!
+  sort: String
+}
+
+input CISearch {
+  commentRefId: String!
+}
+
+enum ClassificationProviderType {
+  GEMINI
+  RULE_BASED
+}
+
+input ClassifyIssueInput {
+  problemText: String!
+}
+
+type Comment {
+  _id: String!
+  authorData: User
+  commentContent: String!
+  commentGroup: CommentGroup!
+  commentRefId: String!
+  commentStatus: CommentStatus!
+  createdAt: DateTime!
+  memberData: User
+  memberId: String!
+  updatedAt: DateTime!
+}
+
+enum CommentGroup {
+  ARTICLE
+  USER
+}
+
+input CommentInput {
+  commentContent: String!
+  commentGroup: CommentGroup!
+  commentRefId: String!
+}
+
+enum CommentStatus {
+  ACTIVE
+  DELETE
+}
+
+input CommentUpdate {
+  _id: String!
+  commentContent: String
+  commentStatus: CommentStatus
+}
+
+type Comments {
+  list: [Comment!]!
+  metaCounter: [TotalCounter!]
+}
+
+input CommentsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: CISearch!
+  sort: String
+}
+
+input CompleteBookingInput {
+  bookingId: String!
+  finalPrice: Float
+}
+
+input CompleteOAuthSignupInput {
+  termsAcceptedAt: DateTime!
+  userEmail: String
+  userNickname: String!
+  userPhoneNumber: String!
+  userType: UserType!
+}
+
+input ConfirmPaymentInput {
+  paymentId: String!
+  transactionId: String
+}
+
+type Conversation {
+  bookingId: String
+  bookingStatus: BookingStatus
+  lastMessage: Message
+  peer: User
+  peerId: String!
+  unreadCount: Int!
+  updatedAt: DateTime!
+}
+
+type Conversations {
+  list: [Conversation!]!
+  metaCounter: [TotalCounter!]
+}
+
+input ConversationsInquiry {
+  limit: Int!
+  page: Int!
+}
+
+input CreateReviewInput {
+  bookingId: String!
+  communication: Float!
+  repairQuality: Float!
+  repairSpeed: Float!
+  reviewContent: String
+  reviewImages: [String!]
+}
+
+input DISearch {
+  deviceCategory: DeviceCategory
+  deviceStatus: DeviceStatus
+  text: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Device {
+  _id: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  deviceBrand: DeviceBrand!
+  deviceCategory: DeviceCategory!
+  deviceDescription: String
+  deviceImage: String!
+  deviceIssue: String!
+  deviceModel: String!
+  deviceSerialNumber: String
+  deviceStatus: DeviceStatus!
+  releaseYear: Int
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum DeviceBrand {
+  APPLE
+}
+
+enum DeviceCategory {
+  APPLE_WATCH
+  IPAD
+  IPHONE
+  MACBOOK
+}
+
+input DeviceInput {
+  deviceBrand: DeviceBrand
+  deviceCategory: DeviceCategory!
+  deviceDescription: String
+  deviceImage: String
+  deviceIssue: String!
+  deviceModel: String!
+  deviceSerialNumber: String
+  releaseYear: Int
+}
+
+enum DeviceStatus {
+  ACTIVE
+  INACTIVE
+  IN_REPAIR
+  REPAIR_COMPLETE
+}
+
+input DeviceUpdate {
+  _id: String!
+  deviceBrand: DeviceBrand
+  deviceCategory: DeviceCategory
+  deviceDescription: String
+  deviceImage: String
+  deviceIssue: String
+  deviceModel: String
+  deviceSerialNumber: String
+  deviceStatus: DeviceStatus
+  releaseYear: Int
+}
+
+type Devices {
+  list: [Device!]!
+  metaCounter: [TotalCounter!]
+}
+
+input DevicesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: DISearch!
+  sort: String
+}
+
+enum Direction {
+  ASC
+  DESC
+}
+
+input FollowInquiry {
+  limit: Int!
+  page: Int!
+  search: FollowSearch!
+}
+
+input FollowSearch {
+  followerId: String
+  followingId: String
+}
+
+type Follower {
+  _id: String!
+  createdAt: DateTime!
+  followerData: User
+  followerId: String!
+  followingId: String!
+  meFollowed: [MeFollowed!]
+  meLiked: [MeLiked!]
+  updatedAt: DateTime!
+}
+
+type Followers {
+  list: [Follower!]!
+  metaCounter: [TotalCounter!]
+}
+
+type Following {
+  _id: String!
+  createdAt: DateTime!
+  followerId: String!
+  followingData: User
+  followingId: String!
+  meFollowed: [MeFollowed!]
+  meLiked: [MeLiked!]
+  updatedAt: DateTime!
+}
+
+type Followings {
+  list: [Following!]!
+  metaCounter: [TotalCounter!]
+}
+
+input HeroSearchInput {
+  limit: Int = 5
+  problemText: String!
+}
+
+type HeroSearchResult {
+  classification: IssueClassificationResult!
+  recommendations: [TechnicianRecommendation!]!
+}
+
+input InitiatePaymentInput {
+  bookingId: String!
+  paymentMethod: PaymentMethod!
+  paymentType: PaymentType!
+}
+
+enum IssueCategory {
+  BATTERY
+  CHARGING
+  GENERAL
+  KEYBOARD
+  SCREEN
+  SOFTWARE
+  WATER_DAMAGE
+}
+
+type IssueClassificationResult {
+  confidenceScore: Float!
+  deviceType: DeviceCategory!
+  issueCategory: IssueCategory!
+  keywords: [String!]!
+  provider: ClassificationProviderType!
+  repairComplexity: RepairComplexity!
+}
+
+input LoginInput {
+  userEmail: String!
+  userPassword: String!
+}
+
+type LogoutResult {
+  message: String!
+  success: Boolean!
+}
+
+input MarkMessagesAsReadInput {
+  bookingId: String
+  peerId: String!
+}
+
+input MarkNotificationReadInput {
+  notificationId: String!
+}
+
+type MeFollowed {
+  followerId: String!
+  followingId: String!
+  myFollowing: Boolean!
+}
+
+type MeLiked {
+  likeRefId: String!
+  memberId: String!
+  myFavorite: Boolean!
+}
+
+type Message {
+  _id: String!
+  bookingId: String
+  createdAt: DateTime!
+  isRead: Boolean!
+  messageContent: String!
+  messageType: MessageType!
+  receiverId: String!
+  senderId: String!
+  updatedAt: DateTime!
+}
+
+input MessageSearch {
+  bookingId: String
+  peerId: String!
+}
+
+enum MessageType {
+  IMAGE
+  TEXT
+}
+
+type Messages {
+  list: [Message!]!
+  metaCounter: [TotalCounter!]
+}
+
+input MessagesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: MessageSearch!
+  sort: String
+}
+
+type Mutation {
+  acceptBooking(bookingId: String!): Booking!
+  addProgressUpdate(input: AddProgressUpdateInput!): Booking!
+  approveTechnician(userId: String!): User!
+  cancelBooking(bookingId: String!): Booking!
+  completeBooking(input: CompleteBookingInput!): Booking!
+  completeOAuthSignup(input: CompleteOAuthSignupInput!): User!
+  confirmCashPayment(paymentId: String!): Payment!
+  confirmPayment(input: ConfirmPaymentInput!): Payment!
+  createArticle(input: ArticleInput!): Article!
+  createBooking(input: BookingInput!): Booking!
+  createComment(input: CommentInput!): Comment!
+  createDevice(input: DeviceInput!): Device!
+  createReview(input: CreateReviewInput!): Review!
+  deleteArticle(articleId: String!): Article!
+  imageUploader(file: Upload!, target: String!): String!
+  imagesUploader(files: [Upload!]!, target: String!): [String!]!
+  initiatePayment(input: InitiatePaymentInput!): Payment!
+  likeTargetArticle(articleId: String!): Article!
+  likeTargetUser(userId: String!): User!
+  login(input: LoginInput!): User!
+  loginWithOAuth(input: OAuthLoginInput!): OAuthLoginResult!
+  logout: LogoutResult!
+  markAllNotificationsRead: Boolean!
+  markMessagesAsRead(input: MarkMessagesAsReadInput!): Boolean!
+  markNotificationRead(input: MarkNotificationReadInput!): Notification!
+  refreshToken(input: RefreshTokenInput!): User!
+  refundPayment(paymentId: String!): Payment!
+  rejectBooking(bookingId: String!): Booking!
+  rejectTechnician(reason: String, userId: String!): User!
+  removeArticleByAdmin(articleId: String!): Article!
+  removeBooking(bookingId: String!): Booking!
+  removeCommentByAdmin(commentId: String!): Comment!
+  removeDevice(deviceId: String!): Device!
+  requestPasswordReset(userEmail: String!): PasswordResetRequestResult!
+  resetPassword(input: ResetPasswordInput!): PasswordResetRequestResult!
+  sendMessage(input: SendMessageInput!): Message!
+  signup(input: UserInput!): User!
+  submitTechnicianVerification: User!
+  subscribe(input: String!): Follower!
+  unsubscribe(input: String!): Follower!
+  updateArticle(input: ArticleUpdate!): Article!
+  updateArticleByAdmin(input: ArticleUpdate!): Article!
+  updateBooking(input: UpdateBookingInput!): Booking!
+  updateBookingStatus(input: UpdateBookingStatusInput!): Booking!
+  updateComment(input: CommentUpdate!): Comment!
+  updateDevice(input: DeviceUpdate!): Device!
+  updateUser(input: UserUpdate!): User!
+  updateUserByAdmin(input: UserUpdate!): User!
+}
+
+input MyArticlesInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: MyArticlesSearch
+  sort: String
+}
+
+input MyArticlesSearch {
+  articleStatus: ArticleStatus
+}
+
+input MyReviewsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: MyReviewsSearch
+  sort: String
+}
+
+input MyReviewsSearch {
+  technicianId: String
+}
+
+type Notification {
+  _id: String!
+  createdAt: DateTime!
+  isRead: Boolean!
+  notificationDescription: String
+  notificationTitle: String!
+  notificationType: NotificationType!
+  receiverId: String!
+  referenceId: String
+  referenceType: NotificationReferenceType
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum NotificationReferenceType {
+  ARTICLE
+  BOOKING
+  MESSAGE
+  REVIEW
+}
+
+input NotificationSearch {
+  isRead: Boolean
+  notificationType: NotificationType
+}
+
+enum NotificationType {
+  BOOKING
+  COMMENT
+  FOLLOW
+  LIKE
+  MESSAGE
+  REVIEW
+}
+
+type Notifications {
+  list: [Notification!]!
+  metaCounter: [TotalCounter!]
+}
+
+input NotificationsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: NotificationSearch
+  sort: String
+}
+
+input OAuthLoginInput {
+  authProvider: AuthProvider!
+
+  """
+  Google: OAuth auth code (popup) or ID token; Kakao: authorization code or access token; Apple: ID token
+  """
+  token: String!
+}
+
+type OAuthLoginResult {
+  accessToken: String!
+  needsOnboarding: Boolean!
+  refreshToken: String!
+  user: User!
+}
+
+input PISearch {
+  paymentMethod: PaymentMethod
+  paymentStatus: PaymentStatus
+  paymentType: PaymentType
+}
+
+type PasswordResetRequestResult {
+  message: String!
+}
+
+type Payment {
+  _id: String!
+  bookingId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  failedAt: DateTime
+  paidAt: DateTime
+  paymentAmount: Float!
+  paymentMethod: PaymentMethod!
+  paymentStatus: PaymentStatus!
+  paymentType: PaymentType!
+  refundedAt: DateTime
+  technicianId: String!
+  transactionId: String
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  KAKAOPAY
+}
+
+enum PaymentStatus {
+  COMPLETED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+enum PaymentType {
+  DEPOSIT
+  FINAL
+}
+
+type Payments {
+  list: [Payment!]!
+  metaCounter: [TotalCounter!]
+}
+
+input PaymentsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: PISearch!
+  sort: String
+}
+
+type ProgressUpdate {
+  note: String
+  step: String!
+  timestamp: DateTime!
+}
+
+input ProgressUpdateInput {
+  note: String
+  step: String!
+}
+
+type Query {
+  checkAuth: String!
+  checkAuthRoles: String!
+  classifyRepairIssue(input: ClassifyIssueInput!): IssueClassificationResult!
+  getAllArticlesByAdmin(input: AllArticlesInquiry!): Articles!
+  getAllBookingsByAdmin(input: AllBookingsInquiry!): Bookings!
+  getAllDevicesByAdmin(input: AllDevicesInquiry!): Devices!
+  getAllPaymentsByAdmin(input: AllPaymentsInquiry!): Payments!
+  getAllUsersByAdmin(input: UsersInquiry!): Users!
+  getArticle(articleId: String!): Article!
+  getArticles(input: ArticlesInquiry!): Articles!
+  getBooking(bookingId: String!): Booking!
+  getBookingPayments(bookingId: String!): [Payment!]!
+  getBookingReview(bookingId: String!): Review
+  getComments(input: CommentsInquiry!): Comments!
+  getDevice(deviceId: String!): Device!
+  getIncomingRequests(input: BookingsInquiry!): Bookings!
+  getMemberFollowers(input: FollowInquiry!): Followers!
+  getMemberFollowings(input: FollowInquiry!): Followings!
+  getMessages(input: MessagesInquiry!): Messages!
+  getMyArticles(input: MyArticlesInquiry!): Articles!
+  getMyBookings(input: BookingsInquiry!): Bookings!
+  getMyConversations(input: ConversationsInquiry!): Conversations!
+  getMyDevices(input: DevicesInquiry!): Devices!
+  getMyPayments(input: PaymentsInquiry!): Payments!
+  getMyReviews(input: MyReviewsInquiry!): Reviews!
+  getNotifications(input: NotificationsInquiry!): Notifications!
+  getTechnicianBookings(input: BookingsInquiry!): Bookings!
+  getTechnicianReviews(input: ReviewsInquiry!): TechnicianReviews!
+  getTechnicianVerificationQueue(input: TechnicianVerificationInquiry!): Users!
+  getTechnicians(input: TechniciansInquiry!): Users!
+  getUser(userId: String!): User!
+  getUserFollowers(input: FollowInquiry!): Followers!
+  getUserFollowings(input: FollowInquiry!): Followings!
+  heroRepairSearch(input: HeroSearchInput!): HeroSearchResult!
+  recommendTechnicians(input: RecommendTechniciansInput!): TechnicianRecommendations!
+  sayHello: String!
+}
+
+input RecommendTechniciansInput {
+  deviceType: DeviceCategory
+  issueCategory: IssueCategory
+  limit: Int = 5
+  problemText: String
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}
+
+enum RepairComplexity {
+  HIGH
+  LOW
+  MEDIUM
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
+}
+
+type Review {
+  _id: String!
+  bookingId: String!
+  communication: Float!
+  createdAt: DateTime!
+  repairQuality: Float!
+  repairSpeed: Float!
+  reviewContent: String
+  reviewImages: [String!]
+  technicianId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type ReviewDistribution {
+  count: Int!
+  star: Int!
+}
+
+input ReviewSearch {
+  technicianId: String!
+}
+
+type Reviews {
+  list: [Review!]!
+  metaCounter: [TotalCounter!]
+}
+
+input ReviewsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: ReviewSearch!
+  sort: String
+}
+
+input SendMessageInput {
+  bookingId: String
+  messageContent: String!
+  messageType: MessageType
+  receiverId: String!
+}
+
+input TISearch {
+  deviceCategory: DeviceCategory
+  isOnline: Boolean
+  minAverageRating: Float
+  text: String
+  userLocation: String
+}
+
+input TVISearch {
+  text: String
+}
+
+type TechnicianRecommendation {
+  matchReason: String!
+  score: Int!
+  technician: User!
+  technicianId: String!
+}
+
+type TechnicianRecommendations {
+  list: [TechnicianRecommendation!]!
+}
+
+type TechnicianReviews {
+  distribution: [ReviewDistribution!]!
+  list: [Review!]!
+  metaCounter: [TotalCounter!]
+}
+
+input TechnicianVerificationInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: TVISearch!
+  sort: String
+}
+
+input TechniciansInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: TISearch!
+  sort: String
+}
+
+type TotalCounter {
+  total: Int
+}
+
+input UISearch {
+  text: String
+  userStatus: UserStatus
+  userType: UserType
+}
+
+input UpdateBookingInput {
+  bookingDate: DateTime
+  bookingId: String!
+  bookingType: BookingType
+  estimatedPrice: Float
+  problemDescription: String
+  problemTitle: String
+}
+
+input UpdateBookingStatusInput {
+  bookingId: String!
+  progressUpdate: ProgressUpdateInput
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type User {
+  _id: String!
+  accessToken: String
+  authProvider: AuthProvider!
+  averageRating: Float!
+  badgeLevel: BadgeLevel!
+  certifications: [String!]
+  completedJobsCount: Int!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  followersCount: Int!
+  followingCount: Int!
+  isBlocked: Boolean!
+  isOnline: Boolean!
+  isVerified: Boolean!
+  lastLoginAt: DateTime
+  meFollowed: [MeFollowed!]
+  meLiked: [MeLiked!]
+  portfolioImages: [String!]
+  profileComplete: Boolean!
+  refreshToken: String
+  reviewCount: Int!
+  services: [UserServiceItem!]
+  shopName: String
+  specialty: String
+  termsAcceptedAt: DateTime
+  updatedAt: DateTime!
+  userArticles: Int!
+  userBio: String
+  userEmail: String
+  userFullName: String
+  userLikes: Int!
+  userLocation: String
+  userNickname: String
+  userPhoneNumber: String
+  userProfileImage: String!
+  userRank: Int!
+  userStatus: UserStatus!
+  userType: UserType!
+  userViews: Int!
+  verificationDocuments: [String!]
+  verificationRejectionReason: String
+  verificationStatus: VerificationStatus!
+  workingHours: UserWorkingHours
+  yearsExperience: Int!
+}
+
+input UserInput {
+  termsAcceptedAt: DateTime!
+  userEmail: String!
+  userNickname: String!
+  userPassword: String!
+  userPhoneNumber: String!
+  userType: UserType!
+}
+
+type UserServiceItem {
+  basePrice: Float!
+  title: String!
+}
+
+input UserServiceItemInput {
+  basePrice: Float!
+  title: String!
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCK
+  DELETE
+}
+
+enum UserType {
+  ADMIN
+  TECHNICIAN
+  USER
+}
+
+input UserUpdate {
+  _id: String!
+  certifications: [String!]
+  isOnline: Boolean
+  portfolioImages: [String!]
+  services: [UserServiceItemInput!]
+  shopName: String
+  specialty: String
+  userBio: String
+  userFullName: String
+  userLocation: String
+  userNickname: String
+  userPassword: String
+  userPhoneNumber: String
+  userProfileImage: String
+  userStatus: UserStatus
+  userType: UserType
+  verificationDocuments: [String!]
+  workingHours: UserWorkingHoursInput
+  yearsExperience: Int
+}
+
+type UserWorkingHours {
+  days: [String!]!
+  endTime: String
+  startTime: String
+}
+
+input UserWorkingHoursInput {
+  days: [String!]
+  endTime: String
+  startTime: String
+}
+
+type Users {
+  list: [User!]!
+  metaCounter: [TotalCounter!]
+}
+
+input UsersInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: UISearch!
+  sort: String
+}
+
+enum VerificationStatus {
+  APPROVED
+  NONE
+  PENDING
+  REJECTED
+  UNDER_REVIEW
+}

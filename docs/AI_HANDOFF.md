@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-09 |
 | **Last agent** | Cursor |
-| **Last session** | P3-02 design system — dark/orange MUI theme, SCSS tokens, UI kit (Button, Input, GlassCard, KakaoButton) |
-| **Next agent should start with** | `P3-03` — Auth UI per `docs/design/auth/` mockups |
+| **Last session** | NEXT_SESSION Task 1+2: Google/Kakao OAuth (`loginWithOAuth`), Fixora email login/signup API, Homepage Hero `heroRepairSearch` |
+| **Next agent should start with** | `P3-04` — Homepage remaining sections per `docs/design/customer/homepage.png` |
 
 ---
 
@@ -19,8 +19,11 @@
 | Decisions | ✅ Locked — `DECISIONS.md` |
 | Agent handoff (Cursor + Codex) | ✅ This file + `TASK_BOARD.md` |
 | Design mockups | ✅ Uploaded — `docs/design/README.md` |
-| Fixora UI migration | 🔄 In progress — theme + UI kit done; pages still legacy real-estate UI |
-| Backend API (FIXORAB) | ⚠️ Separate repo — still nestar domain |
+| Fixora UI migration | 🔄 In progress — auth UI done; homepage + customer pages still legacy |
+| Backend API (FIXORAB / FixoraB) | ✅ MVP ready — `http://localhost:2000/graphql`; see `FRONTEND_API.md` |
+| GraphQL contract sync | ✅ `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql` in `docs/` |
+| OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
+| Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
 
 ---
 
@@ -81,7 +84,7 @@ Full checklist: `TASK_BOARD.md`
 |------|-------|
 | KakaoPay sandbox | Needed before payment UI (P3-06) |
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
-| New GraphQL operations | Some Fixora APIs may not exist in FIXORAB yet — stub or mock |
+| Apollo still on legacy nestar ops | P3-13 — migrate to `FRONTEND_API.md` names |
 | Admin mockup | None — build incrementally (P3-15) |
 | Light theme mockup | None — Phase 4 (P4-05+) |
 
@@ -96,7 +99,9 @@ Full checklist: `TASK_BOARD.md`
 | Customer pages | `docs/design/customer/` + `FIXORA-ANALIZ.md` §9.2 |
 | Tenant Dashboard | `docs/design/technician/` + `FIXORA-ANALIZ.md` §9.3 |
 | Theme / design | `DECISIONS.md` UI-* |
-| GraphQL types | `libs/types/`, `apollo/` |
+| GraphQL types | `docs/schema.gql`, `libs/types/`, `apollo/` |
+| **Active task prompt** | **`docs/NEXT_SESSION.md`** |
+| GraphQL contract | `docs/FRONTEND_API.md`, `docs/AUTH_API.md` |
 
 ---
 

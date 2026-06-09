@@ -210,3 +210,37 @@ Do not copy:
 - Nestar UI
 - Nestar styling
 - Nestar business logic not required by Fixora
+
+## Package Manager
+
+- Use Yarn for all frontend commands.
+- Do not use npm or pnpm.
+- Install dependencies with:
+
+```bash
+yarn
+```
+
+- Start development server with:
+
+```bash
+yarn dev
+```
+
+- Run type checking with:
+
+```bash
+yarn typecheck
+```
+
+- Run linting with:
+
+```bash
+yarn lint
+```
+
+- Build production bundle with:
+
+```bash
+yarn build
+```

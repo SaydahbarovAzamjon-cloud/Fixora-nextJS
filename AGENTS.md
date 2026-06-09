@@ -16,6 +16,7 @@ Works with **Cursor** and **Codex (VS Code)**. Both tools share the same handoff
 | 4 | [docs/FIXORA-ANALIZ.md](docs/FIXORA-ANALIZ.md) | Full spec — UI mockups §9, ER model §4.9 |
 | 5 | [docs/FRONTEND_API.md](docs/FRONTEND_API.md) | GraphQL contract — sync copy from FIXORAB |
 | 6 | FIXORAB `apps/fixora-api/src/graphql/schema.gql` | Generated schema — operation & type names |
+| 7 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
 
 Keep FixoraF `docs/DECISIONS.md`, `docs/FRONTEND_API.md`, and `schema.gql` **in sync** with FIXORAB when the backend contract changes.
 
@@ -74,7 +75,7 @@ Reuse existing `libs/`, `pages/`, and `apollo/` patterns before creating new fol
 | Auth OAuth | **Kakao**, **Google**, **Apple** (Apple = "Coming Soon" if not configured) |
 | Signup phone | `userPhoneNumber` = **contact only** at signup — never login field |
 | Phone in chat | Hide until booking **ACCEPTED** (BIZ-04) |
-| UI mockups | **Final** — pixel-perfect per `FIXORA-ANALIZ.md` §9, no redesign |
+| UI mockups | **Final** — pixel-perfect per `docs/design/` + `FIXORA-ANALIZ.md` §9, no redesign |
 | Theme | Dark background, orange primary, dark glass cards (UI-06) |
 | i18n | **Korean + English** — `next-i18next`; backend errors stay English |
 | AI | **Display only** — never auto-select technician or auto-submit booking (BIZ-07) |
@@ -164,8 +165,9 @@ NEXT_PUBLIC_GRAPHQL_URL=http://localhost:2000/graphql
 NEXT_PUBLIC_WS_URL=ws://localhost:2000
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 NEXT_PUBLIC_KAKAO_JS_KEY=
+```
 
-
+---
 
 ## Reuse Policy
 
@@ -186,14 +188,20 @@ Never create duplicate functionality.
 
 ## Design Rule
 
-When a design mockup or screenshot is provided:
+**Primary mockup path:** `docs/design/` — see [docs/design/README.md](docs/design/README.md) for file → route → task mapping.
 
-- Follow the design exactly
-- Do not redesign
-- Do not simplify
-- Do not add extra sections
+When implementing UI:
+
+- Follow the design exactly — pixel-perfect
+- Do not redesign, simplify, or add extra sections
 - Preserve spacing, hierarchy and layout
-- Use existing project architecture
+- Use existing project architecture (`libs/`, `pages/`, `apollo/`)
+
+**Mockup priority:** High-fidelity PNG > wireframe when they conflict (e.g. login field is **email** per AUTH-07, not phone).
+
+**Admin UI:** No mockup — build incrementally (P3-15), light utilitarian dashboard with Fixora orange accent. See `docs/design/admin/README.md`.
+
+**Light theme:** No mockup yet — Phase 4 (P4-05+). MVP ships **dark only**; build theme tokens with light placeholders in P3-02.
 
 ## Migration Rule
 

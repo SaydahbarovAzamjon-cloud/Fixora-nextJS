@@ -4,9 +4,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-05-31 |
+| **Last updated** | 2026-06-09 |
 | **Last agent** | Cursor |
-| **Last session** | Set up frontend-focused docs + Cursor/Codex shared handoff |
+| **Last session** | Design mockups indexed in `docs/design/` — renamed files, README index, updated AGENTS.md + TASK_BOARD.md |
 | **Next agent should start with** | `P3-02` — Design system + dark/orange Fixora theme |
 
 ---
@@ -18,8 +18,20 @@
 | Analysis & UI specs | ✅ Complete — `FIXORA-ANALIZ.md` |
 | Decisions | ✅ Locked — `DECISIONS.md` |
 | Agent handoff (Cursor + Codex) | ✅ This file + `TASK_BOARD.md` |
+| Design mockups | ✅ Uploaded — `docs/design/README.md` |
 | Fixora UI migration | ⬜ Not started — still nestar real-estate UI |
 | Backend API (FIXORAB) | ⚠️ Separate repo — still nestar domain |
+
+---
+
+## Design Assets
+
+| Folder | Files |
+|--------|-------|
+| `docs/design/auth/` | `auth-login-signup-hifi.png`, `auth-flow-wireframe.png` |
+| `docs/design/customer/` | `homepage.png`, `customer-pages-full.png` |
+| `docs/design/technician/` | `technician-dashboard-full.png` |
+| `docs/design/admin/` | TBD — see `admin/README.md` |
 
 ---
 
@@ -35,6 +47,8 @@ FixoraF/
 │   └── auth/        # JWT / session helpers
 ├── apollo/          # GraphQL queries & mutations
 ├── scss/            # Global + page styles
+├── docs/
+│   └── design/      # UI mockups — pixel-perfect reference
 └── docs/            # Source of truth for all agents
 ```
 
@@ -47,14 +61,14 @@ FixoraF/
 
 | ID | Task |
 |----|------|
-| P3-02 | Design system — dark/orange theme, MUI + SCSS tokens |
-| P3-03 | Auth UI (§9.1) — Phone + Kakao, role select, tech onboarding |
-| P3-04 | Homepage — pixel-perfect |
+| P3-02 | Design system — dark/orange theme, MUI + SCSS tokens, light placeholders |
+| P3-03 | Auth UI — mockups in `docs/design/auth/` |
+| P3-04 | Homepage — `docs/design/customer/homepage.png` |
 | P3-05 | Search + Technician Profile |
 | P3-06 | Booking flow UI |
 | P3-07 | Messages UI |
 | P3-08 | My Page + Notifications |
-| P3-09 | Tenant Dashboard — 7 screens (§9.3) |
+| P3-09 | Tenant Dashboard — `docs/design/technician/technician-dashboard-full.png` |
 | P3-10 | Community + Post Detail |
 
 Full checklist: `TASK_BOARD.md`
@@ -68,6 +82,8 @@ Full checklist: `TASK_BOARD.md`
 | KakaoPay sandbox | Needed before payment UI (P3-06) |
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
 | New GraphQL operations | Some Fixora APIs may not exist in FIXORAB yet — stub or mock |
+| Admin mockup | None — build incrementally (P3-15) |
+| Light theme mockup | None — Phase 4 (P4-05+) |
 
 ---
 
@@ -75,10 +91,11 @@ Full checklist: `TASK_BOARD.md`
 
 | Topic | Where |
 |-------|-------|
-| Auth UI | `FIXORA-ANALIZ.md` §9.1 |
-| Customer pages | `FIXORA-ANALIZ.md` §9.2 |
-| Tenant Dashboard | `FIXORA-ANALIZ.md` §9.3 |
-| Theme / design | `FIXORA-ANALIZ.md` §9 + `DECISIONS.md` UI-* |
+| UI mockups | `docs/design/README.md` |
+| Auth UI | `docs/design/auth/` + `FIXORA-ANALIZ.md` §9.1 |
+| Customer pages | `docs/design/customer/` + `FIXORA-ANALIZ.md` §9.2 |
+| Tenant Dashboard | `docs/design/technician/` + `FIXORA-ANALIZ.md` §9.3 |
+| Theme / design | `DECISIONS.md` UI-* |
 | GraphQL types | `libs/types/`, `apollo/` |
 
 ---

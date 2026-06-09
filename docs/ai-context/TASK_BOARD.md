@@ -6,12 +6,13 @@ Shared by Cursor and Codex. Frontend tasks only.
 
 ## Current Focus
 
-**P3-02** — Design system + dark/orange Fixora theme
+**P3-02** — Design system + dark/orange Fixora theme (mockups: `docs/design/`)
 
 ## Frontend TODO (summary)
 
-- P3-02 — Theme (MUI + SCSS)
-- P3-03 — Auth UI (§9.1)
+- P0-05 — Design mockups indexed ✅
+- P3-02 — Theme (MUI + SCSS, light token placeholders)
+- P3-03 — Auth UI — `docs/design/auth/`
 - P3-04 — Homepage
 - P3-05 — Search + Technician Profile
 - P3-06 — Booking flow UI

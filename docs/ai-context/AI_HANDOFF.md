@@ -18,13 +18,14 @@ This folder (`docs/ai-context/`) is extra working context for **Codex in VS Code
 
 ## Last Agent
 
-Cursor — 2026-05-31 (frontend docs + shared handoff setup)
+Cursor — 2026-06-09 (design mockups indexed in `docs/design/`)
 
 ## Extended Notes
 
 - **Scope:** UI, pages, components, Apollo client, SCSS — not NestJS/backend.
 - **Backend:** FIXORAB repo — stub GraphQL if API not ready yet.
 - **Current UI:** nestar real-estate — migrate terminology and layouts to Fixora.
-- **Next task:** P3-02 design system (dark/orange theme).
+- **Design mockups:** `docs/design/README.md` — auth, customer, technician PNGs ready.
+- **Next task:** P3-02 design system (dark/orange theme from mockup tokens).
 
 See `../AI_HANDOFF.md` for full state, blockers, and session template.

@@ -1,0 +1,14 @@
+---
+description: Fixora pixel-perfect UI from docs/design mockups (MUI + SCSS)
+globs: pages/**/*.{tsx,jsx},libs/components/**/*.{tsx,jsx},scss/**/*
+alwaysApply: false
+---
+
+# Fixora Design Implementation
+
+1. Read `docs/design/README.md` and the PNG for the current task before editing.
+2. Pixel-perfect — no redesign. High-fidelity mockup wins over wireframe.
+3. Tokens: bg `#0D0D0D`, primary `#FF6B00`, glass cards `#1A1A1A` + orange border glow.
+4. New Fixora components in `libs/components/ui/` or feature folders — do not only recolor legacy property/agent components.
+5. All UI strings via `next-i18next` (`public/locales/ko/`, `public/locales/en/`).
+6. Auth login uses **email**, not phone. Kakao OAuth button per mockup.

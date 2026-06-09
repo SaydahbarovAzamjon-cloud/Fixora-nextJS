@@ -67,7 +67,9 @@ body::-webkit-scrollbar {
 					.logo-box {
 						img {
 							width: 150px;
-							cursor: pointer;
+							height: auto;
+							display: block;
+							background: transparent;
 						}
 					}
 					.router-box {

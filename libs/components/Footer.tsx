@@ -15,7 +15,7 @@ const Footer = () => {
 				<Stack className={'main'}>
 					<Stack className={'left'}>
 						<Box component={'div'} className={'footer-box'}>
-							<img src="/img/logo/logoWhite.svg" alt="" className={'logo'} />
+							<img src="/img/logo/logoWhite.png" alt="Fixora" className={'logo'} />
 						</Box>
 						<Box component={'div'} className={'footer-box'}>
 							<span>total free customer care</span>
@@ -63,7 +63,7 @@ const Footer = () => {
 					</Stack>
 				</Stack>
 				<Stack className={'second'}>
-					<span>© Nestar - All rights reserved. Nestar {moment().year()}</span>
+					<span>© Fixora - All rights reserved. Fixora {moment().year()}</span>
 				</Stack>
 			</Stack>
 		);
@@ -73,7 +73,7 @@ const Footer = () => {
 				<Stack className={'main'}>
 					<Stack className={'left'}>
 						<Box component={'div'} className={'footer-box'}>
-							<img src="/img/logo/logoWhite.svg" alt="" className={'logo'} />
+							<img src="/img/logo/logoWhite.png" alt="Fixora" className={'logo'} />
 						</Box>
 						<Box component={'div'} className={'footer-box'}>
 							<span>total free customer care</span>
@@ -128,7 +128,7 @@ const Footer = () => {
 					</Stack>
 				</Stack>
 				<Stack className={'second'}>
-					<span>© Nestar - All rights reserved. Nestar {moment().year()}</span>
+					<span>© Fixora - All rights reserved. Fixora {moment().year()}</span>
 					<span>Privacy · Terms · Sitemap</span>
 				</Stack>
 			</Stack>

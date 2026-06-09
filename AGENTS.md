@@ -17,6 +17,10 @@ Works with **Cursor** and **Codex (VS Code)**. Both tools share the same handoff
 | 5 | [docs/FRONTEND_API.md](docs/FRONTEND_API.md) | GraphQL contract — sync copy from FIXORAB |
 | 6 | FIXORAB `apps/fixora-api/src/graphql/schema.gql` | Generated schema — operation & type names |
 | 7 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
+| 8 | [.cursor/skills/fixora-ui/SKILL.md](.cursor/skills/fixora-ui/SKILL.md) | UI implementation — overview |
+| 9 | [.cursor/skills/fixora-theme/SKILL.md](.cursor/skills/fixora-theme/SKILL.md) | Colors, MUI theme, SCSS tokens (P3-02) |
+| 10 | [.cursor/skills/fixora-ui-kit/SKILL.md](.cursor/skills/fixora-ui-kit/SKILL.md) | Button, Input, GlassCard (P3-02b) |
+| 11 | [.cursor/skills/fixora-navbar/SKILL.md](.cursor/skills/fixora-navbar/SKILL.md) | Navbar / Top.tsx (P3-04) |
 
 Keep FixoraF `docs/DECISIONS.md`, `docs/FRONTEND_API.md`, and `schema.gql` **in sync** with FIXORAB when the backend contract changes.
 
@@ -44,7 +48,7 @@ Fixora is an AI-powered **Apple device repair marketplace** for South Korea.
 
 | | |
 |---|---|
-| **This repo** | Next.js frontend (`nestar-next` base) → Fixora UI |
+| **This repo** | Next.js frontend (`fixora-next`) — Fixora UI |
 | **Backend** | `FIXORAB` — NestJS + GraphQL |
 | **GraphQL URL** | `NEXT_PUBLIC_GRAPHQL_URL` (default `http://localhost:2000/graphql`) |
 | **Stack (here)** | Next.js, React, TypeScript, Apollo Client, MUI, SCSS, **next-i18next** (KO + EN) |
@@ -54,7 +58,7 @@ Fixora is **not** a repair company — it connects customers with verified techn
 
 ---
 
-## Repo structure (Nestar architecture — keep patterns)
+## Repo structure (Fixora — keep legacy folder patterns)
 
 
 
@@ -212,12 +216,12 @@ Keep:
 - Folder structure
 - Authentication patterns
 
-Do not copy:
+Do not copy legacy branding from the old real-estate template:
 
-- Nestar branding
-- Nestar UI
-- Nestar styling
-- Nestar business logic not required by Fixora
+- Old template branding (replaced by Fixora)
+- Legacy real-estate UI
+- Legacy real-estate styling
+- Real-estate business logic not required by Fixora
 
 ## Package Manager
 

@@ -24,7 +24,7 @@ Cursor — 2026-06-09 (design mockups indexed in `docs/design/`)
 
 - **Scope:** UI, pages, components, Apollo client, SCSS — not NestJS/backend.
 - **Backend:** FIXORAB repo — stub GraphQL if API not ready yet.
-- **Current UI:** nestar real-estate — migrate terminology and layouts to Fixora.
+- **Current UI:** legacy real-estate template — migrate terminology and layouts to Fixora.
 - **Design mockups:** `docs/design/README.md` — auth, customer, technician PNGs ready.
 - **Next task:** P3-02 design system (dark/orange theme from mockup tokens).
 

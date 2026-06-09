@@ -19,7 +19,7 @@
 | Decisions | ✅ Locked — `DECISIONS.md` |
 | Agent handoff (Cursor + Codex) | ✅ This file + `TASK_BOARD.md` |
 | Design mockups | ✅ Uploaded — `docs/design/README.md` |
-| Fixora UI migration | ⬜ Not started — still nestar real-estate UI |
+| Fixora UI migration | ⬜ In progress — branding updated; pages still legacy real-estate UI |
 | Backend API (FIXORAB) | ⚠️ Separate repo — still nestar domain |
 
 ---

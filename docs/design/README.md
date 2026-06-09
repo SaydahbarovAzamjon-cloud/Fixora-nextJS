@@ -99,6 +99,9 @@ Shared: fixed left sidebar, online toggle, dark theme + orange accents.
 
 | Token | Value |
 |-------|-------|
+| Logo (full) | `public/img/logo/logoWhite.png` — cropped from `customer/homepage.png` |
+| Logo (icon) | `public/img/logo/logoText.png` — cropped from `auth/auth-login-signup-hifi.png` |
+| Favicon | `public/img/logo/favicon.png` |
 | Primary orange | `#FF6B00` (approx — verify from hifi export) |
 | Background | `#0D0D0D` |
 | Card / glass | `#1A1A1A` with orange border glow |

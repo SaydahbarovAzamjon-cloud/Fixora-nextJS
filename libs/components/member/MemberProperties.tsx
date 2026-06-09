@@ -50,7 +50,7 @@ useEffect(() => {
 	};
 
 	if (device === 'mobile') {
-		return <div>NESTAR PROPERTIES MOBILE</div>;
+		return <div>FIXORA PROPERTIES MOBILE</div>;
 	} else {
 		return (
 			<div id="member-properties-page">

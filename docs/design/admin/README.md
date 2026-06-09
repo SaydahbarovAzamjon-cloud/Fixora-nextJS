@@ -8,7 +8,7 @@ Build incrementally during frontend phase. Per `DECISIONS.md` UI-05:
 
 - **Theme:** Light utilitarian dashboard (not dark glass) — easier to read tables and data
 - **Brand:** Fixora orange accent on primary actions and active nav
-- **Base:** Adapt existing Nestar `pages/_admin/*` + `LayoutAdmin.tsx` shell
+- **Base:** Adapt existing `pages/_admin/*` + `LayoutAdmin.tsx` shell
 
 ## MVP Screens
 

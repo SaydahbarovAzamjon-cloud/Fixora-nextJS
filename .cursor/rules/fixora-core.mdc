@@ -1,0 +1,13 @@
+---
+description: Fixora frontend core conventions — read AGENTS.md and handoff docs
+alwaysApply: true
+---
+
+# Fixora Core
+
+- Frontend only (FixoraF). Backend is FIXORAB — do not implement API here.
+- Start sessions: `docs/AI_HANDOFF.md` → `docs/TASK_BOARD.md` → `docs/design/README.md`.
+- Use **yarn** (`yarn dev`, `yarn build`, `yarn lint`).
+- GraphQL: `docs/FRONTEND_API.md` — never guess operation names.
+- UI skill: apply `.cursor/skills/fixora-ui/SKILL.md` for all UI/theme work.
+- P3-02 skills: `fixora-theme`, `fixora-ui-kit`, `fixora-navbar` in `.cursor/skills/`.

@@ -26,18 +26,11 @@
            flex-direction: row;
            align-items: center;
            img {
-             width: 40px;
-             height: 40px;
+             width: 56px;
+             height: 56px;
            }
            span {
-             margin-left: 10px;
-             font-family: $font ;
-             font-size: 22px;
-             font-style: normal;
-             font-weight: 600;
-             line-height: normal;
-             letter-spacing: 0.44px;
-             color:#181A20;
+             display: none;
            }
          }
          .info {

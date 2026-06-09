@@ -24,9 +24,9 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P3-01 | Next.js app exists | ✅ Done | `nestar-next` base — rename branding later |
+| P3-01 | Next.js app exists | ✅ Done | `fixora-next` — Fixora branding applied |
 | P3-02 | Dark/orange Fixora theme | ⬜ Todo | MUI theme + SCSS tokens — **current focus** |
-| P3-02a | Replace nestar colors/fonts globally | ⬜ Todo | Orange ~`#FF6B00`, bg ~`#0D0D0D` — part of P3-02 |
+| P3-02a | Replace legacy colors/fonts globally | ⬜ Todo | Orange ~`#FF6B00`, bg ~`#0D0D0D` — part of P3-02 |
 | P3-02b | Dark glass card component pattern | ⬜ Todo | From `auth/auth-login-signup-hifi.png` — part of P3-02 |
 | P3-02c | Light theme token placeholders | ⬜ Todo | CSS variables ready for P4-05 — part of P3-02 |
 

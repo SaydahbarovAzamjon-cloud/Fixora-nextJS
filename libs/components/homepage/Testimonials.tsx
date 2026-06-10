@@ -11,7 +11,7 @@ import EastIcon from '@mui/icons-material/East';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import StarIcon from '@mui/icons-material/Star';
 
-/** 9 static testimonials — 3 per carousel page (display only, MVP) */
+/** 9 static testimonials — one per coverflow slide (display only, MVP) */
 const TESTIMONIALS = [
 	{ key: 't1', avatar: '/img/testimonials/avatar-1.png' },
 	{ key: 't2', avatar: '/img/testimonials/avatar-2.png' },
@@ -23,13 +23,6 @@ const TESTIMONIALS = [
 	{ key: 't8', avatar: '/img/testimonials/avatar-1.png' },
 	{ key: 't9', avatar: '/img/testimonials/avatar-2.png' },
 ] as const;
-
-const CARDS_PER_PAGE = 3;
-
-const TESTIMONIAL_PAGES = Array.from(
-	{ length: Math.ceil(TESTIMONIALS.length / CARDS_PER_PAGE) },
-	(_, pageIndex) => TESTIMONIALS.slice(pageIndex * CARDS_PER_PAGE, pageIndex * CARDS_PER_PAGE + CARDS_PER_PAGE),
-);
 
 const Testimonials = () => {
 	const { t } = useTranslation('common');
@@ -75,12 +68,16 @@ const Testimonials = () => {
 					<Swiper
 						className="fixora-home-testimonials__swiper"
 						modules={[Navigation, Pagination]}
-						speed={400}
-						spaceBetween={0}
-						slidesPerView={1}
+						centeredSlides
+						slidesPerView="auto"
 						slidesPerGroup={1}
-						loop={false}
-						watchOverflow
+						spaceBetween={0}
+						speed={450}
+						loop
+						loopedSlides={TESTIMONIALS.length}
+						loopAdditionalSlides={3}
+						slideToClickedSlide
+						watchSlidesProgress
 						navigation={{
 							prevEl: prevRef.current,
 							nextEl: nextRef.current,
@@ -88,33 +85,34 @@ const Testimonials = () => {
 						pagination={{
 							el: paginationRef.current,
 							clickable: true,
+							dynamicBullets: true,
+							dynamicMainBullets: 5,
 						}}
 						onBeforeInit={bindSwiperControls}
 						onInit={bindSwiperControls}
+						onSlideChangeTransitionEnd={(swiper) => swiper.update()}
 					>
-						{TESTIMONIAL_PAGES.map((page, pageIndex) => (
-							<SwiperSlide className="fixora-home-testimonials__slide" key={`page-${pageIndex}`}>
-								<div className="fixora-home-testimonials__page">
-									{page.map(({ key, avatar }) => (
-										<article className="fixora-testimonial-card" key={key}>
-											<FormatQuoteIcon className="fixora-testimonial-card__quote" aria-hidden="true" />
-											<p className="fixora-testimonial-card__text">
-												{t(`homepage.testimonials.items.${key}.text`)}
-											</p>
-											<div className="fixora-testimonial-card__footer">
-												<div className="fixora-testimonial-card__author">
-													<img src={avatar} alt="" className="fixora-testimonial-card__avatar" />
-													<span className="fixora-testimonial-card__name">
-														{t(`homepage.testimonials.items.${key}.name`)}
-													</span>
-												</div>
-												<span className="fixora-testimonial-card__rating">
-													<StarIcon fontSize="inherit" />
-													{t(`homepage.testimonials.items.${key}.rating`)}
+						{TESTIMONIALS.map(({ key, avatar }) => (
+							<SwiperSlide className="fixora-home-testimonials__slide" key={key}>
+								<div className="fixora-home-testimonials__slide-inner">
+									<article className="fixora-testimonial-card">
+										<FormatQuoteIcon className="fixora-testimonial-card__quote" aria-hidden="true" />
+										<p className="fixora-testimonial-card__text">
+											{t(`homepage.testimonials.items.${key}.text`)}
+										</p>
+										<div className="fixora-testimonial-card__footer">
+											<div className="fixora-testimonial-card__author">
+												<img src={avatar} alt="" className="fixora-testimonial-card__avatar" />
+												<span className="fixora-testimonial-card__name">
+													{t(`homepage.testimonials.items.${key}.name`)}
 												</span>
 											</div>
-										</article>
-									))}
+											<span className="fixora-testimonial-card__rating">
+												<StarIcon fontSize="inherit" />
+												{t(`homepage.testimonials.items.${key}.rating`)}
+											</span>
+										</div>
+									</article>
 								</div>
 							</SwiperSlide>
 						))}

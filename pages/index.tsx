@@ -7,11 +7,14 @@ import HowItWorks from '../libs/components/homepage/HowItWorks';
 import TechTips from '../libs/components/homepage/TechTips';
 import Testimonials from '../libs/components/homepage/Testimonials';
 
-export const getStaticProps = async ({ locale }: any) => ({
-	props: {
-		...(await serverSideTranslations(locale, ['common'])),
-	},
-});
+export const getStaticProps = async ({ locale }: any) => {
+	const translations = await serverSideTranslations(locale ?? 'en', ['common']);
+	return {
+		props: {
+			...translations,
+		},
+	};
+};
 
 const Home: NextPage = () => {
 	return (

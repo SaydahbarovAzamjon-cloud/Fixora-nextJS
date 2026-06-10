@@ -693,135 +693,261 @@ body::-webkit-scrollbar {
 		background: #181a20;
 		.footer-container {
 			width: 1300px;
+			max-width: calc(100% - 40px);
 			height: auto;
 			margin: 0 auto;
-			.main {
+
+			@keyframes fixora-footer-logo-y-spin {
+				from {
+					transform: rotateY(0deg);
+				}
+				to {
+					transform: rotateY(360deg);
+				}
+			}
+
+			.fixora-footer__grid {
+				display: grid;
+				grid-template-columns: minmax(220px, 260px) repeat(3, minmax(0, 1fr));
+				grid-template-rows: auto 70px auto;
+				column-gap: 48px;
+				row-gap: 14px;
+				align-items: start;
+			}
+
+			.fixora-footer__newsletter-title {
+				grid-column: 3 / 5;
+				grid-row: 1;
+				min-width: 0;
+
+				strong {
+					color: #fff;
+					font-family: $font;
+					font-size: 15px;
+					font-style: normal;
+					font-weight: 600;
+					line-height: 1.2;
+					margin: 0;
+				}
+			}
+
+			.fixora-footer__heading {
+				color: #fff;
+				font-family: $font;
+				font-size: 15px;
+				font-style: normal;
+				font-weight: 600;
+				line-height: 1.2;
+				margin: 0;
+			}
+
+			.fixora-footer__newsletter-input {
+				grid-column: 3 / 5;
+				grid-row: 2;
+				padding: 20px 30px;
+				width: 100%;
+				height: 70px;
 				display: flex;
 				flex-direction: row;
-				justify-content: space-between;
-				.left {
-					height: 360px;
-					display: flex;
-					flex-direction: column;
-					justify-content: space-between;
-					.footer-box {
-						display: flex;
-						flex-direction: column;
+				align-items: center;
+				box-sizing: border-box;
+				border-radius: 12px;
+				background: #212329;
+				min-width: 0;
 
-						.fixora-logo__image {
-							max-height: 52px;
-						}
-						span {
-							color: #bebdbd;
-							font-family: $font;
-							font-size: 14px;
-							font-style: normal;
-							font-weight: 400;
-							text-transform: capitalize;
-						}
-						p {
-							color: #fff;
-							font-family: $font;
-							font-size: 15px;
-							font-style: normal;
-							font-weight: 600;
-							line-height: normal;
-							text-transform: capitalize;
-						}
-						.media-box {
-							margin-top: 12px;
-							color: #929495;
-							svg {
-								font-size: 32px;
-								margin-right: 22px;
-								cursor: pointer;
-							}
-						}
+				input {
+					flex: 1;
+					margin-right: 10px;
+					border: none;
+					outline: none;
+					color: #fff;
+					font-family: $font;
+					font-size: 14px;
+					font-style: normal;
+					font-weight: 400;
+					line-height: 26px;
+					background: none;
+				}
+
+				span {
+					flex-shrink: 0;
+					color: #fff;
+					font-family: $font;
+					font-size: 15px;
+					font-style: normal;
+					font-weight: 600;
+					line-height: normal;
+					cursor: pointer;
+				}
+			}
+
+			.fixora-footer__logo-scene {
+				grid-column: 1;
+				grid-row: 2;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100%;
+				height: 70px;
+				overflow: visible;
+				perspective: 880px;
+				perspective-origin: center center;
+			}
+
+			.fixora-footer__logo-spin {
+				display: inline-flex;
+				cursor: pointer;
+				transform-style: preserve-3d;
+				backface-visibility: visible;
+				animation: fixora-footer-logo-y-spin 16s linear infinite;
+				will-change: transform;
+
+				&:hover {
+					animation: none;
+					transform: rotateY(0deg);
+					transition: transform 0.45s ease-out, filter 0.35s ease;
+					filter: drop-shadow(0 0 20px rgba(255, 107, 0, 0.42));
+
+					.fixora-footer__logo .fixora-logo__image {
+						filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.35));
 					}
 				}
-				.right {
-					display: flex;
-					flex-direction: column;
-					.top {
-						display: flex;
-						flex-direction: column;
-						strong {
-							color: #fff;
-							font-family: $font;
-							font-size: 15px;
-							font-style: normal;
-							font-weight: 600;
-							line-height: normal;
-							text-transform: capitalize;
-						}
-						div {
-							padding: 20px 30px;
-							margin-top: 20px;
-							width: 667px;
-							height: 70px;
-							display: flex;
-							flex-direction: row;
-							align-items: center;
-							box-sizing: border-box;
-							border-radius: 12px;
-							background: #212329;
-							input {
-								margin-right: 10px;
-								width: 85%;
-								border: none;
-								outline: none;
-								color: #fff;
-								font-family: $font;
-								font-size: 14px;
-								font-style: normal;
-								font-weight: 400;
-								line-height: 26px;
-								background: none;
-							}
-							span {
-								color: #fff;
-								font-family: $font;
-								font-size: 15px;
-								font-style: normal;
-								font-weight: 600;
-								line-height: normal;
-								cursor: pointer;
-							}
-						}
+			}
+
+			.fixora-footer__logo .fixora-logo__image {
+				max-height: 88px;
+				transition: filter 0.35s ease;
+			}
+
+			.fixora-footer__contact {
+				grid-column: 1;
+				grid-row: 3;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				width: 100%;
+				margin-top: 18px;
+				text-align: center;
+				align-items: center;
+			}
+
+			.fixora-footer__links {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 14px;
+				min-width: 0;
+
+				&--popular {
+					grid-column: 2;
+					grid-row: 3;
+					margin-top: 18px;
+				}
+
+				&--quick {
+					grid-column: 3;
+					grid-row: 3;
+					margin-top: 18px;
+				}
+			}
+
+			.fixora-footer__discover {
+				grid-column: 4;
+				grid-row: 3;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 14px;
+				min-width: 0;
+				margin-top: 18px;
+			}
+
+			.footer-box {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				width: 100%;
+
+				> span {
+					color: #bebdbd;
+					font-family: $font;
+					font-size: 14px;
+					font-style: normal;
+					font-weight: 400;
+					line-height: 1.4;
+				}
+			}
+
+			.fixora-footer__phone {
+				margin: 8px 0 0;
+				color: #fff;
+				font-family: $font;
+				font-size: 17px;
+				font-style: normal;
+				font-weight: 700;
+				line-height: 1.3;
+				letter-spacing: 0.02em;
+			}
+
+			.fixora-footer__social-label {
+				margin: 0;
+				color: #fff;
+				font-family: $font;
+				font-size: 14px;
+				font-style: normal;
+				font-weight: 600;
+				line-height: 1.4;
+			}
+
+			.media-box {
+				margin-top: 12px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;
+				gap: 20px;
+
+				.fixora-footer__social-link {
+					display: inline-flex;
+					align-items: center;
+					justify-content: center;
+					color: #929495;
+					text-decoration: none;
+					cursor: pointer;
+					transition:
+						transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1),
+						color 0.22s ease-in-out,
+						filter 0.22s ease-in-out;
+
+					svg {
+						font-size: 30px;
 					}
-					.bottom {
-						margin-top: 60px;
-						display: flex;
-						flex-direction: row;
-						justify-content: space-between;
-						div {
-							display: flex;
-							flex-direction: column;
-							strong {
-								margin-bottom: 3px;
-								color: #fff;
-								font-family: $font;
-								font-size: 15px;
-								font-style: normal;
-								font-weight: 600;
-								line-height: normal;
-								text-transform: capitalize;
-							}
-							span {
-								margin-top: 25px;
-								color: #bebdbd;
-								font-family: $font;
-								font-size: 14px;
-								font-style: normal;
-								font-weight: 400;
-								cursor: pointer;
-								&:hover {
-									color: #ffffff;
-									text-decoration-line: underline;
-								}
-							}
-						}
+
+					&:hover {
+						transform: scale(1.12);
+						color: var(--fixora-primary);
+						filter: drop-shadow(0 0 8px rgba(255, 107, 0, 0.35));
 					}
+				}
+			}
+
+			.fixora-footer__link {
+				display: inline-block;
+				width: fit-content;
+				color: #bebdbd;
+				font-family: $font;
+				font-size: 14px;
+				font-style: normal;
+				font-weight: 400;
+				cursor: pointer;
+				text-decoration: none;
+				transform-origin: left center;
+				transition: transform 0.22s ease-in-out, color 0.22s ease-in-out;
+
+				&:hover {
+					color: var(--fixora-primary);
+					transform: scale(1.06);
+					text-decoration: none;
 				}
 			}
 			.second {

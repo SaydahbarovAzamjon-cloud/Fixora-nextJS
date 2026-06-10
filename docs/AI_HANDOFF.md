@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-09 |
+| **Last updated** | 2026-06-10 |
 | **Last agent** | Cursor |
-| **Last session** | NEXT_SESSION Task 1+2: Google/Kakao OAuth (`loginWithOAuth`), Fixora email login/signup API, Homepage Hero `heroRepairSearch` |
-| **Next agent should start with** | `P3-04` — Homepage remaining sections per `docs/design/customer/homepage.png` |
+| **Last session** | P3-04 complete: homepage sections (TopTechnicians, HowItWorks, TechTips, Testimonials) + Fixora navbar rebuild in `Top.tsx` (Home/Services, EN\|KR toggle, Log in, Find Technician CTA) + hero per mockup (eyebrow, category chips, trust badges) + legacy FiberContainer removed from `LayoutHome` |
+| **Next agent should start with** | `P3-05` — Search + Technician Profile per `docs/design/customer/customer-pages-full.png` §2–3 |
 
 ---
 
@@ -24,6 +24,7 @@
 | GraphQL contract sync | ✅ `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql` in `docs/` |
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
+| Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
 
 ---
 

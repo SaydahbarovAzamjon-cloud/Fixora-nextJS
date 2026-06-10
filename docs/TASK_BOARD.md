@@ -4,7 +4,7 @@
 > Update after each task: `⬜ Todo` · `🔄 In Progress` · `✅ Done` · `⏸ Blocked`  
 > **Cursor and Codex:** keep this in sync with `AI_HANDOFF.md`.
 
-**Last updated:** 2026-06-09
+**Last updated:** 2026-06-10
 
 ---
 
@@ -38,7 +38,7 @@
 |----|------|--------|-------|
 | P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech onboarding — mockup-based |
 | P3-03b | OAuth wiring (Google + Kakao) | ✅ Done | GIS `initCodeClient` + Kakao SDK → `loginWithOAuth` |
-| P3-04 | Homepage | 🔄 In Progress | Hero AI done — remaining sections per mockup |
+| P3-04 | Homepage | ✅ Done | Hero AI + TopTechnicians, HowItWorks, TechTips, Testimonials per mockup |
 | P3-05 | Search + Technician Profile | ⬜ Todo | Mockup: `docs/design/customer/customer-pages-full.png` §2–3 |
 | P3-06 | Booking flow UI | ⬜ Todo | No mockup yet — follow `FIXORA-ANALIZ.md` §9.2 |
 | P3-07 | Messages UI | ⬜ Todo | Mockup: `customer-pages-full.png` §6 |
@@ -86,8 +86,8 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-04` — Homepage remaining sections (top technicians, how it works, articles, testimonials)
+**Next task:** `P3-05` — Search + Technician Profile
 
-**Then:** `P3-05` — Search + Technician Profile
+**Then:** `P3-06` — Booking flow UI
 
 See `AI_HANDOFF.md` for last agent and session notes.

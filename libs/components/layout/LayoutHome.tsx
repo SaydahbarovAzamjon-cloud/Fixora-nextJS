@@ -4,7 +4,6 @@ import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
-import FiberContainer from '../common/FiberContainer';
 import HeroRepairSearch from '../homepage/HeroRepairSearch';
 import { userVar } from '../../../apollo/store';
 import { useReactiveVar } from '@apollo/client';
@@ -63,7 +62,6 @@ const withLayoutMain = (Component: any) => {
 						</Stack>
 
 						<Stack className={'header-main header-main--fixora'}>
-							<FiberContainer />
 							<Stack className={'container'}>
 								<HeroRepairSearch />
 							</Stack>

@@ -563,6 +563,66 @@ export const GET_MEMBER_FOLLOWERS = gql`
 	}
 `;
 
+/**************************
+ *     FIXORA — USERS     *
+ *************************/
+
+export const GET_TECHNICIANS = gql`
+	query GetTechnicians($input: TechniciansInquiry!) {
+		getTechnicians(input: $input) {
+			list {
+				_id
+				userNickname
+				userFullName
+				userProfileImage
+				shopName
+				specialty
+				userLocation
+				isOnline
+				averageRating
+				reviewCount
+				completedJobsCount
+				badgeLevel
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *    FIXORA — ARTICLES   *
+ *************************/
+
+export const GET_ARTICLES = gql`
+	query GetArticles($input: ArticlesInquiry!) {
+		getArticles(input: $input) {
+			list {
+				_id
+				articleCategory
+				articleTitle
+				articleExcerpt
+				articleImage
+				articleLikes
+				articleViews
+				articleComments
+				createdAt
+				authorData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+					specialty
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
 export const GET_MEMBER_FOLLOWINGS = gql`
 	query GetMemberFollowings($input: FollowInquiry!) {
 		getMemberFollowings(input: $input) {

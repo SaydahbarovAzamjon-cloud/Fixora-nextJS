@@ -127,23 +127,33 @@ const HeroRepairSearch = () => {
 					))}
 				</div>
 
-				<FixoraButton
-					variant="primary"
-					className="fixora-hero__cta"
-					disabled={loading}
-					onClick={handleFindTechnician}
-				>
-					<AutoAwesomeIcon fontSize="small" />
-					{t('hero.findTechnician')}
-				</FixoraButton>
+				<div className="fixora-hero__cta-wrap">
+					<FixoraButton
+						variant="primary"
+						className="fixora-hero__cta"
+						disabled={loading}
+						onClick={handleFindTechnician}
+					>
+						<AutoAwesomeIcon fontSize="small" />
+						{t('hero.findTechnician')}
+					</FixoraButton>
+				</div>
 
 				<div className="fixora-hero__trust">
-					{TRUST_KEYS.map((key) => (
-						<span className="fixora-hero__trust-item" key={key}>
-							<VerifiedOutlinedIcon fontSize="inherit" />
-							{t(`hero.trust.${key}`)}
-						</span>
-					))}
+					<div className="fixora-hero__trust-viewport">
+						<div className="fixora-hero__trust-track">
+							{[...TRUST_KEYS, ...TRUST_KEYS].map((key, index) => (
+								<span
+									className="fixora-hero__trust-item"
+									key={`${key}-${index}`}
+									aria-hidden={index >= TRUST_KEYS.length}
+								>
+									<VerifiedOutlinedIcon fontSize="inherit" />
+									{t(`hero.trust.${key}`)}
+								</span>
+							))}
+						</div>
+					</div>
 				</div>
 
 				{classification && (

@@ -207,7 +207,9 @@ When implementing UI:
 
 **Admin UI:** No mockup — build incrementally (P3-15), light utilitarian dashboard with Fixora orange accent. See `docs/design/admin/README.md`.
 
-**Light theme:** No mockup yet — Phase 4 (P4-05+). MVP ships **dark only**; build theme tokens with light placeholders in P3-02.
+**Mobile:** Phase 2 = desktop-first + responsive-safe; **Phase 3 (PM-01…PM-12)** = full mobile conversion — see `docs/TASK_BOARD.md` and `DECISIONS.md` MOB-*.
+
+**Light theme:** No mockup yet — Phase 5 (P4-05+). MVP ships **dark only**; build theme tokens with light placeholders in P3-02.
 
 ## Migration Rule
 

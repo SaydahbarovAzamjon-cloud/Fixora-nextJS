@@ -6,6 +6,8 @@
 
 **Last updated:** 2026-06-10
 
+**Roadmap order:** Phase 0 → 1 → 2 (desktop pages) → **3 (mobile)** → 4 (migration) → 5 (light theme)
+
 ---
 
 ## Phase 0 — Analysis & Docs
@@ -46,9 +48,37 @@
 | P3-09 | Tenant Dashboard (§9.3) | ⬜ Todo | Mockup: `docs/design/technician/technician-dashboard-full.png` |
 | P3-10 | Community + Post Detail | ⬜ Todo | Mockup: `customer-pages-full.png` §4–5 |
 
+> **During Phase 2:** build **responsive-safe** (flex/grid, `@media`, both `#pc-wrap` / `#mobile-wrap`) — not full mobile polish. See `MOB-01` in `DECISIONS.md`.
+
 ---
 
-## Phase 3 — Migration & Integration
+## Phase 3 — Mobile Responsive (full conversion)
+
+> **Goal:** Pixel-perfect mobile UX per route — after matching desktop page exists.  
+> **Mockups:** Auth wireframe has mobile layouts; other pages derive from desktop mockups + breakpoints.  
+> **Legacy:** `scss/mobile/main.scss` is Nestar-era — replace with Fixora tokens in PM-01.
+
+| ID | Task | Status | Depends on | Notes |
+|----|------|--------|------------|-------|
+| PM-01 | Mobile foundation | ⬜ Todo | P3-02 ✅ | Breakpoints (992 / 768 / 639), `scss/mobile/` Fixora tokens, shared mixins from `scss/pc/`, safe-area vars |
+| PM-02 | Global shell — navbar + footer | ⬜ Todo | PM-01, P3-04 ✅ | `Top.tsx` mobile: EN\|KR, Log in, Find Technician, bell, avatar, opaque bar, hamburger/drawer if needed |
+| PM-03 | Auth mobile | ⬜ Todo | PM-02, P3-03 ✅ | Single-column per `auth-flow-wireframe.png`; upload previews, role cards, onboarding steps |
+| PM-04 | Homepage mobile | ⬜ Todo | PM-02, P3-04 ✅ | Hero typography/padding, category chips, trust marquee, sections stack, testimonials 1-col |
+| PM-05 | Search + Technician Profile mobile | ⬜ Todo | PM-02, P3-05 | Filters drawer, result cards, profile gallery + CTA sticky bottom |
+| PM-06 | Booking flow mobile | ⬜ Todo | PM-02, P3-06 | Stepper, device form, KakaoPay CTA, deposit summary |
+| PM-07 | Messages mobile | ⬜ Todo | PM-02, P3-07 | Conversation list + thread full-screen; phone hidden until ACCEPTED |
+| PM-08 | My Page + Notifications mobile | ⬜ Todo | PM-02, P3-08 | Tabs, booking cards, notification list |
+| PM-09 | Community + Post Detail mobile | ⬜ Todo | PM-02, P3-10 | Feed cards, article detail, comments |
+| PM-10 | Technician dashboard mobile | ⬜ Todo | PM-02, P3-09 | Sidebar → drawer/bottom nav; requests/jobs cards |
+| PM-11 | Admin mobile (minimal) | ⬜ Todo | PM-02, P3-15 | Read-only tables OK; verification queue usable on phone |
+| PM-12 | Mobile QA pass | ⬜ Todo | PM-03–PM-11 | Touch targets ≥44px, `:active` states, no hover-only UX, landscape, iOS/Android smoke |
+
+**Execution order:** PM-01 → PM-02 → then **PM-03 → PM-04 → … → PM-11** (same order as P3 routes).  
+**Early start OK:** PM-01, PM-02, PM-03, PM-04 can begin before P3-10 — PM-05+ blocked until matching P3-xx is ✅ Done.
+
+---
+
+## Phase 4 — Migration & Integration
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
@@ -64,7 +94,7 @@
 
 ---
 
-## Phase 4 — Light Theme & Polish
+## Phase 5 — Light Theme & Polish
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
@@ -86,8 +116,10 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-05` — Search + Technician Profile
+**Next task:** `P3-05` — Search + Technician Profile (desktop-first, responsive-safe)
 
-**Then:** `P3-06` — Booking flow UI
+**Then:** `P3-06` → … → `P3-10` — remaining core pages
+
+**Mobile phase:** `PM-01` after Phase 2 pages exist, or pull forward `PM-01`–`PM-04` while building P3-05+
 
 See `AI_HANDOFF.md` for last agent and session notes.

@@ -74,6 +74,7 @@ FixoraF/
 | P3-08 | My Page + Notifications |
 | P3-09 | Tenant Dashboard — `docs/design/technician/technician-dashboard-full.png` |
 | P3-10 | Community + Post Detail |
+| **Phase 3 Mobile** | **PM-01 → PM-12** — full mobile conversion after desktop pages (`TASK_BOARD.md`) |
 
 Full checklist: `TASK_BOARD.md`
 
@@ -87,7 +88,8 @@ Full checklist: `TASK_BOARD.md`
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
 | Apollo still on legacy nestar ops | P3-13 — migrate to `FRONTEND_API.md` names |
 | Admin mockup | None — build incrementally (P3-15) |
-| Light theme mockup | None — Phase 4 (P4-05+) |
+| Light theme mockup | None — Phase 5 (P4-05+) |
+| Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 
 ---
 

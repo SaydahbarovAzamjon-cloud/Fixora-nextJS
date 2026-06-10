@@ -3,7 +3,7 @@
 > **Source of truth for pixel-perfect implementation.**  
 > Mockups are **final** — do not redesign, simplify, or add extra sections.
 
-**Last updated:** 2026-06-09
+**Last updated:** 2026-06-10
 
 ---
 
@@ -13,7 +13,8 @@
 2. **High-fidelity > wireframe** when they conflict (e.g. login uses **email**, not phone — see `AGENTS.md` AUTH-07).
 3. Text spec fallback: `docs/FIXORA-ANALIZ.md` §9.
 4. **Admin:** no mockup — build incrementally (P3-15), light utilitarian UI.
-5. **Light theme:** no mockup yet — Phase 4 (P4-05+). MVP ships **dark only**.
+5. **Light theme:** no mockup yet — Phase 5 (P4-05+). MVP ships **dark only**.
+6. **Mobile:** desktop mockups first (Phase 2); full mobile polish in **Phase 3 — PM-xx** (`TASK_BOARD.md`, `DECISIONS.md` MOB-*).
 
 ---
 
@@ -118,7 +119,7 @@ Build tokens in `scss/variables.scss` + MUI theme with **light placeholder varia
 |------|--------|
 | Admin panel mockup | TBD — see `admin/README.md` |
 | Light theme mockup | TBD — Phase 4 (P4-05+) |
-| Separate mobile PNG exports | Mobile layouts in `auth-flow-wireframe.png` only |
+| Separate mobile PNG exports | Auth wireframe only — other routes: Phase 3 `PM-04`…`PM-11` adapt desktop |
 | Booking / payment screens | Not in current assets — follow `FIXORA-ANALIZ.md` §9.2 |
 
 ---

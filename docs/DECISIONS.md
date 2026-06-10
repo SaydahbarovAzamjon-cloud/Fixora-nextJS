@@ -4,7 +4,7 @@
 > **Repo:** FixoraF (frontend). Shared by **Cursor** and **Codex** — same rules apply.  
 > Backend implementation of these decisions lives in **FIXORAB**.
 
-**Last updated:** 2026-05-31
+**Last updated:** 2026-06-10
 
 ---
 
@@ -73,6 +73,19 @@
 | ARCH-03 | MongoDB + Mongoose — follow ER strictly |
 | ARCH-04 | WebSocket for real-time chat — booking-scoped, DB-persisted messages |
 | ARCH-05 | Reuse nestar: auth guards, follow, like, comment, view, GraphQL infra (~40%) |
+
+---
+
+## Mobile Responsive
+
+| ID | Decision |
+|----|----------|
+| MOB-01 | **Two-step strategy:** Phase 2 builds desktop-first pages **responsive-safe** (`@media`, flex/grid, both wraps). **Phase 3 (PM-xx)** is dedicated full mobile polish — not deferred to light theme. |
+| MOB-02 | **Task order:** `PM-01` foundation → `PM-02` global navbar/footer → `PM-03`…`PM-11` mirror P3 route order. `PM-05+` starts only after matching `P3-xx` is ✅ Done. |
+| MOB-03 | **Breakpoints:** 992px (tablet), 768px (small tablet), 639px (phone). Prefer CSS breakpoints over `useDeviceDetect` for layout; UA detect OK for `#pc-wrap` / `#mobile-wrap` shell until PM-12 QA. |
+| MOB-04 | **Touch UX:** Mobile phase adds `:active` / tap feedback; hover-only effects (marquee pause, chip scale) must have touch equivalents. Min tap target 44×44px. |
+| MOB-05 | **Mockup authority:** Auth mobile = `auth-flow-wireframe.png`. Homepage + customer pages = desktop mockup + responsive adaptation (no separate mobile PNG yet). |
+| MOB-06 | **Legacy cleanup:** Replace Nestar styles in `scss/mobile/main.scss` with Fixora dark/orange tokens in `PM-01` — do not extend legacy property/agent mobile SCSS. |
 
 ---
 

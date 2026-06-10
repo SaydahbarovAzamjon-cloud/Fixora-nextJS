@@ -707,6 +707,16 @@
 
 /* ---------- navbar (P3-04 — mockup top header) ---------- */
 
+.fixora-nav__logo-link {
+	display: inline-flex;
+	text-decoration: none;
+	line-height: 0;
+}
+
+.fixora-nav__logo.fixora-logo--md .fixora-logo__image {
+	max-height: 68px;
+}
+
 .fixora-nav__links {
 	display: flex;
 	flex-direction: row;
@@ -724,7 +734,7 @@
 	transition: color 0.2s ease;
 
 	&:hover {
-		color: var(--fixora-text-primary);
+		color: var(--fixora-primary);
 	}
 
 	&--active {

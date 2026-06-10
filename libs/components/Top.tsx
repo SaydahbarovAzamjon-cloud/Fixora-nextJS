@@ -60,6 +60,12 @@ const Top = () => {
 	const isActive = (path: string) =>
 		path === '/' ? router.pathname === '/' : router.pathname.startsWith(path);
 
+	const goHome = useCallback(() => {
+		if (router.pathname === '/') {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+	}, [router.pathname]);
+
 	const navLinks = (
 		<>
 			<Link href={'/'} className={`fixora-nav__link ${isActive('/') ? 'fixora-nav__link--active' : ''}`}>
@@ -108,8 +114,8 @@ const Top = () => {
 	if (device == 'mobile') {
 		return (
 			<Stack className={'top fixora-nav--mobile'}>
-				<Link href={'/'}>
-					<FixoraLogo size="sm" />
+				<Link href={'/'} onClick={goHome} className="fixora-nav__logo-link">
+					<FixoraLogo size="md" className="fixora-nav__logo" />
 				</Link>
 				<div className="fixora-nav__links">{navLinks}</div>
 				{user?._id && (
@@ -136,8 +142,8 @@ const Top = () => {
 			<Stack className={`navbar-main ${colorChange ? 'transparent' : ''}`}>
 				<Stack className={'container'}>
 					<Box component={'div'} className={'logo-box'}>
-						<Link href={'/'}>
-							<FixoraLogo size="sm" />
+						<Link href={'/'} onClick={goHome} className="fixora-nav__logo-link">
+							<FixoraLogo size="md" className="fixora-nav__logo" />
 						</Link>
 					</Box>
 

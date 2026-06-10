@@ -159,22 +159,28 @@ export const fixoraOAuthLogin = async (
 	token: string,
 ): Promise<OAuthLoginResult> => {
 	const apolloClient = await initializeApollo();
-	const result = await apolloClient.mutate({
-		mutation: LOGIN_WITH_OAUTH,
-		variables: { input: { authProvider, token } },
-		fetchPolicy: 'network-only',
-	});
+	try {
+		const result = await apolloClient.mutate({
+			mutation: LOGIN_WITH_OAUTH,
+			variables: { input: { authProvider, token } },
+			fetchPolicy: 'network-only',
+		});
 
-	const payload = result.data?.loginWithOAuth;
-	if (!payload?.accessToken) throw new Error('OAuth login failed');
+		const payload = result.data?.loginWithOAuth;
+		if (!payload?.accessToken) {
+			throw new Error('OAuth login failed — no access token returned');
+		}
 
-	setAuthTokens(payload.accessToken, payload.refreshToken ?? '');
-	setNeedsOnboarding(!!payload.needsOnboarding);
+		setAuthTokens(payload.accessToken, payload.refreshToken ?? '');
+		setNeedsOnboarding(!!payload.needsOnboarding);
 
-	return {
-		needsOnboarding: !!payload.needsOnboarding,
-		userType: payload.user?.userType,
-	};
+		return {
+			needsOnboarding: !!payload.needsOnboarding,
+			userType: payload.user?.userType,
+		};
+	} catch (err) {
+		throw new Error(getGraphQLErrorMessage(err));
+	}
 };
 
 export const fixoraCompleteOAuthSignup = async (input: {

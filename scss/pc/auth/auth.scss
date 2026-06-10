@@ -240,6 +240,17 @@
 				cursor: not-allowed;
 			}
 
+			&-icon {
+				width: 20px;
+				height: 20px;
+				flex-shrink: 0;
+				display: block;
+
+				&--apple {
+					color: var(--fixora-text-primary);
+				}
+			}
+
 			&-badge {
 				position: absolute;
 				top: -8px;

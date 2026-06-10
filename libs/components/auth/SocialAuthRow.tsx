@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { FixoraKakaoButton } from '../ui';
+import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin } from '../../auth/fixoraAuth';
 import { requestGoogleAuthCode } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
@@ -34,6 +35,18 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
 			if (/NEXT_PUBLIC_GOOGLE_CLIENT_ID|GOOGLE_NOT_CONFIGURED/i.test(message)) return t('oauth.googleNotConfigured');
 			if (/NEXT_PUBLIC_KAKAO_JS_KEY|KAKAO_NOT_CONFIGURED/i.test(message)) return t('oauth.kakaoNotConfigured');
+			if (/OAUTH_NOT_CONFIGURED|not configured on the server/i.test(message)) {
+				return t('oauth.serverNotConfigured');
+			}
+			if (/INVALID_OAUTH|Invalid or expired OAuth token/i.test(message)) {
+				return t('oauth.invalidToken');
+			}
+			if (/OAUTH_ACCOUNT_EXISTS|OAUTH_PROVIDER_MISMATCH/i.test(message)) {
+				return message;
+			}
+			if (message && !/^OAuth login failed/i.test(message) && message !== 'Request failed') {
+				return message;
+			}
 			return provider === 'google' ? t('oauth.googleFailed') : t('oauth.kakaoFailed');
 		},
 		[t],
@@ -92,9 +105,11 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 					onClick={handleGoogle}
 					disabled={loading !== null}
 				>
+					<GoogleIcon className="auth-social__oauth-icon" />
 					Google
 				</button>
 				<button type="button" className="auth-social__oauth" onClick={handleApple} disabled={loading !== null}>
+					<AppleIcon className="auth-social__oauth-icon auth-social__oauth-icon--apple" />
 					Apple
 					<span className="auth-social__oauth-badge">{t('oauth.comingSoon')}</span>
 				</button>

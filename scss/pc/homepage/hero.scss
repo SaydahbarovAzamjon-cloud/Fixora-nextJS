@@ -118,18 +118,24 @@
 		}
 
 		&__category {
-			@include fixora-home-card-surface;
 			display: inline-flex;
 			align-items: center;
 			gap: 8px;
 			padding: 10px 18px;
 			border-radius: 10px;
+			border: 1px solid var(--fixora-border-subtle);
+			background: var(--fixora-surface);
 			color: var(--fixora-text-primary);
 			font-family: $font;
 			font-size: 13px;
 			font-weight: 600;
 			cursor: pointer;
-			transition: border-color 0.2s ease, color 0.2s ease;
+			transition:
+				border-color 0.2s ease,
+				color 0.2s ease,
+				background 0.2s ease,
+				background-image 0.2s ease,
+				box-shadow 0.2s ease;
 
 			svg {
 				font-size: 16px;
@@ -137,6 +143,7 @@
 			}
 
 			&:hover {
+				@include fixora-home-card-surface;
 				border-color: var(--fixora-primary);
 				color: var(--fixora-primary);
 			}

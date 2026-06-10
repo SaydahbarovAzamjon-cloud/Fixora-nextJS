@@ -55,47 +55,36 @@
 	}
 }
 
-/** Fixora brand logo — mockup §9 auth / navbar **/
+/** Fixora brand logo — single enhanced user PNG (tagline visible in image) */
 
 .fixora-logo {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 8px;
+	align-items: center;
+	justify-content: center;
 
-	&__lockup {
-		display: inline-flex;
-		align-items: center;
-	}
-
-	&__mark {
-		flex-shrink: 0;
+	&__image {
 		display: block;
+		width: auto;
+		height: auto;
+		max-width: 100%;
+		object-fit: contain;
 	}
 
-	&__wordmark {
-		font-family: $font;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		line-height: 1;
-		color: var(--fixora-text-primary);
-		white-space: nowrap;
+	&--sm &__image {
+		max-height: 52px;
 	}
 
-	&__tagline {
-		margin: 0;
-		font-size: 13px;
-		font-weight: 400;
-		line-height: 1.4;
-		color: var(--fixora-text-secondary);
+	&--md &__image {
+		max-height: 64px;
 	}
 
-	&--sm &__tagline {
-		font-size: 11px;
+	&--lg &__image {
+		max-width: 300px;
+		width: 100%;
 	}
 
-	&--lg &__tagline {
-		font-size: 13px;
+	&--mark &__image {
+		max-height: 52px;
 	}
 }
 

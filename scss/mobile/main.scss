@@ -769,10 +769,8 @@
           .footer-box {
             display: flex;
             flex-direction: column;
-            .logo {
-              width: 128px;
-              height: 52px;
-              cursor: pointer;
+            .fixora-logo__image {
+              max-height: 52px;
             }
             span {
               color: #bebdbd;

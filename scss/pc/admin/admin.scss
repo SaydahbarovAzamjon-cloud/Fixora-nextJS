@@ -21,9 +21,9 @@
       display: flex;
       flex-direction: row;
       padding: 16px 0;
-      img {
-        width: 52px;
-        height: 52px;
+
+      .fixora-logo__image {
+        max-height: 56px;
       }
     }
     .user {

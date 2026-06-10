@@ -55,6 +55,50 @@
 	}
 }
 
+/** Fixora brand logo — mockup §9 auth / navbar **/
+
+.fixora-logo {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+
+	&__lockup {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	&__mark {
+		flex-shrink: 0;
+		display: block;
+	}
+
+	&__wordmark {
+		font-family: $font;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		line-height: 1;
+		color: var(--fixora-text-primary);
+		white-space: nowrap;
+	}
+
+	&__tagline {
+		margin: 0;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 1.4;
+		color: var(--fixora-text-secondary);
+	}
+
+	&--sm &__tagline {
+		font-size: 11px;
+	}
+
+	&--lg &__tagline {
+		font-size: 13px;
+	}
+}
+
 .fixora-glass-card {
 	background: var(--fixora-glass-bg);
 	border: 1px solid var(--fixora-border-subtle);

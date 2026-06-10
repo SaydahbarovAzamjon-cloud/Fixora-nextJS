@@ -16,6 +16,7 @@ import { GET_BOARD_ARTICLES } from '../../apollo/user/query';
 import { LIKE_TARGET_BOARD_ARTICLE } from '../../apollo/user/mutation';
 import { Messages } from '../../libs/config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { FixoraLogo } from '../../libs/components/brand';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -116,7 +117,7 @@ const likeArticleHandler = async (e: any, user: any, id: string) => {
 						<Stack className="main-box">
 							<Stack className="left-config">
 								<Stack className={'image-info'}>
-									<img src={'/img/logo/logoText.png'} alt="Fixora" />
+									<FixoraLogo variant="mark" size="md" />
 									<Stack className={'community-name'}>
 										<Typography className={'name'}>Fixora Community</Typography>
 									</Stack>

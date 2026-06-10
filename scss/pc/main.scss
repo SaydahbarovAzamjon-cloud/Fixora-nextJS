@@ -67,8 +67,9 @@ body::-webkit-scrollbar {
 					align-items: center;
 					justify-content: space-between;
 					.logo-box {
+						.fixora-logo,
 						img {
-							width: 150px;
+							width: auto;
 							height: auto;
 							display: block;
 							background: transparent;

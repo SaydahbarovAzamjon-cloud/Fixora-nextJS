@@ -5,6 +5,7 @@ import {
 	FIXORA_SIGNUP,
 	LOGIN_WITH_OAUTH,
 } from '../../apollo/user/auth';
+import { userVar } from '../../apollo/store';
 import { updateUserInfo } from './index';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -82,12 +83,29 @@ export const validateOAuthCompleteInput = (
 	return { valid: Object.keys(errors).length === 0, errors };
 };
 
-export function setAuthTokens(accessToken: string, refreshToken: string) {
+export interface FixoraAuthProfile {
+	userProfileImage?: string | null;
+	userNickname?: string | null;
+	userFullName?: string | null;
+	userType?: string | null;
+}
+
+export function setAuthTokens(accessToken: string, refreshToken: string, profile?: FixoraAuthProfile) {
 	if (typeof window === 'undefined') return;
 	localStorage.setItem('accessToken', accessToken);
 	localStorage.setItem('refreshToken', refreshToken);
 	localStorage.setItem('login', Date.now().toString());
 	updateUserInfo(accessToken);
+	if (profile) {
+		const current = userVar();
+		userVar({
+			...current,
+			...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
+			...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
+			...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
+			...(profile.userType ? { memberType: profile.userType } : {}),
+		});
+	}
 }
 
 export function setNeedsOnboarding(value: boolean) {
@@ -113,7 +131,12 @@ export const fixoraLogin = async (userEmail: string, userPassword: string): Prom
 		if (!user?.accessToken) {
 			throw new Error('Login failed — no access token returned');
 		}
-		setAuthTokens(user.accessToken, user.refreshToken ?? '');
+		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			userProfileImage: user.userProfileImage,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName,
+			userType: user.userType,
+		});
 		setNeedsOnboarding(false);
 	} catch (err) {
 		throw new Error(getGraphQLErrorMessage(err));
@@ -147,7 +170,12 @@ export const fixoraCustomerSignup = async (
 		if (!user?.accessToken) {
 			throw new Error('Sign up failed — no access token returned');
 		}
-		setAuthTokens(user.accessToken, user.refreshToken ?? '');
+		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			userProfileImage: user.userProfileImage,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName,
+			userType: user.userType,
+		});
 		setNeedsOnboarding(false);
 	} catch (err) {
 		throw new Error(getGraphQLErrorMessage(err));
@@ -171,7 +199,12 @@ export const fixoraOAuthLogin = async (
 			throw new Error('OAuth login failed — no access token returned');
 		}
 
-		setAuthTokens(payload.accessToken, payload.refreshToken ?? '');
+		setAuthTokens(payload.accessToken, payload.refreshToken ?? '', {
+			userProfileImage: payload.user?.userProfileImage,
+			userNickname: payload.user?.userNickname,
+			userFullName: payload.user?.userFullName,
+			userType: payload.user?.userType,
+		});
 		setNeedsOnboarding(!!payload.needsOnboarding);
 
 		return {
@@ -204,7 +237,11 @@ export const fixoraCompleteOAuthSignup = async (input: {
 	const user = result.data?.completeOAuthSignup;
 	if (!user?.accessToken) throw new Error('OAuth signup completion failed');
 
-	setAuthTokens(user.accessToken, user.refreshToken ?? '');
+	setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+		userNickname: user.userNickname,
+		userFullName: user.userFullName,
+		userType: user.userType,
+	});
 	setNeedsOnboarding(false);
 	return user.userType;
 };
@@ -216,7 +253,10 @@ export interface TechOnboardingDraft {
 	fullName: string;
 	email: string;
 	phone: string;
+	photoFileName?: string;
+	photoDataUrl?: string;
 	idFileName?: string;
+	idPreviewDataUrl?: string;
 }
 
 export const saveTechDraft = (draft: TechOnboardingDraft) => {
@@ -258,7 +298,12 @@ export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promis
 		if (!user?.accessToken) {
 			throw new Error('Technician signup failed');
 		}
-		setAuthTokens(user.accessToken, user.refreshToken ?? '');
+		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			userProfileImage: user.userProfileImage,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName,
+			userType: user.userType,
+		});
 		setNeedsOnboarding(false);
 	} catch (err) {
 		throw new Error(getGraphQLErrorMessage(err));

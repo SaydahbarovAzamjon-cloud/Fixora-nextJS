@@ -12,7 +12,7 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import { Logout } from '@mui/icons-material';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
-import { REACT_APP_API_URL } from '../config';
+import { resolveProfileImageUrl } from '../utils/profileImage';
 
 const LANGS = ['en', 'kr'] as const;
 
@@ -112,6 +112,21 @@ const Top = () => {
 					<FixoraLogo size="sm" />
 				</Link>
 				<div className="fixora-nav__links">{navLinks}</div>
+				{user?._id && (
+					<button
+						type="button"
+						className={'fixora-nav__avatar'}
+						onClick={(event) => setLogoutAnchor(event.currentTarget)}
+					>
+						<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+					</button>
+				)}
+				<Menu anchorEl={logoutAnchor} open={logoutOpen} onClose={() => setLogoutAnchor(null)} sx={{ mt: '5px' }}>
+					<MenuItem onClick={() => logOut()}>
+						<Logout fontSize="small" style={{ marginRight: '10px' }} />
+						{t('nav.logout')}
+					</MenuItem>
+				</Menu>
 			</Stack>
 		);
 	}
@@ -141,10 +156,7 @@ const Top = () => {
 									className={'fixora-nav__avatar'}
 									onClick={(event) => setLogoutAnchor(event.currentTarget)}
 								>
-									<img
-										src={user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'}
-										alt=""
-									/>
+									<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
 								</button>
 								<Menu
 									anchorEl={logoutAnchor}

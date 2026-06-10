@@ -9,6 +9,11 @@ export interface CustomJwtPayload extends JwtPayload {
 	memberNick: string;
 	memberFullName?: string;
 	memberImage?: string;
+	/** Fixora JWT */
+	userProfileImage?: string;
+	userNickname?: string;
+	userFullName?: string;
+	userType?: string;
 	memberAddress?: string;
 	memberDesc?: string;
 	memberProperties: number;

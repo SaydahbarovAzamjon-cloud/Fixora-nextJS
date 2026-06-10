@@ -1,79 +1,136 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import Link from 'next/link';
 import { Stack, Box } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper';
+import type { Swiper as SwiperType } from 'swiper';
+import { Navigation, Pagination } from 'swiper';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import EastIcon from '@mui/icons-material/East';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import StarIcon from '@mui/icons-material/Star';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 
-/** Static testimonials (display only, MVP) — content from i18n homepage.testimonials.items */
-const TESTIMONIAL_KEYS = ['t1', 't2', 't3'] as const;
+/** 9 static testimonials — 3 per carousel page (display only, MVP) */
+const TESTIMONIALS = [
+	{ key: 't1', avatar: '/img/testimonials/avatar-1.png' },
+	{ key: 't2', avatar: '/img/testimonials/avatar-2.png' },
+	{ key: 't3', avatar: '/img/testimonials/avatar-3.png' },
+	{ key: 't4', avatar: '/img/testimonials/avatar-2.png' },
+	{ key: 't5', avatar: '/img/testimonials/avatar-3.png' },
+	{ key: 't6', avatar: '/img/testimonials/avatar-1.png' },
+	{ key: 't7', avatar: '/img/testimonials/avatar-3.png' },
+	{ key: 't8', avatar: '/img/testimonials/avatar-1.png' },
+	{ key: 't9', avatar: '/img/testimonials/avatar-2.png' },
+] as const;
+
+const CARDS_PER_PAGE = 3;
+
+const TESTIMONIAL_PAGES = Array.from(
+	{ length: Math.ceil(TESTIMONIALS.length / CARDS_PER_PAGE) },
+	(_, pageIndex) => TESTIMONIALS.slice(pageIndex * CARDS_PER_PAGE, pageIndex * CARDS_PER_PAGE + CARDS_PER_PAGE),
+);
 
 const Testimonials = () => {
 	const { t } = useTranslation('common');
-	const device = useDeviceDetect();
+	const prevRef = useRef<HTMLButtonElement>(null);
+	const nextRef = useRef<HTMLButtonElement>(null);
+	const paginationRef = useRef<HTMLDivElement>(null);
 
-	const slides = TESTIMONIAL_KEYS.map((key) => (
-		<SwiperSlide className="fixora-home-testimonials__slide" key={key}>
-			<div className="fixora-testimonial-card">
-				<FormatQuoteIcon className="fixora-testimonial-card__quote" />
-				<p className="fixora-testimonial-card__text">{t(`homepage.testimonials.items.${key}.text`)}</p>
-				<div className="fixora-testimonial-card__footer">
-					<span className="fixora-testimonial-card__name">{t(`homepage.testimonials.items.${key}.name`)}</span>
-					<span className="fixora-testimonial-card__rating">
-						<StarIcon fontSize="inherit" />
-						{t(`homepage.testimonials.items.${key}.rating`)}
-					</span>
-				</div>
-			</div>
-		</SwiperSlide>
-	));
+	const bindSwiperControls = (swiper: SwiperType) => {
+		if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
+			swiper.params.navigation.prevEl = prevRef.current;
+			swiper.params.navigation.nextEl = nextRef.current;
+			swiper.navigation.init();
+			swiper.navigation.update();
+		}
+		if (swiper.params.pagination && typeof swiper.params.pagination !== 'boolean') {
+			swiper.params.pagination.el = paginationRef.current;
+			swiper.pagination.init();
+			swiper.pagination.render();
+			swiper.pagination.update();
+		}
+	};
 
 	return (
 		<Stack className="fixora-home-section fixora-home-testimonials">
 			<Stack className="container">
 				<Box component="div" className="fixora-home-section__head">
 					<h2>{t('homepage.testimonials.title')}</h2>
+					<Link href="/community" className="fixora-home-section__view-all">
+						{t('homepage.viewAll')} <EastIcon fontSize="inherit" />
+					</Link>
 				</Box>
 
-				{device === 'mobile' ? (
+				<Box component="div" className="fixora-home-testimonials__carousel">
+					<button
+						type="button"
+						ref={prevRef}
+						className="fixora-home-testimonials__arrow fixora-home-testimonials__arrow--prev"
+						aria-label={t('homepage.testimonials.prev')}
+					>
+						<ArrowBackIosNewIcon fontSize="small" />
+					</button>
+
 					<Swiper
 						className="fixora-home-testimonials__swiper"
-						slidesPerView="auto"
-						centeredSlides
-						spaceBetween={16}
-						modules={[Autoplay, Pagination]}
-						pagination={{ clickable: true }}
+						modules={[Navigation, Pagination]}
+						speed={400}
+						spaceBetween={0}
+						slidesPerView={1}
+						slidesPerGroup={1}
+						loop={false}
+						watchOverflow
+						navigation={{
+							prevEl: prevRef.current,
+							nextEl: nextRef.current,
+						}}
+						pagination={{
+							el: paginationRef.current,
+							clickable: true,
+						}}
+						onBeforeInit={bindSwiperControls}
+						onInit={bindSwiperControls}
 					>
-						{slides}
+						{TESTIMONIAL_PAGES.map((page, pageIndex) => (
+							<SwiperSlide className="fixora-home-testimonials__slide" key={`page-${pageIndex}`}>
+								<div className="fixora-home-testimonials__page">
+									{page.map(({ key, avatar }) => (
+										<article className="fixora-testimonial-card" key={key}>
+											<FormatQuoteIcon className="fixora-testimonial-card__quote" aria-hidden="true" />
+											<p className="fixora-testimonial-card__text">
+												{t(`homepage.testimonials.items.${key}.text`)}
+											</p>
+											<div className="fixora-testimonial-card__footer">
+												<div className="fixora-testimonial-card__author">
+													<img src={avatar} alt="" className="fixora-testimonial-card__avatar" />
+													<span className="fixora-testimonial-card__name">
+														{t(`homepage.testimonials.items.${key}.name`)}
+													</span>
+												</div>
+												<span className="fixora-testimonial-card__rating">
+													<StarIcon fontSize="inherit" />
+													{t(`homepage.testimonials.items.${key}.rating`)}
+												</span>
+											</div>
+										</article>
+									))}
+								</div>
+							</SwiperSlide>
+						))}
 					</Swiper>
-				) : (
-					<Box component="div" className="fixora-home-testimonials__wrapper">
-						<Box component="div" className="fixora-home-arrow swiper-testimonials-prev">
-							<ArrowBackIosNewIcon fontSize="small" />
-						</Box>
-						<Swiper
-							className="fixora-home-testimonials__swiper"
-							slidesPerView={3}
-							spaceBetween={20}
-							modules={[Autoplay, Navigation, Pagination]}
-							navigation={{
-								nextEl: '.swiper-testimonials-next',
-								prevEl: '.swiper-testimonials-prev',
-							}}
-							pagination={{ el: '.fixora-home-testimonials__pagination', clickable: true }}
-						>
-							{slides}
-						</Swiper>
-						<Box component="div" className="fixora-home-arrow swiper-testimonials-next">
-							<ArrowForwardIosIcon fontSize="small" />
-						</Box>
-					</Box>
-				)}
-				<div className="fixora-home-testimonials__pagination" />
+
+					<button
+						type="button"
+						ref={nextRef}
+						className="fixora-home-testimonials__arrow fixora-home-testimonials__arrow--next"
+						aria-label={t('homepage.testimonials.next')}
+					>
+						<ArrowForwardIosIcon fontSize="small" />
+					</button>
+				</Box>
+
+				<div ref={paginationRef} className="fixora-home-testimonials__pagination" />
 			</Stack>
 		</Stack>
 	);

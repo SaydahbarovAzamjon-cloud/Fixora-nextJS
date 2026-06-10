@@ -44,7 +44,9 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 
 	const slides = technicians.map((tech) => (
 		<SwiperSlide className="fixora-home-technicians__slide" key={tech._id}>
-			<TechnicianCard technician={tech} />
+			<div className="fixora-home-technicians__slide-inner">
+				<TechnicianCard technician={tech} />
+			</div>
 		</SwiperSlide>
 	));
 

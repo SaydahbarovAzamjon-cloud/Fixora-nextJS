@@ -98,15 +98,28 @@
 
 	&__swiper {
 		width: 100%;
+
+		.swiper-wrapper {
+			align-items: stretch;
+		}
 	}
 
 	&__slide {
 		width: 262px;
 		height: auto;
+		display: flex;
+		align-items: stretch;
+	}
+
+	&__slide-inner {
+		display: flex;
+		width: 100%;
+		height: 100%;
 	}
 }
 
 .fixora-tech-card {
+	@include fixora-home-card-surface;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -115,8 +128,6 @@
 	height: 100%;
 	padding: 18px;
 	border-radius: 14px;
-	border: 1px solid var(--fixora-border-subtle);
-	background: var(--fixora-surface);
 	cursor: pointer;
 	text-align: left;
 	font-family: inherit;
@@ -484,64 +495,135 @@
 /* ---------- testimonials ---------- */
 
 .fixora-home-testimonials {
-	&__wrapper {
-		position: relative;
+	background: #050505;
+	padding: 32px 0 36px;
+
+	&__carousel {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		gap: 12px;
+		gap: 14px;
 	}
 
 	&__swiper {
-		width: 100%;
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+
+		.swiper-wrapper {
+			align-items: stretch;
+		}
 	}
 
 	&__slide {
 		height: auto;
+		display: flex;
+		align-items: stretch;
+		box-sizing: border-box;
+	}
+
+	&__page {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 18px;
+		width: 100%;
+	}
+
+	&__arrow {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 107, 0, 0.55);
+		background: rgba(255, 107, 0, 0.06);
+		color: var(--fixora-primary);
+		cursor: pointer;
+		transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+		padding: 0;
+
+		&:hover {
+			background: rgba(255, 107, 0, 0.16);
+			border-color: var(--fixora-primary);
+		}
+
+		&:disabled,
+		&.swiper-button-disabled {
+			opacity: 0.35;
+			cursor: default;
+			pointer-events: none;
+		}
+
+		&--prev svg {
+			margin-left: 4px;
+		}
+
+		&--next svg {
+			margin-right: 4px;
+		}
 	}
 
 	&__pagination {
 		display: flex;
 		justify-content: center;
-		gap: 6px;
-		margin-top: 16px;
+		align-items: center;
+		gap: 8px;
+		margin-top: 20px;
+		min-height: 10px;
 
 		.swiper-pagination-bullet {
-			width: 18px;
-			height: 4px;
-			border-radius: 2px;
-			background: var(--fixora-text-muted);
-			opacity: 0.5;
-			transition: all 0.2s ease;
+			width: 8px;
+			height: 8px;
+			margin: 0 !important;
+			border-radius: 50%;
+			background: #3d3d3d;
+			opacity: 1;
+			transition: background 0.3s ease, transform 0.3s ease;
 		}
 
 		.swiper-pagination-bullet-active {
-			background: var(--fixora-primary);
-			opacity: 1;
+			width: 24px;
+			border-radius: 4px;
+			background: #ff6b00;
 		}
 	}
 }
 
 .fixora-testimonial-card {
+	@include fixora-home-card-surface;
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	width: 100%;
 	height: 100%;
-	padding: 22px;
+	min-height: 158px;
+	box-sizing: border-box;
+	padding: 16px 16px 12px;
 	border-radius: 14px;
-	border: 1px solid var(--fixora-border-subtle);
-	background: var(--fixora-surface);
+	overflow: hidden;
 
 	&__quote {
+		flex-shrink: 0;
+		width: 28px;
+		height: 28px;
+		margin-bottom: 4px;
 		font-size: 28px !important;
-		color: var(--fixora-primary);
+		color: #ff6b00;
 	}
 
 	&__text {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.55;
+		flex: 1;
+		min-height: 0;
+		margin: 0 0 10px;
+		font-size: 13.5px;
+		font-weight: 500;
+		line-height: 1.45;
 		color: var(--fixora-text-primary);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
 	&__footer {
@@ -549,26 +631,76 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+		gap: 10px;
 		margin-top: auto;
 	}
 
+	&__author {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	&__avatar {
+		flex-shrink: 0;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 1px solid rgba(255, 107, 0, 0.3);
+	}
+
 	&__name {
-		font-size: 13.5px;
+		font-size: 13px;
 		font-weight: 600;
-		color: var(--fixora-text-secondary);
+		color: var(--fixora-text-primary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	&__rating {
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		font-size: 13.5px;
+		flex-shrink: 0;
+		font-size: 13px;
 		font-weight: 700;
 		color: var(--fixora-text-primary);
 
 		svg {
-			font-size: 16px;
-			color: var(--fixora-primary);
+			font-size: 15px;
+			color: #ff6b00;
+		}
+	}
+}
+
+@media (max-width: 1023px) {
+	.fixora-home-testimonials {
+		&__arrow {
+			display: none;
+		}
+
+		&__carousel {
+			gap: 0;
+		}
+
+		&__page {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 16px;
+		}
+	}
+}
+
+@media (max-width: 639px) {
+	.fixora-home-testimonials {
+		padding: 24px 0 28px;
+
+		&__page {
+			grid-template-columns: 1fr;
+			gap: 14px;
 		}
 	}
 }

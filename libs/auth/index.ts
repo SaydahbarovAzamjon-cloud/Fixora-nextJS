@@ -128,18 +128,16 @@ export const updateUserInfo = (jwtToken: any) => {
 	if (!jwtToken) return false;
 
 	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
+	const profileImage = claims.userProfileImage ?? claims.memberImage ?? '';
 	userVar({
 		_id: claims._id ?? '',
-		memberType: claims.memberType ?? '',
+		memberType: claims.userType ?? claims.memberType ?? '',
 		memberStatus: claims.memberStatus ?? '',
 		memberAuthType: claims.memberAuthType,
 		memberPhone: claims.memberPhone ?? '',
-		memberNick: claims.memberNick ?? '',
-		memberFullName: claims.memberFullName ?? '',
-		memberImage:
-			claims.memberImage === null || claims.memberImage === undefined
-				? '/img/profile/defaultUser.svg'
-				: `${claims.memberImage}`,
+		memberNick: claims.userNickname ?? claims.memberNick ?? '',
+		memberFullName: claims.userFullName ?? claims.memberFullName ?? '',
+		memberImage: profileImage ? `${profileImage}` : '',
 		memberAddress: claims.memberAddress ?? '',
 		memberDesc: claims.memberDesc ?? '',
 		memberProperties: claims.memberProperties,

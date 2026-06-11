@@ -2,6 +2,11 @@
 
 export type BadgeLevel = 'NEW' | 'VERIFIED' | 'PREMIUM_PRO';
 
+export interface UserServiceItem {
+	title: string;
+	basePrice: number;
+}
+
 export interface TechnicianSummary {
 	_id: string;
 	userNickname?: string;
@@ -15,6 +20,7 @@ export interface TechnicianSummary {
 	reviewCount?: number;
 	completedJobsCount?: number;
 	badgeLevel?: BadgeLevel;
+	services?: UserServiceItem[];
 }
 
 export interface ArticleSummary {

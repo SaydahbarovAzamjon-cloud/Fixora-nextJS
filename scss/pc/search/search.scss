@@ -1,0 +1,423 @@
+/** Search results page — P3-05 — mockup: docs/design/customer/customer-pages-full.png §2 */
+
+.fixora-search-page {
+	background: var(--fixora-bg);
+	padding: 28px 0 60px;
+
+	.container {
+		width: 1200px;
+		max-width: calc(100% - 40px);
+		margin: 0 auto;
+	}
+}
+
+/* ---------- search bar row ---------- */
+
+.fixora-search__searchbar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.fixora-search-input {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+	min-width: 240px;
+	height: 46px;
+	padding: 0 16px;
+	border-radius: 12px;
+	background: var(--fixora-surface);
+	border: 1px solid var(--fixora-border-subtle);
+
+	svg {
+		font-size: 20px;
+		color: var(--fixora-text-muted);
+		flex-shrink: 0;
+	}
+
+	input {
+		flex: 1;
+		border: none;
+		outline: none;
+		background: none;
+		color: var(--fixora-text-primary);
+		font-family: $font;
+		font-size: 14px;
+
+		&::placeholder {
+			color: var(--fixora-text-muted);
+		}
+	}
+}
+
+.fixora-search-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 46px;
+	padding: 0 16px;
+	border-radius: 12px;
+	background: var(--fixora-surface);
+	border: 1px solid var(--fixora-border-subtle);
+	color: var(--fixora-text-secondary);
+	font-family: $font;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: border-color 0.2s ease, color 0.2s ease;
+
+	svg {
+		font-size: 18px;
+	}
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-text-primary);
+	}
+
+	&--active {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-primary);
+		background: rgba(255, 107, 0, 0.08);
+	}
+}
+
+.fixora-search-sort {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
+	font-family: $font;
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+
+	.fixora-search-chip {
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+}
+
+/* ---------- layout: sidebar + results ---------- */
+
+.fixora-search__layout {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 24px;
+}
+
+/* ---------- filters sidebar ---------- */
+
+.fixora-search-filters {
+	@include fixora-home-card-surface;
+	flex-shrink: 0;
+	width: 264px;
+	border-radius: 14px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+
+		strong {
+			font-size: 16px;
+			font-weight: 700;
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	&__clear {
+		background: none;
+		border: none;
+		padding: 0;
+		font-family: $font;
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--fixora-primary);
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	&__group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding-top: 14px;
+		border-top: 1px solid var(--fixora-border-subtle);
+
+		&:first-of-type {
+			padding-top: 0;
+			border-top: none;
+		}
+	}
+
+	&__group-title {
+		margin: 0 0 4px;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__option {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--fixora-text-secondary);
+		cursor: pointer;
+
+		.MuiRadio-root,
+		.MuiCheckbox-root {
+			padding: 0;
+			color: var(--fixora-text-muted);
+
+			&.Mui-checked {
+				color: var(--fixora-primary);
+			}
+		}
+
+		svg {
+			font-size: 15px;
+			color: var(--fixora-primary);
+		}
+
+		&:hover {
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	&__show-more {
+		align-self: flex-start;
+		background: none;
+		border: none;
+		padding: 0;
+		font-family: $font;
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--fixora-primary);
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	&__apply {
+		width: 100%;
+		height: 44px;
+		border: none;
+		border-radius: 10px;
+		background: var(--fixora-primary);
+		color: #fff;
+		font-family: $font;
+		font-size: 14px;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: var(--fixora-primary-hover);
+		}
+	}
+}
+
+/* ---------- results list ---------- */
+
+.fixora-search__results {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.fixora-result-card {
+	@include fixora-home-card-surface;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 18px;
+	border-radius: 14px;
+	transition: border-color 0.2s ease, transform 0.2s ease;
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		transform: translateY(-2px);
+	}
+
+	&__avatar {
+		flex-shrink: 0;
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		object-fit: cover;
+		background: var(--fixora-surface-elevated);
+	}
+
+	&__main {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__name-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	&__name {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__rating {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+
+		svg {
+			font-size: 15px;
+			color: var(--fixora-primary);
+		}
+
+		em {
+			font-style: normal;
+			font-weight: 400;
+			color: var(--fixora-text-muted);
+		}
+	}
+
+	&__location {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 12.5px;
+		color: var(--fixora-text-muted);
+
+		svg {
+			font-size: 14px;
+			color: var(--fixora-primary);
+		}
+	}
+
+	&__specialty {
+		font-size: 13.5px;
+		font-weight: 600;
+		color: var(--fixora-text-secondary);
+	}
+
+	&__jobs {
+		font-size: 12.5px;
+		color: var(--fixora-text-muted);
+	}
+
+	&__aside {
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 8px;
+	}
+
+	&__price {
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__response {
+		font-size: 12px;
+		color: var(--fixora-text-muted);
+	}
+
+	&__action {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 38px;
+		padding: 0 18px;
+		border-radius: 10px;
+		border: 1px solid var(--fixora-primary);
+		background: transparent;
+		color: var(--fixora-primary);
+		font-family: $font;
+		font-size: 13px;
+		font-weight: 700;
+		text-decoration: none;
+		white-space: nowrap;
+		transition: background 0.2s ease, color 0.2s ease;
+
+		&:hover {
+			background: var(--fixora-primary);
+			color: #fff;
+		}
+	}
+}
+
+.fixora-search__no-results {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 40px 20px;
+	text-align: center;
+	color: var(--fixora-text-secondary);
+	font-size: 14px;
+}
+
+.fixora-search__pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 24px;
+
+	.MuiPaginationItem-root {
+		color: var(--fixora-text-secondary);
+	}
+
+	.Mui-selected {
+		background: var(--fixora-primary) !important;
+		color: #fff;
+	}
+}
+
+@media (max-width: 1023px) {
+	.fixora-search__layout {
+		flex-direction: column;
+	}
+
+	.fixora-search-filters {
+		width: 100%;
+	}
+
+	.fixora-result-card {
+		flex-wrap: wrap;
+
+		&__aside {
+			width: 100%;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+		}
+	}
+}

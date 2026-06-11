@@ -583,6 +583,10 @@ export const GET_TECHNICIANS = gql`
 				reviewCount
 				completedJobsCount
 				badgeLevel
+				services {
+					title
+					basePrice
+				}
 			}
 			metaCounter {
 				total

@@ -49,6 +49,7 @@ export interface TechniciansInquiry {
 	direction?: 'ASC' | 'DESC';
 	search: {
 		deviceCategory?: string;
+		issueCategory?: string;
 		isOnline?: boolean;
 		minAverageRating?: number;
 		text?: string;

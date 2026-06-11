@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { Radio, Checkbox, RadioGroup, FormControlLabel } from '@mui/material';
+import { Radio, Checkbox, RadioGroup } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
 
@@ -19,10 +19,10 @@ const LOCATION_LABEL: Record<(typeof LOCATIONS)[number], string> = {
 };
 
 const SERVICES = ['screenRepair', 'batteryIssue', 'waterDamage', 'iphoneRepair', 'macbookRepair'] as const;
-const SERVICE_TEXT: Partial<Record<(typeof SERVICES)[number], string>> = {
-	screenRepair: 'screen repair',
-	batteryIssue: 'battery issue',
-	waterDamage: 'water damage',
+const SERVICE_ISSUE_CATEGORY: Partial<Record<(typeof SERVICES)[number], string>> = {
+	screenRepair: 'SCREEN',
+	batteryIssue: 'BATTERY',
+	waterDamage: 'WATER_DAMAGE',
 };
 const SERVICE_DEVICE_CATEGORY: Partial<Record<(typeof SERVICES)[number], string>> = {
 	iphoneRepair: 'IPHONE',
@@ -56,9 +56,9 @@ const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) =>
 		}
 		if (draft.service) {
 			const deviceCategory = SERVICE_DEVICE_CATEGORY[draft.service];
-			const text = SERVICE_TEXT[draft.service];
+			const issueCategory = SERVICE_ISSUE_CATEGORY[draft.service];
 			if (deviceCategory) search.deviceCategory = deviceCategory;
-			if (text) search.text = text;
+			if (issueCategory) search.issueCategory = issueCategory;
 		}
 		if (draft.rating) {
 			search.minAverageRating = draft.rating;

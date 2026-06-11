@@ -522,7 +522,7 @@
 	}
 
 	&__slide {
-		width: 20% !important;
+		width: 36% !important;
 		height: auto;
 		box-sizing: border-box;
 		flex-shrink: 0;
@@ -530,18 +530,15 @@
 		filter: blur(2px) brightness(0.72);
 		z-index: 1;
 		transition:
-			width 450ms ease-in-out,
 			opacity 450ms ease-in-out,
 			filter 450ms ease-in-out,
 			z-index 0ms linear 225ms;
 
 		&.swiper-slide-active {
-			width: 60% !important;
 			opacity: 1;
 			filter: blur(0) brightness(1);
 			z-index: 10;
 			transition:
-				width 450ms ease-in-out,
 				opacity 450ms ease-in-out,
 				filter 450ms ease-in-out,
 				z-index 0ms linear 0ms;
@@ -549,7 +546,6 @@
 
 		&.swiper-slide-prev,
 		&.swiper-slide-next {
-			width: 20% !important;
 			opacity: 0.55;
 			filter: blur(2px) brightness(0.72);
 			z-index: 2;

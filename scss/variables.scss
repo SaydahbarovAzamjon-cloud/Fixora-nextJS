@@ -9,7 +9,14 @@ $font: 'Poppins', sans-serif;
 	--fixora-primary: #ff6b00;
 	--fixora-primary-hover: #ff8533;
 	--fixora-primary-dark: #e55a00;
-	--fixora-bg: #0d0d0d;
+	--fixora-bg: #0d0d0e;
+	/* shared premium page backdrop — sampled from docs/design/customer/customer-pages-full.png:
+	   near-black base (rgb(14,14,15)) with soft warm amber haze (~rgb(48,18,9)) drifting in from the sides */
+	--fixora-bg-ambient:
+		radial-gradient(140% 100% at 0% 45%, rgba(255, 107, 0, 0.12) 0%, transparent 52%),
+		radial-gradient(120% 90% at 100% 55%, rgba(255, 107, 0, 0.08) 0%, transparent 52%),
+		radial-gradient(90% 70% at 50% 0%, rgba(255, 107, 0, 0.05) 0%, transparent 55%),
+		linear-gradient(180deg, #0e0e0f 0%, #0d0d0d 100%);
 	--fixora-surface: #1a1a1a;
 	--fixora-surface-elevated: #242424;
 	--fixora-border: rgba(255, 107, 0, 0.35);

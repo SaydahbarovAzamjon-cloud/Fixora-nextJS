@@ -45,3 +45,8 @@ This file tracks practical skills and workflows for the Fixora Next.js frontend 
 - **Current state:** legacy real-estate UI — transform to Fixora repair marketplace
 - **Run dev:** `yarn dev` · **Build:** `yarn build`
 - See `AGENTS.md` and `docs/AI_HANDOFF.md` before starting work
+
+    circle at center,
+    rgba(255, 107, 0, 0.06) 0%,
+    rgba(255, 107, 0, 0.03) 25%,
+    rgb(141, 4, 4) 30%

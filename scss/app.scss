@@ -35,7 +35,9 @@ p {
 
 body {
 	font-family: $font;
-	background: var(--fixora-bg);
+	background: var(--fixora-bg-ambient);
+	background-attachment: fixed;
+	background-color: var(--fixora-bg);
 	color: var(--fixora-text-primary);
 
 	&::-webkit-scrollbar {

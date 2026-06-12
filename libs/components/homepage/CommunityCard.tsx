@@ -15,7 +15,9 @@ const CommunityCard = (props: CommunityCardProps) => {
 	const { vertical, article, index } = props;
 	const device = useDeviceDetect();
 	const articleImage = article?.articleImage
-		? `${process.env.REACT_APP_API_URL}/${article?.articleImage}`
+		? article.articleImage.startsWith('http')
+			? article.articleImage
+			: `${process.env.REACT_APP_API_URL}/${article?.articleImage}`
 		: '/img/event.svg';
 
 	if (device === 'mobile') {

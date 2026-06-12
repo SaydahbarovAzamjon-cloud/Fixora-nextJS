@@ -410,8 +410,8 @@ export const GET_BOARD_ARTICLE = gql`
 `;  
 
 export const GET_BOARD_ARTICLES = gql`
-	query GetBoardArticles($input: BoardArticlesInquiry!) {
-		getBoardArticles(input: $input) {
+	query GetBoardArticles($input: ArticlesInquiry!) {
+		getBoardArticles: getArticles(input: $input) {
 			list {
 				_id
 				articleCategory
@@ -422,7 +422,7 @@ export const GET_BOARD_ARTICLES = gql`
 				articleViews
 				articleLikes
 				articleComments
-				memberId
+				memberId: userId
 				createdAt
 				updatedAt
 				meLiked {
@@ -430,25 +430,13 @@ export const GET_BOARD_ARTICLES = gql`
 					likeRefId
 					myFavorite
 				}
-				memberData {
+				memberData: authorData {
 					_id
-					memberType
-					memberStatus
-					memberAuthType
-					memberPhone
-					memberNick
-					memberFullName
-					memberImage
-					memberAddress
-					memberDesc
-					memberWarnings
-					memberBlocks
-					memberProperties
-					memberRank
-					memberPoints
-					memberLikes
-					memberViews
-					deletedAt
+					memberType: userType
+					memberNick: userNickname
+					memberFullName: userFullName
+					memberImage: userProfileImage
+					memberDesc: userBio
 					createdAt
 					updatedAt
 				}

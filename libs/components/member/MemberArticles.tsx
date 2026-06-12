@@ -43,7 +43,7 @@ const {
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (memberId) setSearchFilter({ ...initialInput, search: { memberId: memberId } });
+		if (memberId) setSearchFilter({ ...initialInput, search: { userId: memberId } });
 	}, [memberId]);
 
 	/** HANDLERS **/

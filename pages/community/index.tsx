@@ -113,7 +113,7 @@ const likeArticleHandler = async (e: any, user: any, id: string) => {
 		return (
 			<div id="community-list-page">
 				<div className="container">
-					<TabContext value={searchCommunity.search.articleCategory}>
+					<TabContext value={searchCommunity.search.articleCategory ?? 'FREE'}>
 						<Stack className="main-box">
 							<Stack className="left-config">
 								<Stack className={'image-info'}>

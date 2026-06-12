@@ -17,7 +17,7 @@ const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
 	const user = useReactiveVar(userVar);
 	const [searchCommunity, setSearchCommunity] = useState({
 		...initialInput,
-		search: { memberId: user._id },
+		search: { userId: user._id },
 	});
 	const [boardArticles, setBoardArticles] = useState<BoardArticle[]>([]);
 	const [totalCount, setTotalCount] = useState<number>(0);

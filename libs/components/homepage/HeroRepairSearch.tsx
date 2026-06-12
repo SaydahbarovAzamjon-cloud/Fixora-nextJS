@@ -102,11 +102,7 @@ const HeroRepairSearch = () => {
 	return (
 		<Stack className="fixora-hero">
 			<div className="fixora-hero__scene" aria-hidden="true">
-				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--phone">
-					<span className="fixora-hero__device-glow" />
-					<img src="/img/heroSection/bothDevice1.png" alt="" className="fixora-hero__device-img" />
-				</div>
-				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--laptop">
+				<div className="fixora-hero__device-backdrop">
 					<span className="fixora-hero__device-glow" />
 					<img src="/img/heroSection/bothDevice1.png" alt="" className="fixora-hero__device-img" />
 				</div>

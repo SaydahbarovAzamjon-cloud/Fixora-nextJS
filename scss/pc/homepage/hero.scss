@@ -123,10 +123,11 @@
 			}
 		}
 
-		/* real product renders from public/img/heroSection */
+		/* real product renders — bothDevice1.png holds phone (left half) and MacBook (right half) */
 		&__device-wrap {
 			position: absolute;
 			top: 50%;
+			overflow: hidden;
 			animation: fixora-hero-float 7s ease-in-out infinite;
 
 			&--phone {
@@ -160,16 +161,16 @@
 		&__device-img {
 			position: relative;
 			display: block;
-			width: 100%;
+			width: 200%;
+			max-width: none;
 			height: auto;
 			opacity: 0.95;
 			filter: drop-shadow(0 34px 56px rgba(0, 0, 0, 0.6));
 		}
 
-		/* phone render has a baked-in scene — fade its edges into the hero backdrop */
-		&__device-wrap--phone &__device-img {
-			mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 48%, transparent 78%);
-			-webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 48%, transparent 78%);
+		/* laptop wrapper shows the right half of the combined render */
+		&__device-wrap--laptop &__device-img {
+			margin-left: -100%;
 		}
 
 		&__particle {

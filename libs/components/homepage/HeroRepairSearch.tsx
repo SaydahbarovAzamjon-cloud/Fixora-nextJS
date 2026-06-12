@@ -104,11 +104,11 @@ const HeroRepairSearch = () => {
 			<div className="fixora-hero__scene" aria-hidden="true">
 				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--phone">
 					<span className="fixora-hero__device-glow" />
-					<img src="/img/heroSection/phone.png" alt="" className="fixora-hero__device-img" />
+					<img src="/img/heroSection/bothDevice1.png" alt="" className="fixora-hero__device-img" />
 				</div>
 				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--laptop">
 					<span className="fixora-hero__device-glow" />
-					<img src="/img/heroSection/mackbook.png" alt="" className="fixora-hero__device-img" />
+					<img src="/img/heroSection/bothDevice1.png" alt="" className="fixora-hero__device-img" />
 				</div>
 				<span className="fixora-hero__particle fixora-hero__particle--1" />
 				<span className="fixora-hero__particle fixora-hero__particle--2" />

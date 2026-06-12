@@ -148,6 +148,8 @@
 	"search.categories.others": "Другое",
 	"search.location.title": "Ваше местоположение",
 	"search.location.placeholder": "Сеул, Южная Корея",
+	"search.location.detecting": "Определение местоположения…",
+	"search.location.recenter": "Моё местоположение",
 	"search.sort.label": "Сортировка:",
 	"search.sort.recommended": "Рекомендуемые",
 	"search.sort.mostJobs": "Больше всего выполненных работ",

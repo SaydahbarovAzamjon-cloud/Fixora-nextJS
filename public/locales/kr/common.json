@@ -148,6 +148,8 @@
   "search.categories.others": "기타",
   "search.location.title": "내 위치",
   "search.location.placeholder": "서울, 대한민국",
+  "search.location.detecting": "위치 확인 중…",
+  "search.location.recenter": "내 위치 사용",
   "search.sort.label": "정렬:",
   "search.sort.recommended": "추천순",
   "search.sort.mostJobs": "완료 작업 많은 순",

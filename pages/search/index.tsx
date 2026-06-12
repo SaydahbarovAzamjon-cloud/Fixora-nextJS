@@ -35,10 +35,20 @@ const SearchPage: NextPage = () => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
+	const [locationLabel, setLocationLabel] = useState('');
 	const [technicians, setTechnicians] = useState<TechnicianSummary[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+
+	const locationChangeHandler = (location: string) => {
+		setLocationLabel(location);
+		setSearchFilter((prev) => ({
+			...prev,
+			page: 1,
+			search: { ...prev.search, userLocation: location },
+		}));
+	};
 
 	const toggleFavoriteHandler = (id: string) => {
 		setFavoritedIds((prev) => {
@@ -83,7 +93,7 @@ const SearchPage: NextPage = () => {
 
 				<Stack className="fixora-search__layout">
 					<Stack className="fixora-search__sidebar">
-						<LocationCard />
+						<LocationCard locationLabel={locationLabel || t('search.location.placeholder')} onLocationChange={locationChangeHandler} />
 						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 					</Stack>
 

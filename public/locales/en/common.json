@@ -148,6 +148,8 @@
   "search.categories.others": "Others",
   "search.location.title": "Your Location",
   "search.location.placeholder": "Seoul, South Korea",
+  "search.location.detecting": "Detecting location…",
+  "search.location.recenter": "Use my location",
   "search.sort.label": "Sort by:",
   "search.sort.recommended": "Recommended",
   "search.sort.mostJobs": "Most Jobs Completed",

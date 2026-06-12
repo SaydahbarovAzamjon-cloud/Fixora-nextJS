@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-10 |
 | **Last agent** | Cursor |
-| **Last session** | P3-05 Done: `/search` mockup layout (hero, full-width categories, sidebar filters, 2-col cards, trust bar) + `/technicians/[id]` profile (tabs, services, portfolio, reviews, book CTA) + `GET_USER` / `GET_TECHNICIAN_REVIEWS` + legacy `/agent/detail` redirect |
-| **Next agent should start with** | `P3-06` — Booking flow UI |
+| **Last session** | Kakao Map integration: LocationCard real map + technician pins, geo search filter (`latitude`/`longitude`/`radiusKm`), FixoraB `shopLatitude`/`shopLongitude` + backfill script, docs MAP-01 |
+| **Next agent should start with** | `P3-06` — Booking flow UI (ensure Kakao Console + `.env.local` key for map on `/search`) |
 
 ---
 

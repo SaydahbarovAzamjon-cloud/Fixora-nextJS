@@ -64,6 +64,14 @@
 
 ---
 
+## Maps (Kakao)
+
+| ID | Decision |
+|----|----------|
+| MAP-01 | Search LocationCard uses **Kakao Maps JS SDK** (`NEXT_PUBLIC_KAKAO_JS_KEY`); user GPS + reverse geocode; technician pins from `shopLatitude` / `shopLongitude` on `User`; geo filter via `TISearch.latitude`, `longitude`, `radiusKm` (default 10 km) |
+
+---
+
 ## Architecture
 
 | ID | Decision |

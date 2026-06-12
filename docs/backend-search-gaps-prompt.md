@@ -19,5 +19,11 @@ FixoraF frontend tomonida P3-05 (Search Results page, `/search`) implement qilin
    - **Response time** — schema'da hech qanday "javob vaqti" maydoni yo'q. Frontend hozir statik `"~15m response"` matnini ko'rsatyapti. Agar backendda bunday metrika (masalan o'rtacha javob vaqti) hisoblash mumkin bo'lsa — qo'shish kerakmi yoki MVP uchun placeholder qoldirish ma'qulmi, qaror ber/tavsiya ber.
    - **Review/sharh ma'lumotlari** — `reviewCount` bor, lekin alohida sharh matni, sharh muallifi ismi, sana kabi struktura (`Review` type, `getTechnicianReviews` query) bormi? Bu Part 2 (Technician Profile page) uchun zarur — agar yo'q bo'lsa, qaysi schema/resolver/model qo'shilishi kerakligini taklif qil.
 
+5. **Geo search + shop coordinates (MAP-01) — FixoraB implement qilindi**
+   - `User.shopLatitude`, `User.shopLongitude` — technician shop coords for map pins
+   - `TISearch.latitude`, `longitude`, `radiusKm` — radius filter (default 10 km); geo active bo'lsa `userLocation` regex o'tkazib yuboriladi
+   - Seed: `apps/fixora-api/scripts/backfill-shop-coordinates.mjs` — mavjud technicianlar uchun Seoul-area demo coords
+   - Frontend: `LocationCard` Kakao Map + orange technician pins; setup: `docs/KAKAO_MAP_SETUP.md`
+
 ## Kutilgan natija
 Har bir band bo'yicha: **to'liq implement qilingan / qisman (schema'da bor-u, resolver'da ishlamaydi) / umuman yo'q** deb belgila, fayl:line referencelar bilan. Agar tuzatish kerak bo'lsa — minimal, mavjud konventsiyalarga mos patch taklif qil (hali hech narsani o'zgartirma, faqat audit va tavsiya).

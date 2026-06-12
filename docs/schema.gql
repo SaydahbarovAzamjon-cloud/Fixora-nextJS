@@ -892,7 +892,10 @@ input SendMessageInput {
 input TISearch {
   deviceCategory: DeviceCategory
   isOnline: Boolean
+  latitude: Float
+  longitude: Float
   minAverageRating: Float
+  radiusKm: Float
   text: String
   userLocation: String
 }
@@ -984,6 +987,8 @@ type User {
   refreshToken: String
   reviewCount: Int!
   services: [UserServiceItem!]
+  shopLatitude: Float
+  shopLongitude: Float
   shopName: String
   specialty: String
   termsAcceptedAt: DateTime

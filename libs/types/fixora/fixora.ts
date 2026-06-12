@@ -15,6 +15,8 @@ export interface TechnicianSummary {
 	shopName?: string;
 	specialty?: string;
 	userLocation?: string;
+	shopLatitude?: number;
+	shopLongitude?: number;
 	isOnline?: boolean;
 	averageRating?: number;
 	reviewCount?: number;
@@ -50,10 +52,13 @@ export interface TechniciansInquiry {
 	search: {
 		deviceCategory?: string;
 		issueCategory?: string;
-		isOnline?: boolean;
+		isOnline?: boolean | null;
 		minAverageRating?: number;
 		text?: string;
 		userLocation?: string;
+		latitude?: number;
+		longitude?: number;
+		radiusKm?: number;
 	};
 }
 

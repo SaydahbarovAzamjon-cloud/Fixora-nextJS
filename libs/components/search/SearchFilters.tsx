@@ -4,6 +4,7 @@ import { Radio, Checkbox, RadioGroup } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
+import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../kakao-maps';
 import { SERVICES, SERVICE_ISSUE_CATEGORY, SERVICE_DEVICE_CATEGORY } from './categoryMappings';
 
 interface SearchFiltersProps {
@@ -48,11 +49,30 @@ const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) =>
 
 	const clearAllHandler = () => {
 		setDraft(EMPTY_DRAFT);
-		setSearchFilter({ ...searchFilter, page: 1, search: {} });
+		const { latitude, longitude, radiusKm } = searchFilter.search;
+		setSearchFilter({
+			...searchFilter,
+			page: 1,
+			search: {
+				isOnline: null,
+				...(latitude != null && longitude != null
+					? { latitude, longitude, radiusKm: radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM }
+					: {}),
+			},
+		});
 	};
 
 	const applyHandler = () => {
-		const search: TechniciansInquiry['search'] = {};
+		const search: TechniciansInquiry['search'] = {
+			isOnline: draft.availability === 'availableNow' ? true : null,
+		};
+
+		const { latitude, longitude, radiusKm } = searchFilter.search;
+		if (latitude != null && longitude != null) {
+			search.latitude = latitude;
+			search.longitude = longitude;
+			search.radiusKm = radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM;
+		}
 
 		if (draft.service) {
 			const deviceCategory = SERVICE_DEVICE_CATEGORY[draft.service];
@@ -66,9 +86,6 @@ const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) =>
 		}
 		if (draft.rating) {
 			search.minAverageRating = draft.rating;
-		}
-		if (draft.availability === 'availableNow') {
-			search.isOnline = true;
 		}
 
 		setSearchFilter({ ...searchFilter, page: 1, search });

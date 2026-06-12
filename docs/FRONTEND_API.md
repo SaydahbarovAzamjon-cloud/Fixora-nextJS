@@ -111,6 +111,23 @@ Deposit **COMPLETED** gates `ACCEPTED → IN_PROGRESS`.
 
 Prefer AI `recommendTechnicians` / `heroRepairSearch` for Hero-driven discovery.
 
+### `getTechnicians` search filters (`TISearch`)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `text` | String | Nickname, shop name, specialty, location text |
+| `deviceCategory` | `DeviceCategory` | iPhone, MacBook, etc. |
+| `isOnline` | Boolean | Omit = online-only; `null` = all |
+| `minAverageRating` | Float | Minimum rating |
+| `userLocation` | String | Regex on location label — used when **no** geo coords sent |
+| `latitude` | Float | User/search center latitude (with `longitude` enables radius filter) |
+| `longitude` | Float | User/search center longitude |
+| `radiusKm` | Float | Radius in km; default **10** when geo active |
+
+**Geo rule:** When `latitude` + `longitude` are provided, backend filters by Haversine distance and sorts nearest-first. `userLocation` string filter is skipped. Technicians without `shopLatitude` / `shopLongitude` are excluded from geo-filtered results (no map pin).
+
+**User response fields for map pins:** `shopLatitude`, `shopLongitude` on each technician in `getTechnicians.list`.
+
 ---
 
 ## Article (community)

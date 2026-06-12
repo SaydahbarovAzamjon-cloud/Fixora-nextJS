@@ -1,4 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import Script from 'next/script';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -8,14 +10,20 @@ import { Stack, Pagination } from '@mui/material';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import SearchHero from '../../libs/components/search/SearchHero';
 import SearchCategoryRow from '../../libs/components/search/SearchCategoryRow';
-import LocationCard from '../../libs/components/search/LocationCard';
 import SearchFilters from '../../libs/components/search/SearchFilters';
 import SearchResultsHeader from '../../libs/components/search/SearchResultsHeader';
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
 import SearchTrustBar from '../../libs/components/search/SearchTrustBar';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
+import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
 import { T } from '../../libs/types/common';
+
+const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
+
+const KAKAO_MAPS_SDK_SRC = process.env.NEXT_PUBLIC_KAKAO_JS_KEY
+	? `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&autoload=false&libraries=services`
+	: '';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -28,7 +36,8 @@ const DEFAULT_INPUT: TechniciansInquiry = {
 	limit: 10,
 	sort: 'averageRating',
 	direction: 'DESC',
-	search: {},
+	// null = show online + offline (backend default omits isOnline → online-only only)
+	search: { isOnline: null },
 };
 
 const SearchPage: NextPage = () => {
@@ -41,12 +50,18 @@ const SearchPage: NextPage = () => {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
 
-	const locationChangeHandler = (location: string) => {
-		setLocationLabel(location);
+	const locationChangeHandler = ({ label, lat, lng }: { label: string; lat: number; lng: number }) => {
+		setLocationLabel(label);
 		setSearchFilter((prev) => ({
 			...prev,
 			page: 1,
-			search: { ...prev.search, userLocation: location },
+			search: {
+				...prev.search,
+				isOnline: prev.search.isOnline ?? null,
+				latitude: lat,
+				longitude: lng,
+				radiusKm: prev.search.radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
+			},
 		}));
 	};
 
@@ -70,10 +85,20 @@ const SearchPage: NextPage = () => {
 	});
 
 	useEffect(() => {
-		if (router.query.input) {
-			setSearchFilter(JSON.parse(router.query.input as string));
+		if (!router.query.input) return;
+		try {
+			const parsed = JSON.parse(router.query.input as string) as TechniciansInquiry;
+			setSearchFilter({
+				...parsed,
+				search: {
+					isOnline: null,
+					...parsed.search,
+				},
+			});
+		} catch {
+			// ignore malformed query
 		}
-	}, [router]);
+	}, [router.query.input]);
 
 	useEffect(() => {
 		router.replace(`/search?input=${JSON.stringify(searchFilter)}`, undefined, { shallow: true });
@@ -86,6 +111,9 @@ const SearchPage: NextPage = () => {
 
 	return (
 		<Stack className="fixora-search-page">
+			{KAKAO_MAPS_SDK_SRC ? (
+				<Script id="fixora-kakao-maps-sdk" src={KAKAO_MAPS_SDK_SRC} strategy="afterInteractive" />
+			) : null}
 			<Stack className="container">
 				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
@@ -93,7 +121,11 @@ const SearchPage: NextPage = () => {
 
 				<Stack className="fixora-search__layout">
 					<Stack className="fixora-search__sidebar">
-						<LocationCard locationLabel={locationLabel || t('search.location.placeholder')} onLocationChange={locationChangeHandler} />
+						<LocationCard
+							locationLabel={locationLabel || t('search.location.placeholder')}
+							technicians={technicians}
+							onLocationChange={locationChangeHandler}
+						/>
 						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 					</Stack>
 

@@ -578,6 +578,8 @@ export const GET_TECHNICIANS = gql`
 				shopName
 				specialty
 				userLocation
+				shopLatitude
+				shopLongitude
 				isOnline
 				averageRating
 				reviewCount

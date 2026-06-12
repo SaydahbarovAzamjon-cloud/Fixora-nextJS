@@ -1,100 +1,224 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import {
+	bindMapIdleListener,
+	computeMapBounds,
+	fitMapToPoints,
 	getCurrentPosition,
 	loadKakaoMapsSdk,
+	logKakaoMapError,
+	pointToOverlayPercent,
+	relayoutKakaoMap,
 	reverseGeocode,
 	SEOUL_CENTER,
+	waitForNonZeroSize,
 	type KakaoMap,
 	type KakaoMarker,
+	type LocationChangePayload,
+	type MapPoint,
 } from '../../kakao-maps';
+
+export interface LocationTechnicianPin {
+	_id: string;
+	shopLatitude?: number;
+	shopLongitude?: number;
+}
 
 interface LocationCardProps {
 	locationLabel: string;
-	onLocationChange: (location: string) => void;
+	technicians: LocationTechnicianPin[];
+	onLocationChange: (payload: LocationChangePayload) => void;
 }
 
-const LocationCard = ({ locationLabel, onLocationChange }: LocationCardProps) => {
+const TILES_LOAD_TIMEOUT_MS = 6000;
+
+const LocationCard = ({ locationLabel, technicians, onLocationChange }: LocationCardProps) => {
 	const { t } = useTranslation('common');
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<KakaoMap | null>(null);
-	const markerRef = useRef<KakaoMarker | null>(null);
+	const userMarkerRef = useRef<KakaoMarker | null>(null);
 	const kakaoRef = useRef<NonNullable<Window['kakao']> | null>(null);
 	const onLocationChangeRef = useRef(onLocationChange);
-	const [loading, setLoading] = useState(true);
+	const techniciansRef = useRef(technicians);
+	const initGenerationRef = useRef(0);
+	const resizeObserverRef = useRef<ResizeObserver | null>(null);
+	const tilesTimerRef = useRef<number | null>(null);
+	const [locating, setLocating] = useState(false);
 	const [mapError, setMapError] = useState(false);
 	const [mapReady, setMapReady] = useState(false);
+	const [tilesVisible, setTilesVisible] = useState(false);
+	const [userPoint, setUserPoint] = useState<MapPoint>(SEOUL_CENTER);
 
 	useEffect(() => {
 		onLocationChangeRef.current = onLocationChange;
 	}, [onLocationChange]);
 
+	useEffect(() => {
+		techniciansRef.current = technicians;
+	}, [technicians]);
+
+	const overlayPoints = useMemo(() => {
+		const techPoints: MapPoint[] = technicians
+			.filter((tech) => tech.shopLatitude != null && tech.shopLongitude != null)
+			.map((tech) => ({ lat: tech.shopLatitude!, lng: tech.shopLongitude! }));
+
+		const all = [userPoint, ...techPoints];
+		return { bounds: computeMapBounds(all), userPoint, techPoints };
+	}, [technicians, userPoint]);
+
+	const clearTilesTimer = useCallback(() => {
+		if (tilesTimerRef.current != null) {
+			window.clearTimeout(tilesTimerRef.current);
+			tilesTimerRef.current = null;
+		}
+	}, []);
+
+	const markTilesVisible = useCallback(() => {
+		clearTilesTimer();
+		setTilesVisible(true);
+		if (mapRef.current) relayoutKakaoMap(mapRef.current);
+	}, [clearTilesTimer]);
+
+	const startTilesTimer = useCallback(() => {
+		clearTilesTimer();
+		tilesTimerRef.current = window.setTimeout(() => {
+			// Keep grid + pins if Kakao tiles never become visible (domain/API issue).
+			setTilesVisible(false);
+		}, TILES_LOAD_TIMEOUT_MS);
+	}, [clearTilesTimer]);
+
+	const syncMapView = useCallback(
+		(techs: LocationTechnicianPin[], center: MapPoint) => {
+			const kakao = kakaoRef.current;
+			const map = mapRef.current;
+			if (!kakao || !map) return;
+
+			const plotted: MapPoint[] = techs
+				.filter((tech) => tech.shopLatitude != null && tech.shopLongitude != null)
+				.map((tech) => ({ lat: tech.shopLatitude!, lng: tech.shopLongitude! }));
+
+			const fitPoints = [center, ...plotted];
+			if (fitPoints.length) {
+				fitMapToPoints(kakao, map, fitPoints, { minLevel: 5, maxLevel: 10, singlePointLevel: 8 });
+				relayoutKakaoMap(map);
+			}
+		},
+		[],
+	);
+
 	const applyLocation = useCallback(
 		async (lat: number, lng: number, fallbackLabel?: string) => {
 			const kakao = kakaoRef.current;
-			if (!kakao || !mapRef.current) return;
+			const center = { lat, lng };
+			setUserPoint(center);
 
-			const latlng = new kakao.maps.LatLng(lat, lng);
-			mapRef.current.setCenter(latlng);
-			markerRef.current?.setPosition(latlng);
-
-			try {
-				const address = await reverseGeocode(kakao, lat, lng);
-				onLocationChangeRef.current(address || fallbackLabel || t('search.location.placeholder'));
-			} catch {
-				onLocationChangeRef.current(fallbackLabel || t('search.location.placeholder'));
+			if (kakao && mapRef.current) {
+				const latlng = new kakao.maps.LatLng(lat, lng);
+				userMarkerRef.current?.setPosition(latlng);
+				syncMapView(techniciansRef.current, center);
 			}
+
+			const defaultLabel = t('search.location.placeholder') ?? '';
+			let label = fallbackLabel ?? defaultLabel;
+
+			if (kakao) {
+				try {
+					const address = await reverseGeocode(kakao, lat, lng);
+					if (address) label = address;
+				} catch (err) {
+					logKakaoMapError('reverseGeocode', err);
+				}
+			}
+
+			onLocationChangeRef.current({ label, lat, lng });
 		},
-		[t],
+		[syncMapView, t],
 	);
 
 	const detectLocation = useCallback(async () => {
-		if (!mapReady) return;
-		setLoading(true);
+		setLocating(true);
 		try {
 			const position = await getCurrentPosition();
 			await applyLocation(position.coords.latitude, position.coords.longitude);
-		} catch {
+		} catch (err) {
+			logKakaoMapError('geolocation', err);
 			await applyLocation(SEOUL_CENTER.lat, SEOUL_CENTER.lng, t('search.location.placeholder'));
 		} finally {
-			setLoading(false);
+			setLocating(false);
 		}
-	}, [applyLocation, mapReady, t]);
+	}, [applyLocation, t]);
 
 	useEffect(() => {
-		let cancelled = false;
+		const generation = ++initGenerationRef.current;
 
 		const initMap = async () => {
-			if (!mapContainerRef.current) return;
+			const container = mapContainerRef.current;
+			if (!container) return;
 
 			try {
+				await waitForNonZeroSize(container);
 				const kakao = await loadKakaoMapsSdk();
-				if (cancelled || !mapContainerRef.current) return;
+				if (generation !== initGenerationRef.current || !mapContainerRef.current) return;
 
 				kakaoRef.current = kakao;
 				const center = new kakao.maps.LatLng(SEOUL_CENTER.lat, SEOUL_CENTER.lng);
-				const map = new kakao.maps.Map(mapContainerRef.current, { center, level: 8 });
-				const marker = new kakao.maps.Marker({ map, position: center });
+				const map = new kakao.maps.Map(mapContainerRef.current, {
+					center,
+					level: 8,
+					draggable: false,
+					scrollwheel: false,
+					disableDoubleClick: true,
+					disableDoubleClickZoom: true,
+				});
+				const userMarker = new kakao.maps.Marker({ map, position: center, opacity: 0 });
 
 				mapRef.current = map;
-				markerRef.current = marker;
+				userMarkerRef.current = userMarker;
+
+				bindMapIdleListener(kakao, map, markTilesVisible);
+				startTilesTimer();
+
+				resizeObserverRef.current?.disconnect();
+				resizeObserverRef.current = new ResizeObserver(() => {
+					if (mapRef.current) relayoutKakaoMap(mapRef.current);
+				});
+				resizeObserverRef.current.observe(mapContainerRef.current);
+
+				setMapError(false);
 				setMapReady(true);
-			} catch {
-				if (!cancelled) {
-					setMapError(true);
-					setLoading(false);
-					onLocationChangeRef.current(t('search.location.placeholder'));
-				}
+				window.setTimeout(() => {
+					if (generation === initGenerationRef.current && mapRef.current) {
+						relayoutKakaoMap(mapRef.current);
+						syncMapView(techniciansRef.current, SEOUL_CENTER);
+					}
+				}, 150);
+			} catch (err) {
+				logKakaoMapError('initMap', err);
+				if (generation !== initGenerationRef.current) return;
+				setMapError(true);
+				setMapReady(true);
+				setTilesVisible(false);
+				onLocationChangeRef.current({
+					label: t('search.location.placeholder') ?? '',
+					lat: SEOUL_CENTER.lat,
+					lng: SEOUL_CENTER.lng,
+				});
 			}
 		};
 
 		initMap();
 
 		return () => {
-			cancelled = true;
+			initGenerationRef.current += 1;
+			clearTilesTimer();
+			resizeObserverRef.current?.disconnect();
+			resizeObserverRef.current = null;
+			mapRef.current = null;
+			userMarkerRef.current = null;
+			kakaoRef.current = null;
 		};
-	}, [t]);
+	}, [clearTilesTimer, markTilesVisible, startTilesTimer, syncMapView, t]);
 
 	useEffect(() => {
 		if (mapReady) {
@@ -102,19 +226,36 @@ const LocationCard = ({ locationLabel, onLocationChange }: LocationCardProps) =>
 		}
 	}, [mapReady, detectLocation]);
 
+	useEffect(() => {
+		if (mapReady) {
+			syncMapView(technicians, userPoint);
+		}
+	}, [mapReady, technicians, userPoint, syncMapView]);
+
+	const showGridBackground = mapError || !tilesVisible;
+
 	return (
 		<div className="fixora-search-location">
-			<div className={`fixora-search-location__map${mapError ? ' fixora-search-location__map--fallback' : ''}`}>
+			<div
+				className={`fixora-search-location__map${showGridBackground ? ' fixora-search-location__map--fallback' : ''}`}
+			>
 				<div ref={mapContainerRef} className="fixora-search-location__map-canvas" />
-				{mapError && (
-					<div className="fixora-search-location__map-fallback" aria-hidden="true">
-						<span className="fixora-search-location__dot" style={{ top: '28%', left: '22%' }} />
-						<span className="fixora-search-location__dot" style={{ top: '45%', left: '58%' }} />
-						<span className="fixora-search-location__dot" style={{ top: '62%', left: '35%' }} />
-						<span className="fixora-search-location__dot" style={{ top: '38%', left: '78%' }} />
-					</div>
+				<div className="fixora-search-location__map-fallback" aria-hidden="true">
+					<span
+						className="fixora-search-location__dot fixora-search-location__dot--user"
+						style={pointToOverlayPercent(overlayPoints.userPoint, overlayPoints.bounds)}
+					/>
+					{overlayPoints.techPoints.map((point, index) => (
+						<span
+							key={`tech-pin-${index}`}
+							className="fixora-search-location__dot"
+							style={pointToOverlayPercent(point, overlayPoints.bounds)}
+						/>
+					))}
+				</div>
+				{locating && (
+					<div className="fixora-search-location__map-loading">{t('search.location.detecting')}</div>
 				)}
-				{loading && <div className="fixora-search-location__map-loading">{t('search.location.detecting')}</div>}
 			</div>
 			<div className="fixora-search-location__row">
 				<div className="fixora-search-location__label">
@@ -126,7 +267,7 @@ const LocationCard = ({ locationLabel, onLocationChange }: LocationCardProps) =>
 					className="fixora-search-location__recenter"
 					aria-label={t('search.location.recenter')}
 					onClick={detectLocation}
-					disabled={loading || !mapReady}
+					disabled={locating}
 				>
 					<GpsFixedIcon fontSize="small" />
 				</button>

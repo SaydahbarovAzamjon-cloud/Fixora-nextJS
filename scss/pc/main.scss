@@ -206,8 +206,12 @@ body::-webkit-scrollbar {
 		&--fixora {
 			height: auto;
 			min-height: 520px;
-			background: radial-gradient(ellipse at top, rgba(255, 107, 0, 0.12) 0%, var(--fixora-bg) 55%);
-			background-image: none;
+			background:
+				radial-gradient(130% 95% at 50% 35%, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
+				radial-gradient(820px 400px at 10% 92%, rgba(255, 107, 0, 0.17), transparent 62%),
+				radial-gradient(820px 400px at 90% 88%, rgba(255, 107, 0, 0.17), transparent 62%),
+				radial-gradient(ellipse at top, rgba(255, 107, 0, 0.12) 0%, transparent 55%),
+				linear-gradient(180deg, #0c0b0a 0%, var(--fixora-bg) 55%, #0a0908 100%);
 		}
 		.container {
 			position: relative;

@@ -82,6 +82,23 @@ const HeroRepairSearch = () => {
 
 	return (
 		<Stack className="fixora-hero">
+			<div className="fixora-hero__scene" aria-hidden="true">
+				<div className="fixora-hero__device fixora-hero__device--phone">
+					<span className="fixora-hero__device-body" />
+					<span className="fixora-hero__pedestal" />
+				</div>
+				<div className="fixora-hero__device fixora-hero__device--laptop">
+					<span className="fixora-hero__laptop-screen" />
+					<span className="fixora-hero__laptop-base" />
+					<span className="fixora-hero__pedestal" />
+				</div>
+				<span className="fixora-hero__particle fixora-hero__particle--1" />
+				<span className="fixora-hero__particle fixora-hero__particle--2" />
+				<span className="fixora-hero__particle fixora-hero__particle--3" />
+				<span className="fixora-hero__particle fixora-hero__particle--4" />
+				<span className="fixora-hero__particle fixora-hero__particle--5" />
+				<span className="fixora-hero__particle fixora-hero__particle--6" />
+			</div>
 			<div className="fixora-hero__content">
 				<span className="fixora-hero__eyebrow">
 					{t('hero.eyebrow')} <AutoAwesomeIcon fontSize="inherit" />

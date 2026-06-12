@@ -41,7 +41,7 @@
 | P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech onboarding — mockup-based |
 | P3-03b | OAuth wiring (Google + Kakao) | ✅ Done | GIS `initCodeClient` + Kakao SDK → `loginWithOAuth` |
 | P3-04 | Homepage | ✅ Done | Hero AI + TopTechnicians, HowItWorks, TechTips, Testimonials per mockup |
-| P3-05 | Search + Technician Profile | ⬜ Todo | Mockup: `docs/design/customer/customer-pages-full.png` §2–3 |
+| P3-05 | Search + Technician Profile | ✅ Done | `/search` mockup + `/technicians/[id]` profile + book placeholder |
 | P3-06 | Booking flow UI | ⬜ Todo | No mockup yet — follow `FIXORA-ANALIZ.md` §9.2 |
 | P3-07 | Messages UI | ⬜ Todo | Mockup: `customer-pages-full.png` §6 |
 | P3-08 | My Page + Notifications | ⬜ Todo | Mockup: `customer-pages-full.png` §7–8 |
@@ -116,7 +116,7 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-05` — Search + Technician Profile (desktop-first, responsive-safe)
+**Next task:** `P3-06` — Booking flow UI (or `PM-05` if starting mobile phase)
 
 **Then:** `P3-06` → … → `P3-10` — remaining core pages
 

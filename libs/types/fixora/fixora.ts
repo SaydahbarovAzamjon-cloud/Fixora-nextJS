@@ -68,3 +68,54 @@ export interface ArticlesInquiry {
 		userId?: string;
 	};
 }
+
+export interface UserWorkingHours {
+	days: string[];
+	startTime?: string;
+	endTime?: string;
+}
+
+export interface TechnicianProfile {
+	_id: string;
+	userNickname?: string;
+	userFullName?: string;
+	userProfileImage?: string;
+	userBio?: string;
+	shopName?: string;
+	specialty?: string;
+	userLocation?: string;
+	isOnline?: boolean;
+	isVerified?: boolean;
+	averageRating?: number;
+	reviewCount?: number;
+	completedJobsCount?: number;
+	yearsExperience?: number;
+	badgeLevel?: BadgeLevel;
+	services?: UserServiceItem[];
+	portfolioImages?: string[];
+	workingHours?: UserWorkingHours;
+}
+
+export interface TechnicianReview {
+	_id: string;
+	reviewContent?: string;
+	repairQuality: number;
+	repairSpeed: number;
+	communication: number;
+	createdAt: string;
+}
+
+export interface ReviewsInquiry {
+	page: number;
+	limit: number;
+	sort?: string;
+	direction?: 'ASC' | 'DESC';
+	search: {
+		technicianId: string;
+	};
+}
+
+export interface ReviewDistribution {
+	star: number;
+	count: number;
+}

@@ -22,11 +22,22 @@ import { GET_COMMENTS, GET_MEMBER, GET_PROPERTIES } from '../../apollo/user/quer
 import { CREATE_COMMENT, LIKE_TARGET_PROPERTY } from '../../apollo/user/mutation';
 import { T } from '../../libs/types/common';
 
-    export const getStaticProps = async ({ locale }: any) => ({
-    	props: {
-    		...(await serverSideTranslations(locale, ['common'])),
-    	},
-    });
+    export const getServerSideProps = async ({ query, locale }: any) => {
+    	if (query.id && typeof query.id === 'string') {
+    		return {
+    			redirect: {
+    				destination: `/technicians/${query.id}`,
+    				permanent: false,
+    			},
+    		};
+    	}
+
+    	return {
+    		props: {
+    			...(await serverSideTranslations(locale, ['common'])),
+    		},
+    	};
+    };
 
     const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) => {
     	const device = useDeviceDetect();

@@ -595,6 +595,60 @@ export const GET_TECHNICIANS = gql`
 	}
 `;
 
+export const GET_USER = gql`
+	query GetUser($userId: String!) {
+		getUser(userId: $userId) {
+			_id
+			userNickname
+			userFullName
+			userProfileImage
+			userBio
+			shopName
+			specialty
+			userLocation
+			isOnline
+			isVerified
+			averageRating
+			reviewCount
+			completedJobsCount
+			yearsExperience
+			badgeLevel
+			services {
+				title
+				basePrice
+			}
+			portfolioImages
+			workingHours {
+				days
+				startTime
+				endTime
+			}
+		}
+	}
+`;
+
+export const GET_TECHNICIAN_REVIEWS = gql`
+	query GetTechnicianReviews($input: ReviewsInquiry!) {
+		getTechnicianReviews(input: $input) {
+			list {
+				_id
+				reviewContent
+				repairQuality
+				repairSpeed
+				communication
+				createdAt
+			}
+			distribution {
+				star
+				count
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
 /**************************
  *    FIXORA — ARTICLES   *
  *************************/

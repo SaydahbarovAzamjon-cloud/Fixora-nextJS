@@ -6,9 +6,13 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery } from '@apollo/client';
 import { Stack, Pagination } from '@mui/material';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
-import SearchBar from '../../libs/components/search/SearchBar';
+import SearchHero from '../../libs/components/search/SearchHero';
+import SearchCategoryRow from '../../libs/components/search/SearchCategoryRow';
+import LocationCard from '../../libs/components/search/LocationCard';
 import SearchFilters from '../../libs/components/search/SearchFilters';
+import SearchResultsHeader from '../../libs/components/search/SearchResultsHeader';
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
+import SearchTrustBar from '../../libs/components/search/SearchTrustBar';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
 import { T } from '../../libs/types/common';
@@ -33,6 +37,17 @@ const SearchPage: NextPage = () => {
 	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
 	const [technicians, setTechnicians] = useState<TechnicianSummary[]>([]);
 	const [total, setTotal] = useState<number>(0);
+	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+	const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+
+	const toggleFavoriteHandler = (id: string) => {
+		setFavoritedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+	};
 
 	const { data, refetch } = useQuery(GET_TECHNICIANS, {
 		fetchPolicy: 'network-only',
@@ -62,16 +77,39 @@ const SearchPage: NextPage = () => {
 	return (
 		<Stack className="fixora-search-page">
 			<Stack className="container">
-				<SearchBar searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+
+				<SearchCategoryRow searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
 				<Stack className="fixora-search__layout">
-					<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+					<Stack className="fixora-search__sidebar">
+						<LocationCard />
+						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+					</Stack>
 
 					<Stack className="fixora-search__results">
+						<SearchResultsHeader
+							total={total}
+							searchFilter={searchFilter}
+							setSearchFilter={setSearchFilter}
+							viewMode={viewMode}
+							setViewMode={setViewMode}
+						/>
+
 						{technicians.length === 0 ? (
 							<div className="fixora-search__no-results">{t('search.results.noResults')}</div>
 						) : (
-							technicians.map((technician) => <TechnicianResultCard key={technician._id} technician={technician} />)
+							<Stack className={`fixora-search__results-list fixora-search__results-list--${viewMode}`}>
+								{technicians.map((technician) => (
+									<TechnicianResultCard
+										key={technician._id}
+										technician={technician}
+										view={viewMode}
+										favorited={favoritedIds.has(technician._id)}
+										onToggleFavorite={toggleFavoriteHandler}
+									/>
+								))}
+							</Stack>
 						)}
 
 						{technicians.length !== 0 && Math.ceil(total / searchFilter.limit) > 1 && (
@@ -87,6 +125,8 @@ const SearchPage: NextPage = () => {
 						)}
 					</Stack>
 				</Stack>
+
+				<SearchTrustBar />
 			</Stack>
 		</Stack>
 	);

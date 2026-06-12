@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-10 |
 | **Last agent** | Cursor |
-| **Last session** | P3-04 complete: homepage sections (TopTechnicians, HowItWorks, TechTips, Testimonials) + Fixora navbar rebuild in `Top.tsx` (Home/Services, EN\|KR toggle, Log in, Find Technician CTA) + hero per mockup (eyebrow, category chips, trust badges) + legacy FiberContainer removed from `LayoutHome` |
-| **Next agent should start with** | `P3-05` — Search + Technician Profile per `docs/design/customer/customer-pages-full.png` §2–3 |
+| **Last session** | P3-05 Done: `/search` mockup layout (hero, full-width categories, sidebar filters, 2-col cards, trust bar) + `/technicians/[id]` profile (tabs, services, portfolio, reviews, book CTA) + `GET_USER` / `GET_TECHNICIAN_REVIEWS` + legacy `/agent/detail` redirect |
+| **Next agent should start with** | `P3-06` — Booking flow UI |
 
 ---
 

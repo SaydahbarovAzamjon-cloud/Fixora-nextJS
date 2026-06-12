@@ -11,6 +11,12 @@ import TabletMacIcon from '@mui/icons-material/TabletMac';
 import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import WatchIcon from '@mui/icons-material/Watch';
+import HeadphonesIcon from '@mui/icons-material/Headphones';
+import MemoryIcon from '@mui/icons-material/Memory';
+import CableIcon from '@mui/icons-material/Cable';
+import MouseIcon from '@mui/icons-material/Mouse';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import { HERO_REPAIR_SEARCH } from '../../../apollo/user/hero';
 import { FixoraButton } from '../ui';
@@ -41,6 +47,19 @@ const CATEGORY_CHIPS = [
 ] as const;
 
 const TRUST_KEYS = ['experts', 'reviews', 'service', 'payments'] as const;
+
+const FLOATING_DEVICES = [
+	{ key: 'iphone', Icon: PhoneIphoneIcon },
+	{ key: 'macbook', Icon: LaptopMacIcon },
+	{ key: 'ipad', Icon: TabletMacIcon },
+	{ key: 'watch', Icon: WatchIcon },
+	{ key: 'airpods', Icon: HeadphonesIcon },
+	{ key: 'battery', Icon: BatteryAlertIcon },
+	{ key: 'chip', Icon: MemoryIcon },
+	{ key: 'cable', Icon: CableIcon },
+	{ key: 'mouse', Icon: MouseIcon },
+	{ key: 'keyboard', Icon: KeyboardIcon },
+] as const;
 
 const HeroRepairSearch = () => {
 	const { t } = useTranslation('common');
@@ -83,14 +102,13 @@ const HeroRepairSearch = () => {
 	return (
 		<Stack className="fixora-hero">
 			<div className="fixora-hero__scene" aria-hidden="true">
-				<div className="fixora-hero__device fixora-hero__device--phone">
-					<span className="fixora-hero__device-body" />
-					<span className="fixora-hero__pedestal" />
+				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--phone">
+					<span className="fixora-hero__device-glow" />
+					<img src="/img/heroSection/phone.png" alt="" className="fixora-hero__device-img" />
 				</div>
-				<div className="fixora-hero__device fixora-hero__device--laptop">
-					<span className="fixora-hero__laptop-screen" />
-					<span className="fixora-hero__laptop-base" />
-					<span className="fixora-hero__pedestal" />
+				<div className="fixora-hero__device-wrap fixora-hero__device-wrap--laptop">
+					<span className="fixora-hero__device-glow" />
+					<img src="/img/heroSection/mackbook.png" alt="" className="fixora-hero__device-img" />
 				</div>
 				<span className="fixora-hero__particle fixora-hero__particle--1" />
 				<span className="fixora-hero__particle fixora-hero__particle--2" />
@@ -98,6 +116,14 @@ const HeroRepairSearch = () => {
 				<span className="fixora-hero__particle fixora-hero__particle--4" />
 				<span className="fixora-hero__particle fixora-hero__particle--5" />
 				<span className="fixora-hero__particle fixora-hero__particle--6" />
+				<span className="fixora-hero__particle fixora-hero__particle--7" />
+				<span className="fixora-hero__particle fixora-hero__particle--8" />
+				<span className="fixora-hero__particle fixora-hero__particle--9" />
+				{FLOATING_DEVICES.map(({ key, Icon }) => (
+					<span key={key} className={`fixora-hero__float-device fixora-hero__float-device--${key}`}>
+						<Icon fontSize="inherit" />
+					</span>
+				))}
 			</div>
 			<div className="fixora-hero__content">
 				<span className="fixora-hero__eyebrow">

@@ -187,6 +187,8 @@
   "search.results.badge.fastResponder": "빠른 응답",
   "search.results.badge.affordable": "합리적 가격",
   "search.results.minAway": "{{count}}분 거리",
+  "search.results.follow": "팔로우",
+  "search.results.following": "팔로잉",
   "search.trust.verified.title": "검증된 기술자",
   "search.trust.verified.description": "모든 기술자는 신원 확인과 기술 검증을 거쳐 Fixora에 합류합니다.",
   "search.trust.quality.title": "품질 보증 서비스",

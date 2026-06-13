@@ -5,7 +5,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Stack, Pagination } from '@mui/material';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import SearchHero from '../../libs/components/search/SearchHero';
@@ -15,9 +15,13 @@ import SearchResultsHeader from '../../libs/components/search/SearchResultsHeade
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
 import SearchTrustBar from '../../libs/components/search/SearchTrustBar';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
+import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
 import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
 import { T } from '../../libs/types/common';
+import { Messages } from '../../libs/config';
+import { userVar } from '../../apollo/store';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
 
@@ -48,7 +52,12 @@ const SearchPage: NextPage = () => {
 	const [technicians, setTechnicians] = useState<TechnicianSummary[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-	const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+	const user = useReactiveVar(userVar);
+
+	/** APOLLO REQUESTS **/
+	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const [subscribe] = useMutation(SUBSCRIBE);
+	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 
 	const locationChangeHandler = ({ label, lat, lng }: { label: string; lat: number; lng: number }) => {
 		setLocationLabel(label);
@@ -65,13 +74,33 @@ const SearchPage: NextPage = () => {
 		}));
 	};
 
-	const toggleFavoriteHandler = (id: string) => {
-		setFavoritedIds((prev) => {
-			const next = new Set(prev);
-			if (next.has(id)) next.delete(id);
-			else next.add(id);
-			return next;
-		});
+	const toggleFavoriteHandler = async (id: string) => {
+		try {
+			if (!id) return;
+			if (!user?._id) throw new Error(Messages.error2);
+
+			await likeTargetMember({ variables: { input: id } });
+			await refetch({ input: searchFilter });
+		} catch (err: any) {
+			await sweetErrorHandling(err);
+		}
+	};
+
+	const toggleFollowHandler = async (id: string, isFollowing: boolean) => {
+		try {
+			if (!id) return;
+			if (!user?._id) throw new Error(Messages.error2);
+
+			if (isFollowing) {
+				await unsubscribe({ variables: { input: id } });
+			} else {
+				await subscribe({ variables: { input: id } });
+				await sweetTopSmallSuccessAlert('Followed!', 800);
+			}
+			await refetch({ input: searchFilter });
+		} catch (err: any) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	const { data, refetch } = useQuery(GET_TECHNICIANS, {
@@ -147,8 +176,10 @@ const SearchPage: NextPage = () => {
 										key={technician._id}
 										technician={technician}
 										view={viewMode}
-										favorited={favoritedIds.has(technician._id)}
+										favorited={!!technician.meLiked?.[0]?.myFavorite}
+										following={!!technician.meFollowed?.[0]?.myFollowing}
 										onToggleFavorite={toggleFavoriteHandler}
+										onToggleFollow={toggleFollowHandler}
 									/>
 								))}
 							</Stack>

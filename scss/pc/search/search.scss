@@ -778,7 +778,7 @@
 
 	&--grid {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 16px;
 	}
 }
@@ -806,7 +806,33 @@
 
 	&--grid {
 		flex-direction: column;
-		align-items: stretch;
+		align-items: center;
+		text-align: center;
+		gap: 10px;
+		padding: 40px 14px 16px;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&--grid &__actions {
+		position: absolute;
+		top: 14px;
+		left: 14px;
+		right: 14px;
+		justify-content: space-between;
+	}
+
+	&--list &__actions {
+		order: 3;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 8px;
+		flex-shrink: 0;
+		margin-left: auto;
 	}
 
 	&__body {
@@ -815,6 +841,7 @@
 		align-items: flex-start;
 		gap: 14px;
 		width: 100%;
+		order: 1;
 	}
 
 	&--list &__body {
@@ -822,11 +849,14 @@
 		min-width: 0;
 	}
 
+	&--grid &__body {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 10px;
+	}
+
 	&__favorite {
-		position: absolute;
-		top: 12px;
-		right: 12px;
-		z-index: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -838,6 +868,7 @@
 		color: var(--fixora-text-muted);
 		cursor: pointer;
 		transition: color 0.2s ease, border-color 0.2s ease;
+		flex-shrink: 0;
 
 		svg {
 			font-size: 16px;
@@ -846,6 +877,59 @@
 		&:hover {
 			color: var(--fixora-primary);
 			border-color: var(--fixora-primary);
+		}
+	}
+
+	&--grid &__favorite {
+		order: 2;
+		width: 28px;
+		height: 28px;
+	}
+
+	&__follow {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		height: 32px;
+		padding: 0 12px;
+		border-radius: 999px;
+		border: 1px solid var(--fixora-primary);
+		background: rgba(255, 107, 0, 0.12);
+		color: var(--fixora-primary);
+		font-family: $font;
+		font-size: 12px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+		transition: background 0.2s ease, color 0.2s ease;
+
+		svg {
+			font-size: 15px;
+		}
+
+		&:hover {
+			background: var(--fixora-primary);
+			color: #fff;
+		}
+
+		&--active {
+			background: var(--fixora-primary);
+			color: #fff;
+
+			&:hover {
+				background: var(--fixora-primary-hover);
+			}
+		}
+	}
+
+	&--grid &__follow {
+		order: 1;
+		height: 28px;
+		padding: 0 10px;
+		font-size: 11px;
+
+		svg {
+			font-size: 13px;
 		}
 	}
 
@@ -864,8 +948,8 @@
 	}
 
 	&--grid &__avatar {
-		width: 64px;
-		height: 64px;
+		width: 56px;
+		height: 56px;
 	}
 
 	&__status-dot {
@@ -892,7 +976,11 @@
 	}
 
 	&--grid &__main {
+		flex: none;
 		width: 100%;
+		min-width: 0;
+		align-items: center;
+		gap: 4px;
 	}
 
 	&__name-row {
@@ -900,6 +988,10 @@
 		align-items: center;
 		gap: 6px;
 		flex-wrap: wrap;
+	}
+
+	&--grid &__name-row {
+		justify-content: center;
 	}
 
 	&__name {
@@ -968,15 +1060,43 @@
 		}
 	}
 
+	&--grid &__badge {
+		align-self: center;
+	}
+
 	&__specialty {
 		font-size: 13.5px;
 		font-weight: 600;
 		color: var(--fixora-text-secondary);
 	}
 
+	&--grid &__specialty {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		font-size: 12px;
+		max-width: 100%;
+	}
+
+	&--grid &__name {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	&__jobs {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
 		font-size: 12.5px;
 		color: var(--fixora-text-muted);
+
+		svg {
+			font-size: 14px;
+			color: var(--fixora-primary);
+		}
 	}
 
 	&__location {
@@ -1003,6 +1123,15 @@
 				color: var(--fixora-text-muted);
 			}
 		}
+	}
+
+	&--grid &__location em {
+		margin-left: 0;
+	}
+
+	&--grid &__location {
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	&__aside {
@@ -1159,7 +1288,7 @@
 	}
 
 	.fixora-search__results-list--grid {
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.fixora-search-trust {
@@ -1185,6 +1314,13 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+	}
+
+	.fixora-result-card--list .fixora-result-card__actions {
+		width: 100%;
+		flex-direction: row;
+		justify-content: flex-end;
+		margin-left: 0;
 	}
 }
 

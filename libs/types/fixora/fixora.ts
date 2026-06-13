@@ -1,5 +1,8 @@
 /** Minimal Fixora summaries for homepage sections (full User/Article types arrive with P3-13). */
 
+import { MeLiked } from '../property/property';
+import { MeFollowed } from '../follow/follow';
+
 export type BadgeLevel = 'NEW' | 'VERIFIED' | 'PREMIUM_PRO';
 
 export interface UserServiceItem {
@@ -23,6 +26,8 @@ export interface TechnicianSummary {
 	completedJobsCount?: number;
 	badgeLevel?: BadgeLevel;
 	services?: UserServiceItem[];
+	meLiked?: MeLiked[];
+	meFollowed?: MeFollowed[];
 }
 
 export interface ArticleSummary {

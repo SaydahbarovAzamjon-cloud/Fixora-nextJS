@@ -577,6 +577,16 @@ export const GET_TECHNICIANS = gql`
 					title
 					basePrice
 				}
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+				meFollowed {
+					followingId
+					followerId
+					myFollowing
+				}
 			}
 			metaCounter {
 				total

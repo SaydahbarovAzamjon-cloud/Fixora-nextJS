@@ -1,19 +1,26 @@
 import React, { MouseEvent } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
+import { useReactiveVar } from '@apollo/client';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { TechnicianSummary } from '../../types/fixora/fixora';
+import { userVar } from '../../../apollo/store';
 
 interface TechnicianResultCardProps {
 	technician: TechnicianSummary;
 	view: 'grid' | 'list';
 	favorited: boolean;
+	following: boolean;
 	onToggleFavorite: (id: string) => void;
+	onToggleFollow: (id: string, isFollowing: boolean) => void;
 }
 
 const BADGE_TAGS = ['topRated', 'greatReviews', 'fastResponder', 'affordable'] as const;
@@ -30,8 +37,9 @@ const getDistance = (id: string): number => {
 	return (hash % 28) + 2;
 };
 
-const TechnicianResultCard = ({ technician, view, favorited, onToggleFavorite }: TechnicianResultCardProps) => {
+const TechnicianResultCard = ({ technician, view, favorited, following, onToggleFavorite, onToggleFollow }: TechnicianResultCardProps) => {
 	const { t } = useTranslation('common');
+	const user = useReactiveVar(userVar);
 	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
 	const fromPrice = technician.services?.length
 		? Math.min(...technician.services.map((service) => service.basePrice))
@@ -41,6 +49,7 @@ const TechnicianResultCard = ({ technician, view, favorited, onToggleFavorite }:
 		: technician.specialty;
 	const badgeTag = getBadgeTag(technician);
 	const distance = getDistance(technician._id);
+	const isSelf = !!user?._id && user._id === technician._id;
 
 	const favoriteClickHandler = (e: MouseEvent) => {
 		e.preventDefault();
@@ -48,19 +57,35 @@ const TechnicianResultCard = ({ technician, view, favorited, onToggleFavorite }:
 		onToggleFavorite(technician._id);
 	};
 
+	const followClickHandler = (e: MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onToggleFollow(technician._id, following);
+	};
+
 	return (
 		<Link href={`/technicians/${technician._id}`} className={`fixora-result-card fixora-result-card--${view}`}>
-			<button type="button" className="fixora-result-card__favorite" onClick={favoriteClickHandler} aria-label="favorite">
-				{favorited ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
-			</button>
+			<div className="fixora-result-card__actions">
+				<button type="button" className="fixora-result-card__favorite" onClick={favoriteClickHandler} aria-label="favorite">
+					{favorited ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+				</button>
+
+				{!isSelf && (
+					<button
+						type="button"
+						className={`fixora-result-card__follow${following ? ' fixora-result-card__follow--active' : ''}`}
+						onClick={followClickHandler}
+						aria-label="follow"
+					>
+						{following ? <HowToRegIcon fontSize="inherit" /> : <PersonAddAlt1Icon fontSize="inherit" />}
+						<span>{following ? t('search.results.following') : t('search.results.follow')}</span>
+					</button>
+				)}
+			</div>
 
 			<div className="fixora-result-card__body">
 				<div className="fixora-result-card__avatar-wrap">
-					<img
-						className="fixora-result-card__avatar"
-						src={technician.userProfileImage || '/img/profile/defaultUser.svg'}
-						alt=""
-					/>
+					<img className="fixora-result-card__avatar" src={technician.userProfileImage || '/img/profile/defaultUser.svg'} alt="" />
 					<span
 						className={`fixora-result-card__status-dot${
 							technician.isOnline ? ' fixora-result-card__status-dot--online' : ''
@@ -88,11 +113,10 @@ const TechnicianResultCard = ({ technician, view, favorited, onToggleFavorite }:
 
 					{serviceNames && <span className="fixora-result-card__specialty">{serviceNames}</span>}
 
-					{view === 'list' && (
-						<span className="fixora-result-card__jobs">
-							{t('search.results.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
-						</span>
-					)}
+					<span className="fixora-result-card__jobs">
+						<WorkOutlineIcon fontSize="inherit" />
+						{t('search.results.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
+					</span>
 
 					{technician.userLocation && (
 						<span className="fixora-result-card__location">

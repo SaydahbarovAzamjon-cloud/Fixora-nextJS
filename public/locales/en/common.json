@@ -187,6 +187,8 @@
   "search.results.badge.fastResponder": "Fast Responder",
   "search.results.badge.affordable": "Affordable",
   "search.results.minAway": "{{count}} min away",
+  "search.results.follow": "Follow",
+  "search.results.following": "Following",
   "search.trust.verified.title": "Verified Technicians",
   "search.trust.verified.description": "All technicians are background-checked and skill-verified before joining Fixora.",
   "search.trust.quality.title": "Quality Service",

@@ -187,6 +187,8 @@
 	"search.results.badge.fastResponder": "Быстрый ответ",
 	"search.results.badge.affordable": "Доступная цена",
 	"search.results.minAway": "{{count}} мин в пути",
+	"search.results.follow": "Подписаться",
+	"search.results.following": "Подписан",
 	"search.trust.verified.title": "Проверенные специалисты",
 	"search.trust.verified.description": "Все специалисты проходят проверку личности и навыков перед регистрацией на Fixora.",
 	"search.trust.quality.title": "Качественный сервис",

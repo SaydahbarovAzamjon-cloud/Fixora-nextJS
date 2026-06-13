@@ -41,6 +41,8 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
+	const ownerName = technician.userFullName || technician.userNickname;
+	const showOwnerName = !!technician.shopName && !!ownerName && ownerName !== displayName;
 	const fromPrice = technician.services?.length
 		? Math.min(...technician.services.map((service) => service.basePrice))
 		: null;
@@ -100,6 +102,8 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 							<VerifiedOutlinedIcon className="fixora-result-card__verified" fontSize="inherit" />
 						)}
 					</div>
+
+					{showOwnerName && <span className="fixora-result-card__owner">{ownerName}</span>}
 
 					<span className="fixora-result-card__rating">
 						<StarIcon fontSize="inherit" />

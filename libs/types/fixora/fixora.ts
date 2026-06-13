@@ -25,6 +25,7 @@ export interface TechnicianSummary {
 	reviewCount?: number;
 	completedJobsCount?: number;
 	badgeLevel?: BadgeLevel;
+	followersCount?: number;
 	services?: UserServiceItem[];
 	meLiked?: MeLiked[];
 	meFollowed?: MeFollowed[];

@@ -203,6 +203,12 @@
 		color: var(--fixora-text-primary);
 	}
 
+	&__owner {
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--fixora-text-muted);
+	}
+
 	&__rating {
 		display: inline-flex;
 		align-items: center;

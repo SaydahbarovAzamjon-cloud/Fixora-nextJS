@@ -59,6 +59,7 @@
   "homepage.technicians.online": "Online",
   "homepage.technicians.offline": "Offline",
   "homepage.technicians.jobsCompleted": "{{total}}+ jobs completed",
+  "homepage.technicians.followers": "{{count}} followers",
   "homepage.badge.new": "New Technician",
   "homepage.badge.verified": "Verified",
   "homepage.badge.topPro": "Top Pro",

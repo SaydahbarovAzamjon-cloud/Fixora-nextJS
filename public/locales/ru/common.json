@@ -59,6 +59,7 @@
 	"homepage.technicians.online": "Онлайн",
 	"homepage.technicians.offline": "Офлайн",
 	"homepage.technicians.jobsCompleted": "{{total}}+ ремонтов выполнено",
+	"homepage.technicians.followers": "{{count}} подписчиков",
 	"homepage.badge.new": "Новый техник",
 	"homepage.badge.verified": "Проверен",
 	"homepage.badge.topPro": "Топ Про",

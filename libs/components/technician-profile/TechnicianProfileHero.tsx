@@ -19,6 +19,8 @@ interface TechnicianProfileHeroProps {
 const TechnicianProfileHero = ({ technician, isOwnProfile, onToggleFollow, onChat }: TechnicianProfileHeroProps) => {
 	const { t } = useTranslation('common');
 	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
+	const ownerName = technician.userFullName || technician.userNickname;
+	const showOwnerName = !!technician.shopName && !!ownerName && ownerName !== displayName;
 	const isFollowing = !!technician.meFollowed?.[0]?.myFollowing;
 
 	return (
@@ -49,6 +51,8 @@ const TechnicianProfileHero = ({ technician, isOwnProfile, onToggleFollow, onCha
 							</span>
 						)}
 					</div>
+
+					{showOwnerName && <p className="fixora-tech-profile__owner">{ownerName}</p>}
 
 					{technician.specialty && <p className="fixora-tech-profile__specialty">{technician.specialty}</p>}
 

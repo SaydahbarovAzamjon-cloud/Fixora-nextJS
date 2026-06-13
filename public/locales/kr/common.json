@@ -59,6 +59,7 @@
   "homepage.technicians.online": "온라인",
   "homepage.technicians.offline": "오프라인",
   "homepage.technicians.jobsCompleted": "{{total}}+ 건 수리 완료",
+  "homepage.technicians.followers": "팔로워 {{count}}명",
   "homepage.badge.new": "신규 기술자",
   "homepage.badge.verified": "인증됨",
   "homepage.badge.topPro": "탑 프로",

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import { TechnicianSummary } from '../../types/fixora/fixora';
 
 interface TechnicianCardProps {
@@ -20,6 +21,8 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 	const router = useRouter();
 
 	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
+	const ownerName = technician.userFullName || technician.userNickname;
+	const showOwnerName = !!technician.shopName && !!ownerName && ownerName !== displayName;
 	const badgeKey = BADGE_KEY[technician.badgeLevel ?? ''] ?? null;
 
 	return (
@@ -43,6 +46,7 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 						{technician.isOnline ? t('homepage.technicians.online') : t('homepage.technicians.offline')}
 					</span>
 					<strong className="fixora-tech-card__name">{displayName}</strong>
+					{showOwnerName && <span className="fixora-tech-card__owner">{ownerName}</span>}
 					<span className="fixora-tech-card__rating">
 						<StarIcon fontSize="inherit" />
 						{technician.averageRating?.toFixed(1) ?? '—'}
@@ -62,6 +66,10 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 				)}
 				<span className="fixora-tech-card__meta-row">
 					{t('homepage.technicians.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
+				</span>
+				<span className="fixora-tech-card__meta-row">
+					<GroupOutlinedIcon fontSize="inherit" />
+					{t('homepage.technicians.followers', { count: technician.followersCount ?? 0 })}
 				</span>
 			</div>
 

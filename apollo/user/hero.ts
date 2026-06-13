@@ -20,9 +20,25 @@ export const HERO_REPAIR_SEARCH = gql`
 					userNickname
 					userFullName
 					shopName
-					averageRating
 					userProfileImage
 					specialty
+					userLocation
+					isOnline
+					averageRating
+					reviewCount
+					completedJobsCount
+					badgeLevel
+					followersCount
+					meLiked {
+						memberId
+						likeRefId
+						myFavorite
+					}
+					meFollowed {
+						followingId
+						followerId
+						myFollowing
+					}
 				}
 			}
 		}

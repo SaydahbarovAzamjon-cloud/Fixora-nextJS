@@ -573,6 +573,7 @@ export const GET_TECHNICIANS = gql`
 				reviewCount
 				completedJobsCount
 				badgeLevel
+				followersCount
 				services {
 					title
 					basePrice

@@ -21,20 +21,14 @@ import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import { HERO_REPAIR_SEARCH } from '../../../apollo/user/hero';
 import { FixoraButton } from '../ui';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
+import TechnicianCard from './TechnicianCard';
+import { TechnicianSummary } from '../../types/fixora/fixora';
 
 interface HeroRecommendation {
 	technicianId: string;
 	score: number;
 	matchReason: string;
-	technician: {
-		_id: string;
-		userNickname?: string;
-		userFullName?: string;
-		shopName?: string;
-		averageRating?: number;
-		userProfileImage?: string;
-		specialty?: string;
-	};
+	technician: TechnicianSummary;
 }
 
 const CATEGORY_CHIPS = [
@@ -214,24 +208,10 @@ const HeroRepairSearch = () => {
 						<p className="fixora-hero__hint">{t('hero.selectTechnicianHint')}</p>
 						<div className="fixora-hero__cards">
 							{recommendations.map((rec) => (
-								<button
-									key={rec.technicianId}
-									type="button"
-									className="fixora-hero__card"
-									onClick={() => router.push(`/agent/detail?id=${rec.technicianId}`)}
-								>
-									<img
-										src={rec.technician.userProfileImage || '/img/profile/defaultUser.svg'}
-										alt=""
-									/>
-									<div>
-										<strong>{rec.technician.shopName || rec.technician.userNickname}</strong>
-										<span>
-											{rec.technician.specialty} · ★ {rec.technician.averageRating?.toFixed(1) ?? '—'}
-										</span>
-										<small>{rec.matchReason}</small>
-									</div>
-								</button>
+								<div className="fixora-hero__card" key={rec.technicianId}>
+									<TechnicianCard technician={rec.technician} />
+									<small className="fixora-hero__card-reason">{rec.matchReason}</small>
+								</div>
 							))}
 						</div>
 					</div>

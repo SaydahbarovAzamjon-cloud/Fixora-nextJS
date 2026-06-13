@@ -9,6 +9,7 @@ import useDeviceDetect from '../hooks/useDeviceDetect';
 import Link from 'next/link';
 import { FixoraLogo } from './brand';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { Logout } from '@mui/icons-material';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
@@ -156,6 +157,9 @@ const Top = () => {
 
 						{user?._id ? (
 							<>
+								<Link href={'/messages'} className={'fixora-nav__icon-link'}>
+									<ChatBubbleOutlineIcon className={'fixora-nav__bell'} />
+								</Link>
 								<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
 								<button
 									type="button"

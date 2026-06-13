@@ -765,3 +765,35 @@ export const GET_MY_DEVICES = gql`
 		}
 	}
 `;
+
+export const GET_BOOKING = gql`
+	query GetBooking($bookingId: String!) {
+		getBooking(bookingId: $bookingId) {
+			_id
+			bookingStatus
+			bookingType
+			bookingDate
+			problemTitle
+			problemDescription
+			estimatedPrice
+			finalPrice
+			deviceId
+			technicianId
+			userId
+			createdAt
+		}
+	}
+`;
+
+export const GET_DEVICE = gql`
+	query GetDevice($deviceId: String!) {
+		getDevice(deviceId: $deviceId) {
+			_id
+			deviceBrand
+			deviceCategory
+			deviceModel
+			deviceIssue
+			deviceImage
+		}
+	}
+`;

@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-10 |
-| **Last agent** | Cursor |
-| **Last session** | Kakao Map integration: LocationCard real map + technician pins, geo search filter (`latitude`/`longitude`/`radiusKm`), FixoraB `shopLatitude`/`shopLongitude` + backfill script, docs MAP-01 |
-| **Next agent should start with** | `P3-06` — Booking flow UI (ensure Kakao Console + `.env.local` key for map on `/search`) |
+| **Last updated** | 2026-06-13 |
+| **Last agent** | Claude |
+| **Last session** | P3-07 Messages UI: `/messages` page (conversation list + chat thread + request details panel), `getMyConversations`/`getMessages`/`sendMessage`/`markMessagesAsRead` wired, navbar message icon, technician profile chat button now routes to `/messages?peerId=` |
+| **Next agent should start with** | `P3-08` — My Page + Notifications (mockup §7–8 in `customer-pages-full.png`) |
 
 ---
 
@@ -25,6 +25,7 @@
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
+| Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, `scss/pc/messages/messages.scss` |
 
 ---
 
@@ -90,6 +91,8 @@ Full checklist: `TASK_BOARD.md`
 | Admin mockup | None — build incrementally (P3-15) |
 | Light theme mockup | None — Phase 5 (P4-05+) |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
+| Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
+| "View Request" in Messages | Links to `/mypage` — no booking detail view yet (depends on P3-08) |
 
 ---
 

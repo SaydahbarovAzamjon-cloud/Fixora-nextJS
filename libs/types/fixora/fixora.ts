@@ -185,6 +185,7 @@ export interface Booking {
 	problemTitle: string;
 	problemDescription?: string;
 	estimatedPrice?: number;
+	finalPrice?: number;
 	deviceId: string;
 	technicianId: string;
 	userId: string;
@@ -199,4 +200,37 @@ export interface BookingInput {
 	bookingType?: BookingType;
 	bookingDate?: string;
 	estimatedPrice?: number;
+}
+
+export type MessageType = 'TEXT' | 'IMAGE';
+
+export interface Message {
+	_id: string;
+	senderId: string;
+	receiverId: string;
+	bookingId?: string | null;
+	messageContent: string;
+	messageType: MessageType;
+	isRead: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ConversationPeer {
+	_id: string;
+	userNickname?: string;
+	userFullName?: string;
+	shopName?: string;
+	userProfileImage?: string;
+	isOnline?: boolean;
+}
+
+export interface Conversation {
+	peerId: string;
+	bookingId?: string | null;
+	bookingStatus?: BookingStatus | null;
+	unreadCount: number;
+	updatedAt: string;
+	peer?: ConversationPeer;
+	lastMessage?: Message;
 }

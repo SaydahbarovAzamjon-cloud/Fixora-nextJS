@@ -79,7 +79,13 @@ const TechnicianProfilePage: NextPage = () => {
 	};
 
 	const chatHandler = async () => {
-		await sweetTopSmallSuccessAlert(t('technicianProfile.chat.comingSoon'), 1200);
+		try {
+			if (!technicianId) return;
+			if (!user?._id) throw new Error(Messages.error2);
+			await router.push(`/messages?peerId=${technicianId}`);
+		} catch (err: any) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	if (!technicianId) return null;

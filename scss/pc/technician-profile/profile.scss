@@ -144,6 +144,61 @@
 	}
 }
 
+.fixora-tech-profile__hero-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	flex-shrink: 0;
+}
+
+.fixora-tech-profile__follow-btn,
+.fixora-tech-profile__chat-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 40px;
+	padding: 0 18px;
+	border-radius: 999px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-surface);
+	color: var(--fixora-text-primary);
+	font-family: $font;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+	white-space: nowrap;
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-tech-profile__follow-btn {
+	background: var(--fixora-primary);
+	border-color: var(--fixora-primary);
+	color: #fff;
+
+	&:hover {
+		background: var(--fixora-primary-hover);
+		border-color: var(--fixora-primary-hover);
+		color: #fff;
+	}
+
+	&--active {
+		background: var(--fixora-surface);
+		border-color: var(--fixora-border-subtle);
+		color: var(--fixora-text-primary);
+
+		&:hover {
+			border-color: var(--fixora-primary);
+			color: var(--fixora-primary);
+		}
+	}
+}
+
 .fixora-tech-profile__stats {
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
@@ -402,6 +457,16 @@
 
 	.fixora-tech-profile__meta {
 		justify-content: center;
+	}
+
+	.fixora-tech-profile__hero-actions {
+		flex-direction: row;
+		width: 100%;
+
+		.fixora-tech-profile__follow-btn,
+		.fixora-tech-profile__chat-btn {
+			flex: 1;
+		}
 	}
 
 	.fixora-tech-profile__portfolio {

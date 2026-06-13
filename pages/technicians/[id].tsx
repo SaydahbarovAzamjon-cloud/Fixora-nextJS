@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Stack, Tab, Tabs } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
@@ -14,7 +14,11 @@ import TechnicianProfilePortfolio from '../../libs/components/technician-profile
 import TechnicianProfileReviews from '../../libs/components/technician-profile/TechnicianProfileReviews';
 import TechnicianProfileSidebar from '../../libs/components/technician-profile/TechnicianProfileSidebar';
 import { GET_TECHNICIAN_REVIEWS, GET_USER } from '../../apollo/user/query';
+import { SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianProfile, TechnicianReview } from '../../libs/types/fixora/fixora';
+import { userVar } from '../../apollo/store';
+import { Messages } from '../../libs/config';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -29,8 +33,12 @@ const TechnicianProfilePage: NextPage = () => {
 	const router = useRouter();
 	const technicianId = router.query.id as string | undefined;
 	const [activeTab, setActiveTab] = useState<ProfileTab>('about');
+	const user = useReactiveVar(userVar);
 
-	const { data: userData, loading: userLoading } = useQuery(GET_USER, {
+	const [subscribe] = useMutation(SUBSCRIBE);
+	const [unsubscribe] = useMutation(UNSUBSCRIBE);
+
+	const { data: userData, loading: userLoading, refetch: refetchTechnician } = useQuery(GET_USER, {
 		skip: !technicianId,
 		variables: { userId: technicianId },
 		fetchPolicy: 'network-only',
@@ -53,6 +61,27 @@ const TechnicianProfilePage: NextPage = () => {
 	const technician: TechnicianProfile | null = userData?.getUser ?? null;
 	const reviews: TechnicianReview[] = reviewsData?.getTechnicianReviews?.list ?? [];
 
+	const toggleFollowHandler = async () => {
+		try {
+			if (!technicianId) return;
+			if (!user?._id) throw new Error(Messages.error2);
+
+			if (technician?.meFollowed?.[0]?.myFollowing) {
+				await unsubscribe({ variables: { input: technicianId } });
+			} else {
+				await subscribe({ variables: { input: technicianId } });
+				await sweetTopSmallSuccessAlert(t('technicianProfile.followed'), 800);
+			}
+			await refetchTechnician();
+		} catch (err: any) {
+			await sweetErrorHandling(err);
+		}
+	};
+
+	const chatHandler = async () => {
+		await sweetTopSmallSuccessAlert(t('technicianProfile.chat.comingSoon'), 1200);
+	};
+
 	if (!technicianId) return null;
 
 	return (
@@ -69,7 +98,12 @@ const TechnicianProfilePage: NextPage = () => {
 					<div className="fixora-tech-profile__empty">{t('technicianProfile.notFound')}</div>
 				) : (
 					<>
-						<TechnicianProfileHero technician={technician} />
+						<TechnicianProfileHero
+							technician={technician}
+							isOwnProfile={!!user?._id && user._id === technician._id}
+							onToggleFollow={toggleFollowHandler}
+							onChat={chatHandler}
+						/>
 
 						<div className="fixora-tech-profile__layout">
 							<div className="fixora-tech-profile__main">

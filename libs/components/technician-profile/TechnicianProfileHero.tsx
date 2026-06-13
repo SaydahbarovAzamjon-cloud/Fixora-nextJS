@@ -3,15 +3,23 @@ import { useTranslation } from 'next-i18next';
 import StarIcon from '@mui/icons-material/Star';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
 import { TechnicianProfile } from '../../types/fixora/fixora';
 
 interface TechnicianProfileHeroProps {
 	technician: TechnicianProfile;
+	isOwnProfile?: boolean;
+	onToggleFollow?: () => void;
+	onChat?: () => void;
 }
 
-const TechnicianProfileHero = ({ technician }: TechnicianProfileHeroProps) => {
+const TechnicianProfileHero = ({ technician, isOwnProfile, onToggleFollow, onChat }: TechnicianProfileHeroProps) => {
 	const { t } = useTranslation('common');
 	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
+	const isFollowing = !!technician.meFollowed?.[0]?.myFollowing;
 
 	return (
 		<section className="fixora-tech-profile__hero">
@@ -55,8 +63,31 @@ const TechnicianProfileHero = ({ technician }: TechnicianProfileHeroProps) => {
 								{technician.userLocation}
 							</span>
 						)}
+						<span>
+							<GroupOutlinedIcon fontSize="inherit" />
+							{t('technicianProfile.followers', { count: technician.followersCount ?? 0 })}
+						</span>
 					</div>
 				</div>
+
+				{!isOwnProfile && (
+					<div className="fixora-tech-profile__hero-actions">
+						<button
+							type="button"
+							className={`fixora-tech-profile__follow-btn${
+								isFollowing ? ' fixora-tech-profile__follow-btn--active' : ''
+							}`}
+							onClick={onToggleFollow}
+						>
+							{isFollowing ? <HowToRegIcon fontSize="small" /> : <PersonAddAlt1Icon fontSize="small" />}
+							{isFollowing ? t('technicianProfile.following') : t('technicianProfile.follow')}
+						</button>
+						<button type="button" className="fixora-tech-profile__chat-btn" onClick={onChat}>
+							<ChatBubbleOutlineRoundedIcon fontSize="small" />
+							{t('technicianProfile.chat.cta')}
+						</button>
+					</div>
+				)}
 			</div>
 
 			<div className="fixora-tech-profile__stats">

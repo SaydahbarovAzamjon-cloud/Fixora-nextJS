@@ -62,7 +62,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 
 				{device === 'mobile' ? (
 					<Swiper
-						className="fixora-home-technicians__swiper"
+						className="fixora-home-technicians__swiper fixora-home-technicians__swiper--mobile"
 						slidesPerView="auto"
 						centeredSlides
 						spaceBetween={16}
@@ -77,7 +77,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 						</Box>
 						<Swiper
 							className="fixora-home-technicians__swiper"
-							slidesPerView="auto"
+							slidesPerView={4}
 							spaceBetween={20}
 							modules={[Autoplay, Navigation]}
 							navigation={{

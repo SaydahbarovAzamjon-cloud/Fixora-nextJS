@@ -98,6 +98,9 @@
 
 	&__swiper {
 		width: 100%;
+		/* breathing room inside swiper's overflow:hidden so the hover lift
+		   (translateY) doesn't clip; !important — swiper core (.swiper { padding: 0 }) loads later */
+		padding: 8px 0 !important;
 
 		.swiper-wrapper {
 			align-items: stretch;
@@ -105,10 +108,18 @@
 	}
 
 	&__slide {
-		width: 262px;
-		height: auto;
+		/* swiper core css (.swiper-slide { height: 100% }) loads later and breaks
+		   equal-height stretching, hence !important */
+		height: auto !important;
 		display: flex;
 		align-items: stretch;
+	}
+
+	/* mobile swiper uses slidesPerView="auto", so slides need an explicit width;
+	   swiper core css (.swiper-slide { width: 100% }) loads later, hence !important —
+	   same workaround as testimonials. Desktop gets inline widths from slidesPerView={4}. */
+	&__swiper--mobile &__slide {
+		width: 262px !important;
 	}
 
 	&__slide-inner {
@@ -120,6 +131,7 @@
 
 .fixora-tech-card {
 	@include fixora-home-card-surface;
+	box-sizing: border-box; /* global reset forces content-box; without this, height: 100% + padding overflows the slide and the badge gets clipped */
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -148,7 +160,7 @@
 	&__avatar {
 		width: 64px;
 		height: 64px;
-		border-radius: 12px;
+		border-radius: 50%;
 		object-fit: cover;
 		background: var(--fixora-surface-elevated);
 	}
@@ -941,7 +953,7 @@
 		grid-template-columns: 1fr;
 	}
 
-	.fixora-home-technicians__slide {
-		width: 240px;
+	.fixora-home-technicians__swiper--mobile .fixora-home-technicians__slide {
+		width: 240px !important;
 	}
 }

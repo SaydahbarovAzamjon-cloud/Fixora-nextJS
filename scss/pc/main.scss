@@ -695,6 +695,7 @@ body::-webkit-scrollbar {
 		display: flex;
 		flex-direction: row;
 		background: transparent;
+		border-top: 1px solid var(--fixora-border-subtle);
 		.footer-container {
 			width: 1300px;
 			max-width: calc(100% - 40px);

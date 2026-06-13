@@ -9,3 +9,6 @@ export type { FixoraGlassCardProps } from './FixoraGlassCard';
 
 export { default as FixoraKakaoButton } from './FixoraKakaoButton';
 export type { FixoraKakaoButtonProps } from './FixoraKakaoButton';
+
+export { default as FixoraSelect } from './FixoraSelect';
+export type { FixoraSelectProps, FixoraSelectOption } from './FixoraSelect';

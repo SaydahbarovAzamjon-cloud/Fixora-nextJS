@@ -1,0 +1,175 @@
+/** Booking flow UI — P3-06 */
+
+.fixora-booking-page {
+	display: flex;
+	flex-direction: column;
+	max-width: 760px;
+	margin: 0 auto;
+}
+
+.fixora-booking-page__title {
+	font-family: $font;
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	margin: 0 0 20px;
+}
+
+.fixora-booking {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.fixora-booking__intro {
+	color: var(--fixora-text-secondary);
+	font-size: 14px;
+	margin: -8px 0 0;
+}
+
+.fixora-booking__card {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.fixora-booking__heading {
+	font-family: $font;
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	margin: 0;
+}
+
+.fixora-booking__text {
+	color: var(--fixora-text-secondary);
+	font-size: 14px;
+	margin: 0;
+}
+
+.fixora-booking__device-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.fixora-booking__device-option {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 12px;
+	cursor: pointer;
+	transition: border-color 0.2s ease, background 0.2s ease;
+
+	input {
+		accent-color: var(--fixora-primary);
+	}
+
+	&:hover {
+		border-color: var(--fixora-primary);
+	}
+
+	&--active {
+		border-color: var(--fixora-primary);
+		background: rgba(255, 107, 0, 0.08);
+	}
+}
+
+.fixora-booking__device-info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 14px;
+	color: var(--fixora-text-primary);
+
+	strong {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-weight: 600;
+	}
+
+	span {
+		color: var(--fixora-text-secondary);
+		font-size: 13px;
+	}
+}
+
+.fixora-booking__form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+}
+
+.fixora-booking__textarea {
+	grid-column: 1 / -1;
+}
+
+.fixora-booking__type-options {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+}
+
+.fixora-booking__type-option {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 14px 16px;
+	border-radius: 12px;
+	border: 1px solid var(--fixora-border-subtle);
+	font-size: 14px;
+	color: var(--fixora-text-primary);
+
+	span {
+		color: var(--fixora-text-secondary);
+		font-size: 13px;
+	}
+
+	&--active {
+		border-color: var(--fixora-primary);
+		background: rgba(255, 107, 0, 0.08);
+	}
+
+	&--disabled {
+		opacity: 0.5;
+	}
+}
+
+.fixora-booking__success {
+	align-items: center;
+	text-align: center;
+}
+
+.fixora-booking__success-icon {
+	font-size: 48px;
+	color: var(--fixora-primary);
+}
+
+.fixora-booking__success-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 100%;
+	max-width: 320px;
+}
+
+.fixora-booking__link {
+	color: var(--fixora-text-secondary);
+	text-decoration: none;
+	font-size: 14px;
+	text-align: center;
+
+	&:hover {
+		color: var(--fixora-primary);
+	}
+}
+
+@media (max-width: 639px) {
+	.fixora-booking__form-grid,
+	.fixora-booking__type-options {
+		grid-template-columns: 1fr;
+	}
+}

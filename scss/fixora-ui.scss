@@ -131,12 +131,22 @@
 		&--error {
 			border-color: var(--fixora-error);
 		}
+
+		&--textarea {
+			height: auto;
+			align-items: flex-start;
+			padding: 4px 16px;
+		}
 	}
 
 	&__icon {
 		display: flex;
 		color: var(--fixora-text-muted);
 		flex-shrink: 0;
+
+		&--end {
+			pointer-events: none;
+		}
 	}
 
 	&__control {
@@ -152,6 +162,21 @@
 		&::placeholder {
 			color: var(--fixora-text-muted);
 		}
+	}
+
+	&__select {
+		appearance: none;
+		cursor: pointer;
+
+		option {
+			color: #1a1a1a;
+		}
+	}
+
+	textarea.fixora-input__control {
+		resize: vertical;
+		min-height: 88px;
+		padding: 12px 0;
 	}
 
 	&__toggle {

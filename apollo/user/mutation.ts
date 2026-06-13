@@ -328,3 +328,44 @@ export const UNSUBSCRIBE = gql`
 		}
 	}
 `;
+
+/**************************
+ *      DEVICE & BOOKING  *
+ *************************/
+
+export const CREATE_DEVICE = gql`
+	mutation CreateDevice($input: DeviceInput!) {
+		createDevice(input: $input) {
+			_id
+			deviceBrand
+			deviceCategory
+			deviceModel
+			deviceIssue
+			deviceDescription
+			deviceSerialNumber
+			deviceImage
+			deviceStatus
+			releaseYear
+			userId
+			createdAt
+		}
+	}
+`;
+
+export const CREATE_BOOKING = gql`
+	mutation CreateBooking($input: BookingInput!) {
+		createBooking(input: $input) {
+			_id
+			bookingStatus
+			bookingType
+			bookingDate
+			problemTitle
+			problemDescription
+			estimatedPrice
+			deviceId
+			technicianId
+			userId
+			createdAt
+		}
+	}
+`;

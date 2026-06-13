@@ -613,6 +613,12 @@ export const GET_USER = gql`
 			completedJobsCount
 			yearsExperience
 			badgeLevel
+			followersCount
+			meFollowed {
+				followingId
+				followerId
+				myFollowing
+			}
 			services {
 				title
 				basePrice
@@ -727,6 +733,30 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					followerId
 					myFollowing
 				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_MY_DEVICES = gql`
+	query GetMyDevices($input: DevicesInquiry!) {
+		getMyDevices(input: $input) {
+			list {
+				_id
+				deviceBrand
+				deviceCategory
+				deviceModel
+				deviceIssue
+				deviceDescription
+				deviceSerialNumber
+				deviceImage
+				deviceStatus
+				releaseYear
+				userId
+				createdAt
 			}
 			metaCounter {
 				total

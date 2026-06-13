@@ -101,6 +101,8 @@ export interface TechnicianProfile {
 	completedJobsCount?: number;
 	yearsExperience?: number;
 	badgeLevel?: BadgeLevel;
+	followersCount?: number;
+	meFollowed?: MeFollowed[];
 	services?: UserServiceItem[];
 	portfolioImages?: string[];
 	workingHours?: UserWorkingHours;
@@ -128,4 +130,72 @@ export interface ReviewsInquiry {
 export interface ReviewDistribution {
 	star: number;
 	count: number;
+}
+
+export type DeviceCategory = 'IPHONE' | 'IPAD' | 'MACBOOK' | 'APPLE_WATCH';
+export type DeviceBrand = 'APPLE';
+export type DeviceStatus = 'ACTIVE' | 'INACTIVE' | 'IN_REPAIR' | 'REPAIR_COMPLETE';
+export type BookingType = 'SHOP_VISIT' | 'ON_SITE';
+export type BookingStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+
+export interface Device {
+	_id: string;
+	deviceBrand: DeviceBrand;
+	deviceCategory: DeviceCategory;
+	deviceModel: string;
+	deviceIssue: string;
+	deviceDescription?: string;
+	deviceSerialNumber?: string;
+	deviceImage?: string;
+	deviceStatus: DeviceStatus;
+	releaseYear?: number;
+	userId: string;
+	createdAt: string;
+}
+
+export interface DeviceInput {
+	deviceBrand?: DeviceBrand;
+	deviceCategory: DeviceCategory;
+	deviceDescription?: string;
+	deviceImage?: string;
+	deviceIssue: string;
+	deviceModel: string;
+	deviceSerialNumber?: string;
+	releaseYear?: number;
+}
+
+export interface DevicesInquiry {
+	page: number;
+	limit: number;
+	sort?: string;
+	direction?: 'ASC' | 'DESC';
+	search: {
+		deviceCategory?: DeviceCategory;
+		deviceStatus?: DeviceStatus;
+		text?: string;
+	};
+}
+
+export interface Booking {
+	_id: string;
+	bookingStatus: BookingStatus;
+	bookingType: BookingType;
+	bookingDate?: string;
+	problemTitle: string;
+	problemDescription?: string;
+	estimatedPrice?: number;
+	deviceId: string;
+	technicianId: string;
+	userId: string;
+	createdAt: string;
+}
+
+export interface BookingInput {
+	deviceId: string;
+	technicianId: string;
+	problemTitle: string;
+	problemDescription?: string;
+	bookingType?: BookingType;
+	bookingDate?: string;
+	estimatedPrice?: number;
 }

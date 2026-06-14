@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-13 |
+| **Last updated** | 2026-06-14 |
 | **Last agent** | Claude |
-| **Last session** | P3-07 Messages UI: `/messages` page (conversation list + chat thread + request details panel), `getMyConversations`/`getMessages`/`sendMessage`/`markMessagesAsRead` wired, navbar message icon, technician profile chat button now routes to `/messages?peerId=` |
-| **Next agent should start with** | `P3-08` — My Page + Notifications (mockup §7–8 in `customer-pages-full.png`) |
+| **Last session** | P3-07 polish (Messages UI fixes: request details empty state, like button outline/padding, bubble height, sender avatars) + P3-08 My Page + Notifications: `/notifications` page (Today/Earlier groups, mark all as read, navbar bell badge with `pollInterval`), `/mypage` rewritten with `withLayoutFull` — profile header + Requests/Following/Repair Stories/Settings tabs, `getMyBookings`/`getUserFollowings`/`getMyArticles`/`updateUser` wired |
+| **Next agent should start with** | `P3-09` — Tenant Dashboard (mockup `docs/design/technician/technician-dashboard-full.png`) |
 
 ---
 
@@ -25,7 +25,8 @@
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
-| Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, `scss/pc/messages/messages.scss` |
+| Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
+| My Page + Notifications (P3-08) | ✅ `/mypage` (profile header + Requests/Following/Repair Stories/Settings tabs) + `/notifications` (Today/Earlier, mark all read, navbar badge), `scss/pc/mypage/fixora-mypage.scss`, `scss/pc/notifications/notifications.scss` |
 
 ---
 
@@ -92,7 +93,8 @@ Full checklist: `TASK_BOARD.md`
 | Light theme mockup | None — Phase 5 (P4-05+) |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 | Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
-| "View Request" in Messages | Links to `/mypage` — no booking detail view yet (depends on P3-08) |
+| "View Request" in Messages | Links to `/mypage` — no dedicated booking detail view yet |
+| Legacy `/mypage` components | `libs/components/mypage/*` (MyProperties, MyFavorites, MyArticles, WriteArticle, etc.) left in place but no longer imported by `/mypage` — still referenced by `/member` and `/_admin`; do not delete without checking |
 
 ---
 

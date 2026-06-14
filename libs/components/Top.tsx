@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, withRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { getJwtToken, logOut, updateUserInfo } from '../auth';
@@ -11,9 +11,14 @@ import { FixoraLogo } from './brand';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { Logout } from '@mui/icons-material';
-import { useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { resolveProfileImageUrl } from '../utils/profileImage';
+import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../apollo/user/notification';
+import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
+import { Notification } from '../types/fixora/fixora';
+import { getNotificationLink } from '../utils/notifications';
+import NotificationDropdown from './notifications/NotificationDropdown';
 
 const LANGS = ['en', 'kr'] as const;
 
@@ -26,6 +31,44 @@ const Top = () => {
 	const [colorChange, setColorChange] = useState(false);
 	const [logoutAnchor, setLogoutAnchor] = useState<null | HTMLElement>(null);
 	const logoutOpen = Boolean(logoutAnchor);
+	const [notifOpen, setNotifOpen] = useState(false);
+	const notifRef = useRef<HTMLDivElement>(null);
+
+	const { data: notificationsData, refetch: refetchNotifications } = useQuery(GET_NOTIFICATIONS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC' } },
+		fetchPolicy: 'network-only',
+		pollInterval: 30000,
+	});
+
+	const { data: unreadCountData, refetch: refetchUnreadCount } = useQuery(GET_NOTIFICATIONS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 50, search: { isRead: false } } },
+		fetchPolicy: 'network-only',
+		pollInterval: 30000,
+	});
+
+	const { data: conversationsData } = useQuery(GET_MY_CONVERSATIONS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 50 } },
+		fetchPolicy: 'network-only',
+		pollInterval: 30000,
+	});
+
+	// Messages have their own icon + badge, so they're excluded from the notification bell.
+	const recentNotifications: Notification[] = (notificationsData?.getNotifications?.list ?? [])
+		.filter((n: Notification) => n.notificationType !== 'MESSAGE')
+		.slice(0, 8);
+	const unreadNotifications: number = (unreadCountData?.getNotifications?.list ?? []).filter(
+		(n: Notification) => n.notificationType !== 'MESSAGE',
+	).length;
+
+	const unreadMessages: number = (conversationsData?.getMyConversations?.list ?? []).reduce(
+		(sum: number, conversation: { unreadCount?: number }) => sum + (conversation.unreadCount ?? 0),
+		0,
+	);
+
+	const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -48,6 +91,17 @@ const Top = () => {
 		return () => window.removeEventListener('scroll', changeNavbarColor);
 	}, []);
 
+	useEffect(() => {
+		if (!notifOpen) return;
+		const handleClickOutside = (event: MouseEvent) => {
+			if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+				setNotifOpen(false);
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, [notifOpen]);
+
 	/** HANDLERS **/
 	const langChoice = useCallback(
 		async (locale: string) => {
@@ -66,6 +120,20 @@ const Top = () => {
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	}, [router.pathname]);
+
+	const handleNotificationClick = async (notification: Notification) => {
+		setNotifOpen(false);
+		if (!notification.isRead) {
+			try {
+				await markNotificationRead({ variables: { input: { notificationId: notification._id } } });
+				await Promise.all([refetchNotifications(), refetchUnreadCount()]);
+			} catch {
+				/* ignore */
+			}
+		}
+		const link = getNotificationLink(notification);
+		if (link) router.push(link);
+	};
 
 	const navLinks = (
 		<>
@@ -159,8 +227,25 @@ const Top = () => {
 							<>
 								<Link href={'/messages'} className={'fixora-nav__icon-link'}>
 									<ChatBubbleOutlineIcon className={'fixora-nav__bell'} />
+									{unreadMessages > 0 && <span className={'fixora-nav__badge'}>{unreadMessages}</span>}
 								</Link>
-								<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
+								<div className={'fixora-nav__icon-link'} ref={notifRef}>
+									<button
+										type="button"
+										className={'fixora-nav__icon-btn'}
+										onClick={() => setNotifOpen((prev) => !prev)}
+									>
+										<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
+										{unreadNotifications > 0 && <span className={'fixora-nav__badge'}>{unreadNotifications}</span>}
+									</button>
+									{notifOpen && (
+										<NotificationDropdown
+											notifications={recentNotifications}
+											onItemClick={handleNotificationClick}
+											onViewAll={() => setNotifOpen(false)}
+										/>
+									)}
+								</div>
 								<button
 									type="button"
 									className={'fixora-nav__avatar'}

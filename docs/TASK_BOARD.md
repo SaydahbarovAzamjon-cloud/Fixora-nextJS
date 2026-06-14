@@ -4,7 +4,7 @@
 > Update after each task: `⬜ Todo` · `🔄 In Progress` · `✅ Done` · `⏸ Blocked`  
 > **Cursor and Codex:** keep this in sync with `AI_HANDOFF.md`.
 
-**Last updated:** 2026-06-13
+**Last updated:** 2026-06-14
 
 **Roadmap order:** Phase 0 → 1 → 2 (desktop pages) → **3 (mobile)** → 4 (migration) → 5 (light theme)
 
@@ -44,7 +44,7 @@
 | P3-05 | Search + Technician Profile | ✅ Done | `/search` mockup + `/technicians/[id]` profile + book placeholder |
 | P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + new device form + booking details, `createDevice`/`createBooking` wired |
 | P3-07 | Messages UI | ✅ Done | `/messages` — chat list + thread + request details, mockup `customer-pages-full.png` §6 |
-| P3-08 | My Page + Notifications | ⬜ Todo | Mockup: `customer-pages-full.png` §7–8 |
+| P3-08 | My Page + Notifications | ✅ Done | `/mypage` (profile + Requests/Following/Repair Stories/Settings tabs) + `/notifications` — mockup `customer-pages-full.png` §7–8 |
 | P3-09 | Tenant Dashboard (§9.3) | ⬜ Todo | Mockup: `docs/design/technician/technician-dashboard-full.png` |
 | P3-10 | Community + Post Detail | ⬜ Todo | Mockup: `customer-pages-full.png` §4–5 |
 
@@ -67,7 +67,7 @@
 | PM-05 | Search + Technician Profile mobile | ⬜ Todo | PM-02, P3-05 | Filters drawer, result cards, profile gallery + CTA sticky bottom |
 | PM-06 | Booking flow mobile | ⬜ Todo | PM-02, P3-06 | Stepper, device form, KakaoPay CTA, deposit summary |
 | PM-07 | Messages mobile | ⬜ Todo | PM-02, P3-07 | Conversation list + thread full-screen; phone hidden until ACCEPTED |
-| PM-08 | My Page + Notifications mobile | ⬜ Todo | PM-02, P3-08 | Tabs, booking cards, notification list |
+| PM-08 | My Page + Notifications mobile | ⬜ Todo | PM-02, P3-08 ✅ | Tabs, booking cards, notification list |
 | PM-09 | Community + Post Detail mobile | ⬜ Todo | PM-02, P3-10 | Feed cards, article detail, comments |
 | PM-10 | Technician dashboard mobile | ⬜ Todo | PM-02, P3-09 | Sidebar → drawer/bottom nav; requests/jobs cards |
 | PM-11 | Admin mobile (minimal) | ⬜ Todo | PM-02, P3-15 | Read-only tables OK; verification queue usable on phone |
@@ -116,9 +116,9 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-08` — My Page + Notifications (or `PM-05` if starting mobile phase)
+**Next task:** `P3-09` — Tenant Dashboard (or `PM-05` if starting mobile phase)
 
-**Then:** `P3-08` → … → `P3-10` — remaining core pages
+**Then:** `P3-09` → `P3-10` — remaining core pages
 
 **Mobile phase:** `PM-01` after Phase 2 pages exist, or pull forward `PM-01`–`PM-04` while building P3-05+
 

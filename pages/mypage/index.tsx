@@ -1,158 +1,109 @@
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { NextPage } from 'next';
-import { Stack } from '@mui/material';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import MyProperties from '../../libs/components/mypage/MyProperties';
-import MyFavorites from '../../libs/components/mypage/MyFavorites';
-import RecentlyVisited from '../../libs/components/mypage/RecentlyVisited';
-import AddProperty from '../../libs/components/mypage/AddNewProperty';
-import MyProfile from '../../libs/components/mypage/MyProfile';
-import MyArticles from '../../libs/components/mypage/MyArticles';
-import { useMutation, useReactiveVar } from '@apollo/client';
-import { userVar } from '../../apollo/store';
-import MyMenu from '../../libs/components/mypage/MyMenu';
-import WriteArticle from '../../libs/components/mypage/WriteArticle';
-import MemberFollowers from '../../libs/components/member/MemberFollowers';
-import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import MemberFollowings from '../../libs/components/member/MemberFollowings';
+import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
-import { Messages } from '../../libs/config';
+import { useQuery, useReactiveVar } from '@apollo/client';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import ProfileHeader from '../../libs/components/mypage/fixora/ProfileHeader';
+import RequestsTab from '../../libs/components/mypage/fixora/RequestsTab';
+import FollowingTab from '../../libs/components/mypage/fixora/FollowingTab';
+import RepairStoriesTab from '../../libs/components/mypage/fixora/RepairStoriesTab';
+import SettingsTab from '../../libs/components/mypage/fixora/SettingsTab';
+import { GET_USER } from '../../apollo/user/query';
+import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
+import { userVar } from '../../apollo/store';
+import { Booking } from '../../libs/types/fixora/fixora';
 
-export const getStaticProps = async ({ locale }: any) => ({
+export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
-		...(await serverSideTranslations(locale, ['common'])),
+		...(await serverSideTranslations(locale ?? 'en', ['common'])),
 	},
 });
 
+const TABS = ['requests', 'following', 'stories', 'settings'] as const;
+type Tab = (typeof TABS)[number];
+
 const MyPage: NextPage = () => {
-	const device = useDeviceDetect();
-	const user = useReactiveVar(userVar);
+	const { t } = useTranslation('common');
 	const router = useRouter();
-	const category: any = router.query?.category ?? 'myProfile';
+	const user = useReactiveVar(userVar);
+
+	const tab = (router.query.tab as Tab) ?? 'requests';
 
 	/** APOLLO REQUESTS **/
-	const [subscribe] = useMutation(SUBSCRIBE);
-	const [unsubscribe] = useMutation(UNSUBSCRIBE);
-	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const { data: userData } = useQuery(GET_USER, {
+		skip: !user?._id,
+		variables: { userId: user?._id },
+		fetchPolicy: 'network-only',
+	});
+
+	const profile = userData?.getUser;
+
+	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 50, search: {} } },
+		fetchPolicy: 'network-only',
+	});
+
+	const bookings: Booking[] = bookingsData?.getMyBookings?.list ?? [];
+	const requestsCount = bookingsData?.getMyBookings?.metaCounter?.[0]?.total ?? bookings.length;
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (!user?._id) router.push('/').then();
+		if (!user?._id) {
+			router.push('/').then();
+		}
 	}, [user]);
 
 	/** HANDLERS **/
-	const subscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			console.log('id: ', id);
-			if (!id) throw new Error(Messages.error1);
-			if (!user?._id) throw new Error(Messages.error2);
-
-			await subscribe({
-				variables: {
-					input: id,
-				},
-			});
-
-			await sweetTopSmallSuccessAlert('Subscribed!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
+	const selectTab = (next: Tab) => {
+		router.push(`/mypage?tab=${next}`, undefined, { shallow: true });
 	};
 
-	const unsubscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) throw new Error(Messages.error1);
-			if (!user?._id) throw new Error(Messages.error2);
+	return (
+		<div className="fixora-mypage-page">
+			<div className="container fixora-mypage">
+				<ProfileHeader
+					name={profile?.userFullName || profile?.userNickname || ''}
+					email={profile?.userEmail}
+					image={profile?.userProfileImage}
+					requestsCount={requestsCount}
+					followingCount={profile?.followingCount ?? 0}
+					storiesCount={profile?.userArticles ?? 0}
+					onEditProfile={() => selectTab('settings')}
+				/>
 
-			await unsubscribe({
-				variables: {
-					input: id,
-				},
-			});
+				<div className="fixora-mypage__tabs">
+					{TABS.map((item) => (
+						<button
+							key={item}
+							type="button"
+							className={`fixora-mypage__tab ${tab === item ? 'fixora-mypage__tab--active' : ''}`}
+							onClick={() => selectTab(item)}
+						>
+							{t(`mypage.tabs.${item}`)}
+						</button>
+					))}
+				</div>
 
-			await sweetTopSmallSuccessAlert('Unsubscribed!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
-	};
-
-	const likeMemberHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) return;
-			if (!user?._id) throw new Error(Messages.error2);
-
-			await likeTargetMember({
-				variables: {
-					input: id,
-				},
-			});
-
-			await sweetTopSmallSuccessAlert('Success!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			console.log('ERROR, likeMemberHandler:', err.message);
-			sweetMixinErrorAlert(err.message).then();
-		}
-	};
-
-	const redirectToMemberPageHandler = async (memberId: string) => {
-		try {
-			if (memberId === user?._id) await router.push(`/mypage?memberId=${memberId}`);
-			else await router.push(`/member?memberId=${memberId}`);
-		} catch (error) {
-			await sweetErrorHandling(error);
-		}
-	};
-
-	if (device === 'mobile') {
-		return <div>MY PAGE</div>;
-	} else {
-		return (
-			<div id="my-page" style={{ position: 'relative' }}>
-				<div className="container">
-					<Stack className={'my-page'}>
-						<Stack className={'back-frame'}>
-							<Stack className={'left-config'}>
-								<MyMenu />
-							</Stack>
-							<Stack className="main-config" mb={'76px'}>
-								<Stack className={'list-config'}>
-									{category === 'addProperty' && <AddProperty />}
-									{category === 'myProperties' && <MyProperties />}
-									{category === 'myFavorites' && <MyFavorites />}
-									{category === 'recentlyVisited' && <RecentlyVisited />}
-									{category === 'myArticles' && <MyArticles />}
-									{category === 'writeArticle' && <WriteArticle />}
-									{category === 'myProfile' && <MyProfile />}
-									{category === 'followers' && (
-										<MemberFollowers
-											subscribeHandler={subscribeHandler}
-											unsubscribeHandler={unsubscribeHandler}
-											likeMemberHandler={likeMemberHandler}
-											redirectToMemberPageHandler={redirectToMemberPageHandler}
-										/>
-									)}
-									{category === 'followings' && (
-										<MemberFollowings
-											subscribeHandler={subscribeHandler}
-											unsubscribeHandler={unsubscribeHandler}
-											likeMemberHandler={likeMemberHandler}
-											redirectToMemberPageHandler={redirectToMemberPageHandler}
-										/>
-									)}
-								</Stack>
-							</Stack>
-						</Stack>
-					</Stack>
+				<div className="fixora-mypage__content">
+					{tab === 'requests' && <RequestsTab bookings={bookings} />}
+					{tab === 'following' && <FollowingTab />}
+					{tab === 'stories' && <RepairStoriesTab />}
+					{tab === 'settings' && profile?._id && (
+						<SettingsTab
+							userId={profile._id}
+							userFullName={profile.userFullName}
+							userNickname={profile.userNickname}
+							userLocation={profile.userLocation}
+							userBio={profile.userBio}
+						/>
+					)}
 				</div>
 			</div>
-		);
-	}
+		</div>
+	);
 };
 
-export default withLayoutBasic(MyPage);
+export default withLayoutFull(MyPage);

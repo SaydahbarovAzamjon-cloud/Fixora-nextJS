@@ -615,6 +615,9 @@ export const GET_USER = gql`
 			yearsExperience
 			badgeLevel
 			followersCount
+			followingCount
+			userArticles
+			userEmail
 			meFollowed {
 				followingId
 				followerId

@@ -1,0 +1,377 @@
+/** My Page — P3-08 */
+
+@import '/scss/pc/homepage/fixora-card-surface.scss';
+
+.fixora-mypage-page {
+	background: transparent;
+	padding: 130px 0 60px;
+	width: 100%;
+	box-sizing: border-box;
+
+	.container {
+		width: 960px;
+		max-width: calc(100% - 40px);
+		margin: 0 auto;
+		box-sizing: border-box;
+	}
+}
+
+.fixora-mypage {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+/** Header **/
+
+.fixora-mypage__header {
+	@include fixora-home-card-surface;
+	border-radius: 16px;
+	padding: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__identity {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.fixora-mypage__avatar {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__identity-info {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-start;
+}
+
+.fixora-mypage__name {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__email {
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__edit-btn {
+	margin-top: 4px;
+}
+
+.fixora-mypage__stats {
+	display: flex;
+	gap: 32px;
+}
+
+.fixora-mypage__stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+
+	strong {
+		font-size: 20px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+	}
+}
+
+/** Tabs **/
+
+.fixora-mypage__tabs {
+	display: flex;
+	gap: 8px;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+}
+
+.fixora-mypage__tab {
+	padding: 10px 18px;
+	border: none;
+	background: transparent;
+	color: var(--fixora-text-secondary);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	border-bottom: 2px solid transparent;
+	transition: color 0.2s ease, border-color 0.2s ease;
+
+	&:hover {
+		color: var(--fixora-text-primary);
+	}
+
+	&--active {
+		color: var(--fixora-primary);
+		border-bottom-color: var(--fixora-primary);
+	}
+}
+
+.fixora-mypage__content {
+	display: flex;
+	flex-direction: column;
+}
+
+.fixora-mypage__empty {
+	padding: 40px 0;
+	font-size: 13px;
+	color: var(--fixora-text-muted);
+	text-align: center;
+}
+
+/** Requests tab **/
+
+.fixora-mypage__requests {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.fixora-mypage__section-title {
+	margin: 0 0 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__request-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-mypage__request {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 16px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__request-image {
+	width: 56px;
+	height: 56px;
+	border-radius: 10px;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__request-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	strong {
+		font-size: 14px;
+		color: var(--fixora-text-primary);
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.fixora-mypage__request-meta {
+	display: flex;
+	gap: 28px;
+	flex-shrink: 0;
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	dt {
+		font-size: 11px;
+		color: var(--fixora-text-secondary);
+	}
+
+	dd {
+		margin: 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+	}
+}
+
+/** Following tab **/
+
+.fixora-mypage__following-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-mypage__following {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__following-info {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+	min-width: 0;
+
+	div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+
+		strong {
+			font-size: 14px;
+			color: var(--fixora-text-primary);
+		}
+
+		span {
+			font-size: 12px;
+			color: var(--fixora-text-secondary);
+		}
+	}
+}
+
+.fixora-mypage__following-avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__following-rating {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: #ffc107 !important;
+
+	svg {
+		font-size: 14px;
+	}
+}
+
+/** Repair stories tab **/
+
+.fixora-mypage__stories {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-mypage__story {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	border: none;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.fixora-mypage__story-image {
+	width: 56px;
+	height: 56px;
+	border-radius: 10px;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__story-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	strong {
+		font-size: 14px;
+		color: var(--fixora-text-primary);
+	}
+
+	p {
+		margin: 0;
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.fixora-mypage__story-date {
+	font-size: 11px;
+	color: var(--fixora-text-muted);
+}
+
+/** Settings tab **/
+
+.fixora-mypage__settings {
+	@include fixora-home-card-surface;
+	border-radius: 16px;
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 480px;
+	box-sizing: border-box;
+
+	.fixora-input__field--textarea {
+		padding: 10px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: rgba(255, 255, 255, 0.04);
+
+		.fixora-input__control {
+			width: 100%;
+			border: none;
+			outline: none;
+			background: none;
+			color: var(--fixora-text-primary);
+			font-size: 13px;
+			font-family: inherit;
+			resize: vertical;
+		}
+	}
+}

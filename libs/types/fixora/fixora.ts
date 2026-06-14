@@ -234,3 +234,56 @@ export interface Conversation {
 	peer?: ConversationPeer;
 	lastMessage?: Message;
 }
+
+export type ArticleCategory = 'FREE' | 'HUMOR' | 'NEWS' | 'RECOMMEND';
+export type ArticleStatus = 'ACTIVE' | 'DELETE' | 'DRAFT' | 'PUBLISHED';
+
+export interface Article {
+	_id: string;
+	articleCategory?: ArticleCategory | null;
+	articleTitle: string;
+	articleExcerpt?: string | null;
+	articleImage?: string | null;
+	articleStatus: ArticleStatus;
+	articleLikes: number;
+	articleViews: number;
+	articleComments: number;
+	createdAt: string;
+}
+
+export interface FollowedTechnician {
+	_id: string;
+	userNickname?: string;
+	userFullName?: string;
+	shopName?: string;
+	specialty?: string;
+	userProfileImage?: string;
+	averageRating: number;
+	reviewCount: number;
+	isOnline: boolean;
+}
+
+export interface Following {
+	_id: string;
+	followingId: string;
+	followerId: string;
+	createdAt: string;
+	followingData?: FollowedTechnician;
+}
+
+export type NotificationType = 'BOOKING' | 'COMMENT' | 'FOLLOW' | 'LIKE' | 'MESSAGE' | 'REVIEW';
+export type NotificationReferenceType = 'ARTICLE' | 'BOOKING' | 'MESSAGE' | 'REVIEW';
+
+export interface Notification {
+	_id: string;
+	userId: string;
+	receiverId: string;
+	notificationType: NotificationType;
+	notificationTitle: string;
+	notificationDescription?: string;
+	referenceType?: NotificationReferenceType | null;
+	referenceId?: string | null;
+	isRead: boolean;
+	createdAt: string;
+	updatedAt: string;
+}

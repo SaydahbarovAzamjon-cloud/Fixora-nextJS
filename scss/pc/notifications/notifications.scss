@@ -1,0 +1,268 @@
+/** Notifications — P3-08 */
+
+@import '/scss/pc/homepage/fixora-card-surface.scss';
+
+.fixora-notifications-page {
+	background: transparent;
+	padding: 130px 0 60px;
+	width: 100%;
+	box-sizing: border-box;
+
+	.container {
+		width: 720px;
+		max-width: calc(100% - 40px);
+		margin: 0 auto;
+		box-sizing: border-box;
+	}
+}
+
+.fixora-notifications {
+	@include fixora-home-card-surface;
+	border-radius: 16px;
+	padding: 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	box-sizing: border-box;
+}
+
+.fixora-notifications__group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.fixora-notifications__group-title {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-notifications__item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	width: 100%;
+	border-radius: 10px;
+	background: transparent;
+	transition: background-color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	&--unread {
+		background: rgba(255, 107, 0, 0.06);
+	}
+}
+
+.fixora-notifications__item-main {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: 1;
+	min-width: 0;
+	padding: 12px 10px;
+	border: none;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	text-align: left;
+}
+
+.fixora-notifications__mark-read {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	margin-right: 8px;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--fixora-text-muted);
+	cursor: pointer;
+	transition: background-color 0.2s ease, color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-notifications__icon {
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--fixora-primary);
+}
+
+.fixora-notifications__body {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.fixora-notifications__text {
+	font-size: 13px;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-notifications__time {
+	font-size: 12px;
+	color: var(--fixora-text-muted);
+}
+
+.fixora-notifications__chevron {
+	flex-shrink: 0;
+	color: var(--fixora-text-muted);
+}
+
+.fixora-notifications__mark-all {
+	align-self: center;
+	margin-top: 4px;
+}
+
+.fixora-notifications__empty {
+	padding: 24px 0;
+	font-size: 13px;
+	color: var(--fixora-text-muted);
+	text-align: center;
+}
+
+.fixora-notifications__load-more {
+	align-self: center;
+	margin-top: 4px;
+}
+
+/** Navbar dropdown — Instagram-style quick access **/
+
+.fixora-notif-dropdown {
+	@include fixora-home-card-surface;
+	position: absolute;
+	top: calc(100% + 14px);
+	right: -10px;
+	width: 340px;
+	max-width: calc(100vw - 32px);
+	border-radius: 14px;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+	z-index: 200;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.fixora-notif-dropdown__header {
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+
+	strong {
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+}
+
+.fixora-notif-dropdown__list {
+	display: flex;
+	flex-direction: column;
+	max-height: 360px;
+	overflow-y: auto;
+}
+
+.fixora-notif-dropdown__item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	padding: 12px 16px;
+	border: none;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	text-align: left;
+	transition: background-color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	&--unread {
+		background: rgba(255, 107, 0, 0.06);
+	}
+}
+
+.fixora-notif-dropdown__icon {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--fixora-primary);
+}
+
+.fixora-notif-dropdown__body {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.fixora-notif-dropdown__text {
+	font-size: 13px;
+	color: var(--fixora-text-primary);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.fixora-notif-dropdown__time {
+	font-size: 11px;
+	color: var(--fixora-text-muted);
+}
+
+.fixora-notif-dropdown__dot {
+	flex-shrink: 0;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--fixora-primary);
+}
+
+.fixora-notif-dropdown__empty {
+	padding: 24px 16px;
+	font-size: 13px;
+	color: var(--fixora-text-muted);
+	text-align: center;
+}
+
+.fixora-notif-dropdown__view-all {
+	display: block;
+	padding: 12px 16px;
+	border-top: 1px solid var(--fixora-border-subtle);
+	color: var(--fixora-primary);
+	font-size: 13px;
+	font-weight: 600;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+}

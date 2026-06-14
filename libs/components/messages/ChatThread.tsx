@@ -14,11 +14,12 @@ interface ChatThreadProps {
 	peer?: ConversationPeer | null;
 	messages: Message[];
 	currentUserId?: string;
+	currentUserImage?: string;
 	onSend: (text: string) => void | Promise<void>;
 	sending?: boolean;
 }
 
-const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThreadProps) => {
+const ChatThread = ({ peer, messages, currentUserId, currentUserImage, onSend, sending }: ChatThreadProps) => {
 	const { t } = useTranslation('common');
 	const [text, setText] = useState('');
 	const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
@@ -91,11 +92,13 @@ const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThre
 				{messages.map((message) => {
 					const isMine = message.senderId === currentUserId;
 					const isLiked = likedMessages.has(message._id);
+					const avatarSrc = isMine ? resolveProfileImageUrl(currentUserImage) : resolveProfileImageUrl(peer.userProfileImage);
 					return (
 						<div
 							key={message._id}
 							className={`fixora-messages__bubble-row ${isMine ? 'fixora-messages__bubble-row--mine' : ''}`}
 						>
+							<img className="fixora-messages__bubble-avatar" src={avatarSrc} alt="" />
 							<div className="fixora-messages__bubble-group">
 								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''}`}>
 									<p>{message.messageContent}</p>

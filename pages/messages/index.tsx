@@ -146,7 +146,14 @@ const MessagesPage: NextPage = () => {
 			<div className="container fixora-messages">
 				<ConversationList conversations={conversations} selectedPeerId={selected?.peerId} onSelect={selectConversation} />
 
-				<ChatThread peer={activePeer} messages={messages} currentUserId={user?._id} onSend={sendHandler} sending={sending} />
+				<ChatThread
+					peer={activePeer}
+					messages={messages}
+					currentUserId={user?._id}
+					currentUserImage={user?.memberImage}
+					onSend={sendHandler}
+					sending={sending}
+				/>
 
 				<RequestDetailsPanel booking={booking} device={device} loading={selected?.bookingId ? bookingLoading : false} />
 			</div>

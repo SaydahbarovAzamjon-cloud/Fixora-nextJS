@@ -288,11 +288,22 @@
 
 .fixora-messages__bubble-row {
 	display: flex;
+	align-items: flex-end;
+	gap: 8px;
 	justify-content: flex-start;
 
 	&--mine {
-		justify-content: flex-end;
+		flex-direction: row-reverse;
+		justify-content: flex-start;
 	}
+}
+
+.fixora-messages__bubble-avatar {
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	object-fit: cover;
 }
 
 .fixora-messages__bubble-group {

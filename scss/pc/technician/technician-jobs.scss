@@ -1,0 +1,580 @@
+/** ACTIVE JOBS SCREEN STYLES **/
+
+.fixora-technician-active-jobs {
+	width: 100%;
+	height: 100%;
+}
+
+.fixora-active-jobs-container {
+	display: grid;
+	grid-template-columns: 360px 1fr;
+	gap: 24px;
+	height: 100%;
+}
+
+/* ============ LEFT PANE - JOBS LIST ============ */
+
+.fixora-active-jobs-left {
+	display: flex;
+	flex-direction: column;
+}
+
+.fixora-active-jobs-list {
+	background: var(--fixora-glass-bg);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 12px;
+	padding: 20px;
+	backdrop-filter: blur(10px);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.fixora-jobs-list__header {
+	margin-bottom: 16px;
+}
+
+.fixora-jobs-list__title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--fixora-text-primary);
+	margin: 0;
+}
+
+/* Status Tabs */
+.fixora-jobs-list__tabs {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 12px;
+	max-height: 220px;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--fixora-border-subtle);
+		border-radius: 4px;
+
+		&:hover {
+			background: var(--fixora-border);
+		}
+	}
+}
+
+.fixora-jobs-list__tab {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 12px;
+	background: transparent;
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 6px;
+	color: var(--fixora-text-secondary);
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-primary);
+	}
+
+	&--active {
+		background: rgba(255, 107, 0, 0.15);
+		border-color: var(--fixora-primary);
+		color: var(--fixora-primary);
+		font-weight: 600;
+	}
+
+	&-count {
+		background: var(--fixora-surface-elevated);
+		padding: 2px 6px;
+		border-radius: 10px;
+		font-size: 11px;
+		font-weight: 600;
+	}
+}
+
+/* Jobs List */
+.fixora-jobs-list__items {
+	flex: 1;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--fixora-border-subtle);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--fixora-border);
+		}
+	}
+}
+
+.fixora-jobs-list__empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	color: var(--fixora-text-muted);
+	font-size: 14px;
+
+	p {
+		margin: 0;
+	}
+}
+
+/* Job Card */
+.fixora-job-card {
+	display: grid;
+	grid-template-columns: 45px 1fr 80px;
+	align-items: center;
+	gap: 12px;
+	padding: 12px;
+	background: rgba(255, 107, 0, 0.05);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 107, 0, 0.1);
+		border-color: var(--fixora-primary);
+	}
+
+	&--active {
+		background: rgba(255, 107, 0, 0.15);
+		border-color: var(--fixora-primary);
+		box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+	}
+
+	&__icon {
+		font-size: 32px;
+		line-height: 1;
+		text-align: center;
+	}
+
+	&__content {
+		min-width: 0;
+	}
+
+	&__title {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+		margin: 0 0 2px 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__subtitle {
+		font-size: 11px;
+		color: var(--fixora-text-muted);
+		margin: 0 0 2px 0;
+	}
+
+	&__customer {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+		margin: 0 0 2px 0;
+	}
+
+	&__date {
+		font-size: 11px;
+		color: var(--fixora-text-muted);
+		margin: 0;
+	}
+
+	&__status {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 6px;
+	}
+
+	&__price {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--fixora-primary);
+	}
+}
+
+/* Job Badge */
+.fixora-job-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+	&--pending {
+		background: rgba(255, 193, 7, 0.2);
+		color: #ffc107;
+	}
+
+	&--in-progress {
+		background: rgba(33, 150, 243, 0.2);
+		color: #2196f3;
+	}
+
+	&--waiting {
+		background: rgba(255, 152, 0, 0.2);
+		color: #ff9800;
+	}
+
+	&--completed {
+		background: rgba(76, 175, 80, 0.2);
+		color: #4caf50;
+	}
+}
+
+/* ============ RIGHT PANE - JOB DETAIL ============ */
+
+.fixora-active-jobs-right {
+	display: flex;
+	flex-direction: column;
+}
+
+.fixora-job-detail {
+	background: var(--fixora-glass-bg);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 12px;
+	padding: 24px;
+	backdrop-filter: blur(10px);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow-y: auto;
+
+	&--empty {
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__empty-state {
+		text-align: center;
+		color: var(--fixora-text-muted);
+
+		p {
+			margin: 0;
+		}
+	}
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: 20px;
+		padding-bottom: 16px;
+		border-bottom: 1px solid var(--fixora-border-subtle);
+	}
+
+	&__title {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+		margin: 0;
+	}
+
+	&__subtitle {
+		font-size: 13px;
+		color: var(--fixora-text-secondary);
+		margin: 4px 0 0 0;
+	}
+
+	&__status-badge {
+		background: rgba(255, 107, 0, 0.15);
+		color: var(--fixora-primary);
+		padding: 6px 12px;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+
+	&__info-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+		margin-bottom: 20px;
+	}
+
+	&__section {
+		margin-bottom: 20px;
+	}
+
+	&__section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 12px;
+	}
+
+	&__section-title {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		margin: 0;
+	}
+
+	&__edit-btn {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		background: transparent;
+		border: none;
+		color: var(--fixora-text-secondary);
+		cursor: pointer;
+		font-size: 12px;
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: var(--fixora-primary);
+		}
+	}
+
+	&__notes {
+		width: 100%;
+		min-height: 80px;
+		padding: 12px;
+		background: rgba(255, 107, 0, 0.05);
+		border: 1px solid var(--fixora-border-subtle);
+		border-radius: 6px;
+		color: var(--fixora-text-secondary);
+		font-size: 13px;
+		font-family: inherit;
+		resize: vertical;
+
+		&:focus {
+			outline: none;
+			border-color: var(--fixora-primary);
+		}
+	}
+
+	&__footer {
+		margin-top: auto;
+		padding-top: 20px;
+		border-top: 1px solid var(--fixora-border-subtle);
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__price-section {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	&__price-label {
+		font-size: 13px;
+		color: var(--fixora-text-secondary);
+	}
+
+	&__price-value {
+		font-size: 24px;
+		font-weight: 700;
+		color: var(--fixora-primary);
+	}
+
+	&__actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	&__status-select {
+		padding: 10px 12px;
+		background: transparent;
+		border: 1px solid var(--fixora-border-subtle);
+		border-radius: 6px;
+		color: var(--fixora-text-secondary);
+		font-size: 12px;
+		cursor: pointer;
+
+		&:focus {
+			outline: none;
+			border-color: var(--fixora-primary);
+		}
+
+		option {
+			background: var(--fixora-surface);
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	&__btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 16px;
+		border: none;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 12px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+
+		&--complete {
+			background: var(--fixora-success);
+			color: white;
+
+			&:hover {
+				opacity: 0.9;
+			}
+		}
+	}
+}
+
+/* Job Info Card */
+.fixora-job-info-card {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px;
+	background: rgba(255, 107, 0, 0.05);
+	border-radius: 6px;
+
+	&__label {
+		font-size: 11px;
+		color: var(--fixora-text-muted);
+		text-transform: uppercase;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+	}
+
+	&__value {
+		font-size: 13px;
+		color: var(--fixora-text-primary);
+		font-weight: 500;
+	}
+}
+
+/* ============ REPAIR TIMELINE ============ */
+
+.fixora-repair-timeline {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.fixora-timeline-step {
+	display: grid;
+	grid-template-columns: 60px 1fr;
+	gap: 16px;
+	padding-bottom: 20px;
+
+	&:last-child {
+		padding-bottom: 0;
+	}
+
+	&__icon-wrapper {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	&__icon {
+		font-size: 28px;
+		z-index: 2;
+
+		&--completed {
+			color: #4caf50;
+		}
+
+		&--in-progress {
+			color: #2196f3;
+		}
+
+		&--pending {
+			color: var(--fixora-text-muted);
+		}
+	}
+
+	&__connector {
+		position: absolute;
+		width: 2px;
+		height: 50px;
+		background: var(--fixora-border-subtle);
+		top: 32px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	&__content {
+		padding-top: 2px;
+	}
+
+	&__label {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+		margin: 0 0 4px 0;
+	}
+
+	&__timestamp {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+		margin: 0;
+	}
+}
+
+/* ============ RESPONSIVE ============ */
+
+@media (max-width: 1400px) {
+	.fixora-active-jobs-container {
+		grid-template-columns: 320px 1fr;
+		gap: 20px;
+	}
+
+	.fixora-job-detail__info-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 1200px) {
+	.fixora-active-jobs-container {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+
+	.fixora-job-detail__actions {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 992px) {
+	.fixora-job-detail__info-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.fixora-job-detail__actions {
+		grid-template-columns: 1fr 1fr;
+	}
+}

@@ -28,7 +28,7 @@ const RepairStoriesTab = () => {
 					key={article._id}
 					type="button"
 					className="fixora-mypage__story"
-					onClick={() => router.push(`/community/detail?id=${article._id}`)}
+					onClick={() => router.push(`/community/${article._id}`)}
 				>
 					{article.articleImage && <img className="fixora-mypage__story-image" src={article.articleImage} alt="" />}
 					<div className="fixora-mypage__story-info">

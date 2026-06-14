@@ -80,7 +80,7 @@ export const getNotificationLink = (notification: Notification): string | null =
 		case 'MESSAGE':
 			return '/messages';
 		case 'ARTICLE':
-			return notification.referenceId ? `/community/detail?id=${notification.referenceId}` : '/community';
+			return notification.referenceId ? `/community/${notification.referenceId}` : '/community';
 		case 'REVIEW':
 			return '/mypage';
 		default:

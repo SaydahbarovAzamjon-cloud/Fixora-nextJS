@@ -1,290 +1,161 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Stack, Tab, Typography, Button, Pagination } from '@mui/material';
-import CommunityCard from '../../libs/components/common/CommunityCard';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import { BoardArticle } from '../../libs/types/board-article/board-article';
-import { T } from '../../libs/types/common';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { BoardArticlesInquiry } from '../../libs/types/board-article/board-article.input';
-import { BoardArticleCategory } from '../../libs/enums/board-article.enum';
-import { useMutation, useQuery } from '@apollo/client';
-import { GET_BOARD_ARTICLES } from '../../apollo/user/query';
-import { LIKE_TARGET_BOARD_ARTICLE } from '../../apollo/user/mutation';
-import { Messages } from '../../libs/config';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import { FixoraLogo } from '../../libs/components/brand';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import Pagination from '@mui/material/Pagination';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import { GET_ARTICLES } from '../../apollo/user/query';
+import { LIKE_TARGET_ARTICLE } from '../../apollo/user/article';
+import { userVar } from '../../apollo/store';
+import { Article, ArticleCategory } from '../../libs/types/fixora/fixora';
+import { FixoraButton } from '../../libs/components/ui';
+import CategoryTabs from '../../libs/components/community/fixora/CategoryTabs';
+import ArticleCard from '../../libs/components/community/fixora/ArticleCard';
+import { sweetErrorHandling } from '../../libs/sweetAlert';
 
-export const getStaticProps = async ({ locale }: any) => ({
+export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
-		...(await serverSideTranslations(locale, ['common'])),
+		...(await serverSideTranslations(locale ?? 'en', ['common'])),
 	},
 });
 
-const Community: NextPage = ({ initialInput, ...props }: T) => {
-	const device = useDeviceDetect();
+const PAGE_SIZE = 6;
+
+const CommunityPage: NextPage = () => {
+	const { t } = useTranslation('common');
 	const router = useRouter();
-	const { query } = router;
-	const articleCategory = query?.articleCategory as string;
-	const [searchCommunity, setSearchCommunity] = useState<BoardArticlesInquiry>(initialInput);
-	const [boardArticles, setBoardArticles] = useState<BoardArticle[]>([]);
-	const [totalCount, setTotalCount] = useState<number>(0);
-	if (articleCategory) initialInput.search.articleCategory = articleCategory;
+	const user = useReactiveVar(userVar);
+	const [category, setCategory] = useState<ArticleCategory>('FREE');
+	const [page, setPage] = useState(1);
+	const [articles, setArticles] = useState<Article[]>([]);
+	const [likePendingId, setLikePendingId] = useState<string | null>(null);
 
-/** APOLLO REQUESTS **/
-const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
-
-	const {
-		loading: boardArticlesLoading,
-		data: boardArticlesData,
-		error: getBoardArticlesError,
-		refetch: boardArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLES, {
-		fetchPolicy: 'cache-and-network',
+	/** APOLLO REQUESTS **/
+	const { data, loading, refetch } = useQuery(GET_ARTICLES, {
 		variables: {
-			input: searchCommunity,
+			input: {
+				page,
+				limit: PAGE_SIZE,
+				sort: 'createdAt',
+				direction: 'DESC',
+				search: {
+					articleCategory: category,
+				},
+			},
 		},
+		fetchPolicy: 'cache-and-network',
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setBoardArticles(data?.getBoardArticles?.list);
-			setTotalCount(data?.getBoardArticles?.metaCounter[0]?.total);
+		onCompleted: (result) => {
+			const list: Article[] = result?.getArticles?.list ?? [];
+			setArticles(list);
 		},
 	});
 
+	const total: number = data?.getArticles?.metaCounter?.[0]?.total ?? 0;
 
-	/** LIFECYCLES **/
-	useEffect(() => {
-		if (!query?.articleCategory)
-			router.push(
-				{
-					pathname: router.pathname,
-					query: { articleCategory: 'FREE' },
-				},
-				router.pathname,
-				{ shallow: true },
-			);
-	}, []);
+	const [likeArticle] = useMutation(LIKE_TARGET_ARTICLE);
 
 	/** HANDLERS **/
-	const tabChangeHandler = async (e: T, value: string) => {
-		console.log(value);
-
-		setSearchCommunity({ ...searchCommunity, page: 1, search: { articleCategory: value as BoardArticleCategory } });
-		await router.push(
-			{
-				pathname: '/community',
-				query: { articleCategory: value },
-			},
-			router.pathname,
-			{ shallow: true },
-		);
+	const handleCategoryChange = (newCategory: ArticleCategory) => {
+		setCategory(newCategory);
+		setPage(1);
 	};
 
-	const paginationHandler = (e: T, value: number) => {
-		setSearchCommunity({ ...searchCommunity, page: value });
+	const handlePageChange = (event: any, value: number) => {
+		setPage(value);
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-const likeArticleHandler = async (e: any, user: any, id: string) => {
-  try {
-    e.stopPropagation();
-    if (!id) return;
-    if (!user._id) throw new Error(Messages.error2);
+	const handleNewPost = async () => {
+		if (!user?._id) {
+			await sweetErrorHandling(new Error('Please log in to create a post'));
+			return;
+		}
+		router.push('/community/write');
+	};
 
-    await likeTargetBoardArticle({
-	variables: {
-        input: id,
-    },
-    });
+	const handleLike = async (articleId: string) => {
+		if (!user?._id) {
+			await sweetErrorHandling(new Error('Please log in to like a post'));
+			return;
+		}
 
-    await boardArticlesRefetch({ input: searchCommunity });
-    await sweetTopSmallSuccessAlert('success', 800);
-  } catch (err: any) {
-    console.log('ERROR, likePropertyHandler:', err.message);
-    sweetMixinErrorAlert(err.message).then();
-  }
-};
+		setLikePendingId(articleId);
+		try {
+			await likeArticle({
+				variables: { input: articleId },
+				refetchQueries: [
+					{
+						query: GET_ARTICLES,
+						variables: {
+							input: {
+								page,
+								limit: PAGE_SIZE,
+								sort: 'createdAt',
+								direction: 'DESC',
+								search: { articleCategory: category },
+							},
+						},
+					},
+				],
+			});
+		} catch (err: any) {
+			await sweetErrorHandling(err);
+		} finally {
+			setLikePendingId(null);
+		}
+	};
 
-	if (device === 'mobile') {
-		return <h1>COMMUNITY PAGE MOBILE</h1>;
-	} else {
-		return (
-			<div id="community-list-page">
-				<div className="container">
-					<TabContext value={searchCommunity.search.articleCategory ?? 'FREE'}>
-						<Stack className="main-box">
-							<Stack className="left-config">
-								<Stack className={'image-info'}>
-									<FixoraLogo variant="mark" size="md" />
-									<Stack className={'community-name'}>
-										<Typography className={'name'}>Fixora Community</Typography>
-									</Stack>
-								</Stack>
-
-								<TabList
-									orientation="vertical"
-									aria-label="lab API tabs example"
-									TabIndicatorProps={{
-										style: { display: 'none' },
-									}}
-									onChange={tabChangeHandler}
-								>
-									<Tab
-										value={'FREE'}
-										label={'Free Board'}
-										className={`tab-button ${searchCommunity.search.articleCategory == 'FREE' ? 'active' : ''}`}
-									/>
-									<Tab
-										value={'RECOMMEND'}
-										label={'Recommendation'}
-										className={`tab-button ${searchCommunity.search.articleCategory == 'RECOMMEND' ? 'active' : ''}`}
-									/>
-									<Tab
-										value={'NEWS'}
-										label={'News'}
-										className={`tab-button ${searchCommunity.search.articleCategory == 'NEWS' ? 'active' : ''}`}
-									/>
-									<Tab
-										value={'HUMOR'}
-										label={'Humor'}
-										className={`tab-button ${searchCommunity.search.articleCategory == 'HUMOR' ? 'active' : ''}`}
-									/>
-								</TabList>
-							</Stack>
-							<Stack className="right-config">
-								<Stack className="panel-config">
-									<Stack className="title-box">
-										<Stack className="left">
-											<Typography className="title">{searchCommunity.search.articleCategory} BOARD</Typography>
-											<Typography className="sub-title">
-												Express your opinions freely here without content restrictions
-											</Typography>
-										</Stack>
-										<Button
-											onClick={() =>
-												router.push({
-													pathname: '/mypage',
-													query: {
-														category: 'writeArticle',
-													},
-												})
-											}
-											className="right"
-										>
-											Write
-										</Button>
-									</Stack>
-
-									<TabPanel value="FREE">
-										<Stack className="list-box">
-											{totalCount ? (
-												boardArticles?.map((boardArticle: BoardArticle) => {
-													return <CommunityCard 
-														boardArticle={boardArticle} 
-														key={boardArticle?._id} 
-														likeArticleHandler={likeArticleHandler} />;
-												})
-											) : (
-												<Stack className={'no-data'}>
-													<img src="/img/icons/icoAlert.svg" alt="" />
-													<p>No Article found!</p>
-												</Stack>
-											)}
-										</Stack>
-									</TabPanel>
-									<TabPanel value="RECOMMEND">
-										<Stack className="list-box">
-											{totalCount ? (
-												boardArticles?.map((boardArticle: BoardArticle) => {
-													return <CommunityCard 
-														boardArticle={boardArticle} 
-														key={boardArticle?._id}
-														likeArticleHandler={likeArticleHandler}
-													/>;
-												})
-											) : (
-												<Stack className={'no-data'}>
-													<img src="/img/icons/icoAlert.svg" alt="" />
-													<p>No Article found!</p>
-												</Stack>
-											)}
-										</Stack>
-									</TabPanel>
-									<TabPanel value="NEWS">
-										<Stack className="list-box">
-											{totalCount ? (
-												boardArticles?.map((boardArticle: BoardArticle) => {
-													return <CommunityCard 
-														boardArticle={boardArticle} 
-														key={boardArticle?._id} 
-														likeArticleHandler={likeArticleHandler} />;
-												})
-											) : (
-												<Stack className={'no-data'}>
-													<img src="/img/icons/icoAlert.svg" alt="" />
-													<p>No Article found!</p>
-												</Stack>
-											)}
-										</Stack>
-									</TabPanel>
-									<TabPanel value="HUMOR">
-										<Stack className="list-box">
-											{totalCount ? (
-												boardArticles?.map((boardArticle: BoardArticle) => {
-													return <CommunityCard 
-														boardArticle={boardArticle} 
-														key={boardArticle?._id} 
-														likeArticleHandler={likeArticleHandler} />;
-												})
-											) : (
-												<Stack className={'no-data'}>
-													<img src="/img/icons/icoAlert.svg" alt="" />
-													<p>No Article found!</p>
-												</Stack>
-											)}
-										</Stack>
-									</TabPanel>
-								</Stack>
-							</Stack>
-						</Stack>
-					</TabContext>
-
-					{totalCount > 0 && (
-						<Stack className="pagination-config">
-							<Stack className="pagination-box">
-								<Pagination
-									count={Math.ceil(totalCount / searchCommunity.limit)}
-									page={searchCommunity.page}
-									shape="circular"
-									color="primary"
-									onChange={paginationHandler}
-								/>
-							</Stack>
-							<Stack className="total-result">
-								<Typography>
-									Total {totalCount} article{totalCount > 1 ? 's' : ''} available
-								</Typography>
-							</Stack>
-						</Stack>
-					)}
+	return (
+		<div className="fixora-community-page">
+			<div className="fixora-community">
+				{/* Header */}
+				<div className="fixora-community__header">
+					<h1 className="fixora-community__title">Community</h1>
+					<FixoraButton variant="primary" onClick={handleNewPost}>
+						New Post
+					</FixoraButton>
 				</div>
+
+				{/* Category Tabs */}
+				<CategoryTabs value={category} onChange={handleCategoryChange} />
+
+				{/* Feed */}
+				{loading && articles.length === 0 ? (
+					<div className="fixora-community__loading">Loading articles...</div>
+				) : articles.length === 0 ? (
+					<div className="fixora-community__empty">
+						<p>No articles in this category yet</p>
+					</div>
+				) : (
+					<div className="fixora-community__feed">
+						{articles.map((article) => (
+							<ArticleCard
+								key={article._id}
+								article={article}
+								onLike={handleLike}
+								likePending={likePendingId === article._id}
+							/>
+						))}
+					</div>
+				)}
+
+				{/* Pagination */}
+				{total > PAGE_SIZE && (
+					<div className="fixora-community__pagination">
+						<Pagination
+							count={Math.ceil(total / PAGE_SIZE)}
+							page={page}
+							onChange={handlePageChange}
+							color="primary"
+						/>
+					</div>
+				)}
 			</div>
-		);
-	}
+		</div>
+	);
 };
 
-Community.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 6,
-		sort: 'createdAt',
-		direction: 'ASC',
-		search: {
-			articleCategory: 'FREE',
-		},
-	},
-};
-
-export default withLayoutBasic(Community);
+export default withLayoutFull(CommunityPage);

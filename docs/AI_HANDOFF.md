@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-14 |
 | **Last agent** | Claude |
-| **Last session** | P3-07 polish (Messages UI fixes: request details empty state, like button outline/padding, bubble height, sender avatars) + P3-08 My Page + Notifications: `/notifications` page (Today/Earlier groups, mark all as read, navbar bell badge with `pollInterval`), `/mypage` rewritten with `withLayoutFull` — profile header + Requests/Following/Repair Stories/Settings tabs, `getMyBookings`/`getUserFollowings`/`getMyArticles`/`updateUser` wired |
-| **Next agent should start with** | `P3-09` — Tenant Dashboard (mockup `docs/design/technician/technician-dashboard-full.png`) |
+| **Last session** | **P3-10 COMPLETE** — Community + Post Detail (full implementation): `/community` feed page with category tabs + article cards + pagination; `/community/[id]` dynamic post detail page with markdown viewer + comments section; `/community/write` create article page; 4 new Fixora components (CategoryTabs, ArticleCard, PostHeader, CommentSection, ArticleEditor), 6 GraphQL operations (GET_ARTICLE, LIKE_TARGET_ARTICLE, CREATE_ARTICLE, GET_ARTICLE_COMMENTS, CREATE_ARTICLE_COMMENT, UPDATE_ARTICLE_COMMENT), new types (Article, ArticleAuthor, Comment, CommentGroup, CommentStatus, CommentInput, CommentUpdate, ArticleInput), 2 SCSS files with dark/orange theme, route migration from `/community/detail?id=` to `/community/[id]`, legacy detail.tsx deleted, yarn build clean |
+| **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
 
 ---
 

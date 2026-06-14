@@ -238,17 +238,32 @@ export interface Conversation {
 export type ArticleCategory = 'FREE' | 'HUMOR' | 'NEWS' | 'RECOMMEND';
 export type ArticleStatus = 'ACTIVE' | 'DELETE' | 'DRAFT' | 'PUBLISHED';
 
+export interface ArticleAuthor {
+	_id: string;
+	userNickname?: string;
+	userFullName?: string;
+	userProfileImage?: string;
+	specialty?: string;
+	shopName?: string;
+}
+
 export interface Article {
 	_id: string;
 	articleCategory?: ArticleCategory | null;
 	articleTitle: string;
+	articleContent?: string;
 	articleExcerpt?: string | null;
 	articleImage?: string | null;
 	articleStatus: ArticleStatus;
 	articleLikes: number;
 	articleViews: number;
 	articleComments: number;
+	userId: string;
 	createdAt: string;
+	updatedAt?: string;
+	deletedAt?: string | null;
+	authorData?: ArticleAuthor;
+	meLiked?: MeLiked[];
 }
 
 export interface FollowedTechnician {
@@ -269,6 +284,52 @@ export interface Following {
 	followerId: string;
 	createdAt: string;
 	followingData?: FollowedTechnician;
+}
+
+export type CommentGroup = 'ARTICLE' | 'USER';
+export type CommentStatus = 'ACTIVE' | 'DELETE';
+
+export interface Comment {
+	_id: string;
+	commentContent: string;
+	commentGroup: CommentGroup;
+	commentRefId: string;
+	commentStatus: CommentStatus;
+	memberId: string;
+	authorData?: ArticleAuthor;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CommentsInquiry {
+	page: number;
+	limit: number;
+	sort?: string;
+	direction?: 'ASC' | 'DESC';
+	search: {
+		commentRefId: string;
+	};
+}
+
+export interface CommentInput {
+	commentGroup: CommentGroup;
+	commentRefId: string;
+	commentContent: string;
+}
+
+export interface CommentUpdate {
+	_id: string;
+	commentContent?: string;
+	commentStatus?: CommentStatus;
+}
+
+export interface ArticleInput {
+	articleCategory?: ArticleCategory;
+	articleTitle: string;
+	articleContent: string;
+	articleExcerpt?: string;
+	articleImage?: string;
+	articleStatus?: ArticleStatus;
 }
 
 export type NotificationType = 'BOOKING' | 'COMMENT' | 'FOLLOW' | 'LIKE' | 'MESSAGE' | 'REVIEW';

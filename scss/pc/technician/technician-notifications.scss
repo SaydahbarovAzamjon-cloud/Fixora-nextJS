@@ -1,0 +1,321 @@
+/** NOTIFICATIONS SCREEN STYLES **/
+
+.fixora-technician-notifications-page {
+	width: 100%;
+	height: 100%;
+	display: flex;
+}
+
+.fixora-notifications-list {
+	background: var(--fixora-glass-bg);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	padding: 24px;
+}
+
+/* Header */
+.fixora-notifications__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+}
+
+.fixora-notifications__title {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	margin: 0 0 4px 0;
+}
+
+.fixora-notifications__unread-badge {
+	display: inline-block;
+	background: var(--fixora-primary);
+	color: white;
+	padding: 4px 10px;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.fixora-notifications__mark-all-btn {
+	background: rgba(255, 107, 0, 0.15);
+	border: 1px solid var(--fixora-primary);
+	color: var(--fixora-primary);
+	padding: 8px 16px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 107, 0, 0.25);
+	}
+}
+
+/* Content */
+.fixora-notifications__content {
+	flex: 1;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--fixora-border-subtle);
+		border-radius: 3px;
+
+		&:hover {
+			background: var(--fixora-border);
+		}
+	}
+}
+
+.fixora-notifications__empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	color: var(--fixora-text-muted);
+	font-size: 16px;
+
+	p {
+		margin: 0;
+	}
+}
+
+/* Group */
+.fixora-notifications__group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fixora-notifications__group-title {
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: var(--fixora-primary);
+	letter-spacing: 1px;
+	margin: 0 0 8px 0;
+}
+
+.fixora-notifications__items {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Notification Item */
+.fixora-notification {
+	position: relative;
+	display: grid;
+	grid-template-columns: 40px 1fr 80px;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	background: rgba(255, 107, 0, 0.03);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 107, 0, 0.08);
+		border-color: var(--fixora-primary);
+	}
+
+	&--unread {
+		background: rgba(255, 107, 0, 0.1);
+		border-color: var(--fixora-primary);
+
+		.fixora-notification__title {
+			font-weight: 700;
+		}
+	}
+
+	&--request {
+		.fixora-notification__icon {
+			background: rgba(33, 150, 243, 0.2);
+			color: #2196f3;
+		}
+	}
+
+	&--message {
+		.fixora-notification__icon {
+			background: rgba(76, 175, 80, 0.2);
+			color: #4caf50;
+		}
+	}
+
+	&--review {
+		.fixora-notification__icon {
+			background: rgba(255, 193, 7, 0.2);
+			color: #ffc107;
+		}
+	}
+
+	&--payment {
+		.fixora-notification__icon {
+			background: rgba(156, 39, 176, 0.2);
+			color: #9c27b0;
+		}
+	}
+
+	&__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		font-size: 20px;
+		flex-shrink: 0;
+	}
+
+	&__content {
+		min-width: 0;
+		grid-column: 2;
+	}
+
+	&__title {
+		font-size: 13px;
+		color: var(--fixora-text-primary);
+		margin: 0 0 2px 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__description {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+		margin: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		grid-column: 3;
+	}
+
+	&__time {
+		font-size: 11px;
+		color: var(--fixora-text-muted);
+		white-space: nowrap;
+	}
+
+	&__delete-btn {
+		background: transparent;
+		border: none;
+		color: var(--fixora-text-secondary);
+		cursor: pointer;
+		padding: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: var(--fixora-error);
+		}
+	}
+
+	&__unread-dot {
+		position: absolute;
+		width: 8px;
+		height: 8px;
+		background: var(--fixora-primary);
+		border-radius: 50%;
+		top: 50%;
+		right: 8px;
+		transform: translateY(-50%);
+	}
+}
+
+/* ============ RESPONSIVE ============ */
+
+@media (max-width: 1200px) {
+	.fixora-notification {
+		grid-template-columns: 36px 1fr 70px;
+	}
+
+	.fixora-notification__icon {
+		width: 36px;
+		height: 36px;
+		font-size: 18px;
+	}
+}
+
+@media (max-width: 992px) {
+	.fixora-notifications-list {
+		padding: 20px;
+	}
+
+	.fixora-notification {
+		grid-template-columns: 32px 1fr 60px;
+
+		&__title {
+			font-size: 12px;
+		}
+
+		&__description {
+			font-size: 11px;
+		}
+
+		&__time {
+			font-size: 10px;
+		}
+	}
+
+	.fixora-notification__icon {
+		width: 32px;
+		height: 32px;
+		font-size: 16px;
+	}
+}
+
+@media (max-width: 768px) {
+	.fixora-notifications-list {
+		padding: 16px;
+	}
+
+	.fixora-notifications__header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.fixora-notification {
+		grid-template-columns: 40px 1fr;
+
+		&__meta {
+			grid-column: 1 / -1;
+			margin-top: 8px;
+			padding-top: 8px;
+			border-top: 1px solid var(--fixora-border-subtle);
+		}
+	}
+}

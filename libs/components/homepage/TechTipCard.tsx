@@ -15,7 +15,7 @@ const formatCount = (value: number): string =>
 
 const TechTipCard = ({ article }: TechTipCardProps) => {
 	const { t } = useTranslation('common');
-	const detailHref = `/community/detail?articleCategory=${article.articleCategory ?? 'FREE'}&id=${article._id}`;
+	const detailHref = `/community/${article._id}`;
 	const author = article.authorData;
 
 	return (

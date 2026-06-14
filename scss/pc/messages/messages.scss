@@ -4,7 +4,7 @@
 
 .fixora-messages-page {
 	background: transparent;
-	padding: 100px 0 60px;
+	padding: 130px 0 60px;
 	width: 100%;
 	box-sizing: border-box;
 
@@ -20,7 +20,9 @@
 	display: flex;
 	flex-direction: row;
 	gap: 16px;
-	height: 640px;
+	height: calc(100vh - 230px);
+	min-height: 480px;
+	max-height: 760px;
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -305,7 +307,7 @@
 
 .fixora-messages__bubble {
 	position: relative;
-	padding: 10px 34px 10px 14px;
+	padding: 10px 28px 10px 14px;
 	border-radius: 14px 14px 14px 4px;
 	background: rgba(255, 255, 255, 0.04);
 	color: var(--fixora-text-primary);
@@ -326,21 +328,26 @@
 
 .fixora-messages__like {
 	position: absolute;
-	right: 8px;
-	bottom: 8px;
+	right: 6px;
+	bottom: 6px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
 	padding: 0;
 	border: none;
+	outline: none;
 	background: transparent;
 	color: rgba(255, 255, 255, 0.35);
-	font-size: 14px;
+	font-size: 13px;
 	cursor: pointer;
 	opacity: 0;
 	transition: opacity 0.2s ease, color 0.2s ease, transform 0.15s ease;
+
+	&:focus {
+		outline: none;
+	}
 }
 
 .fixora-messages__bubble:hover .fixora-messages__like {

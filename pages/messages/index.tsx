@@ -148,7 +148,7 @@ const MessagesPage: NextPage = () => {
 
 				<ChatThread peer={activePeer} messages={messages} currentUserId={user?._id} onSend={sendHandler} sending={sending} />
 
-				{selected?.bookingId && <RequestDetailsPanel booking={booking} device={device} loading={bookingLoading} />}
+				<RequestDetailsPanel booking={booking} device={device} loading={selected?.bookingId ? bookingLoading : false} />
 			</div>
 		</div>
 	);

@@ -299,5 +299,6 @@
 	"messages.requestDetails.date": "Дата",
 	"messages.requestDetails.time": "Время",
 	"messages.requestDetails.price": "Цена",
-	"messages.requestDetails.viewRequest": "Просмотреть заявку"
+	"messages.requestDetails.viewRequest": "Просмотреть заявку",
+	"messages.requestDetails.empty": "Выберите беседу, связанную с заявкой, чтобы увидеть здесь её детали."
 }

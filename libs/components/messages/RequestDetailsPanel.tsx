@@ -23,7 +23,14 @@ const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelPr
 		);
 	}
 
-	if (!booking) return null;
+	if (!booking) {
+		return (
+			<div className="fixora-messages__details">
+				<h2 className="fixora-messages__details-title">{t('messages.requestDetails.title')}</h2>
+				<p className="fixora-messages__empty">{t('messages.requestDetails.empty')}</p>
+			</div>
+		);
+	}
 
 	const price = booking.finalPrice ?? booking.estimatedPrice;
 

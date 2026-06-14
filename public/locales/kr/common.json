@@ -299,5 +299,6 @@
   "messages.requestDetails.date": "날짜",
   "messages.requestDetails.time": "시간",
   "messages.requestDetails.price": "가격",
-  "messages.requestDetails.viewRequest": "요청 보기"
+  "messages.requestDetails.viewRequest": "요청 보기",
+  "messages.requestDetails.empty": "예약과 연결된 대화를 선택하면 여기에 세부 정보가 표시됩니다."
 }

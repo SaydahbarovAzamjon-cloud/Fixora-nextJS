@@ -299,5 +299,6 @@
   "messages.requestDetails.date": "Date",
   "messages.requestDetails.time": "Time",
   "messages.requestDetails.price": "Price",
-  "messages.requestDetails.viewRequest": "View Request"
+  "messages.requestDetails.viewRequest": "View Request",
+  "messages.requestDetails.empty": "Select a request-linked conversation to see its details here."
 }

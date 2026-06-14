@@ -5,20 +5,24 @@
 .fixora-messages-page {
 	background: transparent;
 	padding: 100px 0 60px;
+	width: 100%;
+	box-sizing: border-box;
 
 	.container {
 		width: 1200px;
 		max-width: calc(100% - 40px);
 		margin: 0 auto;
+		box-sizing: border-box;
 	}
 }
 
 .fixora-messages {
-	display: grid;
-	grid-template-columns: 280px minmax(0, 1fr) 280px;
+	display: flex;
+	flex-direction: row;
 	gap: 16px;
 	height: 640px;
-	align-items: stretch;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .fixora-messages__sidebar,
@@ -30,6 +34,18 @@
 	flex-direction: column;
 	min-height: 0;
 	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.fixora-messages__sidebar,
+.fixora-messages__details {
+	flex: 0 0 280px;
+	width: 280px;
+}
+
+.fixora-messages__thread {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 /** Sidebar — conversation list **/
@@ -78,23 +94,26 @@
 }
 
 .fixora-messages__conversation {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 10px;
+	padding: 10px 10px 10px 13px;
 	border: none;
+	border-left: 3px solid transparent;
 	border-radius: 10px;
 	background: transparent;
 	cursor: pointer;
 	text-align: left;
-	transition: background-color 0.2s ease;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
 
 	&:hover {
 		background: rgba(255, 255, 255, 0.04);
 	}
 
 	&--active {
-		background: rgba(255, 107, 0, 0.12);
+		background: rgba(255, 107, 0, 0.08);
+		border-left-color: var(--fixora-primary);
 	}
 }
 
@@ -166,6 +185,16 @@
 	}
 }
 
+.fixora-messages__conversation .fixora-messages__avatar {
+	width: 36px;
+	height: 36px;
+
+	img {
+		width: 36px;
+		height: 36px;
+	}
+}
+
 .fixora-messages__online-dot {
 	position: absolute;
 	right: -1px;
@@ -206,8 +235,10 @@
 }
 
 .fixora-messages__thread-info {
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	min-width: 0;
 
 	strong {
 		font-size: 14px;
@@ -218,6 +249,30 @@
 .fixora-messages__thread-status {
 	font-size: 12px;
 	color: var(--fixora-text-secondary);
+
+	&--online {
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-messages__expand {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border: none;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--fixora-text-muted);
+	cursor: pointer;
+	transition: background-color 0.2s ease, color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.06);
+		color: var(--fixora-text-primary);
+	}
 }
 
 .fixora-messages__thread-body {
@@ -238,11 +293,21 @@
 	}
 }
 
-.fixora-messages__bubble {
+.fixora-messages__bubble-group {
+	display: flex;
+	flex-direction: column;
 	max-width: 70%;
-	padding: 10px 14px;
+}
+
+.fixora-messages__bubble-row--mine .fixora-messages__bubble-group {
+	align-items: flex-end;
+}
+
+.fixora-messages__bubble {
+	position: relative;
+	padding: 10px 34px 10px 14px;
 	border-radius: 14px 14px 14px 4px;
-	background: rgba(255, 255, 255, 0.05);
+	background: rgba(255, 255, 255, 0.04);
 	color: var(--fixora-text-primary);
 
 	p {
@@ -259,12 +324,44 @@
 	}
 }
 
+.fixora-messages__like {
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.35);
+	font-size: 14px;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.fixora-messages__bubble:hover .fixora-messages__like {
+	opacity: 1;
+}
+
+.fixora-messages__like--active {
+	opacity: 1;
+	color: var(--fixora-error);
+	transform: scale(1.05);
+}
+
 .fixora-messages__bubble-time {
 	display: block;
 	margin-top: 4px;
 	font-size: 10px;
-	text-align: right;
-	color: rgba(255, 255, 255, 0.6);
+	color: var(--fixora-text-muted);
+}
+
+.fixora-messages__bubble-row--mine .fixora-messages__bubble-time {
+	color: var(--fixora-primary);
 }
 
 .fixora-messages__thread-input {
@@ -287,6 +384,26 @@
 		&::placeholder {
 			color: var(--fixora-text-muted);
 		}
+	}
+}
+
+.fixora-messages__icon-btn {
+	flex-shrink: 0;
+	width: 38px;
+	height: 38px;
+	border: none;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--fixora-text-secondary);
+	cursor: pointer;
+	transition: background-color 0.2s ease, color 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: var(--fixora-text-primary);
 	}
 }
 
@@ -364,14 +481,13 @@
 .fixora-messages__details-list {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 14px;
 	margin: 0;
 
 	> div {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
+		flex-direction: column;
+		gap: 4px;
 	}
 
 	dt {
@@ -384,7 +500,6 @@
 		font-size: 13px;
 		font-weight: 600;
 		color: var(--fixora-text-primary);
-		text-align: right;
 	}
 }
 

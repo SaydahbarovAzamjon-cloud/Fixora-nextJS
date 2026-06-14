@@ -3,6 +3,10 @@ import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
 import SendIcon from '@mui/icons-material/Send';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { ConversationPeer, Message } from '../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 
@@ -17,6 +21,7 @@ interface ChatThreadProps {
 const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThreadProps) => {
 	const { t } = useTranslation('common');
 	const [text, setText] = useState('');
+	const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -35,6 +40,22 @@ const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThre
 			e.preventDefault();
 			submit();
 		}
+	};
+
+	const toggleLike = (messageId: string) => {
+		setLikedMessages((prev) => {
+			const next = new Set(prev);
+			if (next.has(messageId)) {
+				next.delete(messageId);
+			} else {
+				next.add(messageId);
+			}
+			return next;
+		});
+	};
+
+	const addEmoji = () => {
+		setText((prev) => `${prev}🙂`);
 	};
 
 	if (!peer) {
@@ -57,22 +78,36 @@ const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThre
 				</span>
 				<span className="fixora-messages__thread-info">
 					<strong>{displayName}</strong>
-					<span className="fixora-messages__thread-status">
+					<span className={`fixora-messages__thread-status ${peer.isOnline ? 'fixora-messages__thread-status--online' : ''}`}>
 						{peer.isOnline ? t('messages.online') : t('messages.offline')}
 					</span>
 				</span>
+				<button type="button" className="fixora-messages__expand" aria-label={t('messages.expand')}>
+					<OpenInFullIcon fontSize="small" />
+				</button>
 			</div>
 
 			<div className="fixora-messages__thread-body">
 				{messages.map((message) => {
 					const isMine = message.senderId === currentUserId;
+					const isLiked = likedMessages.has(message._id);
 					return (
 						<div
 							key={message._id}
 							className={`fixora-messages__bubble-row ${isMine ? 'fixora-messages__bubble-row--mine' : ''}`}
 						>
-							<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''}`}>
-								<p>{message.messageContent}</p>
+							<div className="fixora-messages__bubble-group">
+								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''}`}>
+									<p>{message.messageContent}</p>
+									<button
+										type="button"
+										className={`fixora-messages__like ${isLiked ? 'fixora-messages__like--active' : ''}`}
+										onClick={() => toggleLike(message._id)}
+										aria-label={t('messages.like')}
+									>
+										{isLiked ? <FavoriteIcon fontSize="inherit" /> : <FavoriteBorderIcon fontSize="inherit" />}
+									</button>
+								</div>
 								<Moment format="HH:mm" className="fixora-messages__bubble-time">
 									{message.createdAt}
 								</Moment>
@@ -91,6 +126,9 @@ const ChatThread = ({ peer, messages, currentUserId, onSend, sending }: ChatThre
 					onChange={(e) => setText(e.target.value)}
 					onKeyDown={onKeyDown}
 				/>
+				<button type="button" className="fixora-messages__icon-btn" onClick={addEmoji} aria-label={t('messages.emoji')}>
+					<EmojiEmotionsIcon fontSize="small" />
+				</button>
 				<button
 					type="button"
 					className="fixora-messages__send"

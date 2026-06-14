@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { Stack } from '@mui/material';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import ConversationList from '../../libs/components/messages/ConversationList';
 import ChatThread from '../../libs/components/messages/ChatThread';
@@ -143,15 +142,15 @@ const MessagesPage: NextPage = () => {
 	}, [conversations, selected?.peerId, peerData]);
 
 	return (
-		<Stack className="fixora-messages-page">
-			<Stack className="container fixora-messages">
+		<div className="fixora-messages-page">
+			<div className="container fixora-messages">
 				<ConversationList conversations={conversations} selectedPeerId={selected?.peerId} onSelect={selectConversation} />
 
 				<ChatThread peer={activePeer} messages={messages} currentUserId={user?._id} onSend={sendHandler} sending={sending} />
 
 				{selected?.bookingId && <RequestDetailsPanel booking={booking} device={device} loading={bookingLoading} />}
-			</Stack>
-		</Stack>
+			</div>
+		</div>
 	);
 };
 

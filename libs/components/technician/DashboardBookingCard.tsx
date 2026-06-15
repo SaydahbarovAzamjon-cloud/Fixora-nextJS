@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_DEVICE, GET_USER } from '../../apollo/user/query';
+import { GET_DEVICE, GET_USER } from '../../../apollo/user/query';
 
 interface DashboardBookingCardProps {
 	booking: any;

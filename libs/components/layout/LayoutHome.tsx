@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import Head from 'next/head';
 import Top from '../Top';
@@ -15,6 +16,7 @@ import 'swiper/css/navigation';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
+		const router = useRouter();
 		const device = useDeviceDetect();
 		const user = useReactiveVar(userVar);
 
@@ -23,6 +25,12 @@ const withLayoutMain = (Component: any) => {
 			const jwt = getJwtToken();
 			if (jwt) updateUserInfo(jwt);
 		}, []);
+
+		useEffect(() => {
+			if (user?._id && user?.memberType === 'TECHNICIAN') {
+				router.replace('/technician/dashboard').then();
+			}
+		}, [user, router]);
 
 		/** HANDLERS **/
 

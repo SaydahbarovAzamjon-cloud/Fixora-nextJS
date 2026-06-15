@@ -10,6 +10,7 @@ import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
 import { fixoraLogin, validateLoginInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { userVar } from '../../../apollo/store';
 
 const LoginForm = () => {
 	const { t } = useTranslation('auth');
@@ -30,8 +31,9 @@ const LoginForm = () => {
 		setLoading(true);
 		try {
 			await fixoraLogin(email, password);
-			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : '/';
-			await router.push(referrer);
+			const user = userVar();
+			const destination = user?.memberType === 'TECHNICIAN' ? '/technician/dashboard' : (typeof router.query.referrer === 'string' ? router.query.referrer : '/');
+			await router.push(destination);
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Login failed');
 		} finally {

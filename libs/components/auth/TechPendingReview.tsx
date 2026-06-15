@@ -15,7 +15,7 @@ const TechPendingReview = () => {
 			<h2>{t('tech.pendingTitle')}</h2>
 			<p>{t('tech.pendingSubtitle')}</p>
 			<p>{t('tech.pendingHint')}</p>
-			<FixoraButton variant="primary" fullWidth onClick={() => router.push('/')}>
+			<FixoraButton variant="primary" fullWidth onClick={() => router.push('/technician/dashboard')}>
 				{t('tech.goToDashboard')}
 				<ArrowForward fontSize="small" />
 			</FixoraButton>

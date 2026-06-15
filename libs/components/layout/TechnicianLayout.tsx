@@ -25,10 +25,12 @@ const withTechnicianLayout = (Component: any) => {
 		}, []);
 
 		useEffect(() => {
-			if (user?._id && user?.userType !== 'TECHNICIAN') {
-				router.push('/').then();
+			if (!user?._id) {
+				router.replace(`/login?referrer=${encodeURIComponent(router.asPath)}`).then();
+			} else if (user?.memberType !== 'TECHNICIAN') {
+				router.replace('/').then();
 			}
-		}, [user]);
+		}, [user, router.asPath]);
 
 		if (device == 'mobile') {
 			return (

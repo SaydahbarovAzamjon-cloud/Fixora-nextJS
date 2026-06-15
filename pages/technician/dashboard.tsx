@@ -1,11 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useQuery, useReactiveVar } from '@apollo/client';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import { userVar } from '../../apollo/store';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -15,19 +12,11 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 
 const TechnicianDashboard: NextPage = () => {
 	const { t } = useTranslation('common');
-	const router = useRouter();
-	const user = useReactiveVar(userVar);
-
-	useEffect(() => {
-		if (!user?._id) {
-			router.push('/').then();
-		}
-	}, [user]);
 
 	return (
 		<div className="fixora-technician-dashboard">
 			<div className="fixora-technician-dashboard__header">
-				<h1 className="fixora-technician-dashboard__title">Welcome back, {user?.userNickname}! 👋</h1>
+				<h1 className="fixora-technician-dashboard__title">Welcome back! 👋</h1>
 				<p className="fixora-technician-dashboard__subtitle">Here's your overview for today</p>
 			</div>
 

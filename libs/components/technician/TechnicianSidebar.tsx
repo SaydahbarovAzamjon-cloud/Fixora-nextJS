@@ -3,20 +3,28 @@ import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 
+interface NavItem {
+	id: string;
+	icon: string;
+	label: string;
+	route: string;
+	badge?: number;
+}
+
 const TechnicianSidebar: React.FC = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [isOnline, setIsOnline] = useState(true);
 
-	const navItems = [
-		{ id: 'dashboard', label: 'Dashboard', route: '/technician/dashboard', icon: '📊' },
-		{ id: 'requests', label: 'Incoming Requests', route: '/technician/requests', icon: '📬', badge: 4 },
-		{ id: 'jobs', label: 'Active Jobs', route: '/technician/jobs', icon: '💼', badge: 7 },
-		{ id: 'messages', label: 'Messages', route: '/technician/messages', icon: '💬', badge: 2 },
-		{ id: 'notifications', label: 'Notifications', route: '/technician/notifications', icon: '🔔', badge: 9 },
-		{ id: 'profile', label: 'Public Profile', route: '/technician/profile', icon: '👤' },
-		{ id: 'analytics', label: 'Analytics', route: '/technician/analytics', icon: '📈' },
-		{ id: 'earnings', label: 'Earnings', route: '/technician/earnings', icon: '💰' },
+	const navItems: NavItem[] = [
+		{ id: 'dashboard', icon: '📊', label: 'Dashboard', route: '/technician/dashboard' },
+		{ id: 'requests', icon: '📬', label: 'Incoming Requests', route: '/technician/requests', badge: 4 },
+		{ id: 'jobs', icon: '💼', label: 'Active Jobs', route: '/technician/jobs', badge: 7 },
+		{ id: 'messages', icon: '💬', label: 'Messages', route: '/technician/messages', badge: 2 },
+		{ id: 'notifications', icon: '🔔', label: 'Notifications', route: '/technician/notifications', badge: 9 },
+		{ id: 'profile', icon: '👤', label: 'Public Profile', route: '/technician/profile' },
+		{ id: 'analytics', icon: '📈', label: 'Analytics', route: '/technician/analytics' },
+		{ id: 'earnings', icon: '💰', label: 'Earnings', route: '/technician/earnings' },
 	];
 
 	const isActive = (route: string) => router.pathname === route;
@@ -80,19 +88,58 @@ const TechnicianSidebar: React.FC = () => {
 						className={`fixora-technician-sidebar__nav-item ${isActive(item.route) ? 'fixora-technician-sidebar__nav-item--active' : ''}`}
 						onClick={() => router.push(item.route)}
 						type="button"
+						style={{
+							display: 'flex',
+							alignItems: 'center',
+							gap: 10,
+							width: '100%',
+							padding: '8px 10px',
+							borderRadius: 9,
+							background: isActive(item.route) ? 'rgba(255,107,0,0.14)' : 'transparent',
+							border: 'none',
+							cursor: 'pointer',
+							color: isActive(item.route) ? '#FF6B00' : '#808080',
+							fontSize: 13,
+							fontWeight: isActive(item.route) ? 600 : 400,
+							transition: 'all 0.15s ease',
+							position: 'relative',
+							marginBottom: 1,
+						}}
+						onMouseEnter={(e) => {
+							if (!isActive(item.route)) {
+								(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
+								(e.currentTarget as HTMLButtonElement).style.color = '#D0D0D0';
+							}
+						}}
+						onMouseLeave={(e) => {
+							if (!isActive(item.route)) {
+								(e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+								(e.currentTarget as HTMLButtonElement).style.color = '#808080';
+							}
+						}}
 					>
-						<span className="fixora-technician-sidebar__nav-icon">{item.icon}</span>
-						<span className="fixora-technician-sidebar__nav-label">{item.label}</span>
-						{item.badge && (
+						<span style={{ fontSize: 16 }}>{item.icon}</span>
+						<span style={{ flex: 1, textAlign: 'left', lineHeight: 1 }}>{item.label}</span>
+						{item.badge && isActive(item.route) && (
 							<span style={{
-								background: isActive(item.route) ? '#FF6B00' : '#2A2A2A',
-								color: isActive(item.route) ? '#fff' : '#A0A0A0',
+								background: '#FF6B00',
+								color: '#fff',
 								borderRadius: 20,
 								fontSize: '10px',
 								fontWeight: 700,
 								padding: '1px 6px',
 								lineHeight: '16px',
-								marginLeft: 'auto',
+							}}>{item.badge}</span>
+						)}
+						{item.badge && !isActive(item.route) && (
+							<span style={{
+								background: '#2A2A2A',
+								color: '#A0A0A0',
+								borderRadius: 20,
+								fontSize: '10px',
+								fontWeight: 700,
+								padding: '1px 6px',
+								lineHeight: '16px',
 							}}>{item.badge}</span>
 						)}
 					</button>
@@ -134,7 +181,7 @@ const TechnicianSidebar: React.FC = () => {
 						fontSize: 13,
 						fontWeight: 700,
 						color: '#fff',
-					}}>AK</div>
+					}}>{user?.userNickname?.[0] || 'A'}{user?.userNickname?.[1] || 'K'}</div>
 					<div style={{ flex: 1, minWidth: 0 }}>
 						<div style={{
 							color: '#E0E0E0',
@@ -150,7 +197,35 @@ const TechnicianSidebar: React.FC = () => {
 					<span style={{ color: '#606060', fontSize: 11 }}>›</span>
 				</div>
 
-				<button className="fixora-technician-sidebar__logout" onClick={handleLogout} type="button">
+				<button
+					className="fixora-technician-sidebar__logout"
+					onClick={handleLogout}
+					type="button"
+					style={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: 8,
+						width: '100%',
+						padding: '8px 10px',
+						marginTop: 10,
+						border: 'none',
+						background: 'transparent',
+						color: '#808080',
+						borderRadius: 9,
+						cursor: 'pointer',
+						fontSize: 13,
+						fontWeight: 400,
+						transition: 'all 0.15s ease',
+					}}
+					onMouseEnter={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
+						(e.currentTarget as HTMLButtonElement).style.color = '#D0D0D0';
+					}}
+					onMouseLeave={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+						(e.currentTarget as HTMLButtonElement).style.color = '#808080';
+					}}
+				>
 					🚪 Logout
 				</button>
 			</div>

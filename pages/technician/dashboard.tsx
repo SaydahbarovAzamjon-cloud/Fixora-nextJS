@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
-import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import DashboardBookingCard from '../../libs/components/technician/DashboardBookingCard';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
@@ -16,8 +15,8 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 });
 
 const TechnicianDashboard: NextPage = () => {
-	useTranslation('common');
 	const user = useReactiveVar(userVar);
+	const [hoveredJob, setHoveredJob] = useState<string | null>(null);
 
 	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
 		skip: !user?._id,
@@ -36,7 +35,7 @@ const TechnicianDashboard: NextPage = () => {
 		variables: {
 			input: {
 				page: 1,
-				limit: 10,
+				limit: 5,
 				sort: 'createdAt',
 				direction: 'DESC',
 				search: { technicianId: user?._id ?? '' },
@@ -47,10 +46,10 @@ const TechnicianDashboard: NextPage = () => {
 
 	const bookings = useMemo(() => bookingsData?.getMyBookings?.list ?? [], [bookingsData]);
 	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
-	const reviews = useMemo(() => reviewsData?.getTechnicianReviews ?? null, [reviewsData]);
+	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
 
-	const incomingRequests = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'REQUESTED'), [bookings]);
-	const activeJobs = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'CONFIRMED' || b?.bookingStatus === 'IN_PROGRESS'), [bookings]);
+	const incomingRequests = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'PENDING'), [bookings]);
+	const activeJobs = useMemo(() => bookings.filter((b: any) => ['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus)), [bookings]);
 	const completedBookings = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'COMPLETED'), [bookings]);
 
 	const earnings = useMemo(() => {
@@ -83,37 +82,36 @@ const TechnicianDashboard: NextPage = () => {
 	}, [earnings, previousEarnings]);
 
 	const rating = useMemo(() => technicianUser?.averageRating ?? 0, [technicianUser]);
+
 	const requestsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
 		const previousCount = bookings.filter((b: any) =>
-			b?.bookingStatus === 'REQUESTED' && new Date(b?.createdAt) < lastMonth
+			b?.bookingStatus === 'PENDING' && new Date(b?.createdAt) < lastMonth
 		).length;
-		const currentCount = incomingRequests.length;
 		if (previousCount === 0) return 0;
-		return (((currentCount - previousCount) / previousCount) * 100).toFixed(0);
+		return (((incomingRequests.length - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, incomingRequests]);
 
 	const jobsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
 		const previousCount = bookings.filter((b: any) =>
-			(b?.bookingStatus === 'CONFIRMED' || b?.bookingStatus === 'IN_PROGRESS') &&
+			['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus) &&
 			new Date(b?.createdAt) < lastMonth
 		).length;
-		const currentCount = activeJobs.length;
 		if (previousCount === 0) return 0;
-		return (((currentCount - previousCount) / previousCount) * 100).toFixed(0);
+		return (((activeJobs.length - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, activeJobs]);
-
-	const [hoveredJob, setHoveredJob] = React.useState<string | null>(null);
 
 	return (
 		<div className="fixora-tech-dashboard">
 			{/* Welcome Section */}
 			<div className="fixora-tech-dashboard__welcome">
 				<div>
-					<div className="fixora-tech-dashboard__date">Monday, June 15, 2026</div>
+					<div className="fixora-tech-dashboard__date">
+						{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+					</div>
 					<h1 className="fixora-tech-dashboard__greeting">
 						Good morning, {technicianUser?.userNickname || 'Alex'} 👋
 					</h1>
@@ -180,13 +178,33 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 						<div className="fixora-tech-card__list">
 							{incomingRequests.length > 0 ? (
-								incomingRequests.slice(0, 4).map((booking: any, idx: number) => (
-									<DashboardBookingCard
-										key={idx}
-										booking={booking}
-										technicianLocation={technicianUser?.userLocation}
-										variant="request"
-									/>
+								incomingRequests.slice(0, 4).map((booking: any) => (
+									<div key={booking._id} style={{
+										padding: '12px 4px',
+										borderBottom: '1px solid rgba(255,255,255,0.05)',
+										cursor: 'pointer',
+										borderRadius: 8,
+										transition: 'background 0.15s',
+									}}
+										onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'; }}
+										onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+									>
+										<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+											<div style={{ width: 36, height: 36, borderRadius: 10, background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+												📱
+											</div>
+											<div style={{ flex: 1, minWidth: 0 }}>
+												<div style={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>Customer</div>
+												<div style={{ color: '#606060', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+													{booking.problemTitle || 'Device Repair'}
+												</div>
+											</div>
+											<div style={{ textAlign: 'right', flexShrink: 0 }}>
+												<div style={{ color: '#FF6B00', fontSize: 13, fontWeight: 700 }}>$0</div>
+												<div style={{ color: '#505050', fontSize: 11 }}>now</div>
+											</div>
+										</div>
+									</div>
 								))
 							) : (
 								<div className="fixora-tech-empty">No incoming requests</div>
@@ -202,9 +220,9 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 						<div className="fixora-tech-card__list">
 							{activeJobs.length > 0 ? (
-								activeJobs.slice(0, 3).map((booking: any, idx: number) => (
+								activeJobs.slice(0, 3).map((booking: any) => (
 									<div
-										key={idx}
+										key={booking._id}
 										className="fixora-tech-job-item"
 										onMouseEnter={() => setHoveredJob(booking._id)}
 										onMouseLeave={() => setHoveredJob(null)}
@@ -213,16 +231,31 @@ const TechnicianDashboard: NextPage = () => {
 											padding: '14px',
 											background: hoveredJob === booking._id ? 'rgba(255,255,255,0.03)' : 'transparent',
 											border: hoveredJob === booking._id ? '1px solid rgba(255,107,0,0.15)' : '1px solid transparent',
-											marginBottom: idx < activeJobs.length - 1 ? '8px' : 0,
+											marginBottom: '8px',
 											transition: 'all 0.15s ease',
 											cursor: 'pointer',
 										}}
 									>
-										<DashboardBookingCard
-											booking={booking}
-											technicianLocation={technicianUser?.userLocation}
-											variant="job"
-										/>
+										<div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+											<div style={{ display: 'flex', gap: 10 }}>
+												<div style={{ width: 34, height: 34, borderRadius: 9, background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+													💼
+												</div>
+												<div>
+													<div style={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>Customer</div>
+													<div style={{ color: '#606060', fontSize: 12 }}>{booking.problemTitle || 'Repair'}</div>
+												</div>
+											</div>
+											<span style={{ background: 'rgba(255,107,0,0.12)', color: '#FF6B00', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>In Progress</span>
+										</div>
+										<div style={{ color: '#707070', fontSize: 12, marginBottom: 8 }}>Device repair</div>
+										<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+											<div style={{ flex: 1, height: 5, background: '#1E1E1E', borderRadius: 4, overflow: 'hidden' }}>
+												<div style={{ width: '65%', height: '100%', background: 'linear-gradient(90deg, #FF4500 0%, #FF6B00 25%, #FFCC00 50%, #FF6B00 75%, #FF4500 100%)', boxShadow: '0 0 8px rgba(255,107,0,0.5)' }} />
+											</div>
+											<span style={{ color: '#FF9A3C', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>65%</span>
+											<span style={{ color: '#505050', fontSize: 11, flexShrink: 0 }}>Due: Today</span>
+										</div>
 									</div>
 								))
 							) : (
@@ -250,45 +283,36 @@ const TechnicianDashboard: NextPage = () => {
 								<button className="fixora-tech-period-btn">Year</button>
 							</div>
 						</div>
-						<div style={{
-							height: '180px',
-							marginTop: '16px',
-							display: 'flex',
-							alignItems: 'flex-end',
-							gap: '8px',
-							paddingBottom: '16px',
-						}}>
-							{earningsData.map((d, i) => (
-								<div
-									key={i}
-									style={{
-										flex: 1,
-										height: `${(d.earnings / 800) * 100}%`,
-										background: 'linear-gradient(180deg, #FF6B00 0%, #FF9A3C 100%)',
-										borderRadius: '4px 4px 0 0',
-										boxShadow: '0 0 8px rgba(255,107,0,0.5)',
-										position: 'relative',
-										minHeight: '20px',
-									}}
-									title={`${d.day}: $${d.earnings}`}
-								/>
-							))}
-						</div>
-						<div style={{
-							display: 'flex',
-							justifyContent: 'space-between',
-							paddingTop: '8px',
-							borderTop: '1px solid rgba(255,255,255,0.07)',
-						}}>
-							{earningsData.map((d) => (
-								<div key={d.day} style={{
-									flex: 1,
-									textAlign: 'center',
-									color: '#606060',
-									fontSize: '11px',
-									fontWeight: 500,
-								}}>{d.day}</div>
-							))}
+						<div style={{ height: '180px', marginTop: '16px' }}>
+							<ResponsiveContainer width="100%" height="100%">
+								<AreaChart data={earningsData}>
+									<defs>
+										<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
+											<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
+											<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
+											<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
+										</linearGradient>
+									</defs>
+									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+									<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+									<Tooltip
+										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
+										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
+										itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
+										formatter={(v: number) => [`$${v}`, 'Earnings']}
+									/>
+									<Area
+										type="monotone"
+										dataKey="earnings"
+										stroke="#FF6B00"
+										strokeWidth={2.5}
+										fill="url(#earningsGrad)"
+										dot={false}
+										isAnimationActive
+									/>
+								</AreaChart>
+							</ResponsiveContainer>
 						</div>
 					</div>
 
@@ -300,7 +324,7 @@ const TechnicianDashboard: NextPage = () => {
 						<div className="fixora-tech-schedule-list">
 							{activeJobs.length > 0 ? (
 								activeJobs.slice(0, 3).map((booking: any, idx: number) => (
-									<div key={idx} className="fixora-tech-schedule-item">
+									<div key={booking._id} className="fixora-tech-schedule-item">
 										<div className="fixora-tech-schedule-dot" style={{ background: '#FF6B00' }} />
 										<div className="fixora-tech-schedule-content">
 											<div className="fixora-tech-schedule-time">
@@ -309,7 +333,7 @@ const TechnicianDashboard: NextPage = () => {
 													minute: '2-digit',
 												})}
 											</div>
-											<div className="fixora-tech-schedule-task">{booking?.problemTitle ?? 'Repair Task'}</div>
+											<div className="fixora-tech-schedule-task">{booking?.problemTitle || 'Repair Task'}</div>
 										</div>
 									</div>
 								))
@@ -326,9 +350,9 @@ const TechnicianDashboard: NextPage = () => {
 							<a href="/technician/profile" className="fixora-tech-card__link">View all ›</a>
 						</div>
 						<div className="fixora-tech-reviews-grid">
-							{reviews?.list && reviews.list.length > 0 ? (
-								reviews.list.slice(0, 3).map((review: any, idx: number) => (
-									<div key={idx} className="fixora-tech-review-card">
+							{reviews.length > 0 ? (
+								reviews.slice(0, 3).map((review: any, idx: number) => (
+									<div key={review._id} className="fixora-tech-review-card">
 										<div className="fixora-tech-review-header">
 											<div className="fixora-tech-review-avatar">
 												{review.userId?.userNickname?.[0] || 'C'}
@@ -340,7 +364,7 @@ const TechnicianDashboard: NextPage = () => {
 											<div className="fixora-tech-review-date">Today</div>
 										</div>
 										<div className="fixora-tech-review-stars">
-											{'⭐'.repeat(review.repairQuality || 5)}
+											{'⭐'.repeat(Math.round(review.repairQuality || 5))}
 										</div>
 										<p className="fixora-tech-review-text">{review.reviewContent || 'Great service!'}</p>
 									</div>

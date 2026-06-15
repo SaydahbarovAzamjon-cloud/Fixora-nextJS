@@ -4,6 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
+import DashboardBookingCard from '../../libs/components/technician/DashboardBookingCard';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
@@ -20,7 +21,7 @@ const TechnicianDashboard: NextPage = () => {
 
 	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
 		skip: !user?._id,
-		variables: { input: { page: 1, limit: 100 } },
+		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
 	});
 
@@ -32,7 +33,15 @@ const TechnicianDashboard: NextPage = () => {
 
 	const { data: reviewsData } = useQuery(GET_TECHNICIAN_REVIEWS, {
 		skip: !user?._id,
-		variables: { userId: user?._id },
+		variables: {
+			input: {
+				page: 1,
+				limit: 10,
+				sort: 'createdAt',
+				direction: 'DESC',
+				search: { technicianId: user?._id ?? '' },
+			},
+		},
 		fetchPolicy: 'network-only',
 	});
 
@@ -63,7 +72,7 @@ const TechnicianDashboard: NextPage = () => {
 		return (((parseFloat(earnings) - previousEarnings) / previousEarnings) * 100).toFixed(1);
 	}, [earnings, previousEarnings]);
 
-	const rating = useMemo(() => reviews?.averageRating ?? 0, [reviews]);
+	const rating = useMemo(() => technicianUser?.averageRating ?? 0, [technicianUser]);
 	const requestsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
@@ -135,7 +144,7 @@ const TechnicianDashboard: NextPage = () => {
 					<div className="fixora-kpi-card__icon">⭐</div>
 					<div className="fixora-kpi-card__content">
 						<div className="fixora-kpi-card__value">{rating.toFixed(1)}</div>
-						<div className="fixora-kpi-card__change">{reviews?.metaCounter?.[0]?.total ?? 0}+ reviews</div>
+						<div className="fixora-kpi-card__change">{technicianUser?.reviewCount ?? 0}+ reviews</div>
 						<div className="fixora-kpi-card__label">Rating</div>
 					</div>
 				</div>
@@ -154,23 +163,12 @@ const TechnicianDashboard: NextPage = () => {
 						<div className="fixora-dashboard-section__list">
 							{incomingRequests.length > 0 ? (
 								incomingRequests.slice(0, 8).map((booking: any, idx: number) => (
-									<div key={idx} className="fixora-request-item">
-										<div className="fixora-request-item__device">
-											📱 {booking?.deviceType ?? 'Device'}
-										</div>
-										<div className="fixora-request-item__problem">
-											{booking?.problemTitle ?? 'Repair request'}
-										</div>
-										<div className="fixora-request-item__customer">
-											{booking?.customerName ?? 'Customer'}
-										</div>
-										<div className="fixora-request-item__location">
-											📍 {booking?.location ?? 'Location'}
-										</div>
-										<div className="fixora-request-item__price">
-											₩{booking?.estimatedPrice ?? '0'}
-										</div>
-									</div>
+									<DashboardBookingCard
+										key={idx}
+										booking={booking}
+										technicianLocation={technicianUser?.userLocation}
+										variant="request"
+									/>
 								))
 							) : (
 								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
@@ -189,26 +187,12 @@ const TechnicianDashboard: NextPage = () => {
 						<div className="fixora-dashboard-section__list">
 							{activeJobs.length > 0 ? (
 								activeJobs.slice(0, 6).map((booking: any, idx: number) => (
-									<div key={idx} className="fixora-job-item">
-										<div className="fixora-job-item__status">
-											{booking?.bookingStatus === 'CONFIRMED' ? '⏳ Confirmed' : '⚙️ In Progress'}
-										</div>
-										<div className="fixora-job-item__problem">
-											{booking?.problemTitle ?? 'Repair'}
-										</div>
-										<div className="fixora-job-item__customer">
-											{booking?.customerName ?? 'Customer'}
-										</div>
-										<div className="fixora-job-item__date">
-											📅 {new Date(booking?.bookingDate).toLocaleDateString('en-US')}
-										</div>
-										<div className="fixora-job-item__time">
-											🕐 {new Date(booking?.bookingDate).toLocaleTimeString('en-US', {
-												hour: '2-digit',
-												minute: '2-digit'
-											})}
-										</div>
-									</div>
+									<DashboardBookingCard
+										key={idx}
+										booking={booking}
+										technicianLocation={technicianUser?.userLocation}
+										variant="job"
+									/>
 								))
 							) : (
 								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>

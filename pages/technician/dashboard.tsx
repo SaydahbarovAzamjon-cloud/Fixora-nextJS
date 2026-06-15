@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
 import DashboardBookingCard from '../../libs/components/technician/DashboardBookingCard';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
@@ -16,7 +17,7 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 });
 
 const TechnicianDashboard: NextPage = () => {
-	const { t } = useTranslation('common');
+	useTranslation('common');
 	const user = useReactiveVar(userVar);
 
 	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
@@ -49,34 +50,44 @@ const TechnicianDashboard: NextPage = () => {
 	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews ?? null, [reviewsData]);
 
-	const incomingRequests = useMemo(() => bookings.filter(b => b?.bookingStatus === 'REQUESTED'), [bookings]);
-	const activeJobs = useMemo(() => bookings.filter(b => b?.bookingStatus === 'CONFIRMED' || b?.bookingStatus === 'IN_PROGRESS'), [bookings]);
-	const completedBookings = useMemo(() => bookings.filter(b => b?.bookingStatus === 'COMPLETED'), [bookings]);
+	const incomingRequests = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'REQUESTED'), [bookings]);
+	const activeJobs = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'CONFIRMED' || b?.bookingStatus === 'IN_PROGRESS'), [bookings]);
+	const completedBookings = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'COMPLETED'), [bookings]);
 
 	const earnings = useMemo(() => {
 		return completedBookings
-			.reduce((sum, b) => sum + (parseFloat(b?.finalPrice) || 0), 0)
+			.reduce((sum: number, b: any) => sum + (parseFloat(b?.finalPrice) || 0), 0)
 			.toFixed(2);
 	}, [completedBookings]);
+
+	const earningsData = [
+		{ day: 'Mon', earnings: 320, jobs: 3 },
+		{ day: 'Tue', earnings: 480, jobs: 5 },
+		{ day: 'Wed', earnings: 240, jobs: 2 },
+		{ day: 'Thu', earnings: 620, jobs: 6 },
+		{ day: 'Fri', earnings: 780, jobs: 8 },
+		{ day: 'Sat', earnings: 540, jobs: 5 },
+		{ day: 'Sun', earnings: 160, jobs: 2 },
+	];
 
 	const previousEarnings = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
 		return completedBookings
-			.filter(b => new Date(b?.completedAt) < lastMonth)
-			.reduce((sum, b) => sum + (parseFloat(b?.finalPrice) || 0), 0);
+			.filter((b: any) => new Date(b?.completedAt) < lastMonth)
+			.reduce((sum: number, b: any) => sum + (parseFloat(b?.finalPrice) || 0), 0);
 	}, [completedBookings]);
 
 	const earningsChange = useMemo(() => {
 		if (previousEarnings === 0) return 0;
-		return (((parseFloat(earnings) - previousEarnings) / previousEarnings) * 100).toFixed(1);
+		return (((parseFloat(earnings as string) - previousEarnings) / previousEarnings) * 100).toFixed(1);
 	}, [earnings, previousEarnings]);
 
 	const rating = useMemo(() => technicianUser?.averageRating ?? 0, [technicianUser]);
 	const requestsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
-		const previousCount = bookings.filter(b =>
+		const previousCount = bookings.filter((b: any) =>
 			b?.bookingStatus === 'REQUESTED' && new Date(b?.createdAt) < lastMonth
 		).length;
 		const currentCount = incomingRequests.length;
@@ -87,7 +98,7 @@ const TechnicianDashboard: NextPage = () => {
 	const jobsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
-		const previousCount = bookings.filter(b =>
+		const previousCount = bookings.filter((b: any) =>
 			(b?.bookingStatus === 'CONFIRMED' || b?.bookingStatus === 'IN_PROGRESS') &&
 			new Date(b?.createdAt) < lastMonth
 		).length;
@@ -96,73 +107,81 @@ const TechnicianDashboard: NextPage = () => {
 		return (((currentCount - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, activeJobs]);
 
+	const [hoveredJob, setHoveredJob] = React.useState<string | null>(null);
+
 	return (
-		<div className="fixora-technician-dashboard">
-			<div className="fixora-technician-dashboard__header">
-				<h1 className="fixora-technician-dashboard__title">
-					Welcome back, {technicianUser?.userNickname || 'Technician'}! 👋
-				</h1>
-				<p className="fixora-technician-dashboard__subtitle">Here's your overview for today</p>
-			</div>
-
-			{/* KPI Cards */}
-			<div className="fixora-technician-dashboard__kpis">
-				<div className="fixora-kpi-card">
-					<div className="fixora-kpi-card__icon">🔔</div>
-					<div className="fixora-kpi-card__content">
-						<div className="fixora-kpi-card__value">{incomingRequests.length}</div>
-						<div className="fixora-kpi-card__change">
-							{requestsChange > 0 ? '+' : ''}{requestsChange}% vs last month
-						</div>
-						<div className="fixora-kpi-card__label">Incoming Requests</div>
-					</div>
+		<div className="fixora-tech-dashboard">
+			{/* Welcome Section */}
+			<div className="fixora-tech-dashboard__welcome">
+				<div>
+					<div className="fixora-tech-dashboard__date">Monday, June 15, 2026</div>
+					<h1 className="fixora-tech-dashboard__greeting">
+						Good morning, {technicianUser?.userNickname || 'Alex'} 👋
+					</h1>
+					<p className="fixora-tech-dashboard__info">
+						You have <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--orange">{incomingRequests.length} new requests</span> and <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--green">{activeJobs.length} active jobs</span> today.
+					</p>
 				</div>
-
-				<div className="fixora-kpi-card">
-					<div className="fixora-kpi-card__icon">💼</div>
-					<div className="fixora-kpi-card__content">
-						<div className="fixora-kpi-card__value">{activeJobs.length}</div>
-						<div className="fixora-kpi-card__change">
-							{jobsChange > 0 ? '+' : ''}{jobsChange}% vs last month
-						</div>
-						<div className="fixora-kpi-card__label">Active Jobs</div>
-					</div>
-				</div>
-
-				<div className="fixora-kpi-card">
-					<div className="fixora-kpi-card__icon">💰</div>
-					<div className="fixora-kpi-card__content">
-						<div className="fixora-kpi-card__value">${earnings}</div>
-						<div className="fixora-kpi-card__change">
-							{earningsChange > 0 ? '+' : ''}{earningsChange}% vs last month
-						</div>
-						<div className="fixora-kpi-card__label">Earnings</div>
-					</div>
-				</div>
-
-				<div className="fixora-kpi-card">
-					<div className="fixora-kpi-card__icon">⭐</div>
-					<div className="fixora-kpi-card__content">
-						<div className="fixora-kpi-card__value">{rating.toFixed(1)}</div>
-						<div className="fixora-kpi-card__change">{technicianUser?.reviewCount ?? 0}+ reviews</div>
-						<div className="fixora-kpi-card__label">Rating</div>
-					</div>
+				<div className="fixora-tech-dashboard__quick-actions">
+					<button className="fixora-tech-quick-action">⚡ New Quote</button>
+					<button className="fixora-tech-quick-action">✓ Mark Available</button>
+					<button className="fixora-tech-quick-action">📅 View Schedule</button>
+					<button className="fixora-tech-quick-action">📤 Export Report</button>
 				</div>
 			</div>
 
-			{/* Main Content - Two Rows Layout */}
-			<div className="fixora-technician-dashboard__sections">
-				{/* First Row - Incoming Requests & Active Jobs */}
-				<div className="fixora-technician-dashboard__row">
-					{/* Incoming Requests Section */}
-					<div className="fixora-dashboard-section fixora-dashboard-section--large">
-						<div className="fixora-dashboard-section__header">
-							<h2 className="fixora-dashboard-section__title">Incoming Requests ({incomingRequests.length})</h2>
-							<a href="/technician/requests" className="fixora-dashboard-section__link">View all</a>
+			{/* Stats */}
+			<div className="fixora-tech-dashboard__stats">
+				<div className="fixora-tech-stat-card">
+					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--orange">📬</div>
+					<div>
+						<div className="fixora-tech-stat-label">Total Requests</div>
+						<div className="fixora-tech-stat-value">{incomingRequests.length}</div>
+						<div className="fixora-tech-stat-change">+{requestsChange}% vs last week</div>
+					</div>
+				</div>
+
+				<div className="fixora-tech-stat-card">
+					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--blue">💼</div>
+					<div>
+						<div className="fixora-tech-stat-label">Active Jobs</div>
+						<div className="fixora-tech-stat-value">{activeJobs.length}</div>
+						<div className="fixora-tech-stat-change">+{jobsChange}% vs last week</div>
+					</div>
+				</div>
+
+				<div className="fixora-tech-stat-card">
+					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green">💵</div>
+					<div>
+						<div className="fixora-tech-stat-label">This Week</div>
+						<div className="fixora-tech-stat-value">${earnings}</div>
+						<div className="fixora-tech-stat-change">+{earningsChange}% vs last week</div>
+					</div>
+				</div>
+
+				<div className="fixora-tech-stat-card">
+					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--yellow">⭐</div>
+					<div>
+						<div className="fixora-tech-stat-label">Avg Rating</div>
+						<div className="fixora-tech-stat-value">{rating.toFixed(1)}</div>
+						<div className="fixora-tech-stat-change">+0.2 vs last week</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Main Grid */}
+			<div className="fixora-tech-dashboard__grid">
+				{/* Left Column */}
+				<div className="fixora-tech-dashboard__left">
+					{/* Incoming Requests */}
+					<div className="fixora-tech-card">
+						<div className="fixora-tech-card__header">
+							<h2 className="fixora-tech-card__title">Incoming Requests</h2>
+							<a href="/technician/requests" className="fixora-tech-card__link">View all ›</a>
 						</div>
-						<div className="fixora-dashboard-section__list">
+						<div className="fixora-tech-card__list">
 							{incomingRequests.length > 0 ? (
-								incomingRequests.slice(0, 8).map((booking: any, idx: number) => (
+								incomingRequests.slice(0, 4).map((booking: any, idx: number) => (
 									<DashboardBookingCard
 										key={idx}
 										booking={booking}
@@ -171,120 +190,156 @@ const TechnicianDashboard: NextPage = () => {
 									/>
 								))
 							) : (
-								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
-									No incoming requests
-								</div>
+								<div className="fixora-tech-empty">No incoming requests</div>
 							)}
 						</div>
 					</div>
 
-					{/* Active Jobs Section */}
-					<div className="fixora-dashboard-section fixora-dashboard-section--large">
-						<div className="fixora-dashboard-section__header">
-							<h2 className="fixora-dashboard-section__title">Active Jobs ({activeJobs.length})</h2>
-							<a href="/technician/jobs" className="fixora-dashboard-section__link">View all</a>
+					{/* Active Jobs */}
+					<div className="fixora-tech-card">
+						<div className="fixora-tech-card__header">
+							<h2 className="fixora-tech-card__title">Active Jobs</h2>
+							<a href="/technician/jobs" className="fixora-tech-card__link">View all ›</a>
 						</div>
-						<div className="fixora-dashboard-section__list">
+						<div className="fixora-tech-card__list">
 							{activeJobs.length > 0 ? (
-								activeJobs.slice(0, 6).map((booking: any, idx: number) => (
-									<DashboardBookingCard
+								activeJobs.slice(0, 3).map((booking: any, idx: number) => (
+									<div
 										key={idx}
-										booking={booking}
-										technicianLocation={technicianUser?.userLocation}
-										variant="job"
-									/>
+										className="fixora-tech-job-item"
+										onMouseEnter={() => setHoveredJob(booking._id)}
+										onMouseLeave={() => setHoveredJob(null)}
+										style={{
+											borderRadius: '10px',
+											padding: '14px',
+											background: hoveredJob === booking._id ? 'rgba(255,255,255,0.03)' : 'transparent',
+											border: hoveredJob === booking._id ? '1px solid rgba(255,107,0,0.15)' : '1px solid transparent',
+											marginBottom: idx < activeJobs.length - 1 ? '8px' : 0,
+											transition: 'all 0.15s ease',
+											cursor: 'pointer',
+										}}
+									>
+										<DashboardBookingCard
+											booking={booking}
+											technicianLocation={technicianUser?.userLocation}
+											variant="job"
+										/>
+									</div>
 								))
 							) : (
-								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
-									No active jobs
-								</div>
+								<div className="fixora-tech-empty">No active jobs</div>
 							)}
 						</div>
 					</div>
 				</div>
 
-				{/* Second Row - Earnings, Schedule, Reviews, Actions */}
-				<div className="fixora-technician-dashboard__row">
-					{/* Earnings Overview Chart */}
-					<div className="fixora-dashboard-section">
-						<div className="fixora-dashboard-section__header">
-							<h2 className="fixora-dashboard-section__title">Earnings Overview</h2>
-							<select className="fixora-dashboard-section__dropdown">
-								<option>This Month</option>
-								<option>Last Month</option>
-								<option>Last 3 Months</option>
-							</select>
+				{/* Right Column */}
+				<div className="fixora-tech-dashboard__right">
+					{/* Earnings Chart */}
+					<div className="fixora-tech-card">
+						<div className="fixora-tech-card__header">
+							<div>
+								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
+								<div className="fixora-tech-earnings-info">
+									<div className="fixora-tech-earnings-amount">$3,240</div>
+									<div className="fixora-tech-earnings-change">+18% vs last week</div>
+								</div>
+							</div>
+							<div className="fixora-tech-period-toggle">
+								<button className="fixora-tech-period-btn fixora-tech-period-btn--active">Week</button>
+								<button className="fixora-tech-period-btn">Month</button>
+								<button className="fixora-tech-period-btn">Year</button>
+							</div>
 						</div>
-						<div className="fixora-dashboard-section__chart-placeholder">
-							<svg viewBox="0 0 400 200" className="fixora-chart">
-								<polyline
-									points="0,150 40,120 80,140 120,80 160,100 200,60 240,90 280,50 320,80 360,40"
-									fill="none"
-									stroke="var(--fixora-primary)"
-									strokeWidth="2"
-								/>
-							</svg>
+						<div style={{ height: '180px', marginTop: '16px' }}>
+							<ResponsiveContainer width="100%" height="100%">
+								<AreaChart data={earningsData}>
+									<defs>
+										<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
+											<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
+											<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
+											<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
+										</linearGradient>
+									</defs>
+									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+									<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+									<Tooltip
+										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
+										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
+										itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
+										formatter={(v: number) => [`$${v}`, 'Earnings']}
+									/>
+									<Area
+										type="monotone"
+										dataKey="earnings"
+										stroke="#FF6B00"
+										strokeWidth={2.5}
+										fill="url(#earningsGrad)"
+										dot={false}
+										isAnimationActive
+									/>
+								</AreaChart>
+							</ResponsiveContainer>
 						</div>
 					</div>
 
 					{/* Today's Schedule */}
-					<div className="fixora-dashboard-section">
-						<div className="fixora-dashboard-section__header">
-							<h2 className="fixora-dashboard-section__title">Today's Schedule</h2>
-							<a href="/technician/jobs" className="fixora-dashboard-section__link">View all</a>
+					<div className="fixora-tech-card">
+						<div className="fixora-tech-card__header">
+							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
 						</div>
-						<div className="fixora-dashboard-section__list">
+						<div className="fixora-tech-schedule-list">
 							{activeJobs.length > 0 ? (
 								activeJobs.slice(0, 3).map((booking: any, idx: number) => (
-									<div key={idx} className="fixora-schedule-item">
-										<span className="fixora-schedule-item__time">
-											{new Date(booking?.bookingDate).toLocaleTimeString('en-US', {
-												hour: '2-digit',
-												minute: '2-digit',
-											})}
-										</span>
-										<span className="fixora-schedule-item__title">{booking?.problemTitle ?? 'Repair'}</span>
-										<span className="fixora-schedule-item__count">📱</span>
+									<div key={idx} className="fixora-tech-schedule-item">
+										<div className="fixora-tech-schedule-dot" style={{ background: '#FF6B00' }} />
+										<div className="fixora-tech-schedule-content">
+											<div className="fixora-tech-schedule-time">
+												{new Date(booking?.bookingDate).toLocaleTimeString('en-US', {
+													hour: '2-digit',
+													minute: '2-digit',
+												})}
+											</div>
+											<div className="fixora-tech-schedule-task">{booking?.problemTitle ?? 'Repair Task'}</div>
+										</div>
 									</div>
 								))
 							) : (
-								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)' }}>No scheduled jobs for today</div>
+								<div className="fixora-tech-empty">No scheduled jobs</div>
 							)}
 						</div>
 					</div>
 
 					{/* Recent Reviews */}
-					<div className="fixora-dashboard-section">
-						<h2 className="fixora-dashboard-section__title">Recent Reviews</h2>
-						<div className="fixora-dashboard-section__list">
+					<div className="fixora-tech-card">
+						<div className="fixora-tech-card__header">
+							<h2 className="fixora-tech-card__title">Recent Reviews</h2>
+							<a href="/technician/profile" className="fixora-tech-card__link">View all ›</a>
+						</div>
+						<div className="fixora-tech-reviews-grid">
 							{reviews?.list && reviews.list.length > 0 ? (
 								reviews.list.slice(0, 3).map((review: any, idx: number) => (
-									<div key={idx} className="fixora-review-item">
-										<div className="fixora-review-item__avatar">
-											👤
-										</div>
-										<div className="fixora-review-item__content">
-											<div className="fixora-review-item__name">Customer</div>
-											<div className="fixora-review-item__rating">
-												⭐ {review?.repairQuality ?? 5.0}
+									<div key={idx} className="fixora-tech-review-card">
+										<div className="fixora-tech-review-header">
+											<div className="fixora-tech-review-avatar">
+												{review.userId?.userNickname?.[0] || 'C'}
 											</div>
+											<div className="fixora-tech-review-info">
+												<div className="fixora-tech-review-name">{review.userId?.userNickname || 'Customer'}</div>
+												<div className="fixora-tech-review-device">Repair Service</div>
+											</div>
+											<div className="fixora-tech-review-date">Today</div>
 										</div>
+										<div className="fixora-tech-review-stars">
+											{'⭐'.repeat(review.repairQuality || 5)}
+										</div>
+										<p className="fixora-tech-review-text">{review.reviewContent || 'Great service!'}</p>
 									</div>
 								))
 							) : (
-								<div style={{ padding: '20px', color: 'rgba(255,255,255,0.6)' }}>No reviews yet</div>
+								<div className="fixora-tech-empty">No reviews yet</div>
 							)}
-						</div>
-					</div>
-
-					{/* Quick Actions */}
-					<div className="fixora-dashboard-section">
-						<h2 className="fixora-dashboard-section__title">Quick Actions</h2>
-						<div className="fixora-dashboard-section__actions">
-							<button className="fixora-action-btn">Update Availability</button>
-							<button className="fixora-action-btn">Add Service</button>
-							<button className="fixora-action-btn">Withdraw Earnings</button>
-							<button className="fixora-action-btn">View Analytics</button>
 						</div>
 					</div>
 				</div>

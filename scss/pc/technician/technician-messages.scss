@@ -977,3 +977,14 @@
 		}
 	}
 }
+
+/* -------- Real profile images inside avatar circles -------- */
+.fixora-msg-conv__avatar img,
+.fixora-msg-chat__avatar img,
+.fixora-msg-row__avatar img {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	object-fit: cover;
+	display: block;
+}

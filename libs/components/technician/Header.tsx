@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useReactiveVar } from '@apollo/client';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import AddOutlined from '@mui/icons-material/AddOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import { userVar } from '../../../apollo/store';
+import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 
 interface HeaderProps {
 	activePage: string;
@@ -26,8 +29,18 @@ const PAGE_TITLES: Record<string, string> = {
 
 const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const router = useRouter();
+	const user = useReactiveVar(userVar);
+	const badges = useTechnicianBadges();
 	const [searchFocused, setSearchFocused] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
+
+	const displayName = user?.memberFullName || user?.memberNick || 'Technician';
+	const initials = displayName
+		.split(' ')
+		.map((part) => part.charAt(0))
+		.slice(0, 2)
+		.join('')
+		.toUpperCase();
 
 	const handleLogout = () => {
 		localStorage.removeItem('accessToken');
@@ -71,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				onClick={() => router.push('/technician/messages')}
 			>
 				<ChatBubbleOutlineOutlined style={{ fontSize: 18 }} />
-				<span className="fixora-tech-header__badge">2</span>
+				{badges.messages > 0 && <span className="fixora-tech-header__badge">{badges.messages}</span>}
 			</button>
 
 			<button
@@ -80,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				onClick={() => router.push('/technician/notifications')}
 			>
 				<NotificationsNoneOutlined style={{ fontSize: 19 }} />
-				<span className="fixora-tech-header__badge">9</span>
+				{badges.notifications > 0 && <span className="fixora-tech-header__badge">{badges.notifications}</span>}
 			</button>
 
 			<button
@@ -97,9 +110,9 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 					className="fixora-tech-header__profile-btn"
 					onClick={() => setDropdownOpen(!dropdownOpen)}
 				>
-					<div className="fixora-tech-header__avatar">AK</div>
+					<div className="fixora-tech-header__avatar">{initials || 'T'}</div>
 					<div className="fixora-tech-header__profile-info">
-						<div className="fixora-tech-header__profile-name">Alex Kim</div>
+						<div className="fixora-tech-header__profile-name">{displayName}</div>
 						<div className="fixora-tech-header__profile-role">Pro Technician</div>
 					</div>
 					<KeyboardArrowDown style={{ fontSize: 16, color: '#606060' }} />

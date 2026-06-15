@@ -45,6 +45,22 @@ const DeviceIcon = ({ type }: { type?: string | null }) => {
 	}
 };
 
+const customerName = (entity?: any) =>
+	entity?.customerData?.userFullName || entity?.customerData?.userNickname || 'Customer';
+
+const customerInitial = (entity?: any) => {
+	const name = entity?.customerData?.userFullName || entity?.customerData?.userNickname;
+	return name ? name.charAt(0).toUpperCase() : 'C';
+};
+
+const deviceLabel = (booking?: any) => {
+	const d = booking?.deviceData;
+	if (d?.deviceBrand || d?.deviceModel) {
+		return [d?.deviceBrand, d?.deviceModel].filter(Boolean).join(' ');
+	}
+	return booking?.problemTitle || 'Repair';
+};
+
 const urgencyInfo = (complexity?: string | null) => {
 	switch (complexity) {
 		case 'HIGH':
@@ -166,15 +182,30 @@ const TechnicianDashboard: NextPage = () => {
 			.toFixed(2);
 	}, [completedBookings]);
 
-	const earningsData = [
-		{ day: 'Mon', earnings: 320, jobs: 3 },
-		{ day: 'Tue', earnings: 480, jobs: 5 },
-		{ day: 'Wed', earnings: 240, jobs: 2 },
-		{ day: 'Thu', earnings: 620, jobs: 6 },
-		{ day: 'Fri', earnings: 780, jobs: 8 },
-		{ day: 'Sat', earnings: 540, jobs: 5 },
-		{ day: 'Sun', earnings: 160, jobs: 2 },
-	];
+	// Real weekly earnings: bucket completed bookings into the current week (Mon–Sun)
+	// by completion date, summing finalPrice. Replaces the previous hardcoded mock series.
+	const earningsData = useMemo(() => {
+		const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+		const week = labels.map((day) => ({ day, earnings: 0, jobs: 0 }));
+
+		const now = new Date();
+		const monday = new Date(now);
+		const dow = (now.getDay() + 6) % 7; // 0 = Monday
+		monday.setHours(0, 0, 0, 0);
+		monday.setDate(now.getDate() - dow);
+		const nextMonday = new Date(monday);
+		nextMonday.setDate(monday.getDate() + 7);
+
+		completedBookings.forEach((b: any) => {
+			const when = new Date(b?.completedAt || b?.bookingDate || b?.updatedAt || b?.createdAt);
+			if (Number.isNaN(when.getTime()) || when < monday || when >= nextMonday) return;
+			const idx = (when.getDay() + 6) % 7;
+			week[idx].earnings += parseFloat(b?.finalPrice) || 0;
+			week[idx].jobs += 1;
+		});
+
+		return week;
+	}, [completedBookings]);
 
 	const previousEarnings = useMemo(() => {
 		const lastMonth = new Date();
@@ -298,7 +329,7 @@ const TechnicianDashboard: NextPage = () => {
 						<div className="fixora-tech-stat-value">{rating.toFixed(1)}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
-							<span className="fixora-tech-stat-change__up">+0.2</span> vs last week
+							based on {technicianUser?.reviewCount ?? 0} reviews
 						</div>
 					</div>
 			</div>
@@ -317,13 +348,15 @@ const TechnicianDashboard: NextPage = () => {
 									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity);
 									return (
 										<div key={booking._id} className="fixora-tech-request-item">
-											<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.aiClassification?.deviceType} /></div>
+											<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} /></div>
 											<div className="fixora-tech-request-info">
 												<div className="fixora-tech-request-top">
-													<span className="fixora-tech-request-name">Customer</span>
+													<span className="fixora-tech-request-name">{customerName(booking)}</span>
 													<span className="fixora-tech-urgency-badge" style={{ background: ug.bg, color: ug.color }}>{ug.label}</span>
 												</div>
-												<div className="fixora-tech-request-desc">{booking.problemTitle || 'Device Repair'}</div>
+												<div className="fixora-tech-request-desc">
+													{booking?.deviceData ? `${deviceLabel(booking)} • ${booking.problemTitle || 'Device Repair'}` : (booking.problemTitle || 'Device Repair')}
+												</div>
 											</div>
 											<div className="fixora-tech-request-meta">
 												<div className="fixora-tech-request-budget">{booking.estimatedPrice ? `$${booking.estimatedPrice}` : 'TBD'}</div>
@@ -358,10 +391,10 @@ const TechnicianDashboard: NextPage = () => {
 										>
 											<div className="fixora-tech-job-top">
 												<div className="fixora-tech-job-info">
-													<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.aiClassification?.deviceType} /></div>
+													<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} /></div>
 													<div>
-														<div className="fixora-tech-request-name">Customer</div>
-														<div className="fixora-tech-job-device">{booking.problemTitle || 'Repair'}</div>
+														<div className="fixora-tech-request-name">{customerName(booking)}</div>
+														<div className="fixora-tech-job-device">{deviceLabel(booking)}</div>
 													</div>
 												</div>
 												<span className="fixora-tech-job-status" style={{ color: status.color }}>{status.label}</span>
@@ -478,10 +511,10 @@ const TechnicianDashboard: NextPage = () => {
 								reviews.slice(0, 3).map((review: any) => (
 									<div key={review._id} className="fixora-tech-review-card">
 										<div className="fixora-tech-review-header">
-											<div className="fixora-tech-review-avatar">C</div>
+											<div className="fixora-tech-review-avatar">{customerInitial(review)}</div>
 											<div className="fixora-tech-review-info">
-												<div className="fixora-tech-review-name">Customer</div>
-												<div className="fixora-tech-review-device">Repair Service</div>
+												<div className="fixora-tech-review-name">{customerName(review)}</div>
+												<div className="fixora-tech-review-device">Verified Customer</div>
 											</div>
 											<div className="fixora-tech-review-date">
 												{new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

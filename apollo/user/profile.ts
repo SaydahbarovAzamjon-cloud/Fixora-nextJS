@@ -54,6 +54,18 @@ export const GET_INCOMING_REQUESTS = gql`
 					issueCategory
 					repairComplexity
 				}
+				customerData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
+				deviceData {
+					_id
+					deviceModel
+					deviceBrand
+					deviceCategory
+				}
 			}
 			metaCounter {
 				total
@@ -92,6 +104,18 @@ export const GET_TECHNICIAN_BOOKINGS = gql`
 					deviceType
 					issueCategory
 					repairComplexity
+				}
+				customerData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
+				deviceData {
+					_id
+					deviceModel
+					deviceBrand
+					deviceCategory
 				}
 			}
 			metaCounter {

@@ -14,6 +14,7 @@ import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { userVar } from '../../../apollo/store';
+import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 
 interface NavItem {
 	id: string;
@@ -29,13 +30,22 @@ const TechnicianSidebar: React.FC = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [isOnline] = useState(true);
+	const badges = useTechnicianBadges();
+
+	const displayName = user?.memberFullName || user?.memberNick || 'Technician';
+	const initials = displayName
+		.split(' ')
+		.map((part) => part.charAt(0))
+		.slice(0, 2)
+		.join('')
+		.toUpperCase();
 
 	const navItems: NavItem[] = [
 		{ id: 'dashboard', icon: <GridViewOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Dashboard', route: '/technician/dashboard' },
-		{ id: 'requests', icon: <MailOutline style={{ fontSize: ICON_SIZE }} />, label: 'Incoming Requests', route: '/technician/requests', badge: 4 },
-		{ id: 'jobs', icon: <WorkOutlineOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Active Jobs', route: '/technician/jobs', badge: 7 },
-		{ id: 'messages', icon: <ChatBubbleOutlineOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Messages', route: '/technician/messages', badge: 2 },
-		{ id: 'notifications', icon: <NotificationsNoneOutlined style={{ fontSize: ICON_SIZE + 1 }} />, label: 'Notifications', route: '/technician/notifications', badge: 9 },
+		{ id: 'requests', icon: <MailOutline style={{ fontSize: ICON_SIZE }} />, label: 'Incoming Requests', route: '/technician/requests', badge: badges.requests },
+		{ id: 'jobs', icon: <WorkOutlineOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Active Jobs', route: '/technician/jobs', badge: badges.jobs },
+		{ id: 'messages', icon: <ChatBubbleOutlineOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Messages', route: '/technician/messages', badge: badges.messages },
+		{ id: 'notifications', icon: <NotificationsNoneOutlined style={{ fontSize: ICON_SIZE + 1 }} />, label: 'Notifications', route: '/technician/notifications', badge: badges.notifications },
 		{ id: 'profile', icon: <PersonOutlineOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Public Profile', route: '/technician/profile' },
 		{ id: 'analytics', icon: <BarChartOutlined style={{ fontSize: ICON_SIZE }} />, label: 'Analytics', route: '/technician/analytics' },
 		{ id: 'earnings', icon: <AttachMoneyOutlined style={{ fontSize: ICON_SIZE + 1 }} />, label: 'Earnings', route: '/technician/earnings' },
@@ -59,7 +69,7 @@ const TechnicianSidebar: React.FC = () => {
 			>
 				<span className="fixora-technician-sidebar__nav-icon">{item.icon}</span>
 				<span className="fixora-technician-sidebar__nav-label">{item.label}</span>
-				{item.badge != null && (
+				{item.badge != null && item.badge > 0 && (
 					<span className="fixora-technician-sidebar__nav-badge">{item.badge}</span>
 				)}
 			</button>
@@ -105,11 +115,9 @@ const TechnicianSidebar: React.FC = () => {
 					className="fixora-technician-sidebar__user-card"
 					onClick={() => router.push('/technician/profile')}
 				>
-					<div className="fixora-technician-sidebar__user-avatar">
-						{(user?.userNickname?.[0] || 'A')}{(user?.userNickname?.[1] || 'K')}
-					</div>
+					<div className="fixora-technician-sidebar__user-avatar">{initials || 'T'}</div>
 					<div className="fixora-technician-sidebar__user-info">
-						<div className="fixora-technician-sidebar__user-name">{user?.userNickname || 'Alex Kim'}</div>
+						<div className="fixora-technician-sidebar__user-name">{displayName}</div>
 						<div className="fixora-technician-sidebar__user-role">Pro Technician</div>
 					</div>
 					<KeyboardArrowRight style={{ fontSize: 16, color: '#606060', flexShrink: 0 }} />

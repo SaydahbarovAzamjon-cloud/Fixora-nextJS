@@ -647,6 +647,12 @@ export const GET_TECHNICIAN_REVIEWS = gql`
 				repairSpeed
 				communication
 				createdAt
+				customerData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
 			}
 			distribution {
 				star

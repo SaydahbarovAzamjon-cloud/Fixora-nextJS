@@ -14,15 +14,17 @@ interface MessageThreadProps {
 	messages?: Message[];
 	bookingStatus?: string;
 	requestPrice?: number;
+	startDate?: string;
 	onSendMessage?: (message: string) => void;
 }
 
 const MessageThread: React.FC<MessageThreadProps> = ({
 	conversationId,
-	customerName = 'John D.',
+	customerName,
 	messages = [],
-	bookingStatus = 'In Progress',
-	requestPrice = 35,
+	bookingStatus,
+	requestPrice,
+	startDate,
 	onSendMessage,
 }) => {
 	const [messageText, setMessageText] = useState('');
@@ -58,9 +60,9 @@ const MessageThread: React.FC<MessageThreadProps> = ({
 			{/* Header */}
 			<div className="fixora-message-thread__header">
 				<div>
-					<h3 className="fixora-message-thread__title">{customerName}</h3>
+					<h3 className="fixora-message-thread__title">{customerName || 'Customer'}</h3>
 					<p className="fixora-message-thread__subtitle">
-						Status: <strong>{bookingStatus}</strong>
+						Status: <strong>{bookingStatus || '—'}</strong>
 					</p>
 				</div>
 				<a href="#" className="fixora-message-thread__view-request">
@@ -70,24 +72,31 @@ const MessageThread: React.FC<MessageThreadProps> = ({
 
 			{/* Request Summary Bar */}
 			<div className="fixora-message-thread__request-summary">
-				<div className="fixora-request-summary__item">
-					<span className="fixora-request-summary__label">Price</span>
-					<span className="fixora-request-summary__value">
-						${requestPrice}
-					</span>
-				</div>
-				<div className="fixora-request-summary__item">
-					<span className="fixora-request-summary__label">Status</span>
-					<span className="fixora-request-summary__value">
-						{bookingStatus}
-					</span>
-				</div>
-				<div className="fixora-request-summary__item">
-					<span className="fixora-request-summary__label">Start Date</span>
-					<span className="fixora-request-summary__value">
-						May 18, 10:30 AM
-					</span>
-				</div>
+				{requestPrice !== undefined && (
+					<div className="fixora-request-summary__item">
+						<span className="fixora-request-summary__label">Price</span>
+						<span className="fixora-request-summary__value">${requestPrice}</span>
+					</div>
+				)}
+				{bookingStatus && (
+					<div className="fixora-request-summary__item">
+						<span className="fixora-request-summary__label">Status</span>
+						<span className="fixora-request-summary__value">{bookingStatus}</span>
+					</div>
+				)}
+				{startDate && (
+					<div className="fixora-request-summary__item">
+						<span className="fixora-request-summary__label">Start Date</span>
+						<span className="fixora-request-summary__value">
+							{new Date(startDate).toLocaleString('en-US', {
+								month: 'short',
+								day: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+							})}
+						</span>
+					</div>
+				)}
 			</div>
 
 			{/* Messages List */}

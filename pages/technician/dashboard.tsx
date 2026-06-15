@@ -45,6 +45,12 @@ const DeviceIcon = ({ type }: { type?: string | null }) => {
 	}
 };
 
+const formatMoney = (value: number | string) => {
+	const num = typeof value === 'string' ? parseFloat(value) : value;
+	if (Number.isNaN(num)) return '0';
+	return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+};
+
 const customerName = (entity?: any) =>
 	entity?.customerData?.userFullName || entity?.customerData?.userNickname || 'Customer';
 
@@ -55,10 +61,9 @@ const customerInitial = (entity?: any) => {
 
 const deviceLabel = (booking?: any) => {
 	const d = booking?.deviceData;
-	if (d?.deviceBrand || d?.deviceModel) {
-		return [d?.deviceBrand, d?.deviceModel].filter(Boolean).join(' ');
-	}
-	return booking?.problemTitle || 'Repair';
+	// Show the model alone ("iPhone 15 Plus", "MacBook Air M2") — the brand is
+	// redundant for Apple devices and would render "APPLE Apple Watch SE 2".
+	return d?.deviceModel?.trim() || d?.deviceBrand?.trim() || booking?.problemTitle || 'Repair';
 };
 
 const urgencyInfo = (complexity?: string | null) => {
@@ -257,7 +262,7 @@ const TechnicianDashboard: NextPage = () => {
 						{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
 					</div>
 					<h1 className="fixora-tech-dashboard__greeting">
-						Good morning, {technicianUser?.userNickname || 'Alex'} 👋
+						Good morning, {technicianUser?.userFullName?.trim().split(/\s+/)[0] || technicianUser?.userNickname || 'Technician'} 👋
 					</h1>
 					<p className="fixora-tech-dashboard__info">
 						You have <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--orange">{incomingRequests.length} new requests</span> and <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--green">{activeJobs.length} active jobs</span> today.
@@ -314,7 +319,7 @@ const TechnicianDashboard: NextPage = () => {
 							<div className="fixora-tech-stat-label">This Week</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green"><AttachMoneyOutlined style={{ fontSize: 20 }} /></div>
 						</div>
-						<div className="fixora-tech-stat-value">${earnings}</div>
+						<div className="fixora-tech-stat-value">${formatMoney(earnings)}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
 							<span className="fixora-tech-stat-change__up">+{earningsChange}%</span> vs last week
@@ -422,7 +427,7 @@ const TechnicianDashboard: NextPage = () => {
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
 								<div className="fixora-tech-earnings-info">
-									<div className="fixora-tech-earnings-amount">${earnings}</div>
+									<div className="fixora-tech-earnings-amount">${formatMoney(earnings)}</div>
 									<div className="fixora-tech-earnings-change"><TrendingUpOutlined style={{ fontSize: 13 }} /> +{earningsChange}% vs last week</div>
 								</div>
 							</div>
@@ -444,7 +449,7 @@ const TechnicianDashboard: NextPage = () => {
 									</defs>
 									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
 									<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, (max: number) => Math.max(Number(max) || 0, 100)]} allowDecimals={false} />
 									<Tooltip
 										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
 										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}

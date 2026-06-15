@@ -624,7 +624,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 
 	&__quick-actions {
 		display: flex;
-		gap: 10px;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 12px;
 		flex-shrink: 0;
 		position: relative;
 		z-index: 1;
@@ -824,6 +826,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 12px;
 		margin-bottom: 12px;
 	}
 
@@ -843,6 +846,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		cursor: pointer;
 		transition: color 0.2s ease;
 		text-decoration: none;
+		margin-left: auto;
+		flex-shrink: 0;
+		white-space: nowrap;
 
 		&:hover {
 			color: #FF7A00;

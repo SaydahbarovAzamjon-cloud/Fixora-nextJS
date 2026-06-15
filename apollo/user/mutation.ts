@@ -369,3 +369,21 @@ export const CREATE_BOOKING = gql`
 		}
 	}
 `;
+
+export const ACCEPT_BOOKING = gql`
+	mutation AcceptBooking($bookingId: String!) {
+		acceptBooking(bookingId: $bookingId) {
+			_id
+			bookingStatus
+		}
+	}
+`;
+
+export const REJECT_BOOKING = gql`
+	mutation RejectBooking($bookingId: String!) {
+		rejectBooking(bookingId: $bookingId) {
+			_id
+			bookingStatus
+		}
+	}
+`;

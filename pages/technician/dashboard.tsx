@@ -4,7 +4,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
+import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
 
@@ -14,11 +14,97 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	},
 });
 
+const DEVICE_ICON: Record<string, string> = {
+	IPHONE: '📱',
+	APPLE_WATCH: '⌚',
+	IPAD: '📱',
+	MACBOOK: '💻',
+};
+
+const deviceIcon = (deviceType?: string | null) => DEVICE_ICON[deviceType ?? ''] ?? '🔧';
+
+const urgencyInfo = (complexity?: string | null) => {
+	switch (complexity) {
+		case 'HIGH':
+			return { label: 'high', color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
+		case 'LOW':
+			return { label: 'low', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' };
+		default:
+			return { label: 'medium', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
+	}
+};
+
+const jobStatusInfo = (status: string) => {
+	switch (status) {
+		case 'IN_PROGRESS':
+			return { label: 'In Progress', color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' };
+		case 'ACCEPTED':
+			return { label: 'Diagnosing', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' };
+		default:
+			return { label: 'Parts Ordered', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
+	}
+};
+
+const jobProgress = (booking: any) => {
+	if (booking?.bookingStatus === 'COMPLETED') return 100;
+	if (booking?.bookingStatus === 'ACCEPTED') return 15;
+	const steps = booking?.progressUpdates?.length ?? 0;
+	return Math.min(90, 30 + steps * 15);
+};
+
+const scheduleDotColor = (status: string) => {
+	switch (status) {
+		case 'ACCEPTED':
+			return '#3B82F6';
+		case 'COMPLETED':
+			return '#22C55E';
+		case 'CANCELLED':
+		case 'REJECTED':
+			return '#404040';
+		default:
+			return '#FF6B00';
+	}
+};
+
+const timeAgo = (dateStr?: string | null) => {
+	if (!dateStr) return '';
+	const date = new Date(dateStr);
+	const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+	if (minutes < 1) return 'just now';
+	if (minutes < 60) return `${minutes} min ago`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return `${hours}h ago`;
+	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const formatDue = (dateStr?: string | null) => {
+	if (!dateStr) return 'TBD';
+	const date = new Date(dateStr);
+	const now = new Date();
+	const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+	if (date.toDateString() === now.toDateString()) return `Today ${time}`;
+	const tomorrow = new Date(now);
+	tomorrow.setDate(now.getDate() + 1);
+	if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow ${time}`;
+	return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
+};
+
+const formatTime = (dateStr?: string | null) => {
+	if (!dateStr) return '--';
+	return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+};
+
 const TechnicianDashboard: NextPage = () => {
 	const user = useReactiveVar(userVar);
 	const [hoveredJob, setHoveredJob] = useState<string | null>(null);
 
-	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
+	const { data: incomingRequestsData } = useQuery(GET_INCOMING_REQUESTS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 100, search: {} } },
+		fetchPolicy: 'network-only',
+	});
+
+	const { data: technicianBookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
@@ -35,7 +121,7 @@ const TechnicianDashboard: NextPage = () => {
 		variables: {
 			input: {
 				page: 1,
-				limit: 5,
+				limit: 3,
 				sort: 'createdAt',
 				direction: 'DESC',
 				search: { technicianId: user?._id ?? '' },
@@ -44,11 +130,11 @@ const TechnicianDashboard: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const bookings = useMemo(() => bookingsData?.getMyBookings?.list ?? [], [bookingsData]);
+	const incomingRequests = useMemo(() => incomingRequestsData?.getIncomingRequests?.list ?? [], [incomingRequestsData]);
+	const bookings = useMemo(() => technicianBookingsData?.getTechnicianBookings?.list ?? [], [technicianBookingsData]);
 	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
 
-	const incomingRequests = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'PENDING'), [bookings]);
 	const activeJobs = useMemo(() => bookings.filter((b: any) => ['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus)), [bookings]);
 	const completedBookings = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'COMPLETED'), [bookings]);
 
@@ -86,12 +172,10 @@ const TechnicianDashboard: NextPage = () => {
 	const requestsChange = useMemo(() => {
 		const lastMonth = new Date();
 		lastMonth.setMonth(lastMonth.getMonth() - 1);
-		const previousCount = bookings.filter((b: any) =>
-			b?.bookingStatus === 'PENDING' && new Date(b?.createdAt) < lastMonth
-		).length;
+		const previousCount = incomingRequests.filter((b: any) => new Date(b?.createdAt) < lastMonth).length;
 		if (previousCount === 0) return 0;
 		return (((incomingRequests.length - previousCount) / previousCount) * 100).toFixed(0);
-	}, [bookings, incomingRequests]);
+	}, [incomingRequests]);
 
 	const jobsChange = useMemo(() => {
 		const lastMonth = new Date();
@@ -103,6 +187,13 @@ const TechnicianDashboard: NextPage = () => {
 		if (previousCount === 0) return 0;
 		return (((activeJobs.length - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, activeJobs]);
+
+	const scheduleItems = useMemo(() => {
+		return [...bookings]
+			.filter((b: any) => b?.bookingDate && !['CANCELLED', 'REJECTED'].includes(b?.bookingStatus))
+			.sort((a: any, b: any) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime())
+			.slice(0, 5);
+	}, [bookings]);
 
 	return (
 		<div className="fixora-tech-dashboard">
@@ -120,10 +211,10 @@ const TechnicianDashboard: NextPage = () => {
 					</p>
 				</div>
 				<div className="fixora-tech-dashboard__quick-actions">
-					<button className="fixora-tech-quick-action">⚡ New Quote</button>
-					<button className="fixora-tech-quick-action">✓ Mark Available</button>
-					<button className="fixora-tech-quick-action">📅 View Schedule</button>
-					<button className="fixora-tech-quick-action">📤 Export Report</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange">⚡ New Quote</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--green">✓ Mark Available</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue">📅 View Schedule</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple">📤 Export Report</button>
 				</div>
 			</div>
 
@@ -178,34 +269,25 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 						<div className="fixora-tech-card__list">
 							{incomingRequests.length > 0 ? (
-								incomingRequests.slice(0, 4).map((booking: any) => (
-									<div key={booking._id} style={{
-										padding: '12px 4px',
-										borderBottom: '1px solid rgba(255,255,255,0.05)',
-										cursor: 'pointer',
-										borderRadius: 8,
-										transition: 'background 0.15s',
-									}}
-										onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'; }}
-										onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
-									>
-										<div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-											<div style={{ width: 36, height: 36, borderRadius: 10, background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-												📱
-											</div>
-											<div style={{ flex: 1, minWidth: 0 }}>
-												<div style={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>Customer</div>
-												<div style={{ color: '#606060', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-													{booking.problemTitle || 'Device Repair'}
+								incomingRequests.slice(0, 4).map((booking: any) => {
+									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity);
+									return (
+										<div key={booking._id} className="fixora-tech-request-item">
+											<div className="fixora-tech-request-icon">{deviceIcon(booking?.aiClassification?.deviceType)}</div>
+											<div className="fixora-tech-request-info">
+												<div className="fixora-tech-request-top">
+													<span className="fixora-tech-request-name">Customer</span>
+													<span className="fixora-tech-urgency-badge" style={{ background: ug.bg, color: ug.color }}>{ug.label}</span>
 												</div>
+												<div className="fixora-tech-request-desc">{booking.problemTitle || 'Device Repair'}</div>
 											</div>
-											<div style={{ textAlign: 'right', flexShrink: 0 }}>
-												<div style={{ color: '#FF6B00', fontSize: 13, fontWeight: 700 }}>$0</div>
-												<div style={{ color: '#505050', fontSize: 11 }}>now</div>
+											<div className="fixora-tech-request-meta">
+												<div className="fixora-tech-request-budget">{booking.estimatedPrice ? `$${booking.estimatedPrice}` : 'TBD'}</div>
+												<div className="fixora-tech-request-time">{timeAgo(booking.createdAt)}</div>
 											</div>
 										</div>
-									</div>
-								))
+									);
+								})
 							) : (
 								<div className="fixora-tech-empty">No incoming requests</div>
 							)}
@@ -220,44 +302,37 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 						<div className="fixora-tech-card__list">
 							{activeJobs.length > 0 ? (
-								activeJobs.slice(0, 3).map((booking: any) => (
-									<div
-										key={booking._id}
-										className="fixora-tech-job-item"
-										onMouseEnter={() => setHoveredJob(booking._id)}
-										onMouseLeave={() => setHoveredJob(null)}
-										style={{
-											borderRadius: '10px',
-											padding: '14px',
-											background: hoveredJob === booking._id ? 'rgba(255,255,255,0.03)' : 'transparent',
-											border: hoveredJob === booking._id ? '1px solid rgba(255,107,0,0.15)' : '1px solid transparent',
-											marginBottom: '8px',
-											transition: 'all 0.15s ease',
-											cursor: 'pointer',
-										}}
-									>
-										<div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
-											<div style={{ display: 'flex', gap: 10 }}>
-												<div style={{ width: 34, height: 34, borderRadius: 9, background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-													💼
+								activeJobs.slice(0, 3).map((booking: any) => {
+									const status = jobStatusInfo(booking?.bookingStatus);
+									const progress = jobProgress(booking);
+									return (
+										<div
+											key={booking._id}
+											className={`fixora-tech-job-item ${hoveredJob === booking._id ? 'fixora-tech-job-item--hovered' : ''}`}
+											onMouseEnter={() => setHoveredJob(booking._id)}
+											onMouseLeave={() => setHoveredJob(null)}
+										>
+											<div className="fixora-tech-job-top">
+												<div className="fixora-tech-job-info">
+													<div className="fixora-tech-request-icon">{deviceIcon(booking?.aiClassification?.deviceType)}</div>
+													<div>
+														<div className="fixora-tech-request-name">Customer</div>
+														<div className="fixora-tech-job-device">{booking.problemTitle || 'Repair'}</div>
+													</div>
 												</div>
-												<div>
-													<div style={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>Customer</div>
-													<div style={{ color: '#606060', fontSize: 12 }}>{booking.problemTitle || 'Repair'}</div>
+												<span className="fixora-tech-job-status" style={{ background: status.bg, color: status.color }}>{status.label}</span>
+											</div>
+											<div className="fixora-tech-job-issue">{booking.problemDescription || 'Device repair'}</div>
+											<div className="fixora-tech-job-progress">
+												<div className="fixora-tech-progress-track">
+													<div className="prog-bar" style={{ '--prog-w': `${progress}%` } as React.CSSProperties} />
 												</div>
+												<span className="fixora-tech-progress-value">{progress}%</span>
+												<span className="fixora-tech-job-due">Due: {formatDue(booking.bookingDate)}</span>
 											</div>
-											<span style={{ background: 'rgba(255,107,0,0.12)', color: '#FF6B00', fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 20 }}>In Progress</span>
 										</div>
-										<div style={{ color: '#707070', fontSize: 12, marginBottom: 8 }}>Device repair</div>
-										<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-											<div style={{ flex: 1, height: 5, background: '#1E1E1E', borderRadius: 4, overflow: 'hidden' }}>
-												<div style={{ width: '65%', height: '100%', background: 'linear-gradient(90deg, #FF4500 0%, #FF6B00 25%, #FFCC00 50%, #FF6B00 75%, #FF4500 100%)', boxShadow: '0 0 8px rgba(255,107,0,0.5)' }} />
-											</div>
-											<span style={{ color: '#FF9A3C', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>65%</span>
-											<span style={{ color: '#505050', fontSize: 11, flexShrink: 0 }}>Due: Today</span>
-										</div>
-									</div>
-								))
+									);
+								})
 							) : (
 								<div className="fixora-tech-empty">No active jobs</div>
 							)}
@@ -273,8 +348,8 @@ const TechnicianDashboard: NextPage = () => {
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
 								<div className="fixora-tech-earnings-info">
-									<div className="fixora-tech-earnings-amount">$3,240</div>
-									<div className="fixora-tech-earnings-change">+18% vs last week</div>
+									<div className="fixora-tech-earnings-amount">${earnings}</div>
+									<div className="fixora-tech-earnings-change">+{earningsChange}% vs last week</div>
 								</div>
 							</div>
 							<div className="fixora-tech-period-toggle">
@@ -300,7 +375,7 @@ const TechnicianDashboard: NextPage = () => {
 										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
 										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
 										itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
-										formatter={(v: number) => [`$${v}`, 'Earnings']}
+										formatter={(v: any) => [`$${v}`, 'Earnings']}
 									/>
 									<Area
 										type="monotone"
@@ -322,21 +397,24 @@ const TechnicianDashboard: NextPage = () => {
 							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
 						</div>
 						<div className="fixora-tech-schedule-list">
-							{activeJobs.length > 0 ? (
-								activeJobs.slice(0, 3).map((booking: any, idx: number) => (
-									<div key={booking._id} className="fixora-tech-schedule-item">
-										<div className="fixora-tech-schedule-dot" style={{ background: '#FF6B00' }} />
-										<div className="fixora-tech-schedule-content">
-											<div className="fixora-tech-schedule-time">
-												{new Date(booking?.bookingDate).toLocaleTimeString('en-US', {
-													hour: '2-digit',
-													minute: '2-digit',
-												})}
+							{scheduleItems.length > 0 ? (
+								scheduleItems.map((booking: any, idx: number) => {
+									const done = booking.bookingStatus === 'COMPLETED';
+									const dotColor = scheduleDotColor(booking.bookingStatus);
+									return (
+										<div key={booking._id} className="fixora-tech-schedule-item" style={{ opacity: done ? 0.45 : 1 }}>
+											<div className="fixora-tech-schedule-rail">
+												<div className="fixora-tech-schedule-dot" style={{ background: done ? '#404040' : dotColor, boxShadow: done ? 'none' : `0 0 6px ${dotColor}` }} />
+												{idx < scheduleItems.length - 1 && <div className="fixora-tech-schedule-line" />}
 											</div>
-											<div className="fixora-tech-schedule-task">{booking?.problemTitle || 'Repair Task'}</div>
+											<div className="fixora-tech-schedule-content">
+												<div className="fixora-tech-schedule-time">{formatTime(booking.bookingDate)}</div>
+												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{booking.problemTitle || 'Repair Task'}</div>
+											</div>
+											{done && <span className="fixora-tech-schedule-done">✓</span>}
 										</div>
-									</div>
-								))
+									);
+								})
 							) : (
 								<div className="fixora-tech-empty">No scheduled jobs</div>
 							)}
@@ -351,17 +429,17 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 						<div className="fixora-tech-reviews-grid">
 							{reviews.length > 0 ? (
-								reviews.slice(0, 3).map((review: any, idx: number) => (
+								reviews.slice(0, 3).map((review: any) => (
 									<div key={review._id} className="fixora-tech-review-card">
 										<div className="fixora-tech-review-header">
-											<div className="fixora-tech-review-avatar">
-												{review.userId?.userNickname?.[0] || 'C'}
-											</div>
+											<div className="fixora-tech-review-avatar">C</div>
 											<div className="fixora-tech-review-info">
-												<div className="fixora-tech-review-name">{review.userId?.userNickname || 'Customer'}</div>
+												<div className="fixora-tech-review-name">Customer</div>
 												<div className="fixora-tech-review-device">Repair Service</div>
 											</div>
-											<div className="fixora-tech-review-date">Today</div>
+											<div className="fixora-tech-review-date">
+												{new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+											</div>
 										</div>
 										<div className="fixora-tech-review-stars">
 											{'⭐'.repeat(Math.round(review.repairQuality || 5))}

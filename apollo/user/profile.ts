@@ -29,6 +29,79 @@ export const GET_MY_BOOKINGS = gql`
 `;
 
 /**************************
+ *  INCOMING REQUESTS     *
+ *  (TECHNICIAN, PENDING) *
+ *************************/
+
+export const GET_INCOMING_REQUESTS = gql`
+	query GetIncomingRequests($input: BookingsInquiry!) {
+		getIncomingRequests(input: $input) {
+			list {
+				_id
+				bookingStatus
+				bookingType
+				bookingDate
+				problemTitle
+				problemDescription
+				estimatedPrice
+				finalPrice
+				deviceId
+				technicianId
+				userId
+				createdAt
+				aiClassification {
+					deviceType
+					issueCategory
+					repairComplexity
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *  TECHNICIAN BOOKINGS   *
+ *************************/
+
+export const GET_TECHNICIAN_BOOKINGS = gql`
+	query GetTechnicianBookings($input: BookingsInquiry!) {
+		getTechnicianBookings(input: $input) {
+			list {
+				_id
+				bookingStatus
+				bookingType
+				bookingDate
+				problemTitle
+				problemDescription
+				estimatedPrice
+				finalPrice
+				deviceId
+				technicianId
+				userId
+				createdAt
+				completedAt
+				progressUpdates {
+					step
+					note
+					timestamp
+				}
+				aiClassification {
+					deviceType
+					issueCategory
+					repairComplexity
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
  *   FOLLOWED TECHNICIANS *
  *************************/
 

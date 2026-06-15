@@ -1,120 +1,71 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { NextPage } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import NotificationsList from '../../../libs/components/technician/NotificationsList';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: {
-		...(await serverSideTranslations(locale ?? 'en', ['common'])),
-	},
+	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
-interface Notification {
-	id: string;
-	type: 'request' | 'message' | 'review' | 'payment';
-	title: string;
-	description: string;
-	timestamp: string;
-	isRead: boolean;
-	icon: string;
-}
-
 const Notifications: NextPage = () => {
-	const [notifications, setNotifications] = useState<Notification[]>([
-		{
-			id: '1',
-			type: 'request',
-			title: 'New request: iPhone 13 Screen Repair',
-			description:
-				'John D. requested a screen repair for iPhone 13. Price: $35',
-			timestamp: 'Today 10:30 AM',
-			isRead: false,
-			icon: '🔔',
-		},
-		{
-			id: '2',
-			type: 'message',
-			title: 'John D. accepted your offer',
-			description:
-				'The customer accepted your service offer for screen repair.',
-			timestamp: 'Today 10:45 AM',
-			isRead: false,
-			icon: '💬',
-		},
-		{
-			id: '3',
-			type: 'request',
-			title: 'New request: MacBook Air Overheating',
-			description:
-				'Sarah L. requested thermal paste replacement. Price: $60',
-			timestamp: 'Today 02:00 PM',
-			isRead: false,
-			icon: '🔔',
-		},
-		{
-			id: '4',
-			type: 'review',
-			title: 'You received a 5-star review',
-			description:
-				'John D. left a review: "Great work on the repair! Highly recommended."',
-			timestamp: 'Yesterday 08:15 PM',
-			isRead: true,
-			icon: '⭐',
-		},
-		{
-			id: '5',
-			type: 'payment',
-			title: 'Payment received',
-			description:
-				'Payment of $35 received for iPhone 13 screen repair from John D.',
-			timestamp: 'Yesterday 08:30 PM',
-			isRead: true,
-			icon: '💰',
-		},
-		{
-			id: '6',
-			type: 'message',
-			title: 'Sarah L. sent you a message',
-			description: 'The MacBook is running much better now. Thanks!',
-			timestamp: 'May 17, 03:00 PM',
-			isRead: true,
-			icon: '💬',
-		},
-		{
-			id: '7',
-			type: 'request',
-			title: 'New request: iPad Battery Issue',
-			description:
-				'Michael K. requested battery replacement. Price: $25',
-			timestamp: 'May 16, 05:30 PM',
-			isRead: true,
-			icon: '🔔',
-		},
-	]);
-
-	const handleMarkAsRead = (id: string) => {
-		setNotifications((prev) =>
-			prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-		);
-	};
-
-	const handleMarkAllAsRead = () => {
-		setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-	};
-
-	const handleDelete = (id: string) => {
-		setNotifications((prev) => prev.filter((n) => n.id !== id));
-	};
+	const notifications = [
+		{ id: 1, type: 'request', title: 'New repair request', desc: 'Sarah Johnson submitted a screen repair request', icon: '📱', time: '2 min ago', unread: true },
+		{ id: 2, type: 'payment', title: 'Payment received', desc: '$85.00 from iPhone screen repair completed', icon: '💰', time: '1 hour ago', unread: true },
+		{ id: 3, type: 'rating', title: 'New 5-star rating', desc: 'Michael Chen left a 5-star review', icon: '⭐', time: '3 hours ago', unread: false },
+		{ id: 4, type: 'message', title: 'New message', desc: 'Emma Williams: "Is my phone ready?"', icon: '💬', time: '5 hours ago', unread: false },
+		{ id: 5, type: 'reminder', title: 'Job reminder', desc: 'James Smith\'s repair is due tomorrow', icon: '⏰', time: '1 day ago', unread: false },
+	];
 
 	return (
-		<div className="fixora-technician-notifications-page">
-			<NotificationsList
-				notifications={notifications}
-				onMarkAsRead={handleMarkAsRead}
-				onMarkAllAsRead={handleMarkAllAsRead}
-				onDelete={handleDelete}
-			/>
+		<div style={{ padding: '24px', maxWidth: 720, margin: '0 auto', height: 'calc(100vh - 60px)', overflowY: 'auto' }}>
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+				<h2 style={{ color: '#F0F0F0', fontSize: 18, fontWeight: 700, margin: 0 }}>Notifications</h2>
+				<button style={{
+					padding: '6px 12px',
+					borderRadius: 8,
+					background: 'transparent',
+					border: '1px solid rgba(255,255,255,0.1)',
+					color: '#E0E0E0',
+					cursor: 'pointer',
+					fontSize: 12,
+					fontWeight: 600
+				}}>
+					Mark all as read
+				</button>
+			</div>
+
+			{notifications.map((notif) => (
+				<div key={notif.id} style={{
+					background: notif.unread ? 'rgba(255,107,0,0.08)' : 'transparent',
+					border: notif.unread ? '1px solid rgba(255,107,0,0.2)' : '1px solid rgba(255,255,255,0.05)',
+					borderRadius: 12,
+					padding: 16,
+					marginBottom: 12,
+					display: 'flex',
+					gap: 12,
+					cursor: 'pointer',
+					transition: 'all 0.15s ease'
+				}}>
+					<div style({ fontSize: 20 }}>{notif.icon}</div>
+					<div style={{ flex: 1 }}>
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 4 }}>
+							<div style={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>{notif.title}</div>
+							<div style={{ color: '#606060', fontSize: 11 }}>{notif.time}</div>
+						</div>
+						<div style={{ color: '#A0A0A0', fontSize: 12 }}>{notif.desc}</div>
+					</div>
+					{notif.unread && (
+						<div style={{
+							width: 8,
+							height: 8,
+							borderRadius: '50%',
+							background: '#FF6B00',
+							flexShrink: 0,
+							marginTop: 2
+						}} />
+					)}
+				</div>
+			))}
 		</div>
 	);
 };

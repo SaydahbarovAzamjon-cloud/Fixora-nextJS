@@ -1,0 +1,259 @@
+﻿// Header container
+.fixora-tech-header {
+	position: fixed;
+	top: 0;
+	left: 240px;
+	right: 0;
+	height: 60px;
+	background: rgba(10, 10, 10, 0.95);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	display: flex;
+	align-items: center;
+	padding: 0 24px;
+	gap: 16px;
+	z-index: 40;
+}
+
+// Page title
+.fixora-tech-header__title {
+	display: flex;
+	align-items: center;
+
+	h1 {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 700;
+		color: #f0f0f0;
+	}
+}
+
+// Search bar
+.fixora-tech-header__search {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	max-width: 360px;
+	padding: 8px 12px;
+	border-radius: 10px;
+	background: #1a1a1a;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: #1f1f1f;
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	&.fixora-tech-header__search--focused {
+		background: #1f1f1f;
+		border-color: rgba(255, 107, 0, 0.25);
+		box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+	}
+}
+
+.fixora-tech-header__search-icon {
+	font-size: 14px;
+	color: #606060;
+}
+
+.fixora-tech-header__search-input {
+	flex: 1;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: #e0e0e0;
+	font-size: 13px;
+	font-family: inherit;
+
+	&::placeholder {
+		color: #606060;
+	}
+}
+
+.fixora-tech-header__search-kbd {
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	font-size: 11px;
+	color: #808080;
+	font-family: 'Monaco', 'Menlo', monospace;
+}
+
+// Spacer
+.fixora-tech-header__spacer {
+	flex: 1;
+}
+
+// New Quote button
+.fixora-tech-header__new-quote {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 16px;
+	border-radius: 10px;
+	background: linear-gradient(135deg, #ff6b00, #ff9a3c);
+	border: none;
+	color: #fff;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
+
+	&:hover {
+		box-shadow: 0 6px 20px rgba(255, 107, 0, 0.35);
+		transform: translateY(-1px);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+// Icon buttons with badges
+.fixora-tech-header__icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: transparent;
+	border: none;
+	color: #808080;
+	font-size: 16px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	position: relative;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.05);
+		color: #d0d0d0;
+	}
+
+	&:active {
+		background: rgba(255, 255, 255, 0.08);
+	}
+}
+
+.fixora-tech-header__badge {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 3px;
+	border-radius: 8px;
+	background: #ff6b00;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+// Profile section
+.fixora-tech-header__profile {
+	display: flex;
+	align-items: center;
+	position: relative;
+}
+
+.fixora-tech-header__profile-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-radius: 10px;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+}
+
+.fixora-tech-header__avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: linear-gradient(135deg, #ff6b00, #ff9a3c);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.fixora-tech-header__profile-info {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	line-height: 1.2;
+	min-width: 100px;
+}
+
+.fixora-tech-header__profile-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: #e0e0e0;
+}
+
+.fixora-tech-header__profile-role {
+	font-size: 11px;
+	color: #606060;
+}
+
+// Dropdown menu
+.fixora-tech-header__dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 4px;
+	min-width: 160px;
+	background: #1a1a1a;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 10px;
+	overflow: hidden;
+	z-index: 50;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.fixora-tech-header__dropdown-item {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	padding: 10px 12px;
+	background: transparent;
+	border: none;
+	color: #d0d0d0;
+	font-size: 13px;
+	cursor: pointer;
+	transition: all 0.1s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: #fff;
+	}
+
+	&.fixora-tech-header__dropdown-item--danger {
+		color: #ff6b00;
+
+		&:hover {
+			background: rgba(255, 107, 0, 0.1);
+		}
+	}
+}
+
+.fixora-tech-header__dropdown-divider {
+	height: 1px;
+	background: rgba(255, 255, 255, 0.07);
+	margin: 4px 0;
+}

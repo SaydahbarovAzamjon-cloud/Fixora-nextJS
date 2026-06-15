@@ -25,9 +25,12 @@ const withTechnicianLayout = (Component: any) => {
 		}, []);
 
 		useEffect(() => {
-			if (!user?._id) {
+			const jwt = getJwtToken();
+			if (!jwt) {
 				router.replace(`/login?referrer=${encodeURIComponent(router.asPath)}`).then();
-			} else if (user?.memberType !== 'TECHNICIAN') {
+				return;
+			}
+			if (user?._id && user?.memberType !== 'TECHNICIAN') {
 				router.replace('/').then();
 			}
 		}, [user, router.asPath]);

@@ -13,42 +13,36 @@ import { loadTechDraft, saveTechDraft, validateTechStep1 } from '../../auth/fixo
 const TechOnboardingStep1 = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
-	const draft = loadTechDraft();
 	const fileRef = useRef<HTMLInputElement>(null);
-	const [fullName, setFullName] = useState(draft?.fullName ?? '');
-	const [email, setEmail] = useState(draft?.email ?? '');
-	const [phone, setPhone] = useState(draft?.phone ?? '');
-	const [photoPreview, setPhotoPreview] = useState(draft?.photoDataUrl ?? '');
-	const [photoFileName, setPhotoFileName] = useState(draft?.photoFileName ?? '');
+	const [fullName, setFullName] = useState('');
+	const [email, setEmail] = useState('');
+	const [phone, setPhone] = useState('');
+	const [photoFileName, setPhotoFileName] = useState('');
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
+	// Restore the saved draft only after mount so SSR and the first client
+	// render match (sessionStorage is unavailable during SSR).
 	useEffect(() => {
-		return () => {
-			if (photoPreview.startsWith('blob:')) URL.revokeObjectURL(photoPreview);
-		};
-	}, [photoPreview]);
+		const draft = loadTechDraft();
+		if (!draft) return;
+		setFullName(draft.fullName ?? '');
+		setEmail(draft.email ?? '');
+		setPhone(draft.phone ?? '');
+		setPhotoFileName(draft.photoFileName ?? '');
+	}, []);
 
 	const handlePhoto = (file: File | undefined) => {
 		if (!file) return;
 		if (!file.type.startsWith('image/')) return;
-
-		const reader = new FileReader();
-		reader.onload = () => {
-			const dataUrl = typeof reader.result === 'string' ? reader.result : '';
-			setPhotoPreview(dataUrl);
-			setPhotoFileName(file.name);
-			const current = loadTechDraft();
-			saveTechDraft({
-				fullName: current?.fullName ?? fullName,
-				email: current?.email ?? email,
-				phone: current?.phone ?? phone,
-				photoFileName: file.name,
-				photoDataUrl: dataUrl,
-				idFileName: current?.idFileName,
-				idPreviewDataUrl: current?.idPreviewDataUrl,
-			});
-		};
-		reader.readAsDataURL(file);
+		setPhotoFileName(file.name);
+		const current = loadTechDraft();
+		saveTechDraft({
+			fullName: current?.fullName ?? fullName,
+			email: current?.email ?? email,
+			phone: current?.phone ?? phone,
+			photoFileName: file.name,
+			idFileName: current?.idFileName,
+		});
 	};
 
 	const handleContinue = useCallback(() => {
@@ -63,12 +57,10 @@ const TechOnboardingStep1 = () => {
 			email,
 			phone,
 			photoFileName: photoFileName || current?.photoFileName,
-			photoDataUrl: photoPreview || current?.photoDataUrl,
 			idFileName: current?.idFileName,
-			idPreviewDataUrl: current?.idPreviewDataUrl,
 		});
 		router.push('/register/technician/id');
-	}, [fullName, email, phone, photoFileName, photoPreview, router]);
+	}, [fullName, email, phone, photoFileName, router]);
 
 	return (
 		<>
@@ -87,20 +79,14 @@ const TechOnboardingStep1 = () => {
 					onChange={(e) => handlePhoto(e.target.files?.[0])}
 				/>
 				<div
-					className={`auth-tech__photo ${photoPreview ? 'auth-tech__photo--has-image' : ''}`}
+					className="auth-tech__photo"
 					role="button"
 					tabIndex={0}
 					onClick={() => fileRef.current?.click()}
 					onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
 				>
-					{photoPreview ? (
-						<img src={photoPreview} alt="" className="auth-tech__photo-preview" />
-					) : (
-						<>
-							<AddAPhotoOutlined />
-							<span>{t('tech.photoUpload')}</span>
-						</>
-					)}
+					<AddAPhotoOutlined />
+					<span>{photoFileName || t('tech.photoUpload')}</span>
 				</div>
 				<div className="auth-form">
 					<FixoraInput

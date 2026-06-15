@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import styles from '../../../scss/pc/technician/technician-header.module.scss';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import AddOutlined from '@mui/icons-material/AddOutlined';
+import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
+import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 
 interface HeaderProps {
 	activePage: string;
@@ -24,6 +29,12 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const [searchFocused, setSearchFocused] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
+	const handleLogout = () => {
+		localStorage.removeItem('accessToken');
+		localStorage.removeItem('refreshToken');
+		router.push('/login');
+	};
+
 	return (
 		<header className="fixora-tech-header">
 			{/* Page title */}
@@ -36,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				className={`fixora-tech-header__search ${searchFocused ? 'fixora-tech-header__search--focused' : ''}`}
 				onClick={() => !searchFocused && (document.querySelector('.fixora-tech-header__search-input') as HTMLInputElement)?.focus()}
 			>
-				<span className="fixora-tech-header__search-icon">🔍</span>
+				<SearchOutlined className="fixora-tech-header__search-icon" style={{ fontSize: 17 }} />
 				<input
 					className="fixora-tech-header__search-input"
 					placeholder="Search jobs, clients, devices..."
@@ -50,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			{/* New Quote button */}
 			<button className="fixora-tech-header__new-quote">
-				<span>⚡</span> New Quote
+				<AddOutlined style={{ fontSize: 16 }} /> New Quote
 			</button>
 
 			{/* Icon buttons */}
@@ -59,7 +70,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				title="Messages"
 				onClick={() => router.push('/technician/messages')}
 			>
-				<span>💬</span>
+				<ChatBubbleOutlineOutlined style={{ fontSize: 18 }} />
 				<span className="fixora-tech-header__badge">2</span>
 			</button>
 
@@ -68,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				title="Notifications"
 				onClick={() => router.push('/technician/notifications')}
 			>
-				<span>🔔</span>
+				<NotificationsNoneOutlined style={{ fontSize: 19 }} />
 				<span className="fixora-tech-header__badge">9</span>
 			</button>
 
@@ -77,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				title="Settings"
 				onClick={() => router.push('/technician/settings')}
 			>
-				<span>⚙️</span>
+				<SettingsOutlined style={{ fontSize: 18 }} />
 			</button>
 
 			{/* Profile dropdown */}
@@ -91,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 						<div className="fixora-tech-header__profile-name">Alex Kim</div>
 						<div className="fixora-tech-header__profile-role">Pro Technician</div>
 					</div>
-					<span>›</span>
+					<KeyboardArrowDown style={{ fontSize: 16, color: '#606060' }} />
 				</button>
 
 				{dropdownOpen && (
@@ -115,7 +126,10 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 							Settings
 						</button>
 						<div className="fixora-tech-header__dropdown-divider" />
-						<button className="fixora-tech-header__dropdown-item fixora-tech-header__dropdown-item--danger">
+						<button
+							className="fixora-tech-header__dropdown-item fixora-tech-header__dropdown-item--danger"
+							onClick={handleLogout}
+						>
 							Sign Out
 						</button>
 					</div>

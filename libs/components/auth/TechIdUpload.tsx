@@ -12,46 +12,29 @@ const TechIdUpload = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
 	const fileRef = useRef<HTMLInputElement>(null);
-	const draft = loadTechDraft();
-	const [fileName, setFileName] = useState(draft?.idFileName ?? '');
-	const [previewUrl, setPreviewUrl] = useState(draft?.idPreviewDataUrl ?? '');
-	const [isImage, setIsImage] = useState(!!draft?.idPreviewDataUrl);
+	const [fileName, setFileName] = useState('');
 	const [loading, setLoading] = useState(false);
 
+	// Restore the saved draft only after mount so SSR and the first client
+	// render match (sessionStorage is unavailable during SSR).
 	useEffect(() => {
-		return () => {
-			if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
-		};
-	}, [previewUrl]);
+		const draft = loadTechDraft();
+		if (!draft) return;
+		setFileName(draft.idFileName ?? '');
+	}, []);
 
-	const persistFile = (file: File, dataUrl?: string) => {
+	const persistFile = (file: File) => {
 		const current = loadTechDraft();
 		if (!current?.email || !current?.fullName) return;
 		saveTechDraft({
 			...current,
 			idFileName: file.name,
-			idPreviewDataUrl: dataUrl,
 		});
 	};
 
 	const handleFile = (file: File | undefined) => {
 		if (!file) return;
 		setFileName(file.name);
-
-		if (file.type.startsWith('image/')) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				const dataUrl = typeof reader.result === 'string' ? reader.result : '';
-				setPreviewUrl(dataUrl);
-				setIsImage(true);
-				persistFile(file, dataUrl);
-			};
-			reader.readAsDataURL(file);
-			return;
-		}
-
-		setPreviewUrl('');
-		setIsImage(false);
 		persistFile(file);
 	};
 
@@ -85,25 +68,16 @@ const TechIdUpload = () => {
 					onChange={(e) => handleFile(e.target.files?.[0])}
 				/>
 				<div
-					className={`auth-tech__upload ${previewUrl ? 'auth-tech__upload--has-image' : ''}`}
+					className="auth-tech__upload"
 					role="button"
 					tabIndex={0}
 					onClick={() => fileRef.current?.click()}
 					onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
 				>
-					{previewUrl && isImage ? (
-						<img src={previewUrl} alt="" className="auth-tech__upload-preview" />
-					) : (
-						<>
-							<CloudUploadOutlined />
-							<strong>{t('tech.idUpload')}</strong>
-							<span>{fileName || t('tech.idHint')}</span>
-						</>
-					)}
+					<CloudUploadOutlined />
+					<strong>{t('tech.idUpload')}</strong>
+					<span>{fileName || t('tech.idHint')}</span>
 				</div>
-				{fileName && !isImage && (
-					<p className="auth-tech__file-name">{fileName}</p>
-				)}
 				<FixoraButton variant="primary" fullWidth disabled={loading || !fileName} onClick={handleSubmit}>
 					{t('tech.submitVerification')}
 					<ArrowForward fontSize="small" />

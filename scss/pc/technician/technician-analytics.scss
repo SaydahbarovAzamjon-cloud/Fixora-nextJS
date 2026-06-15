@@ -1,0 +1,360 @@
+/* ============================================================
+   PERFORMANCE ANALYTICS — pixel-perfect (2026)
+   ============================================================ */
+
+.fixora-an-page {
+	padding: 4px 4px 32px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* -------- Header -------- */
+.fixora-an-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+
+	&__title {
+		color: #F5F5F5;
+		font-size: 26px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		margin: 0;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 14px;
+		margin: 6px 0 0;
+	}
+}
+
+.fixora-an-range {
+	display: flex;
+	gap: 4px;
+	background: #141414;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 11px;
+	padding: 4px;
+	flex-shrink: 0;
+
+	&__btn {
+		background: transparent;
+		border: none;
+		border-radius: 8px;
+		padding: 8px 16px;
+		color: #808080;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s ease;
+
+		&:hover {
+			color: #C0C0C0;
+		}
+
+		&--active {
+			background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+			color: #fff;
+		}
+	}
+}
+
+/* -------- KPI cards -------- */
+.fixora-an-kpis {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 14px;
+}
+
+.fixora-an-kpi {
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 14px;
+	padding: 18px;
+
+	&__top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 16px;
+	}
+
+	&__icon {
+		width: 40px;
+		height: 40px;
+		border-radius: 11px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__trend {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		color: #22C55E;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	&__value {
+		color: #F5F5F5;
+		font-size: 28px;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1;
+		margin-bottom: 8px;
+		white-space: nowrap;
+	}
+
+	&__label {
+		color: #808080;
+		font-size: 13px;
+	}
+}
+
+/* -------- Layout rows -------- */
+.fixora-an-row {
+	display: grid;
+	gap: 16px;
+
+	&--2-1 {
+		grid-template-columns: 2fr 1fr;
+	}
+}
+
+.fixora-an-card {
+	background: #0C0C0C;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 18px;
+	padding: 22px 24px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 18px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	&__hint {
+		color: #707070;
+		font-size: 13px;
+	}
+}
+
+.fixora-an-chart {
+	height: 280px;
+	width: 100%;
+
+	&--sm {
+		height: 150px;
+	}
+}
+
+/* -------- Chart legend (revenue) -------- */
+.fixora-an-legend {
+	display: flex;
+	gap: 24px;
+	margin-top: 6px;
+
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: #909090;
+		font-size: 13px;
+	}
+
+	&__line {
+		width: 16px;
+		height: 3px;
+		border-radius: 2px;
+	}
+}
+
+/* -------- Custom tooltip -------- */
+.fixora-an-tooltip {
+	background: #161616;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 10px;
+	padding: 10px 14px;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+
+	&__title {
+		color: #E0E0E0;
+		font-size: 13px;
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	&__row {
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1.6;
+	}
+}
+
+/* -------- Device donut + legend -------- */
+.fixora-an-donut {
+	display: flex;
+	justify-content: center;
+	margin: 6px 0 18px;
+}
+
+.fixora-an-devlist {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.fixora-an-devrow {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
+	&__dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	&__name {
+		color: #C0C0C0;
+		font-size: 13px;
+		width: 96px;
+		flex-shrink: 0;
+	}
+
+	&__track {
+		flex: 1;
+		height: 8px;
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	&__bar {
+		display: block;
+		height: 100%;
+		border-radius: 6px;
+	}
+
+	&__pct {
+		color: #E0E0E0;
+		font-size: 13px;
+		font-weight: 700;
+		width: 42px;
+		text-align: right;
+		flex-shrink: 0;
+	}
+}
+
+/* -------- Rating trend -------- */
+.fixora-an-rating {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin: 4px 0 6px;
+
+	&__value {
+		color: #FF6B00;
+		font-size: 38px;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 14px;
+	}
+}
+
+/* -------- Top clients -------- */
+.fixora-an-clients {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 16px;
+}
+
+.fixora-an-client {
+	background: #111111;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 14px;
+	padding: 18px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		margin-bottom: 14px;
+	}
+
+	&__avatar {
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-size: 14px;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+
+	&__name {
+		color: #F0F0F0;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	&__stars {
+		display: flex;
+		gap: 1px;
+		margin-top: 3px;
+	}
+
+	&__amount {
+		color: #FF6B00;
+		font-size: 22px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	&__jobs {
+		color: #707070;
+		font-size: 12px;
+		margin-top: 3px;
+	}
+}
+
+/* -------- Responsive -------- */
+@media (max-width: 1400px) {
+	.fixora-an-kpis {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (max-width: 1200px) {
+	.fixora-an-row--2-1 {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-an-clients {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}

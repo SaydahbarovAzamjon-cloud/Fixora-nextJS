@@ -30,6 +30,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	// reserve space for the fixed 60px header so the page top isn't hidden behind it
+	padding-top: 60px;
 }
 
 .fixora-technician-main {
@@ -78,6 +80,94 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		font-size: 16px;
 		box-shadow: 0 0 16px rgba(255, 107, 0, 0.4);
 		flex-shrink: 0;
+	}
+
+	&__status {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: rgba(34, 197, 94, 0.08);
+		border: 1px solid rgba(34, 197, 94, 0.2);
+		border-radius: 8px;
+		padding: 9px 12px;
+		margin: 0 16px 8px;
+	}
+
+	&__section-label {
+		color: #404040;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		padding: 6px 10px;
+		margin-bottom: 2px;
+	}
+
+	&__nav-badge {
+		font-size: 11px;
+		font-weight: 600;
+		color: #707070;
+		flex-shrink: 0;
+		line-height: 1;
+	}
+
+	&__bottom-nav {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		margin-bottom: 8px;
+	}
+
+	&__user-card {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		padding: 9px 10px;
+		border-radius: 10px;
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.07);
+		}
+	}
+
+	&__user-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		font-size: 13px;
+		font-weight: 700;
+		color: #fff;
+	}
+
+	&__user-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__user-name {
+		color: #E0E0E0;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1.2;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__user-role {
+		color: #606060;
+		font-size: 11px;
+		margin-top: 1px;
 	}
 
 	.fixora-logo-text {
@@ -130,17 +220,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 			color: $primary-orange;
 			font-weight: 600;
 
-			&::before {
-				content: '';
-				position: absolute;
-				left: 0;
-				top: 50%;
-				transform: translateY(-50%);
-				width: 3px;
-				height: 18px;
-				background: $primary-orange;
-				border-radius: 0 2px 2px 0;
-				box-shadow: 0 0 8px rgba(255, 107, 0, 0.6);
+			.fixora-technician-sidebar__nav-badge {
+				color: $primary-orange;
 			}
 		}
 	}
@@ -149,9 +230,10 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 16px;
-		height: 16px;
+		width: 20px;
+		height: 20px;
 		flex-shrink: 0;
+		color: inherit;
 	}
 
 	&__nav-label {
@@ -487,8 +569,13 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 24px;
 		position: relative;
 		overflow: hidden;
+
+		> div:first-child {
+			min-width: 0;
+		}
 
 		&::before {
 			content: '';
@@ -538,6 +625,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	&__quick-actions {
 		display: flex;
 		gap: 10px;
+		flex-shrink: 0;
 		position: relative;
 		z-index: 1;
 	}
@@ -552,6 +640,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 16px;
+		align-items: start;
 	}
 
 	&__left,
@@ -568,17 +657,28 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 6px;
+	justify-content: center;
+	gap: 8px;
+	flex-shrink: 0;
 	background: #161616;
 	border: 1px solid rgba(255, 107, 0, 0.3);
 	border-radius: 12px;
-	padding: 12px 16px;
+	padding: 14px 16px;
 	cursor: pointer;
 	color: $primary-orange;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	transition: all 0.2s ease;
-	min-width: 80px;
+	min-width: 104px;
+
+	svg {
+		flex-shrink: 0;
+	}
+
+	span {
+		white-space: nowrap;
+		line-height: 1;
+	}
 
 	&:hover {
 		box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
@@ -637,10 +737,16 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	background: $bg-card;
 	border: 1px solid $border-subtle;
 	border-radius: 14px;
-	padding: 20px;
+	padding: 18px 20px;
 	display: flex;
-	align-items: flex-start;
-	gap: 16px;
+	flex-direction: column;
+
+	&__top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 14px;
+	}
 }
 
 .fixora-tech-stat-icon {
@@ -655,47 +761,54 @@ $border-orange: rgba(255, 107, 0, 0.2);
 
 	&--orange {
 		background: rgba(255, 107, 0, 0.1);
+		color: $primary-orange;
 	}
 
 	&--blue {
 		background: rgba(59, 130, 246, 0.1);
+		color: #3B82F6;
 	}
 
 	&--green {
 		background: rgba(34, 197, 94, 0.1);
+		color: #22C55E;
 	}
 
 	&--yellow {
 		background: rgba(245, 158, 11, 0.1);
+		color: #F59E0B;
 	}
 }
 
 .fixora-tech-stat-label {
-	color: #707070;
-	font-size: 12px;
+	color: #808080;
+	font-size: 13px;
 	font-weight: 500;
-	margin-bottom: 8px;
 }
 
 .fixora-tech-stat-value {
 	color: $text-primary;
-	font-size: 26px;
+	font-size: 28px;
 	font-weight: 700;
 	letter-spacing: -0.03em;
 	line-height: 1;
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 }
 
 .fixora-tech-stat-change {
-	color: #505050;
+	color: #707070;
 	font-size: 11px;
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 3px;
 
-	&::before {
-		content: '📈';
-		font-size: 10px;
+	svg {
+		color: #22C55E;
+	}
+
+	&__up {
+		color: #22C55E;
+		font-weight: 600;
 	}
 }
 
@@ -802,12 +915,12 @@ $border-orange: rgba(255, 107, 0, 0.2);
 }
 
 .fixora-tech-urgency-badge {
-	font-size: 9px;
-	font-weight: 700;
-	padding: 1px 7px;
-	border-radius: 20px;
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 1px 6px;
+	border-radius: 5px;
+	letter-spacing: 0;
+	text-transform: none;
 }
 
 .fixora-tech-request-desc {
@@ -874,10 +987,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 }
 
 .fixora-tech-job-status {
-	font-size: 10px;
-	font-weight: 700;
-	padding: 3px 9px;
-	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+	flex-shrink: 0;
 }
 
 .fixora-tech-job-issue {
@@ -978,15 +1090,11 @@ $border-orange: rgba(255, 107, 0, 0.2);
 .fixora-tech-earnings-change {
 	color: #22C55E;
 	font-size: 12px;
+	font-weight: 600;
 	display: flex;
 	align-items: center;
 	gap: 3px;
 	margin-top: 2px;
-
-	&::before {
-		content: '📈';
-		font-size: 10px;
-	}
 }
 
 /* ============ PERIOD TOGGLE ============ */
@@ -1058,10 +1166,14 @@ $border-orange: rgba(255, 107, 0, 0.2);
 }
 
 .fixora-tech-schedule-done {
-	color: #404040;
-	font-size: 13px;
 	flex-shrink: 0;
-	margin-top: 2px;
+	margin-top: 1px;
+}
+
+.fixora-tech-schedule-clock {
+	color: #3A3A3A;
+	flex-shrink: 0;
+	margin-top: 1px;
 }
 
 .fixora-tech-schedule-content {

@@ -3,6 +3,21 @@ import { NextPage } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import BoltOutlined from '@mui/icons-material/BoltOutlined';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined';
+import NorthEastOutlined from '@mui/icons-material/NorthEastOutlined';
+import MailOutline from '@mui/icons-material/MailOutline';
+import WorkOutlineOutlined from '@mui/icons-material/WorkOutlineOutlined';
+import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import StarOutlined from '@mui/icons-material/StarOutlined';
+import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
+import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
+import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
+import LaptopMacOutlined from '@mui/icons-material/LaptopMacOutlined';
+import WatchOutlined from '@mui/icons-material/WatchOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
 import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
@@ -14,14 +29,21 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	},
 });
 
-const DEVICE_ICON: Record<string, string> = {
-	IPHONE: '📱',
-	APPLE_WATCH: '⌚',
-	IPAD: '📱',
-	MACBOOK: '💻',
+const DeviceIcon = ({ type }: { type?: string | null }) => {
+	const sx = { fontSize: 18, color: '#9A9A9A' } as const;
+	switch (type) {
+		case 'IPHONE':
+			return <SmartphoneOutlined style={sx} />;
+		case 'IPAD':
+			return <TabletMacOutlined style={sx} />;
+		case 'MACBOOK':
+			return <LaptopMacOutlined style={sx} />;
+		case 'APPLE_WATCH':
+			return <WatchOutlined style={sx} />;
+		default:
+			return <BuildOutlined style={sx} />;
+	}
 };
-
-const deviceIcon = (deviceType?: string | null) => DEVICE_ICON[deviceType ?? ''] ?? '🔧';
 
 const urgencyInfo = (complexity?: string | null) => {
 	switch (complexity) {
@@ -211,57 +233,79 @@ const TechnicianDashboard: NextPage = () => {
 					</p>
 				</div>
 				<div className="fixora-tech-dashboard__quick-actions">
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange">⚡ New Quote</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--green">✓ Mark Available</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue">📅 View Schedule</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple">📤 Export Report</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange">
+							<BoltOutlined style={{ fontSize: 20 }} />
+							<span>New Quote</span>
+						</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--green">
+							<CheckCircleOutline style={{ fontSize: 20 }} />
+							<span>Mark Available</span>
+						</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue">
+							<CalendarTodayOutlined style={{ fontSize: 19 }} />
+							<span>View Schedule</span>
+						</button>
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple">
+							<NorthEastOutlined style={{ fontSize: 20 }} />
+							<span>Export Report</span>
+						</button>
 				</div>
 			</div>
 
 			{/* Stats */}
 			<div className="fixora-tech-dashboard__stats">
 				<div className="fixora-tech-stat-card">
-					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--orange">📬</div>
-					<div>
-						<div className="fixora-tech-stat-label">Total Requests</div>
+						<div className="fixora-tech-stat-card__top">
+							<div className="fixora-tech-stat-label">Total Requests</div>
+							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--orange"><MailOutline style={{ fontSize: 20 }} /></div>
+						</div>
 						<div className="fixora-tech-stat-value">{incomingRequests.length}</div>
-						<div className="fixora-tech-stat-change">+{requestsChange}% vs last week</div>
+						<div className="fixora-tech-stat-change">
+							<TrendingUpOutlined style={{ fontSize: 13 }} />
+							<span className="fixora-tech-stat-change__up">+{requestsChange}</span> vs last week
+						</div>
 					</div>
-				</div>
 
 				<div className="fixora-tech-stat-card">
-					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--blue">💼</div>
-					<div>
-						<div className="fixora-tech-stat-label">Active Jobs</div>
+						<div className="fixora-tech-stat-card__top">
+							<div className="fixora-tech-stat-label">Active Jobs</div>
+							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--blue"><WorkOutlineOutlined style={{ fontSize: 20 }} /></div>
+						</div>
 						<div className="fixora-tech-stat-value">{activeJobs.length}</div>
-						<div className="fixora-tech-stat-change">+{jobsChange}% vs last week</div>
+						<div className="fixora-tech-stat-change">
+							<TrendingUpOutlined style={{ fontSize: 13 }} />
+							<span className="fixora-tech-stat-change__up">+{jobsChange}</span> vs last week
+						</div>
 					</div>
-				</div>
 
 				<div className="fixora-tech-stat-card">
-					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green">💵</div>
-					<div>
-						<div className="fixora-tech-stat-label">This Week</div>
+						<div className="fixora-tech-stat-card__top">
+							<div className="fixora-tech-stat-label">This Week</div>
+							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green"><AttachMoneyOutlined style={{ fontSize: 20 }} /></div>
+						</div>
 						<div className="fixora-tech-stat-value">${earnings}</div>
-						<div className="fixora-tech-stat-change">+{earningsChange}% vs last week</div>
+						<div className="fixora-tech-stat-change">
+							<TrendingUpOutlined style={{ fontSize: 13 }} />
+							<span className="fixora-tech-stat-change__up">+{earningsChange}%</span> vs last week
+						</div>
 					</div>
-				</div>
 
 				<div className="fixora-tech-stat-card">
-					<div className="fixora-tech-stat-icon fixora-tech-stat-icon--yellow">⭐</div>
-					<div>
-						<div className="fixora-tech-stat-label">Avg Rating</div>
+						<div className="fixora-tech-stat-card__top">
+							<div className="fixora-tech-stat-label">Avg Rating</div>
+							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--yellow"><StarOutlined style={{ fontSize: 20 }} /></div>
+						</div>
 						<div className="fixora-tech-stat-value">{rating.toFixed(1)}</div>
-						<div className="fixora-tech-stat-change">+0.2 vs last week</div>
+						<div className="fixora-tech-stat-change">
+							<TrendingUpOutlined style={{ fontSize: 13 }} />
+							<span className="fixora-tech-stat-change__up">+0.2</span> vs last week
+						</div>
 					</div>
-				</div>
 			</div>
 
 			{/* Main Grid */}
 			<div className="fixora-tech-dashboard__grid">
-				{/* Left Column */}
-				<div className="fixora-tech-dashboard__left">
-					{/* Incoming Requests */}
+				{/* Incoming Requests */}
 					<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Incoming Requests</h2>
@@ -273,7 +317,7 @@ const TechnicianDashboard: NextPage = () => {
 									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity);
 									return (
 										<div key={booking._id} className="fixora-tech-request-item">
-											<div className="fixora-tech-request-icon">{deviceIcon(booking?.aiClassification?.deviceType)}</div>
+											<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.aiClassification?.deviceType} /></div>
 											<div className="fixora-tech-request-info">
 												<div className="fixora-tech-request-top">
 													<span className="fixora-tech-request-name">Customer</span>
@@ -294,7 +338,7 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 					</div>
 
-					{/* Active Jobs */}
+				{/* Active Jobs */}
 					<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Active Jobs</h2>
@@ -314,13 +358,13 @@ const TechnicianDashboard: NextPage = () => {
 										>
 											<div className="fixora-tech-job-top">
 												<div className="fixora-tech-job-info">
-													<div className="fixora-tech-request-icon">{deviceIcon(booking?.aiClassification?.deviceType)}</div>
+													<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.aiClassification?.deviceType} /></div>
 													<div>
 														<div className="fixora-tech-request-name">Customer</div>
 														<div className="fixora-tech-job-device">{booking.problemTitle || 'Repair'}</div>
 													</div>
 												</div>
-												<span className="fixora-tech-job-status" style={{ background: status.bg, color: status.color }}>{status.label}</span>
+												<span className="fixora-tech-job-status" style={{ color: status.color }}>{status.label}</span>
 											</div>
 											<div className="fixora-tech-job-issue">{booking.problemDescription || 'Device repair'}</div>
 											<div className="fixora-tech-job-progress">
@@ -338,18 +382,15 @@ const TechnicianDashboard: NextPage = () => {
 							)}
 						</div>
 					</div>
-				</div>
 
-				{/* Right Column */}
-				<div className="fixora-tech-dashboard__right">
-					{/* Earnings Chart */}
+				{/* Earnings Chart */}
 					<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
 								<div className="fixora-tech-earnings-info">
 									<div className="fixora-tech-earnings-amount">${earnings}</div>
-									<div className="fixora-tech-earnings-change">+{earningsChange}% vs last week</div>
+									<div className="fixora-tech-earnings-change"><TrendingUpOutlined style={{ fontSize: 13 }} /> +{earningsChange}% vs last week</div>
 								</div>
 							</div>
 							<div className="fixora-tech-period-toggle">
@@ -391,7 +432,7 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 					</div>
 
-					{/* Today's Schedule */}
+				{/* Today's Schedule */}
 					<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
@@ -411,7 +452,11 @@ const TechnicianDashboard: NextPage = () => {
 												<div className="fixora-tech-schedule-time">{formatTime(booking.bookingDate)}</div>
 												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{booking.problemTitle || 'Repair Task'}</div>
 											</div>
-											{done && <span className="fixora-tech-schedule-done">✓</span>}
+											{done ? (
+													<CheckCircleOutline className="fixora-tech-schedule-done" style={{ fontSize: 15, color: '#22C55E' }} />
+												) : (
+													<AccessTimeOutlined className="fixora-tech-schedule-clock" style={{ fontSize: 15 }} />
+												)}
 										</div>
 									);
 								})
@@ -420,9 +465,10 @@ const TechnicianDashboard: NextPage = () => {
 							)}
 						</div>
 					</div>
+			</div>
 
-					{/* Recent Reviews */}
-					<div className="fixora-tech-card">
+			{/* Recent Reviews (full width) */}
+			<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Recent Reviews</h2>
 							<a href="/technician/profile" className="fixora-tech-card__link">View all ›</a>
@@ -442,7 +488,12 @@ const TechnicianDashboard: NextPage = () => {
 											</div>
 										</div>
 										<div className="fixora-tech-review-stars">
-											{'⭐'.repeat(Math.round(review.repairQuality || 5))}
+											{Array.from({ length: 5 }).map((_, i) => (
+												<StarOutlined
+													key={i}
+													style={{ fontSize: 13, color: i < Math.round(review.repairQuality || 5) ? '#FF9A3C' : '#3A3A3A' }}
+												/>
+											))}
 										</div>
 										<p className="fixora-tech-review-text">{review.reviewContent || 'Great service!'}</p>
 									</div>
@@ -452,8 +503,6 @@ const TechnicianDashboard: NextPage = () => {
 							)}
 						</div>
 					</div>
-				</div>
-			</div>
 		</div>
 	);
 };

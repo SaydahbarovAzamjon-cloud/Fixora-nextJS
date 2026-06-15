@@ -319,3 +319,213 @@
 		}
 	}
 }
+
+/* ============================================================
+   NOTIFICATION CENTER — pixel-perfect (2026 redesign)
+   ============================================================ */
+
+.fixora-notif-page {
+	max-width: 980px;
+	padding: 4px 4px 32px;
+}
+
+.fixora-notif-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 22px;
+
+	&__title-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__title {
+		color: #F5F5F5;
+		font-size: 24px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		margin: 0;
+	}
+
+	&__badge {
+		background: #FF6B00;
+		color: #fff;
+		font-size: 12px;
+		font-weight: 700;
+		padding: 3px 10px;
+		border-radius: 20px;
+		line-height: 1.3;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 14px;
+		margin: 7px 0 0;
+	}
+}
+
+.fixora-notif-markall {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	flex-shrink: 0;
+	background: rgba(255, 107, 0, 0.1);
+	border: 1px solid rgba(255, 107, 0, 0.3);
+	border-radius: 10px;
+	padding: 9px 16px;
+	color: #FF6B00;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		background: rgba(255, 107, 0, 0.18);
+	}
+}
+
+.fixora-notif-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 26px;
+}
+
+.fixora-notif-filter {
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 20px;
+	padding: 7px 16px;
+	color: #909090;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+
+	&:hover {
+		border-color: rgba(255, 255, 255, 0.15);
+		color: #C0C0C0;
+	}
+
+	&--active {
+		background: rgba(255, 107, 0, 0.15);
+		border-color: rgba(255, 107, 0, 0.35);
+		color: #FF6B00;
+		font-weight: 600;
+	}
+}
+
+.fixora-notif-section-label {
+	color: #606060;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	margin-bottom: 14px;
+}
+
+.fixora-notif-list {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.fixora-notif-empty {
+	color: #606060;
+	font-size: 14px;
+	padding: 30px;
+	text-align: center;
+}
+
+.fixora-notif-card {
+	position: relative;
+	display: flex;
+	gap: 16px;
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 16px;
+	padding: 20px 22px;
+	overflow: hidden;
+	transition: all 0.15s ease;
+
+	&:hover {
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	&--unread {
+		background: rgba(255, 107, 0, 0.03);
+
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 14px;
+			bottom: 14px;
+			width: 3px;
+			border-radius: 0 3px 3px 0;
+			background: #FF6B00;
+		}
+	}
+
+	&__icon {
+		width: 48px;
+		height: 48px;
+		border-radius: 13px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__top {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 5px;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	&__time {
+		color: #707070;
+		font-size: 12px;
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	&__desc {
+		color: #9A9A9A;
+		font-size: 14px;
+		line-height: 1.5;
+		margin-bottom: 14px;
+	}
+
+	&__action {
+		background: transparent;
+		border: 1px solid;
+		border-radius: 8px;
+		padding: 6px 14px;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s ease;
+
+		&:hover {
+			filter: brightness(1.2);
+		}
+	}
+}

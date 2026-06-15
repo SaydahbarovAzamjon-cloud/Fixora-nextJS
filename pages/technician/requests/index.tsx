@@ -3,6 +3,20 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
+import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
+import LaptopMacOutlined from '@mui/icons-material/LaptopMacOutlined';
+import WatchOutlined from '@mui/icons-material/WatchOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
+import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
+import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import StarRounded from '@mui/icons-material/StarRounded';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
+import PhotoCameraOutlined from '@mui/icons-material/PhotoCameraOutlined';
+import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import HighlightOffOutlined from '@mui/icons-material/HighlightOffOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_INCOMING_REQUESTS } from '../../../apollo/user/profile';
 import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
@@ -11,13 +25,6 @@ import { userVar } from '../../../apollo/store';
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
-
-const DEVICE_ICON: Record<string, string> = {
-	IPHONE: '📱',
-	APPLE_WATCH: '⌚',
-	IPAD: '📱',
-	MACBOOK: '💻',
-};
 
 const DEVICE_LABEL: Record<string, string> = {
 	IPHONE: 'iPhone',
@@ -36,9 +43,25 @@ const ISSUE_LABEL: Record<string, string> = {
 	WATER_DAMAGE: 'Water Damage',
 };
 
-const deviceIcon = (deviceType?: string | null) => DEVICE_ICON[deviceType ?? ''] ?? '🔧';
+const DeviceGlyph = ({ type, size = 18, color = '#9A9A9A' }: { type?: string | null; size?: number; color?: string }) => {
+	const sx = { fontSize: size, color } as const;
+	switch (type) {
+		case 'IPHONE':
+			return <SmartphoneOutlined style={sx} />;
+		case 'IPAD':
+			return <TabletMacOutlined style={sx} />;
+		case 'MACBOOK':
+			return <LaptopMacOutlined style={sx} />;
+		case 'APPLE_WATCH':
+			return <WatchOutlined style={sx} />;
+		default:
+			return <BuildOutlined style={sx} />;
+	}
+};
+
 const deviceLabel = (deviceType?: string | null) => DEVICE_LABEL[deviceType ?? ''] ?? 'Device';
 const issueLabel = (issueCategory?: string | null) => ISSUE_LABEL[issueCategory ?? ''] ?? 'General';
+const reqCode = (id: string) => `REQ-${id.slice(-4).toUpperCase()}`;
 
 const urgencyInfo = (complexity?: string | null) => {
 	switch (complexity) {
@@ -56,7 +79,7 @@ const timeAgo = (dateStr?: string | null) => {
 	const date = new Date(dateStr);
 	const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
 	if (minutes < 1) return 'just now';
-	if (minutes < 60) return `${minutes}m ago`;
+	if (minutes < 60) return `${minutes} min ago`;
 	const hours = Math.floor(minutes / 60);
 	if (hours < 24) return `${hours}h ago`;
 	const days = Math.floor(hours / 24);
@@ -66,12 +89,11 @@ const timeAgo = (dateStr?: string | null) => {
 const FILTERS = [
 	{ id: 'all', label: 'All' },
 	{ id: 'urgent', label: 'Urgent' },
-	{ id: 'medium', label: 'Medium' },
-	{ id: 'low', label: 'Low' },
+	{ id: 'nearby', label: 'Nearby' },
+	{ id: 'highbudget', label: 'High Budget' },
 	{ id: 'IPHONE', label: 'iPhone' },
 	{ id: 'MACBOOK', label: 'MacBook' },
 	{ id: 'IPAD', label: 'iPad' },
-	{ id: 'APPLE_WATCH', label: 'Apple Watch' },
 ];
 
 const IncomingRequests: NextPage = () => {
@@ -101,8 +123,8 @@ const IncomingRequests: NextPage = () => {
 		);
 
 		if (activeFilter === 'urgent') result = result.filter((b: any) => b.aiClassification?.repairComplexity === 'HIGH');
-		else if (activeFilter === 'medium') result = result.filter((b: any) => b.aiClassification?.repairComplexity === 'MEDIUM');
-		else if (activeFilter === 'low') result = result.filter((b: any) => b.aiClassification?.repairComplexity === 'LOW');
+		else if (activeFilter === 'highbudget') result = result.filter((b: any) => (parseFloat(b.estimatedPrice) || 0) >= 200);
+		else if (activeFilter === 'nearby') result = result; // distance data not available — shows all
 		else if (activeFilter !== 'all') result = result.filter((b: any) => b.aiClassification?.deviceType === activeFilter);
 
 		return result;
@@ -140,7 +162,7 @@ const IncomingRequests: NextPage = () => {
 			<div className="fixora-requests-left">
 				<div className="fixora-requests-search-wrap">
 					<div className="fixora-requests-search">
-						<span className="fixora-requests-search__icon">🔍</span>
+						<SearchOutlined className="fixora-requests-search__icon" style={{ fontSize: 17 }} />
 						<input
 							type="text"
 							placeholder="Search requests..."
@@ -180,18 +202,20 @@ const IncomingRequests: NextPage = () => {
 									onClick={() => setSelectedId(req._id)}
 								>
 									<div className="fixora-request-card__top">
-										<div className="fixora-request-card__icon">{deviceIcon(req.aiClassification?.deviceType)}</div>
+										<div className="fixora-request-card__icon">
+											<DeviceGlyph type={req.aiClassification?.deviceType} />
+										</div>
 										<div className="fixora-request-card__info">
 											<div className="fixora-request-card__title-row">
 												<span className="fixora-request-card__name">Customer</span>
 												<span className="fixora-request-card__dot">•</span>
-												<span className="fixora-request-card__id">#{req._id.slice(-6).toUpperCase()}</span>
+												<span className="fixora-request-card__id">{reqCode(req._id)}</span>
 											</div>
 											<div className="fixora-request-card__device">{deviceLabel(req.aiClassification?.deviceType)}</div>
 										</div>
 										<span
 											className="fixora-req-urgency-badge"
-											style={{ color: urgency.color, background: urgency.bg }}
+											style={{ color: urgency.color }}
 										>
 											{urgency.label}
 										</span>
@@ -199,9 +223,12 @@ const IncomingRequests: NextPage = () => {
 									<div className="fixora-request-card__issue">{req.problemTitle || req.problemDescription}</div>
 									<div className="fixora-request-card__bottom">
 										<span className="fixora-request-card__price">
-											{req.estimatedPrice ? `$${parseFloat(req.estimatedPrice).toFixed(2)}` : '—'}
+											{req.estimatedPrice ? `$${parseFloat(req.estimatedPrice).toFixed(0)}` : '—'}
 										</span>
-										<span className="fixora-request-card__time">{timeAgo(req.createdAt)}</span>
+										<span className="fixora-request-card__time">
+											<AccessTimeOutlined style={{ fontSize: 13 }} />
+											{timeAgo(req.createdAt)}
+										</span>
 									</div>
 								</div>
 							);
@@ -215,85 +242,117 @@ const IncomingRequests: NextPage = () => {
 				{displayedBooking ? (
 					(() => {
 						const urgency = urgencyInfo(displayedBooking.aiClassification?.repairComplexity);
+						const priceLabel = displayedBooking.estimatedPrice
+							? `$${parseFloat(displayedBooking.estimatedPrice).toFixed(0)}`
+							: 'No estimate';
 						return (
-							<div className="fixora-requests-detail">
-								<div className="fixora-requests-detail__header">
-									<div className="fixora-requests-detail__header-top">
-										<div>
-											<div className="fixora-requests-detail__meta">
-												#{displayedBooking._id.slice(-6).toUpperCase()} • {timeAgo(displayedBooking.createdAt)}
-											</div>
-											<h2 className="fixora-requests-detail__title">{displayedBooking.problemTitle}</h2>
-										</div>
-										<span
-											className="fixora-req-urgency-badge fixora-req-urgency-badge--lg"
-											style={{ color: urgency.color, background: urgency.bg }}
-										>
-											{urgency.label}
-										</span>
-									</div>
-									<div className="fixora-requests-detail__tags">
-										<span className="fixora-requests-detail__tag">{deviceLabel(displayedBooking.aiClassification?.deviceType)}</span>
-										<span className="fixora-requests-detail__tag">{issueLabel(displayedBooking.aiClassification?.issueCategory)}</span>
-									</div>
-								</div>
-
-								<div className="fixora-requests-detail__grid">
-									<div className="fixora-requests-detail__card">
-										<div className="fixora-requests-detail__card-label">Client</div>
-										<div className="fixora-requests-detail__entity">
-											<div className="fixora-requests-detail__avatar">C</div>
+							<>
+								<div className="fixora-requests-detail">
+									<div className="fixora-requests-detail__header">
+										<div className="fixora-requests-detail__header-top">
 											<div>
-												<div className="fixora-requests-detail__entity-name">Customer</div>
-												<div className="fixora-requests-detail__entity-sub">Booking #{displayedBooking._id.slice(-6).toUpperCase()}</div>
+												<div className="fixora-requests-detail__meta">
+													{reqCode(displayedBooking._id)} • {timeAgo(displayedBooking.createdAt)}
+												</div>
+												<h2 className="fixora-requests-detail__title">{displayedBooking.problemTitle}</h2>
 											</div>
-										</div>
-									</div>
-									<div className="fixora-requests-detail__card">
-										<div className="fixora-requests-detail__card-label">Device</div>
-										<div className="fixora-requests-detail__entity">
-											<div className="fixora-requests-detail__device-icon">{deviceIcon(displayedBooking.aiClassification?.deviceType)}</div>
-											<div>
-												<div className="fixora-requests-detail__entity-name">{deviceLabel(displayedBooking.aiClassification?.deviceType)}</div>
-												<div className="fixora-requests-detail__entity-sub">{issueLabel(displayedBooking.aiClassification?.issueCategory)}</div>
-											</div>
-										</div>
-										<div className="fixora-requests-detail__chips">
-											<span className="fixora-requests-detail__chip fixora-requests-detail__chip--price">
-												{displayedBooking.estimatedPrice ? `$${parseFloat(displayedBooking.estimatedPrice).toFixed(2)}` : 'No estimate'}
+											<span
+												className="fixora-req-urgency-badge fixora-req-urgency-badge--lg"
+												style={{ color: urgency.color, background: urgency.bg }}
+											>
+												{urgency.label}
 											</span>
 										</div>
+										<div className="fixora-requests-detail__tags">
+											<span className="fixora-requests-detail__tag">{issueLabel(displayedBooking.aiClassification?.issueCategory)} Repair</span>
+											<span className="fixora-requests-detail__tag">{deviceLabel(displayedBooking.aiClassification?.deviceType)}</span>
+											<span className="fixora-requests-detail__tag">{urgency.label}</span>
+										</div>
+									</div>
+
+									<div className="fixora-requests-detail__grid">
+										<div className="fixora-requests-detail__card">
+											<div className="fixora-requests-detail__card-label">Client</div>
+											<div className="fixora-requests-detail__entity">
+												<div className="fixora-requests-detail__avatar">C</div>
+												<div>
+													<div className="fixora-requests-detail__entity-name">Customer</div>
+													<div className="fixora-requests-detail__rating">
+														<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} />
+														<span className="fixora-requests-detail__rating-val">Client</span>
+														<span className="fixora-requests-detail__rating-sub">rating</span>
+													</div>
+												</div>
+											</div>
+											<div className="fixora-requests-detail__loc">
+												<LocationOnOutlined style={{ fontSize: 15 }} />
+												<span>Booking {reqCode(displayedBooking._id)}</span>
+											</div>
+										</div>
+										<div className="fixora-requests-detail__card">
+											<div className="fixora-requests-detail__card-label">Device</div>
+											<div className="fixora-requests-detail__entity">
+												<div className="fixora-requests-detail__device-icon">
+													<DeviceGlyph type={displayedBooking.aiClassification?.deviceType} size={22} color="#FF9A3C" />
+												</div>
+												<div>
+													<div className="fixora-requests-detail__entity-name">{deviceLabel(displayedBooking.aiClassification?.deviceType)}</div>
+													<div className="fixora-requests-detail__warranty">
+														<CheckCircleOutline style={{ fontSize: 14 }} />
+														{issueLabel(displayedBooking.aiClassification?.issueCategory)}
+													</div>
+												</div>
+											</div>
+											<div className="fixora-requests-detail__chips">
+												<span className="fixora-requests-detail__chip">
+													<CameraAltOutlined style={{ fontSize: 13 }} /> 3 photos
+												</span>
+												<span className="fixora-requests-detail__chip fixora-requests-detail__chip--price">{priceLabel}</span>
+											</div>
+										</div>
+									</div>
+
+									<div className="fixora-requests-detail__description">
+										<div className="fixora-requests-detail__card-label">Issue Description</div>
+										<p>{displayedBooking.problemDescription || 'No description provided'}</p>
+									</div>
+
+									<div className="fixora-requests-detail__photos">
+										<div className="fixora-requests-detail__card-label">Damage Photos (3)</div>
+										<div className="fixora-requests-detail__photos-grid">
+											{[1, 2, 3].map((n) => (
+												<div key={n} className="fixora-requests-detail__photo">
+													<PhotoCameraOutlined style={{ fontSize: 22 }} />
+													<span>Photo {n}</span>
+												</div>
+											))}
+										</div>
 									</div>
 								</div>
 
-								<div className="fixora-requests-detail__description">
-									<div className="fixora-requests-detail__card-label">Issue Description</div>
-									<p>{displayedBooking.problemDescription || 'No description provided'}</p>
-								</div>
-
-								<div className="fixora-requests-detail__actions">
+								<div className="fixora-requests-actionbar">
 									<button
 										className="fixora-requests-detail__btn fixora-requests-detail__btn--accept"
 										disabled={accepting}
 										onClick={() => handleAccept(displayedBooking._id)}
 									>
-										✓ Accept & Send Quote
+										<CheckCircleOutline style={{ fontSize: 18 }} /> Accept &amp; Send Quote
 									</button>
 									<button
 										className="fixora-requests-detail__btn fixora-requests-detail__btn--message"
 										onClick={() => router.push('/technician/messages')}
 									>
-										💬 Message Client
+										<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> Message Client
 									</button>
 									<button
 										className="fixora-requests-detail__btn fixora-requests-detail__btn--decline"
 										disabled={rejecting}
 										onClick={() => handleDecline(displayedBooking._id)}
 									>
-										× Decline
+										<HighlightOffOutlined style={{ fontSize: 17 }} /> Decline
 									</button>
 								</div>
-							</div>
+							</>
 						);
 					})()
 				) : (

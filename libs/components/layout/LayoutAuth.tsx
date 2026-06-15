@@ -20,7 +20,7 @@ const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 		return (
 			<>
 				<Head>
-					<title>{t(pageTitleKey)} | Fixora</title>
+					<title>{`${t(pageTitleKey)} | Fixora`}</title>
 					<meta name="title" content={`${t(pageTitleKey)} | Fixora`} />
 				</Head>
 				<Stack id={wrapId}>

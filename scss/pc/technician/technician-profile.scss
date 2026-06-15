@@ -300,3 +300,799 @@
 		font-size: 28px;
 	}
 }
+
+/* ============================================================
+   PUBLIC PROFILE — pixel-perfect (2026 redesign)
+   ============================================================ */
+
+.fixora-pp-page {
+	max-width: 1180px;
+	padding: 4px 4px 32px;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+/* -------- Header card -------- */
+.fixora-pp-header {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 28px;
+	background: radial-gradient(900px 240px at 12% -10%, rgba(255, 107, 0, 0.12), transparent 60%), #0E0E0E;
+	border: 1px solid rgba(255, 107, 0, 0.12);
+	border-radius: 20px;
+	padding: 28px 32px;
+
+	&__avatar-wrap {
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	&__avatar {
+		width: 116px;
+		height: 116px;
+		border-radius: 26px;
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-size: 42px;
+		font-weight: 700;
+		box-shadow: 0 0 30px rgba(255, 107, 0, 0.35);
+	}
+
+	&__online {
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #22C55E;
+		border: 3px solid #0E0E0E;
+		box-shadow: 0 0 8px #22C55E;
+	}
+
+	&__main {
+		flex: 1;
+		min-width: 0;
+		padding-top: 4px;
+	}
+
+	&__name-row {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+	}
+
+	&__name {
+		color: #F5F5F5;
+		font-size: 30px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		margin: 0;
+	}
+
+	&__role {
+		color: #FF6B00;
+		font-size: 16px;
+		font-weight: 600;
+		margin-top: 6px;
+	}
+
+	&__loc {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		color: #909090;
+		font-size: 14px;
+		margin-top: 8px;
+
+		svg {
+			color: #707070;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		flex-shrink: 0;
+		width: 230px;
+	}
+}
+
+.fixora-pp-stats {
+	display: flex;
+	gap: 48px;
+	margin-top: 22px;
+
+	&__x {
+		display: none;
+	}
+}
+
+.fixora-pp-stat {
+	&__label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		color: #909090;
+		font-size: 13px;
+		margin-bottom: 7px;
+	}
+
+	&__value {
+		color: #F5F5F5;
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: -0.02em;
+	}
+
+	&__unit {
+		color: #707070;
+		font-size: 14px;
+		font-weight: 500;
+		margin-left: 3px;
+	}
+}
+
+.fixora-pp-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	border-radius: 12px;
+	padding: 12px 18px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: none;
+
+	&--primary {
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		color: #fff;
+		box-shadow: 0 0 22px rgba(255, 107, 0, 0.32);
+
+		&:hover {
+			box-shadow: 0 0 34px rgba(255, 107, 0, 0.5);
+		}
+	}
+
+	&--ghost {
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		color: #D0D0D0;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.05);
+		}
+	}
+}
+
+/* -------- Repair Stories -------- */
+.fixora-pp-stories-card {
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 20px;
+	padding: 22px 26px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 20px;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 18px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	&__live {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: #22C55E;
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	&__live-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #22C55E;
+		box-shadow: 0 0 6px #22C55E;
+	}
+}
+
+.fixora-pp-stories {
+	display: flex;
+	gap: 26px;
+	flex-wrap: wrap;
+}
+
+.fixora-pp-story {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	width: 76px;
+
+	&__add {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		border: 2px dashed rgba(255, 107, 0, 0.5);
+		background: rgba(255, 107, 0, 0.06);
+		color: #FF6B00;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.15s ease;
+
+		&:hover {
+			background: rgba(255, 107, 0, 0.12);
+			border-color: #FF6B00;
+		}
+	}
+
+	&__ring {
+		position: relative;
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		border: 2px solid;
+		background: #141414;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: transform 0.15s ease;
+
+		&:hover {
+			transform: translateY(-2px);
+		}
+	}
+
+	&__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__badge {
+		position: absolute;
+		bottom: 2px;
+		right: 2px;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		border: 2px solid #0E0E0E;
+	}
+
+	&__label {
+		color: #B0B0B0;
+		font-size: 12px;
+		font-weight: 500;
+		white-space: nowrap;
+
+		&--add {
+			color: #FF6B00;
+		}
+	}
+}
+
+/* -------- Tabs -------- */
+.fixora-pp-tabs {
+	display: flex;
+	gap: 32px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	padding: 0 4px;
+}
+
+.fixora-pp-tab {
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid transparent;
+	padding: 12px 2px;
+	margin-bottom: -1px;
+	color: #808080;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: color 0.15s ease;
+
+	&:hover {
+		color: #B0B0B0;
+	}
+
+	&--active {
+		color: #FF6B00;
+		border-bottom-color: #FF6B00;
+	}
+}
+
+/* -------- Panel -------- */
+.fixora-pp-panel {
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 16px;
+	padding: 28px 30px;
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 18px;
+		font-weight: 700;
+		margin: 0 0 16px;
+	}
+
+	&__text {
+		color: #9A9A9A;
+		font-size: 15px;
+		line-height: 1.75;
+		margin: 0 0 16px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}
+
+@media (max-width: 1100px) {
+	.fixora-pp-header {
+		flex-wrap: wrap;
+
+		&__actions {
+			width: 100%;
+			flex-direction: row;
+		}
+	}
+
+	.fixora-pp-stats {
+		gap: 28px;
+		flex-wrap: wrap;
+	}
+}
+
+/* -------- Overview: Trust & Credentials / Specializations -------- */
+.fixora-pp-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	align-items: start;
+}
+
+.fixora-pp-creds,
+.fixora-pp-specs {
+	display: flex;
+	flex-direction: column;
+}
+
+.fixora-pp-cred {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 13px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__icon {
+		width: 42px;
+		height: 42px;
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 1.25;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 13px;
+		margin-top: 2px;
+	}
+}
+
+.fixora-pp-spec {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__icon {
+		width: 42px;
+		height: 42px;
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 1.25;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 13px;
+		margin-top: 2px;
+	}
+
+	&__jobs {
+		color: #707070;
+		font-size: 13px;
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+}
+
+@media (max-width: 1100px) {
+	.fixora-pp-row {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* -------- Services tab -------- */
+.fixora-pp-services {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 18px;
+}
+
+.fixora-pp-service {
+	position: relative;
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 16px;
+	padding: 22px 24px;
+	transition: border-color 0.15s ease;
+
+	&:hover {
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	&--popular {
+		border-color: rgba(255, 107, 0, 0.4);
+	}
+
+	&__badge {
+		position: absolute;
+		top: -11px;
+		left: 24px;
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		color: #fff;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		padding: 3px 12px;
+		border-radius: 20px;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 18px;
+		font-weight: 700;
+		margin-bottom: 6px;
+	}
+
+	&__devices {
+		color: #808080;
+		font-size: 14px;
+		margin-bottom: 22px;
+	}
+
+	&__foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	&__price {
+		color: #FF6B00;
+		font-size: 22px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	&__dur {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		color: #707070;
+		font-size: 13px;
+		margin-top: 6px;
+	}
+
+	&__book {
+		background: rgba(255, 107, 0, 0.12);
+		border: 1px solid rgba(255, 107, 0, 0.3);
+		color: #FF6B00;
+		border-radius: 10px;
+		padding: 10px 18px;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: rgba(255, 107, 0, 0.2);
+		}
+	}
+}
+
+/* -------- Portfolio tab -------- */
+.fixora-pp-portfolio {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 18px;
+}
+
+.fixora-pp-port {
+	background: #0E0E0E;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 16px;
+	overflow: hidden;
+	transition: border-color 0.15s ease;
+
+	&:hover {
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	&__media {
+		height: 170px;
+		background: linear-gradient(160deg, #1A1A1A, #131313);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__body {
+		padding: 16px 18px 18px;
+	}
+
+	&__title {
+		color: #F0F0F0;
+		font-size: 15px;
+		font-weight: 700;
+		margin-bottom: 5px;
+	}
+
+	&__sub {
+		color: #808080;
+		font-size: 13px;
+		margin-bottom: 12px;
+	}
+
+	&__foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	&__stars {
+		display: inline-flex;
+		gap: 1px;
+	}
+
+	&__client {
+		color: #707070;
+		font-size: 13px;
+	}
+}
+
+/* -------- Reviews tab -------- */
+.fixora-pp-reviews {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.fixora-pp-rsummary {
+	display: flex;
+	align-items: center;
+	gap: 48px;
+
+	&__score {
+		flex-shrink: 0;
+		text-align: center;
+	}
+
+	&__num {
+		color: #FF6B00;
+		font-size: 56px;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1;
+	}
+
+	&__stars {
+		display: flex;
+		gap: 2px;
+		margin: 10px 0 6px;
+	}
+
+	&__count {
+		color: #808080;
+		font-size: 13px;
+	}
+
+	&__bars {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 11px;
+	}
+}
+
+.fixora-pp-rbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+
+	&__star {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		color: #B0B0B0;
+		font-size: 13px;
+		width: 30px;
+		flex-shrink: 0;
+	}
+
+	&__track {
+		flex: 1;
+		height: 8px;
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	&__fill {
+		display: block;
+		height: 100%;
+		border-radius: 6px;
+		background: #F59E0B;
+	}
+
+	&__pct {
+		color: #909090;
+		font-size: 13px;
+		width: 42px;
+		text-align: right;
+		flex-shrink: 0;
+	}
+}
+
+.fixora-pp-review {
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		gap: 14px;
+		margin-bottom: 14px;
+	}
+
+	&__avatar {
+		width: 46px;
+		height: 46px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-size: 15px;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+
+	&__id {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__name-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	&__name {
+		color: #F0F0F0;
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	&__verified {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		background: rgba(59, 130, 246, 0.12);
+		color: #3B82F6;
+		font-size: 12px;
+		font-weight: 600;
+		padding: 2px 9px 2px 6px;
+		border-radius: 20px;
+	}
+
+	&__stars {
+		display: flex;
+		gap: 1px;
+		margin-top: 5px;
+	}
+
+	&__meta {
+		text-align: right;
+		flex-shrink: 0;
+	}
+
+	&__date {
+		color: #808080;
+		font-size: 13px;
+	}
+
+	&__device {
+		color: #707070;
+		font-size: 13px;
+		margin-top: 3px;
+	}
+
+	&__text {
+		color: #A8A8A8;
+		font-size: 15px;
+		line-height: 1.7;
+		margin: 0;
+	}
+}
+
+@media (max-width: 1100px) {
+	.fixora-pp-services {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-pp-portfolio {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.fixora-pp-rsummary {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 24px;
+	}
+}

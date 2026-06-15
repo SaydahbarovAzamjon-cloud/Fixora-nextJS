@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SaveIcon from '@mui/icons-material/Save';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 
@@ -18,18 +18,23 @@ interface TechnicianProfileFormProps {
 
 const TechnicianProfileForm: React.FC<TechnicianProfileFormProps> = ({
 	initialData = {
-		fullName: 'Alex K.',
-		nickname: 'alex-iphone-specialist',
-		bio: 'I am a professional technician with 6+ years of experience in mobile and laptop repairs. Specialized in Apple device repairs with expertise in screen replacements, battery issues, and water damage repairs.',
-		location: 'Busan, KR',
-		rating: 4.9,
-		jobsCompleted: 210,
-		experience: '6+ years',
+		fullName: '',
+		nickname: '',
+		bio: '',
+		location: '',
+		profileImage: '',
+		rating: 0,
+		jobsCompleted: 0,
+		experience: '',
 	},
 	onSave,
 }) => {
 	const [formData, setFormData] = useState(initialData);
 	const [isSaving, setIsSaving] = useState(false);
+
+	useEffect(() => {
+		setFormData(initialData);
+	}, [initialData]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -64,13 +69,13 @@ const TechnicianProfileForm: React.FC<TechnicianProfileFormProps> = ({
 				<h3 className="fixora-profile-form__section-title">Profile Photo</h3>
 				<div className="fixora-profile-form__image-upload">
 					<div className="fixora-profile-avatar">
-						{initialData.profileImage ? (
+						{formData.profileImage ? (
 							<img
-								src={initialData.profileImage}
+								src={formData.profileImage}
 								alt="Profile"
 							/>
 						) : (
-							initialData.fullName
+							formData.fullName
 								?.split(' ')
 								.map((n) => n[0])
 								.join('')

@@ -3,7 +3,6 @@ import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
 import DashboardBookingCard from '../../libs/components/technician/DashboardBookingCard';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
@@ -251,36 +250,45 @@ const TechnicianDashboard: NextPage = () => {
 								<button className="fixora-tech-period-btn">Year</button>
 							</div>
 						</div>
-						<div style={{ height: '180px', marginTop: '16px' }}>
-							<ResponsiveContainer width="100%" height="100%">
-								<AreaChart data={earningsData}>
-									<defs>
-										<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
-											<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
-											<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
-										</linearGradient>
-									</defs>
-									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-									<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-									<Tooltip
-										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
-										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
-										itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
-										formatter={(v: number) => [`$${v}`, 'Earnings']}
-									/>
-									<Area
-										type="monotone"
-										dataKey="earnings"
-										stroke="#FF6B00"
-										strokeWidth={2.5}
-										fill="url(#earningsGrad)"
-										dot={false}
-										isAnimationActive
-									/>
-								</AreaChart>
-							</ResponsiveContainer>
+						<div style={{
+							height: '180px',
+							marginTop: '16px',
+							display: 'flex',
+							alignItems: 'flex-end',
+							gap: '8px',
+							paddingBottom: '16px',
+						}}>
+							{earningsData.map((d, i) => (
+								<div
+									key={i}
+									style={{
+										flex: 1,
+										height: `${(d.earnings / 800) * 100}%`,
+										background: 'linear-gradient(180deg, #FF6B00 0%, #FF9A3C 100%)',
+										borderRadius: '4px 4px 0 0',
+										boxShadow: '0 0 8px rgba(255,107,0,0.5)',
+										position: 'relative',
+										minHeight: '20px',
+									}}
+									title={`${d.day}: $${d.earnings}`}
+								/>
+							))}
+						</div>
+						<div style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							paddingTop: '8px',
+							borderTop: '1px solid rgba(255,255,255,0.07)',
+						}}>
+							{earningsData.map((d) => (
+								<div key={d.day} style={{
+									flex: 1,
+									textAlign: 'center',
+									color: '#606060',
+									fontSize: '11px',
+									fontWeight: 500,
+								}}>{d.day}</div>
+							))}
 						</div>
 					</div>
 

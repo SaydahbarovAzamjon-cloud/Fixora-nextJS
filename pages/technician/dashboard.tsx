@@ -66,8 +66,16 @@ const deviceLabel = (booking?: any) => {
 	return d?.deviceModel?.trim() || d?.deviceBrand?.trim() || booking?.problemTitle || 'Repair';
 };
 
-const urgencyInfo = (complexity?: string | null) => {
-	switch (complexity) {
+const inferComplexity = (title?: string | null, desc?: string | null): string => {
+	const t = ((title || '') + ' ' + (desc || '')).toLowerCase();
+	if (t.match(/crack|shatter|broken|water.dam|flood|not.turn|dead|motherboard|logic.board/)) return 'HIGH';
+	if (t.match(/battery|charg|slow|fan|overheat|screen|display|repair/)) return 'MEDIUM';
+	return 'LOW';
+};
+
+const urgencyInfo = (complexity?: string | null, title?: string | null, desc?: string | null) => {
+	const level = complexity || inferComplexity(title, desc);
+	switch (level) {
 		case 'HIGH':
 			return { label: 'high', color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
 		case 'LOW':
@@ -75,6 +83,13 @@ const urgencyInfo = (complexity?: string | null) => {
 		default:
 			return { label: 'medium', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
 	}
+};
+
+const bookingPrice = (booking: any): string | null => {
+	const raw = booking?.estimatedPrice ?? booking?.finalPrice ?? booking?.serviceFee ?? booking?.aiClassification?.estimatedCost ?? booking?.price;
+	if (raw == null) return null;
+	const num = parseFloat(raw);
+	return Number.isNaN(num) ? null : `$${Math.round(num)}`;
 };
 
 const jobStatusInfo = (status: string) => {
@@ -90,9 +105,10 @@ const jobStatusInfo = (status: string) => {
 
 const jobProgress = (booking: any) => {
 	if (booking?.bookingStatus === 'COMPLETED') return 100;
-	if (booking?.bookingStatus === 'ACCEPTED') return 15;
 	const steps = booking?.progressUpdates?.length ?? 0;
-	return Math.min(90, 30 + steps * 15);
+	if (booking?.bookingStatus === 'IN_PROGRESS') return Math.min(90, 45 + steps * 12);
+	if (booking?.bookingStatus === 'ACCEPTED') return Math.min(35, 20 + steps * 8);
+	return Math.min(60, 30 + steps * 10);
 };
 
 const scheduleDotColor = (status: string) => {
@@ -120,16 +136,25 @@ const timeAgo = (dateStr?: string | null) => {
 	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const formatDue = (dateStr?: string | null) => {
-	if (!dateStr) return 'TBD';
-	const date = new Date(dateStr);
+const formatDue = (dateStr?: string | null, createdAt?: string | null) => {
+	let date: Date | null = null;
+	let isEstimate = false;
+	if (dateStr) {
+		date = new Date(dateStr);
+	} else if (createdAt) {
+		date = new Date(createdAt);
+		date.setDate(date.getDate() + 3);
+		isEstimate = true;
+	}
+	if (!date || Number.isNaN(date.getTime())) return 'TBD';
 	const now = new Date();
 	const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 	if (date.toDateString() === now.toDateString()) return `Today ${time}`;
 	const tomorrow = new Date(now);
 	tomorrow.setDate(now.getDate() + 1);
 	if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow ${time}`;
-	return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
+	const label = `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
+	return isEstimate ? `~${label}` : label;
 };
 
 const formatTime = (dateStr?: string | null) => {
@@ -246,6 +271,8 @@ const TechnicianDashboard: NextPage = () => {
 		return (((activeJobs.length - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, activeJobs]);
 
+	const hasEarningsData = useMemo(() => earningsData.some((d) => d.earnings > 0), [earningsData]);
+
 	const scheduleItems = useMemo(() => {
 		return [...bookings]
 			.filter((b: any) => b?.bookingDate && !['CANCELLED', 'REJECTED'].includes(b?.bookingStatus))
@@ -350,7 +377,8 @@ const TechnicianDashboard: NextPage = () => {
 						<div className="fixora-tech-card__list">
 							{incomingRequests.length > 0 ? (
 								incomingRequests.slice(0, 4).map((booking: any) => {
-									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity);
+									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity, booking?.problemTitle, booking?.problemDescription);
+									const price = bookingPrice(booking);
 									return (
 										<div key={booking._id} className="fixora-tech-request-item">
 											<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} /></div>
@@ -364,7 +392,7 @@ const TechnicianDashboard: NextPage = () => {
 												</div>
 											</div>
 											<div className="fixora-tech-request-meta">
-												<div className="fixora-tech-request-budget">{booking.estimatedPrice ? `$${booking.estimatedPrice}` : 'TBD'}</div>
+												{price && <div className="fixora-tech-request-budget">{price}</div>}
 												<div className="fixora-tech-request-time">{timeAgo(booking.createdAt)}</div>
 											</div>
 										</div>
@@ -410,7 +438,7 @@ const TechnicianDashboard: NextPage = () => {
 													<div className="prog-bar" style={{ '--prog-w': `${progress}%` } as React.CSSProperties} />
 												</div>
 												<span className="fixora-tech-progress-value">{progress}%</span>
-												<span className="fixora-tech-job-due">Due: {formatDue(booking.bookingDate)}</span>
+												<span className="fixora-tech-job-due">Due: {formatDue(booking.bookingDate, booking.createdAt)}</span>
 											</div>
 										</div>
 									);
@@ -438,35 +466,41 @@ const TechnicianDashboard: NextPage = () => {
 							</div>
 						</div>
 						<div style={{ height: '180px', marginTop: '16px' }}>
-							<ResponsiveContainer width="100%" height="100%">
-								<AreaChart data={earningsData}>
-									<defs>
-										<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
-											<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
-											<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
-										</linearGradient>
-									</defs>
-									<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-									<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-									<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, (max: number) => Math.max(Number(max) || 0, 100)]} allowDecimals={false} />
-									<Tooltip
-										contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
-										labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
-										itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
-										formatter={(v: any) => [`$${v}`, 'Earnings']}
-									/>
-									<Area
-										type="monotone"
-										dataKey="earnings"
-										stroke="#FF6B00"
-										strokeWidth={2.5}
-										fill="url(#earningsGrad)"
-										dot={false}
-										isAnimationActive
-									/>
-								</AreaChart>
-							</ResponsiveContainer>
+							{hasEarningsData ? (
+								<ResponsiveContainer width="100%" height="100%">
+									<AreaChart data={earningsData}>
+										<defs>
+											<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
+												<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
+												<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
+												<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
+											</linearGradient>
+										</defs>
+										<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+										<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, (max: number) => Math.max(Number(max) || 0, 100)]} allowDecimals={false} />
+										<Tooltip
+											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
+											labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
+											itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
+											formatter={(v: any) => [`$${v}`, 'Earnings']}
+										/>
+										<Area
+											type="monotone"
+											dataKey="earnings"
+											stroke="#FF6B00"
+											strokeWidth={2.5}
+											fill="url(#earningsGrad)"
+											dot={false}
+											isAnimationActive
+										/>
+									</AreaChart>
+								</ResponsiveContainer>
+							) : (
+								<div className="fixora-tech-chart-empty">
+									<span>No earnings recorded this week</span>
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -489,6 +523,7 @@ const TechnicianDashboard: NextPage = () => {
 											<div className="fixora-tech-schedule-content">
 												<div className="fixora-tech-schedule-time">{formatTime(booking.bookingDate)}</div>
 												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{booking.problemTitle || 'Repair Task'}</div>
+												<div className="fixora-tech-schedule-client">{customerName(booking)}</div>
 											</div>
 											{done ? (
 													<CheckCircleOutline className="fixora-tech-schedule-done" style={{ fontSize: 15, color: '#22C55E' }} />

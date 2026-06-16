@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -11,7 +11,9 @@ import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
 import AttachFileOutlined from '@mui/icons-material/AttachFileOutlined';
 import SentimentSatisfiedAltOutlined from '@mui/icons-material/SentimentSatisfiedAltOutlined';
 import SendRounded from '@mui/icons-material/SendRounded';
+import DoneRounded from '@mui/icons-material/DoneRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../../apollo/user/message';
 import { GET_BOOKING, GET_DEVICE } from '../../../apollo/user/query';
@@ -23,6 +25,13 @@ import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
+
+const EMOJIS = [
+	'😀','😁','😂','🤣','😊','😍','🥰','😘','😎','🤔','😅','😭',
+	'😤','🤩','😢','😡','🥳','🤗','😴','🫶','👍','👎','👏','🙏',
+	'🤝','✌️','🤞','💪','👋','🙌','👌','🫡','❤️','🔥','⭐','✅',
+	'❌','💯','🎉','🚀','💡','🔧','📱','⚡','🎁','💬','📸','🛠️',
+];
 
 const peerName = (conv?: Conversation | null) =>
 	conv?.peer?.userFullName || conv?.peer?.userNickname || conv?.peer?.shopName || 'Customer';
@@ -36,7 +45,6 @@ const initialsOf = (name: string) => {
 
 const hasImage = (image?: string | null) => !!image && image.trim() !== '';
 
-/** Avatar that shows the real profile image when available, else initials. */
 const Avatar = ({ image, name, className }: { image?: string | null; name: string; className: string }) => (
 	<div className={className}>
 		{hasImage(image) ? <img src={resolveProfileImageUrl(image)} alt={name} /> : initialsOf(name)}
@@ -78,6 +86,12 @@ const Messages: NextPage = () => {
 	const [search, setSearch] = useState('');
 	const [selected, setSelected] = useState<{ peerId: string; bookingId?: string | null } | null>(null);
 	const [draft, setDraft] = useState('');
+	const [showEmoji, setShowEmoji] = useState(false);
+	const [imgPreview, setImgPreview] = useState<{ file: File; url: string } | null>(null);
+
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const emojiRef = useRef<HTMLDivElement>(null);
 
 	/** APOLLO **/
 	const { data: conversationsData, loading: convsLoading, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
@@ -88,6 +102,9 @@ const Messages: NextPage = () => {
 	});
 
 	const conversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
+
+	// FIX 1: show skeleton until data actually arrives (prevents "no data" flash)
+	const isConvsLoading = !user?._id || convsLoading || !conversationsData;
 
 	const { data: messagesData, loading: msgsLoading, refetch: refetchMessages } = useQuery(GET_MESSAGES, {
 		skip: !selected?.peerId,
@@ -103,8 +120,6 @@ const Messages: NextPage = () => {
 		fetchPolicy: 'network-only',
 		pollInterval: 5000,
 	});
-
-	const isConvsLoading = !user?._id || convsLoading;
 
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];
 
@@ -153,6 +168,17 @@ const Messages: NextPage = () => {
 		}
 	}, [selected?.peerId, selected?.bookingId, conversations]);
 
+	// Close emoji picker on outside click
+	useEffect(() => {
+		const handler = (e: MouseEvent) => {
+			if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+				setShowEmoji(false);
+			}
+		};
+		if (showEmoji) document.addEventListener('mousedown', handler);
+		return () => document.removeEventListener('mousedown', handler);
+	}, [showEmoji]);
+
 	/** DERIVED **/
 	const filteredConversations = useMemo(
 		() => conversations.filter((c) => peerName(c).toLowerCase().includes(search.toLowerCase())),
@@ -166,8 +192,37 @@ const Messages: NextPage = () => {
 
 	/** HANDLERS **/
 	const sendHandler = async () => {
+		if (!selected?.peerId) return;
+
+		// FIX 3: send image if preview exists
+		if (imgPreview) {
+			const reader = new FileReader();
+			reader.onloadend = async () => {
+				const base64 = reader.result as string;
+				try {
+					await sendMessage({
+						variables: {
+							input: {
+								receiverId: selected.peerId,
+								bookingId: selected.bookingId || undefined,
+								messageContent: base64,
+								messageType: 'IMAGE',
+							},
+						},
+					});
+					setImgPreview(null);
+					await refetchMessages();
+					await refetchConversations();
+				} catch (err: any) {
+					await sweetErrorHandling(err);
+				}
+			};
+			reader.readAsDataURL(imgPreview.file);
+			return;
+		}
+
 		const text = draft.trim();
-		if (!text || !selected?.peerId) return;
+		if (!text) return;
 		setDraft('');
 		try {
 			await sendMessage({
@@ -192,6 +247,34 @@ const Messages: NextPage = () => {
 			e.preventDefault();
 			sendHandler();
 		}
+	};
+
+	// FIX 4: insert emoji at cursor position
+	const insertEmoji = (emoji: string) => {
+		const textarea = textareaRef.current;
+		if (!textarea) {
+			setDraft((d) => d + emoji);
+			setShowEmoji(false);
+			return;
+		}
+		const start = textarea.selectionStart ?? draft.length;
+		const end = textarea.selectionEnd ?? draft.length;
+		const newVal = draft.slice(0, start) + emoji + draft.slice(end);
+		setDraft(newVal);
+		setShowEmoji(false);
+		setTimeout(() => {
+			textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+			textarea.focus();
+		}, 0);
+	};
+
+	// FIX 3: handle file selection
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const url = URL.createObjectURL(file);
+		setImgPreview({ file, url });
+		e.target.value = '';
 	};
 
 	const activeName = peerName(activeConversation);
@@ -304,16 +387,26 @@ const Messages: NextPage = () => {
 							) : null}
 							{!msgsLoading && messages.map((m) => {
 								const dir = m.senderId === user?._id ? 'out' : 'in';
+								const isImg = (m as any).messageType === 'IMAGE';
 								return (
 									<div key={m._id} className={`fixora-msg-row fixora-msg-row--${dir}`}>
 										{dir === 'in' && (
 											<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-row__avatar" />
 										)}
 										<div className="fixora-msg-row__wrap">
-											<div className={`fixora-msg-bubble fixora-msg-bubble--${dir}`}>{m.messageContent}</div>
+											<div className={`fixora-msg-bubble fixora-msg-bubble--${dir}`}>
+												{isImg
+													? <img src={m.messageContent} alt="image" className="fixora-msg-bubble__img" />
+													: m.messageContent}
+											</div>
 											<div className="fixora-msg-bubble__meta">
 												{formatTime(m.createdAt)}
-												{dir === 'out' && <DoneAllRounded style={{ fontSize: 14, color: m.isRead ? '#FF9A3C' : undefined }} />}
+												{/* FIX 2: 1 check = sent (not read), 2 checks = read */}
+												{dir === 'out' && (
+													m.isRead
+														? <DoneAllRounded style={{ fontSize: 14, color: '#FF9A3C' }} />
+														: <DoneRounded style={{ fontSize: 14, color: '#606060' }} />
+												)}
 											</div>
 										</div>
 										{dir === 'out' && (
@@ -325,9 +418,49 @@ const Messages: NextPage = () => {
 						</div>
 
 						<div className="fixora-msg-composer-wrap">
+							{/* FIX 3: image preview strip */}
+							{imgPreview && (
+								<div className="fixora-msg-img-preview">
+									<img src={imgPreview.url} alt="preview" />
+									<button
+										type="button"
+										className="fixora-msg-img-preview__remove"
+										onClick={() => { URL.revokeObjectURL(imgPreview.url); setImgPreview(null); }}
+									>
+										<CloseRounded style={{ fontSize: 14 }} />
+									</button>
+								</div>
+							)}
+
+							{/* FIX 4: emoji picker */}
+							{showEmoji && (
+								<div className="fixora-msg-emoji-picker" ref={emojiRef}>
+									{EMOJIS.map((e) => (
+										<button key={e} type="button" className="fixora-msg-emoji-btn" onClick={() => insertEmoji(e)}>
+											{e}
+										</button>
+									))}
+								</div>
+							)}
+
 							<div className="fixora-msg-composer">
-								<button className="fixora-msg-composer__attach" type="button"><AttachFileOutlined style={{ fontSize: 18 }} /></button>
+								{/* FIX 3: hidden file input */}
+								<input
+									ref={fileInputRef}
+									type="file"
+									accept="image/*"
+									style={{ display: 'none' }}
+									onChange={handleFileChange}
+								/>
+								<button
+									className="fixora-msg-composer__attach"
+									type="button"
+									onClick={() => fileInputRef.current?.click()}
+								>
+									<AttachFileOutlined style={{ fontSize: 18 }} />
+								</button>
 								<textarea
+									ref={textareaRef}
 									className="fixora-msg-composer__input"
 									placeholder="Type a message..."
 									rows={1}
@@ -335,7 +468,14 @@ const Messages: NextPage = () => {
 									onChange={(e) => setDraft(e.target.value)}
 									onKeyDown={handleKeyDown}
 								/>
-								<button className="fixora-msg-composer__emoji" type="button"><SentimentSatisfiedAltOutlined style={{ fontSize: 19 }} /></button>
+								{/* FIX 4: emoji button toggles picker */}
+								<button
+									className="fixora-msg-composer__emoji"
+									type="button"
+									onClick={() => setShowEmoji((v) => !v)}
+								>
+									<SentimentSatisfiedAltOutlined style={{ fontSize: 19 }} />
+								</button>
 								<button className="fixora-msg-composer__send" type="button" onClick={sendHandler}>
 									<SendRounded style={{ fontSize: 18 }} />
 								</button>

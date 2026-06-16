@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
 import GridViewOutlined from '@mui/icons-material/GridViewOutlined';
 import MailOutline from '@mui/icons-material/MailOutline';
 import WorkOutlineOutlined from '@mui/icons-material/WorkOutlineOutlined';
@@ -115,7 +116,11 @@ const TechnicianSidebar: React.FC = () => {
 					className="fixora-technician-sidebar__user-card"
 					onClick={() => router.push('/technician/profile')}
 				>
-					<div className="fixora-technician-sidebar__user-avatar">{initials || 'T'}</div>
+					<div className="fixora-technician-sidebar__user-avatar">
+						{user?.memberImage
+							? <img src={resolveProfileImageUrl(user.memberImage)} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+							: initials || 'T'}
+					</div>
 					<div className="fixora-technician-sidebar__user-info">
 						<div className="fixora-technician-sidebar__user-name">{displayName}</div>
 						<div className="fixora-technician-sidebar__user-role">Pro Technician</div>

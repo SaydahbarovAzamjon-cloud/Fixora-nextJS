@@ -1,29 +1,23 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxOutlined from '@mui/icons-material/MoveToInboxOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import StarRounded from '@mui/icons-material/StarRounded';
 import ErrorOutlineOutlined from '@mui/icons-material/ErrorOutlineOutlined';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
+import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
+import { userVar } from '../../../apollo/store';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
 type NotifKind = 'requests' | 'messages' | 'payments' | 'reviews' | 'alerts';
-
-interface Notif {
-	id: number;
-	kind: NotifKind;
-	title: string;
-	desc: string;
-	time: string;
-	action: string;
-	unread: boolean;
-}
 
 const KIND_META: Record<NotifKind, { gradient: string; color: string; icon: React.ReactNode }> = {
 	requests: {
@@ -62,26 +56,60 @@ const FILTERS: { id: 'all' | NotifKind; label: string }[] = [
 	{ id: 'alerts', label: 'Alerts' },
 ];
 
-const INITIAL: Notif[] = [
-	{ id: 1, kind: 'requests', title: 'New Repair Request', desc: 'Sarah Mitchell requested iPhone 15 Pro Max screen replacement — $180 budget', time: '12 min ago', action: 'View Request', unread: true },
-	{ id: 2, kind: 'messages', title: 'New Message', desc: 'Daniel Wagner: "Is my phone ready? Any updates on the repair?"', time: '45 min ago', action: 'Reply', unread: true },
-	{ id: 3, kind: 'payments', title: 'Payment Received', desc: 'Lily Chen paid $380 for iPad Pro screen replacement — JOB-879', time: '2h ago', action: 'View Receipt', unread: false },
-	{ id: 4, kind: 'reviews', title: 'New 5-Star Review', desc: 'Michael Chen left a 5-star review: "Fast, reliable, and affordable. My MacBook is running like new again."', time: '3h ago', action: 'View Review', unread: true },
-	{ id: 5, kind: 'alerts', title: 'Job Due Soon', desc: 'JOB-882 — Water damage recovery for Daniel Wagner is due in 2 hours', time: '4h ago', action: 'View Job', unread: false },
-];
+const mapKind = (notificationType?: string): NotifKind => {
+	const t = (notificationType ?? '').toUpperCase();
+	if (t.includes('BOOKING') || t.includes('REQUEST')) return 'requests';
+	if (t.includes('MESSAGE')) return 'messages';
+	if (t.includes('PAYMENT')) return 'payments';
+	if (t.includes('REVIEW')) return 'reviews';
+	return 'alerts';
+};
+
+const timeAgo = (dateStr?: string | null) => {
+	if (!dateStr) return '';
+	const diff = Date.now() - new Date(dateStr).getTime();
+	const m = Math.floor(diff / 60000);
+	if (m < 1) return 'just now';
+	if (m < 60) return `${m} min ago`;
+	const h = Math.floor(m / 60);
+	if (h < 24) return `${h}h ago`;
+	const d = Math.floor(h / 24);
+	if (d < 7) return `${d}d ago`;
+	return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
 
 const Notifications: NextPage = () => {
+	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<'all' | NotifKind>('all');
-	const [notifs, setNotifs] = useState<Notif[]>(INITIAL);
 
-	const unreadCount = useMemo(() => notifs.filter((n) => n.unread).length, [notifs]);
+	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 50, search: {} } },
+		fetchPolicy: 'network-only',
+	});
 
-	const filtered = useMemo(
-		() => (activeFilter === 'all' ? notifs : notifs.filter((n) => n.kind === activeFilter)),
-		[notifs, activeFilter]
-	);
+	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
+	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 
-	const markAllRead = () => setNotifs((prev) => prev.map((n) => ({ ...n, unread: false })));
+	const notifications = useMemo(() => data?.getNotifications?.list ?? [], [data]);
+
+	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
+
+	const filtered = useMemo(() => {
+		const list = notifications.filter((n: any) => n.notificationType !== 'MESSAGE');
+		if (activeFilter === 'all') return list;
+		return list.filter((n: any) => mapKind(n.notificationType) === activeFilter);
+	}, [notifications, activeFilter]);
+
+	const handleMarkAllRead = async () => {
+		await markAllRead();
+		refetch();
+	};
+
+	const handleMarkRead = async (id: string) => {
+		await markRead({ variables: { input: { notificationId: id } } });
+		refetch();
+	};
 
 	return (
 		<div className="fixora-notif-page">
@@ -93,9 +121,11 @@ const Notifications: NextPage = () => {
 					</div>
 					<p className="fixora-notif-header__sub">Stay on top of your repair workflow</p>
 				</div>
-				<button className="fixora-notif-markall" onClick={markAllRead} type="button">
-					<DoneAllRounded style={{ fontSize: 17 }} /> Mark all as read
-				</button>
+				{unreadCount > 0 && (
+					<button className="fixora-notif-markall" onClick={handleMarkAllRead} type="button">
+						<DoneAllRounded style={{ fontSize: 17 }} /> Mark all as read
+					</button>
+				)}
 			</div>
 
 			<div className="fixora-notif-filters">
@@ -111,32 +141,35 @@ const Notifications: NextPage = () => {
 				))}
 			</div>
 
-			<div className="fixora-notif-section-label">Today</div>
-
 			<div className="fixora-notif-list">
-				{filtered.length === 0 ? (
-					<div className="fixora-notif-empty">No notifications</div>
+				{loading ? (
+					<div className="fixora-notif-loading">
+						<div className="fixora-notif-loading__spinner" />
+					</div>
+				) : filtered.length === 0 ? (
+					<div className="fixora-notif-empty">
+						<NotificationsNoneOutlined style={{ fontSize: 48, color: '#333' }} />
+						<p>You have no notifications</p>
+					</div>
 				) : (
-					filtered.map((n) => {
-						const meta = KIND_META[n.kind];
+					filtered.map((n: any) => {
+						const kind = mapKind(n.notificationType);
+						const meta = KIND_META[kind];
 						return (
-							<div key={n.id} className={`fixora-notif-card ${n.unread ? 'fixora-notif-card--unread' : ''}`}>
+							<div
+								key={n._id}
+								className={`fixora-notif-card ${!n.isRead ? 'fixora-notif-card--unread' : ''}`}
+								onClick={() => !n.isRead && handleMarkRead(n._id)}
+							>
 								<div className="fixora-notif-card__icon" style={{ background: meta.gradient }}>
 									{meta.icon}
 								</div>
 								<div className="fixora-notif-card__body">
 									<div className="fixora-notif-card__top">
-										<div className="fixora-notif-card__title">{n.title}</div>
-										<div className="fixora-notif-card__time">{n.time}</div>
+										<div className="fixora-notif-card__title">{n.notificationTitle}</div>
+										<div className="fixora-notif-card__time">{timeAgo(n.createdAt)}</div>
 									</div>
-									<div className="fixora-notif-card__desc">{n.desc}</div>
-									<button
-										className="fixora-notif-card__action"
-										style={{ color: meta.color, borderColor: `${meta.color}55` }}
-										type="button"
-									>
-										{n.action}
-									</button>
+									<div className="fixora-notif-card__desc">{n.notificationDescription}</div>
 								</div>
 							</div>
 						);

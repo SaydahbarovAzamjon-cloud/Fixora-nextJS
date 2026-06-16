@@ -80,7 +80,7 @@ const Messages: NextPage = () => {
 	const [draft, setDraft] = useState('');
 
 	/** APOLLO **/
-	const { data: conversationsData, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
+	const { data: conversationsData, loading: convsLoading, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50 } },
 		fetchPolicy: 'network-only',
@@ -89,7 +89,7 @@ const Messages: NextPage = () => {
 
 	const conversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
 
-	const { data: messagesData, refetch: refetchMessages } = useQuery(GET_MESSAGES, {
+	const { data: messagesData, loading: msgsLoading, refetch: refetchMessages } = useQuery(GET_MESSAGES, {
 		skip: !selected?.peerId,
 		variables: {
 			input: {
@@ -103,6 +103,8 @@ const Messages: NextPage = () => {
 		fetchPolicy: 'network-only',
 		pollInterval: 5000,
 	});
+
+	const isConvsLoading = !user?._id || convsLoading;
 
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];
 
@@ -214,7 +216,19 @@ const Messages: NextPage = () => {
 				</div>
 
 				<div className="fixora-msg-conv-list">
-					{filteredConversations.length === 0 ? (
+					{isConvsLoading ? (
+						<>
+							{[1, 2, 3].map((i) => (
+								<div key={i} className="fixora-msg-conv-skeleton">
+									<div className="fixora-msg-conv-skeleton__avatar" />
+									<div className="fixora-msg-conv-skeleton__body">
+										<div className="fixora-msg-conv-skeleton__line fixora-msg-conv-skeleton__line--name" />
+										<div className="fixora-msg-conv-skeleton__line fixora-msg-conv-skeleton__line--preview" />
+									</div>
+								</div>
+							))}
+						</>
+					) : filteredConversations.length === 0 ? (
 						<div className="fixora-tech-empty">No conversations yet</div>
 					) : (
 						filteredConversations.map((conv) => {
@@ -281,7 +295,14 @@ const Messages: NextPage = () => {
 						)}
 
 						<div className="fixora-msg-chat__body">
-							{messages.map((m) => {
+							{msgsLoading ? (
+								<div className="fixora-msg-loading">
+									<div className="fixora-msg-loading__spinner" />
+								</div>
+							) : messages.length === 0 ? (
+								<div className="fixora-tech-empty" style={{ margin: 'auto' }}>No messages yet. Say hello!</div>
+							) : null}
+							{!msgsLoading && messages.map((m) => {
 								const dir = m.senderId === user?._id ? 'out' : 'in';
 								return (
 									<div key={m._id} className={`fixora-msg-row fixora-msg-row--${dir}`}>
@@ -324,6 +345,10 @@ const Messages: NextPage = () => {
 							</div>
 						</div>
 					</>
+				) : (isConvsLoading || (!selected && conversations.length > 0)) ? (
+					<div className="fixora-msg-loading" style={{ margin: 'auto' }}>
+						<div className="fixora-msg-loading__spinner" />
+					</div>
 				) : (
 					<div className="fixora-tech-empty" style={{ margin: 'auto' }}>Select a conversation to start chatting</div>
 				)}

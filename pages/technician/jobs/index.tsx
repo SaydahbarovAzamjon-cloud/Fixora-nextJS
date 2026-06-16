@@ -16,90 +16,54 @@ import RadioButtonUnchecked from '@mui/icons-material/RadioButtonUnchecked';
 import EastOutlined from '@mui/icons-material/EastOutlined';
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import { GET_MY_BOOKINGS } from '../../../apollo/user/profile';
+import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
+import {
+	JOB_STAGE_INFO,
+	getJobStage,
+	getJobProgress,
+	buildTimeline,
+	deviceLabel,
+	formatDue,
+	formatDateTime,
+} from '../../../libs/components/technician/ActiveJobs/jobHelpers';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
-const DEVICE_LABEL: Record<string, string> = {
-	IPHONE: 'iPhone',
-	APPLE_WATCH: 'Apple Watch',
-	IPAD: 'iPad',
-	MACBOOK: 'MacBook',
-};
-
 const DeviceGlyph = ({ type, size = 18, color = '#9A9A9A' }: { type?: string | null; size?: number; color?: string }) => {
 	const sx = { fontSize: size, color } as const;
 	switch (type) {
-		case 'IPHONE':
-			return <SmartphoneOutlined style={sx} />;
-		case 'IPAD':
-			return <TabletMacOutlined style={sx} />;
-		case 'MACBOOK':
-			return <LaptopMacOutlined style={sx} />;
-		case 'APPLE_WATCH':
-			return <WatchOutlined style={sx} />;
-		default:
-			return <BuildOutlined style={sx} />;
+		case 'IPHONE': return <SmartphoneOutlined style={sx} />;
+		case 'IPAD': return <TabletMacOutlined style={sx} />;
+		case 'MACBOOK': return <LaptopMacOutlined style={sx} />;
+		case 'APPLE_WATCH': return <WatchOutlined style={sx} />;
+		default: return <BuildOutlined style={sx} />;
 	}
 };
 
-const deviceLabel = (deviceType?: string | null) => DEVICE_LABEL[deviceType ?? ''] ?? 'Device';
 const jobCode = (id: string) => `JOB-${id.slice(-3).toUpperCase()}`;
-
-// Visual stage derived from booking status (granular sub-status not stored in schema).
-const jobStage = (job: any): string => {
-	if (job?.bookingStatus === 'IN_PROGRESS') return 'inprogress';
-	return 'diagnosing';
-};
-
-const STAGE_INFO: Record<string, { label: string; color: string; bg: string }> = {
-	diagnosing: { label: 'Diagnosing', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
-	inprogress: { label: 'In Progress', color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' },
-	parts: { label: 'Parts Ordered', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-	ready: { label: 'Ready for Pickup', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-};
-
-const STAGE_PROGRESS: Record<string, number> = { diagnosing: 30, inprogress: 65, parts: 45, ready: 100 };
-// timeline index that is currently active per stage
-const STAGE_STEP: Record<string, number> = { diagnosing: 1, inprogress: 3, parts: 2, ready: 5 };
-
-const TIMELINE = ['Received & Logged', 'Initial Diagnosis', 'Parts Ordered', 'Repair In Progress', 'Quality Testing', 'Ready for Pickup'];
-
-const FILTERS = [
-	{ id: 'all', label: 'All Jobs' },
-	{ id: 'diagnosing', label: 'Diagnosing' },
-	{ id: 'inprogress', label: 'In Progress' },
-	{ id: 'parts', label: 'Parts Ordered' },
-	{ id: 'ready', label: 'Ready for Pickup' },
-];
 
 const fmtDate = (dateStr?: string | null) => {
 	if (!dateStr) return 'TBD';
 	return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const fmtDue = (dateStr?: string | null) => {
-	if (!dateStr) return 'TBD';
-	const d = new Date(dateStr);
-	return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-};
-
-const stepTime = (createdAt: string | undefined, idx: number) => {
-	if (!createdAt) return '';
-	const d = new Date(createdAt);
-	d.setHours(d.getHours() + idx * 5);
-	return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-};
+const FILTERS = [
+	{ id: 'all', label: 'All Jobs' },
+	{ id: 'DIAGNOSING', label: 'Diagnosing' },
+	{ id: 'IN_PROGRESS', label: 'In Progress' },
+	{ id: 'PARTS_ORDERED', label: 'Parts Ordered' },
+	{ id: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
+];
 
 const ActiveJobs: NextPage = () => {
 	const user = useReactiveVar(userVar);
 	const [selectedJob, setSelectedJob] = useState<any>(null);
 	const [activeFilter, setActiveFilter] = useState<string>('all');
 
-	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
+	const { data: bookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
@@ -107,22 +71,23 @@ const ActiveJobs: NextPage = () => {
 
 	const activeJobs = useMemo(
 		() =>
-			(bookingsData?.getMyBookings?.list ?? []).filter((b: any) =>
+			(bookingsData?.getTechnicianBookings?.list ?? []).filter((b: any) =>
 				['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus)
 			),
 		[bookingsData]
 	);
 
 	const counts = useMemo(() => {
-		const c: Record<string, number> = { all: activeJobs.length, diagnosing: 0, inprogress: 0, parts: 0, ready: 0 };
+		const c: Record<string, number> = { all: activeJobs.length, DIAGNOSING: 0, IN_PROGRESS: 0, PARTS_ORDERED: 0, READY_FOR_PICKUP: 0 };
 		activeJobs.forEach((j: any) => {
-			c[jobStage(j)] = (c[jobStage(j)] || 0) + 1;
+			const stage = getJobStage(j);
+			c[stage] = (c[stage] || 0) + 1;
 		});
 		return c;
 	}, [activeJobs]);
 
 	const filtered = useMemo(
-		() => (activeFilter === 'all' ? activeJobs : activeJobs.filter((j: any) => jobStage(j) === activeFilter)),
+		() => (activeFilter === 'all' ? activeJobs : activeJobs.filter((j: any) => getJobStage(j) === activeFilter)),
 		[activeJobs, activeFilter]
 	);
 
@@ -153,9 +118,9 @@ const ActiveJobs: NextPage = () => {
 						<div className="fixora-jobs-empty">No active jobs</div>
 					) : (
 						filtered.map((job: any) => {
-							const stage = jobStage(job);
-							const info = STAGE_INFO[stage];
-							const progress = STAGE_PROGRESS[stage];
+							const stage = getJobStage(job);
+							const info = JOB_STAGE_INFO[stage];
+							const progress = getJobProgress(job);
 							const active = displayedJob?._id === job._id;
 							return (
 								<div
@@ -168,10 +133,10 @@ const ActiveJobs: NextPage = () => {
 											<DeviceGlyph type={job.aiClassification?.deviceType} />
 										</div>
 										<div className="fixora-job-card__head">
-											<div className="fixora-job-card__name">{job.userId?.userNickname || 'Customer'}</div>
+											<div className="fixora-job-card__name">{job.customerData?.userFullName || job.customerData?.userNickname || 'Unknown'}</div>
 											<div className="fixora-job-card__device">{deviceLabel(job.aiClassification?.deviceType)}</div>
 										</div>
-										<span className="fixora-job-card__status" style={{ color: info.color }}>
+										<span className="fixora-job-card__status" style={{ color: info.color, background: info.bg }}>
 											{info.label}
 										</span>
 									</div>
@@ -196,7 +161,7 @@ const ActiveJobs: NextPage = () => {
 										</span>
 										<span className="fixora-job-card__due">
 											<AccessTimeOutlined style={{ fontSize: 13 }} />
-											{fmtDue(job.bookingDate)}
+											{formatDue(job.bookingDate)}
 										</span>
 									</div>
 								</div>
@@ -210,9 +175,9 @@ const ActiveJobs: NextPage = () => {
 			<div className="fixora-jobs-right">
 				{displayedJob ? (
 					(() => {
-						const stage = jobStage(displayedJob);
-						const info = STAGE_INFO[stage];
-						const currentStep = STAGE_STEP[stage];
+						const stage = getJobStage(displayedJob);
+						const info = JOB_STAGE_INFO[stage];
+						const timeline = buildTimeline(displayedJob);
 						const price = parseFloat(displayedJob.finalPrice || displayedJob.estimatedPrice || '0').toFixed(0);
 						return (
 							<>
@@ -237,7 +202,7 @@ const ActiveJobs: NextPage = () => {
 											</div>
 											<div>
 												<div className="fixora-jobs-infocard__label">Client</div>
-												<div className="fixora-jobs-infocard__value">{displayedJob.userId?.userNickname || 'Customer'}</div>
+												<div className="fixora-jobs-infocard__value">{displayedJob.customerData?.userFullName || displayedJob.customerData?.userNickname || 'Unknown'}</div>
 												<div className="fixora-jobs-infocard__sub">Verified Customer</div>
 											</div>
 										</div>
@@ -257,7 +222,7 @@ const ActiveJobs: NextPage = () => {
 											</div>
 											<div>
 												<div className="fixora-jobs-infocard__label">Due Date</div>
-												<div className="fixora-jobs-infocard__value">{fmtDue(displayedJob.bookingDate)}</div>
+												<div className="fixora-jobs-infocard__value">{formatDue(displayedJob.bookingDate)}</div>
 												<div className="fixora-jobs-infocard__sub">Estimated completion</div>
 											</div>
 										</div>
@@ -266,9 +231,8 @@ const ActiveJobs: NextPage = () => {
 									<div className="fixora-jobs-timeline-card">
 										<h3 className="fixora-jobs-timeline-card__title">Repair Timeline</h3>
 										<div className="fixora-jobs-timeline">
-											{TIMELINE.map((label, idx) => {
-												const done = idx < currentStep;
-												const current = idx === currentStep;
+											{timeline.map(({ label, done, timestamp }, idx) => {
+												const current = !done && (idx === 0 || timeline[idx - 1]?.done);
 												const reached = done || current;
 												return (
 													<div
@@ -281,14 +245,14 @@ const ActiveJobs: NextPage = () => {
 															) : (
 																<RadioButtonUnchecked className="fixora-jobs-tl-step__node fixora-jobs-tl-step__node--pending" style={{ fontSize: 20 }} />
 															)}
-															{idx < TIMELINE.length - 1 && (
+															{idx < timeline.length - 1 && (
 																<div className={`fixora-jobs-tl-step__line ${done ? 'fixora-jobs-tl-step__line--done' : ''}`} />
 															)}
 														</div>
 														<div className="fixora-jobs-tl-step__content">
 															<div className="fixora-jobs-tl-step__label">{label}</div>
-															{reached && (
-																<div className="fixora-jobs-tl-step__time">{stepTime(displayedJob.createdAt, idx)}</div>
+															{reached && timestamp && (
+																<div className="fixora-jobs-tl-step__time">{formatDateTime(timestamp)}</div>
 															)}
 														</div>
 													</div>

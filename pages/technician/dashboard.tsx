@@ -369,7 +369,7 @@ const TechnicianDashboard: NextPage = () => {
 			{/* Main Grid */}
 			<div className="fixora-tech-dashboard__grid">
 				{/* Incoming Requests */}
-					<div className="fixora-tech-card">
+					<div className="fixora-tech-card fixora-tech-card--span-half">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Incoming Requests</h2>
 							<a href="/technician/requests" className="fixora-tech-card__link">View all ›</a>
@@ -405,7 +405,7 @@ const TechnicianDashboard: NextPage = () => {
 					</div>
 
 				{/* Active Jobs */}
-					<div className="fixora-tech-card">
+					<div className="fixora-tech-card fixora-tech-card--span-half">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Active Jobs</h2>
 							<a href="/technician/jobs" className="fixora-tech-card__link">View all ›</a>
@@ -450,7 +450,7 @@ const TechnicianDashboard: NextPage = () => {
 					</div>
 
 				{/* Earnings Chart */}
-					<div className="fixora-tech-card">
+					<div className="fixora-tech-card fixora-tech-card--span-wide">
 						<div className="fixora-tech-card__header">
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
@@ -505,7 +505,7 @@ const TechnicianDashboard: NextPage = () => {
 					</div>
 
 				{/* Today's Schedule */}
-					<div className="fixora-tech-card">
+					<div className="fixora-tech-card fixora-tech-card--span-narrow">
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
 						</div>

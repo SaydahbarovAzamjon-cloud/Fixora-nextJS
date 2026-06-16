@@ -655,7 +655,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 
 	&__grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: repeat(6, 1fr);
 		gap: 16px;
 		align-items: start;
 	}
@@ -666,6 +666,21 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		flex-direction: column;
 		gap: 16px;
 	}
+}
+
+/* Dashboard grid card spans (6-col grid):
+   row 1 → Requests + Active Jobs equal (3 + 3)
+   row 2 → Weekly Earnings wider + Schedule narrower (4 + 2) */
+.fixora-tech-card--span-half {
+	grid-column: span 3;
+}
+
+.fixora-tech-card--span-wide {
+	grid-column: span 4;
+}
+
+.fixora-tech-card--span-narrow {
+	grid-column: span 2;
 }
 
 /* ============ QUICK ACTION BUTTON ============ */
@@ -858,6 +873,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px;
+		width: 100%;
 		margin-bottom: 12px;
 	}
 
@@ -890,7 +906,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	&__list {
 		display: flex;
 		flex-direction: column;
+		align-items: stretch;
 		gap: 12px;
+		width: 100%;
 	}
 }
 
@@ -907,6 +925,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	display: flex;
 	align-items: center;
 	gap: 12px;
+	width: 100%;
+	box-sizing: border-box;
 	padding: 11px 8px;
 	border-radius: 8px;
 	cursor: pointer;
@@ -972,6 +992,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 .fixora-tech-request-meta {
 	text-align: right;
 	flex-shrink: 0;
+	margin-left: auto;
 }
 
 .fixora-tech-request-budget {
@@ -989,6 +1010,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 /* ============ JOB ITEM ============ */
 
 .fixora-tech-job-item {
+	width: 100%;
+	box-sizing: border-box;
 	padding: 14px;
 	border-radius: 10px;
 	background: rgba(255, 255, 255, 0.025);
@@ -1012,12 +1035,16 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
 	margin-bottom: 8px;
 }
 
 .fixora-tech-job-info {
 	display: flex;
 	gap: 10px;
+	flex: 1;
+	min-width: 0;
 }
 
 .fixora-tech-job-device {
@@ -1030,6 +1057,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	font-weight: 700;
 	flex-shrink: 0;
 	letter-spacing: 0.01em;
+	margin-left: auto;
 }
 
 .fixora-tech-job-issue {
@@ -1063,6 +1091,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	color: #505050;
 	font-size: 11px;
 	flex-shrink: 0;
+	margin-left: auto;
 }
 
 /* ============ ANIMATED PROGRESS BAR ============ */
@@ -1172,13 +1201,17 @@ $border-orange: rgba(255, 107, 0, 0.2);
 .fixora-tech-schedule-list {
 	display: flex;
 	flex-direction: column;
+	align-items: stretch;
 	gap: 12px;
+	width: 100%;
 }
 
 .fixora-tech-schedule-item {
 	display: flex;
 	gap: 12px;
 	align-items: flex-start;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .fixora-tech-schedule-rail {
@@ -1245,6 +1278,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 /* ============ CHART EMPTY ============ */
 
 .fixora-tech-chart-empty {
+	width: 100%;
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -1261,6 +1295,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 12px;
+	width: 100%;
 }
 
 .fixora-tech-review-card {
@@ -1342,6 +1377,12 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		&__grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.fixora-tech-card--span-half,
+	.fixora-tech-card--span-wide,
+	.fixora-tech-card--span-narrow {
+		grid-column: auto;
 	}
 
 	.fixora-tech-reviews-grid {

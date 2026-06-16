@@ -12,10 +12,10 @@ import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
 import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
-import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { userVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
+import { FixoraLogo } from '../brand';
 
 interface NavItem {
 	id: string;
@@ -79,16 +79,15 @@ const TechnicianSidebar: React.FC = () => {
 
 	return (
 		<aside className="fixora-technician-sidebar">
-			{/* Logo */}
-			<div className="fixora-technician-sidebar__logo">
-				<div className="fixora-logo-icon">
-					<BoltOutlined style={{ fontSize: 19 }} />
-				</div>
-				<div>
-					<div className="fixora-logo-text">FIXORA</div>
-					<div className="fixora-logo-subtext">TECHNICIAN</div>
-				</div>
-			</div>
+			{/* Logo — footer design, static (no spin/scale), navigates to dashboard */}
+			<button
+				type="button"
+				className="fixora-technician-sidebar__logo"
+				onClick={() => router.push('/technician/dashboard')}
+			>
+				<FixoraLogo size="md" className="fixora-technician-sidebar__logo-img" />
+				<div className="fixora-logo-subtext">TECHNICIAN</div>
+			</button>
 
 			{/* Status Badge */}
 			<div className="fixora-technician-sidebar__status">

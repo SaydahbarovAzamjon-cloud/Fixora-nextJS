@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
@@ -59,9 +60,12 @@ const FILTERS = [
 ];
 
 const ActiveJobs: NextPage = () => {
+	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [selectedJob, setSelectedJob] = useState<any>(null);
 	const [activeFilter, setActiveFilter] = useState<string>('all');
+
+	const searchTerm = ((router.query.search as string) ?? '').trim().toLowerCase();
 
 	const { data: bookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
 		skip: !user?._id,
@@ -86,10 +90,18 @@ const ActiveJobs: NextPage = () => {
 		return c;
 	}, [activeJobs]);
 
-	const filtered = useMemo(
-		() => (activeFilter === 'all' ? activeJobs : activeJobs.filter((j: any) => getJobStage(j) === activeFilter)),
-		[activeJobs, activeFilter]
-	);
+	const filtered = useMemo(() => {
+		let result = activeFilter === 'all' ? activeJobs : activeJobs.filter((j: any) => getJobStage(j) === activeFilter);
+		if (searchTerm) {
+			result = result.filter((j: any) => {
+				const customer = (j.customerData?.userFullName || j.customerData?.userNickname || '').toLowerCase();
+				const title = (j.problemTitle || '').toLowerCase();
+				const dev = deviceLabel(j.aiClassification?.deviceType).toLowerCase();
+				return customer.includes(searchTerm) || title.includes(searchTerm) || dev.includes(searchTerm);
+			});
+		}
+		return result;
+	}, [activeJobs, activeFilter, searchTerm]);
 
 	const displayedJob = useMemo(
 		() => (selectedJob && filtered.find((j: any) => j._id === selectedJob._id)) || filtered[0] || null,

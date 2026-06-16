@@ -9,6 +9,7 @@ import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { userVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
 
 interface HeaderProps {
 	activePage: string;
@@ -32,6 +33,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const user = useReactiveVar(userVar);
 	const badges = useTechnicianBadges();
 	const [searchFocused, setSearchFocused] = useState(false);
+	const [searchTerm, setSearchTerm] = useState('');
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	const displayName = user?.memberFullName || user?.memberNick || 'Technician';
@@ -46,6 +48,19 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 		localStorage.removeItem('accessToken');
 		localStorage.removeItem('refreshToken');
 		router.push('/login');
+	};
+
+	const submitSearch = () => {
+		const term = searchTerm.trim();
+		if (!term) return;
+		router.push(`/technician/jobs?search=${encodeURIComponent(term)}`);
+	};
+
+	const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			submitSearch();
+		}
 	};
 
 	return (
@@ -64,6 +79,9 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				<input
 					className="fixora-tech-header__search-input"
 					placeholder="Search jobs, clients, devices..."
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+					onKeyDown={handleSearchKeyDown}
 					onFocus={() => setSearchFocused(true)}
 					onBlur={() => setSearchFocused(false)}
 				/>
@@ -72,8 +90,11 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			<div className="fixora-tech-header__spacer" />
 
-			{/* New Quote button */}
-			<button className="fixora-tech-header__new-quote">
+			{/* New Quote button → create a new article */}
+			<button
+				className="fixora-tech-header__new-quote"
+				onClick={() => router.push('/community/write')}
+			>
 				<AddOutlined style={{ fontSize: 16 }} /> New Quote
 			</button>
 
@@ -110,7 +131,11 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 					className="fixora-tech-header__profile-btn"
 					onClick={() => setDropdownOpen(!dropdownOpen)}
 				>
-					<div className="fixora-tech-header__avatar">{initials || 'T'}</div>
+					<div className="fixora-tech-header__avatar">
+						{user?.memberImage
+							? <img src={resolveProfileImageUrl(user.memberImage)} alt={displayName} />
+							: initials || 'T'}
+					</div>
 					<div className="fixora-tech-header__profile-info">
 						<div className="fixora-tech-header__profile-name">{displayName}</div>
 						<div className="fixora-tech-header__profile-role">Pro Technician</div>

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
-import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded';
+import Inventory2Rounded from '@mui/icons-material/Inventory2Rounded';
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
 import PersonAddAlt1Rounded from '@mui/icons-material/PersonAddAlt1Rounded';
 import StarRounded from '@mui/icons-material/StarRounded';
@@ -12,10 +12,13 @@ import ChatBubbleRounded from '@mui/icons-material/ChatBubbleRounded';
 import PaidRounded from '@mui/icons-material/PaidRounded';
 import CampaignRounded from '@mui/icons-material/CampaignRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
+import { GET_USER } from '../../../apollo/user/query';
 import { userVar } from '../../../apollo/store';
+import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
@@ -43,9 +46,9 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		action: () => ({ label: 'View Request', link: '/technician/requests' }),
 	},
 	status: {
-		gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
-		color: '#3B82F6',
-		icon: <AssignmentTurnedInRounded style={ICON_SX} />,
+		gradient: 'linear-gradient(135deg, #A855F7, #8B5CF6)',
+		color: '#A855F7',
+		icon: <Inventory2Rounded style={ICON_SX} />,
 		filter: 'requests',
 		action: () => ({ label: 'View Job', link: '/technician/jobs' }),
 	},
@@ -150,10 +153,46 @@ const timeAgo = (dateStr?: string | null) => {
 const isToday = (dateStr?: string | null) =>
 	!!dateStr && new Date(dateStr).toDateString() === new Date().toDateString();
 
+const initialsOf = (name: string) => {
+	const parts = name.trim().split(/\s+/).filter(Boolean);
+	if (parts.length === 0) return 'U';
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return (parts[0][0] + parts[1][0]).toUpperCase();
+};
+
+/** Shows the sender's avatar + nickname (fetched by userId) linking to their profile. */
+const NotifSender = ({ userId }: { userId?: string | null }) => {
+	const router = useRouter();
+	const { data } = useQuery(GET_USER, {
+		skip: !userId,
+		variables: { userId },
+		fetchPolicy: 'cache-first',
+	});
+	const sender = data?.getUser;
+	if (!userId || !sender) return null;
+	const name = sender.userNickname || sender.userFullName || sender.shopName || 'User';
+	const img = sender.userProfileImage;
+	const goProfile = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		router.push(`/member?memberId=${userId}`);
+	};
+	return (
+		<div className="fixora-notif-card__sender-row" onClick={goProfile}>
+			<div className="fixora-notif-card__avatar">
+				{img && img.trim() !== '' ? <img src={resolveProfileImageUrl(img)} alt={name} /> : initialsOf(name)}
+			</div>
+			<button type="button" className="fixora-notif-card__sender" onClick={goProfile}>
+				{name}
+			</button>
+		</div>
+	);
+};
+
 const Notifications: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
+	const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
 	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
@@ -164,10 +203,14 @@ const Notifications: NextPage = () => {
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 
-	// Every notification except chat messages (those live in the Messages screen).
+	// Every notification except chat messages (those live in the Messages screen)
+	// and any the user dismissed locally this session.
 	const notifications = useMemo(
-		() => (data?.getNotifications?.list ?? []).filter((n: any) => n.notificationType !== 'MESSAGE'),
-		[data]
+		() =>
+			(data?.getNotifications?.list ?? []).filter(
+				(n: any) => n.notificationType !== 'MESSAGE' && !dismissed.has(n._id)
+			),
+		[data, dismissed]
 	);
 
 	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
@@ -198,6 +241,12 @@ const Notifications: NextPage = () => {
 		if (action) router.push(action.link);
 	};
 
+	// Backend has no deleteNotification mutation (see docs/schema.gql), so this
+	// dismisses the card locally for the session. Wire a mutation here once it exists.
+	const handleDelete = (id: string) => {
+		setDismissed((prev) => new Set(prev).add(id));
+	};
+
 	const renderCard = (n: any) => {
 		const meta = CAT_META[detectCat(n)];
 		const action = meta.action(n);
@@ -211,11 +260,27 @@ const Notifications: NextPage = () => {
 					{meta.icon}
 				</div>
 				<div className="fixora-notif-card__body">
-					<div className="fixora-notif-card__top">
-						<div className="fixora-notif-card__title">{n.notificationTitle}</div>
-						<div className="fixora-notif-card__time">{timeAgo(n.createdAt)}</div>
+					<div className="fixora-notif-card__title">{n.notificationTitle}</div>
+					<div className="fixora-notif-card__subrow">
+						<NotifSender userId={n.userId} />
+						{n.notificationDescription && (
+							<span className="fixora-notif-card__issue">{n.notificationDescription}</span>
+						)}
+						<div className="fixora-notif-card__meta">
+							<span className="fixora-notif-card__time">{timeAgo(n.createdAt)}</span>
+							<button
+								type="button"
+								className="fixora-notif-card__delete"
+								title="Delete notification"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleDelete(n._id);
+								}}
+							>
+								<CloseRounded style={{ fontSize: 15 }} />
+							</button>
+						</div>
 					</div>
-					<div className="fixora-notif-card__desc">{n.notificationDescription}</div>
 					{action && (
 						<button
 							className="fixora-notif-card__action"

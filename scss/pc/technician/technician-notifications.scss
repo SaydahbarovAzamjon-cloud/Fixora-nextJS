@@ -477,11 +477,12 @@
 .fixora-notif-card {
 	position: relative;
 	display: flex;
-	gap: 16px;
+	align-items: flex-start;
+	gap: 13px;
 	background: #0E0E0E;
 	border: 1px solid transparent;
-	border-radius: 16px;
-	padding: 20px 22px;
+	border-radius: 14px;
+	padding: 14px 18px;
 	transition: background 0.15s ease;
 	cursor: pointer;
 
@@ -521,8 +522,8 @@
 			content: '';
 			position: absolute;
 			left: 0;
-			top: 14px;
-			bottom: 14px;
+			top: 12px;
+			bottom: 12px;
 			width: 3px;
 			border-radius: 0 3px 3px 0;
 			background: #FF6B00;
@@ -531,55 +532,158 @@
 	}
 
 	&__icon {
-		width: 48px;
-		height: 48px;
+		width: 44px;
+		height: 44px;
 		border-radius: 13px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+
+		svg {
+			filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+		}
 	}
 
 	&__body {
 		flex: 1;
 		min-width: 0;
-	}
-
-	&__top {
 		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 12px;
-		margin-bottom: 5px;
+		flex-direction: column;
+		gap: 4px;
 	}
 
 	&__title {
 		color: #F0F0F0;
-		font-size: 15px;
+		font-size: 14px;
 		font-weight: 700;
+		min-width: 0;
+	}
+
+	&__subrow {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		min-width: 0;
+	}
+
+	&__sender-row {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+
+	&__avatar {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		overflow: hidden;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		color: #fff;
+		font-size: 8px;
+		font-weight: 700;
+		line-height: 1;
+		transition: transform 0.15s ease;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__sender-row:hover &__avatar {
+		transform: scale(1.2);
+	}
+
+	&__sender {
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		color: #D0D0D0;
+		font-size: 13px;
+		font-weight: 600;
+		white-space: nowrap;
+		transition: color 0.15s ease;
+
+		&:hover {
+			color: #FF9A3C;
+		}
+	}
+
+	&__issue {
+		flex: 1;
+		min-width: 0;
+		color: #8A8A8A;
+		font-size: 13px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&::before {
+			content: '·';
+			margin-right: 8px;
+			color: #555;
+		}
+	}
+
+	&__meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+		margin-left: auto;
 	}
 
 	&__time {
 		color: #707070;
 		font-size: 12px;
-		flex-shrink: 0;
 		white-space: nowrap;
+	}
+
+	&__delete {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 7px;
+		background: transparent;
+		border: none;
+		color: #606060;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: all 0.15s ease;
+
+		&:hover {
+			background: rgba(239, 68, 68, 0.14);
+			color: #EF4444;
+		}
 	}
 
 	&__desc {
 		color: #9A9A9A;
-		font-size: 14px;
-		line-height: 1.5;
-		margin-bottom: 14px;
+		font-size: 13px;
+		line-height: 1.45;
 	}
 
 	&__action {
+		align-self: flex-start;
+		margin-top: 4px;
 		background: transparent;
 		border: 1px solid;
 		border-radius: 8px;
-		padding: 6px 14px;
-		font-size: 13px;
+		padding: 5px 12px;
+		font-size: 12px;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.15s ease;

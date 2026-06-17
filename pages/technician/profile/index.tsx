@@ -30,25 +30,25 @@ import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayo
 import { userVar } from '../../../apollo/store';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../../apollo/user/query';
 import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
+import { GET_TECHNICIAN_STORIES } from '../../../apollo/user/story';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
 import TechTipCard from '../../../libs/components/homepage/TechTipCard';
-import { Article, ArticleSummary, TechnicianReview } from '../../../libs/types/fixora/fixora';
+import CreateStoryModal from '../../../libs/components/technician/CreateStoryModal';
+import { Article, ArticleSummary, Story, TechnicianReview } from '../../../libs/types/fixora/fixora';
 import { T } from '../../../libs/types/common';
-import { Messages } from '../../../libs/config';
+import { Messages, REACT_APP_API_URL } from '../../../libs/config';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
-const STORIES = [
-	{ label: 'Screen Fix', color: '#FF6B00', icon: <SmartphoneOutlined style={{ fontSize: 24 }} /> },
-	{ label: 'MacBook', color: '#3B82F6', icon: <LaptopMacOutlined style={{ fontSize: 24 }} /> },
-	{ label: 'Water DMG', color: '#A855F7', icon: <SmartphoneOutlined style={{ fontSize: 24 }} /> },
-	{ label: 'iPad Pro', color: '#22C55E', icon: <TabletMacOutlined style={{ fontSize: 24 }} /> },
-	{ label: 'Battery', color: '#F59E0B', icon: <LaptopMacOutlined style={{ fontSize: 24 }} /> },
-	{ label: 'Watch', color: '#EC4899', icon: <BoltOutlined style={{ fontSize: 24 }} /> },
-];
+const STORY_COLORS = ['#FF6B00', '#3B82F6', '#A855F7', '#22C55E', '#F59E0B', '#EC4899'];
+
+const storyImageUrl = (url?: string): string => {
+	if (!url) return '';
+	return url.startsWith('http') ? url : `${REACT_APP_API_URL}/${url}`;
+};
 
 const TABS = ['Overview', 'Services', 'Portfolio', 'Reviews'];
 
@@ -108,6 +108,7 @@ const PublicProfile: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [activeTab, setActiveTab] = useState('Overview');
+	const [storyModalOpen, setStoryModalOpen] = useState(false);
 	const technicianId = user?._id;
 
 	const [subscribe] = useMutation(SUBSCRIBE);
@@ -140,29 +141,42 @@ const PublicProfile: NextPage = () => {
 	});
 	const reviews: TechnicianReview[] = (reviewsData as T)?.getTechnicianReviews?.list ?? [];
 	const distribution: { star: number; count: number }[] = (reviewsData as T)?.getTechnicianReviews?.distribution ?? [];
+	// Real review total from the query (User.reviewCount may be stale/seeded)
+	const reviewsTotal: number = (reviewsData as T)?.getTechnicianReviews?.metaCounter?.[0]?.total ?? reviews.length;
 
 	// Followers of this technician
 	const { data: followersData } = useQuery(GET_USER_FOLLOWERS, {
-		variables: { input: { page: 1, limit: 12, search: { followingId: technicianId ?? '' } } },
+		variables: { input: { page: 1, limit: 24, search: { followingId: technicianId ?? '' } } },
 		skip: !technicianId,
 		fetchPolicy: 'cache-and-network',
 	});
 	const followerList: T[] = (followersData as T)?.getUserFollowers?.list ?? [];
+	// Real follower total from the query (User.followersCount may be stale/seeded)
+	const followersTotal: number = (followersData as T)?.getUserFollowers?.metaCounter?.[0]?.total ?? followerList.length;
 
 	const name = profile?.userNickname || profile?.userFullName || user?.userNickname || 'Technician';
 	const profileImage = profile?.userProfileImage || user?.userProfileImage || '';
 	const specialty: string = profile?.specialty || '';
 	const location: string = profile?.userLocation || '';
 	const rating = profile?.averageRating ?? 0;
-	const reviewsCount = profile?.reviewCount ?? 0;
 	const completed = profile?.completedJobsCount ?? 0;
-	const followersCount = profile?.followersCount ?? 0;
 	const isOnline = profile?.isOnline === true;
 	const isVerified = profile?.isVerified === true;
 	const bio: string | undefined = profile?.userBio;
 	const isFollowing = !!profile?.meFollowed?.[0]?.myFollowing;
 	const services: { title: string; basePrice: number }[] = profile?.services ?? [];
 	const portfolioImages: string[] = profile?.portfolioImages ?? [];
+
+	// 24h Repair Stories for this technician
+	const { data: storiesData, refetch: refetchStories } = useQuery(GET_TECHNICIAN_STORIES, {
+		variables: { input: { technicianId: technicianId ?? '', limit: 20 } },
+		skip: !technicianId,
+		fetchPolicy: 'cache-and-network',
+	});
+	const stories: Story[] = (storiesData as T)?.getTechnicianStories?.list ?? [];
+
+	// Only an APPROVED technician may post stories (server also enforces this)
+	const canCreateStory = profile?.userType === 'TECHNICIAN' && profile?.verificationStatus === 'APPROVED';
 
 	const initials = useMemo(() => initialsOf(name), [name]);
 
@@ -229,7 +243,7 @@ const PublicProfile: NextPage = () => {
 							<div className="fixora-pp-stat__label">
 								<ThumbUpAltOutlined style={{ fontSize: 14, color: '#3B82F6' }} /> Reviews
 							</div>
-							<div className="fixora-pp-stat__value">{reviewsCount}</div>
+							<div className="fixora-pp-stat__value">{reviewsTotal}</div>
 						</div>
 						<div className="fixora-pp-stat">
 							<div className="fixora-pp-stat__label">
@@ -243,7 +257,7 @@ const PublicProfile: NextPage = () => {
 							<div className="fixora-pp-stat__label">
 								<GroupOutlined style={{ fontSize: 14, color: '#EC4899' }} /> Followers
 							</div>
-							<div className="fixora-pp-stat__value">{followersCount}</div>
+							<div className="fixora-pp-stat__value">{followersTotal}</div>
 						</div>
 						<div className="fixora-pp-stat">
 							<div className="fixora-pp-stat__label">
@@ -284,23 +298,41 @@ const PublicProfile: NextPage = () => {
 					</div>
 				</div>
 				<div className="fixora-pp-stories">
-					<div className="fixora-pp-story">
-						<button className="fixora-pp-story__add" type="button">
-							<AddRounded style={{ fontSize: 24 }} />
-						</button>
-						<span className="fixora-pp-story__label fixora-pp-story__label--add">Add Story</span>
-					</div>
-					{STORIES.map((s) => (
-						<div key={s.label} className="fixora-pp-story">
-							<button className="fixora-pp-story__ring" style={{ borderColor: s.color, color: s.color }} type="button">
-								<span className="fixora-pp-story__icon">{s.icon}</span>
-								<span className="fixora-pp-story__badge" style={{ background: s.color }} />
+					{canCreateStory && (
+						<div className="fixora-pp-story">
+							<button className="fixora-pp-story__add" type="button" onClick={() => setStoryModalOpen(true)}>
+								<AddRounded style={{ fontSize: 24 }} />
 							</button>
-							<span className="fixora-pp-story__label">{s.label}</span>
+							<span className="fixora-pp-story__label fixora-pp-story__label--add">Add Story</span>
 						</div>
-					))}
+					)}
+					{stories.map((s, i) => {
+						const color = STORY_COLORS[i % STORY_COLORS.length];
+						const cover = storyImageUrl(s.images?.[0]?.url);
+						const label = s.caption?.trim() || formatDate(s.createdAt);
+						return (
+							<div key={s._id} className="fixora-pp-story">
+								<button className="fixora-pp-story__ring" style={{ borderColor: color }} type="button">
+									{cover ? (
+										<img className="fixora-pp-story__cover" src={cover} alt="" />
+									) : (
+										<span className="fixora-pp-story__icon" style={{ color }}>
+											<BoltOutlined style={{ fontSize: 24 }} />
+										</span>
+									)}
+									<span className="fixora-pp-story__badge" style={{ background: color }} />
+								</button>
+								<span className="fixora-pp-story__label">{label}</span>
+							</div>
+						);
+					})}
+					{!canCreateStory && stories.length === 0 && (
+						<span className="fixora-pp-stories__empty">No stories yet.</span>
+					)}
 				</div>
 			</div>
+
+			<CreateStoryModal open={storyModalOpen} onClose={() => setStoryModalOpen(false)} onCreated={() => refetchStories()} />
 
 			{/* Tabs */}
 			<div className="fixora-pp-tabs">
@@ -350,7 +382,7 @@ const PublicProfile: NextPage = () => {
 
 					{/* Followers */}
 					<div className="fixora-pp-panel">
-						<h3 className="fixora-pp-panel__title">Followers ({followersCount})</h3>
+						<h3 className="fixora-pp-panel__title">Followers ({followersTotal})</h3>
 						{followerList.length > 0 ? (
 							<div className="fixora-pp-followers">
 								{followerList.map((f) => {
@@ -484,12 +516,12 @@ const PublicProfile: NextPage = () => {
 							<div className="fixora-pp-rsummary__score">
 								<div className="fixora-pp-rsummary__num">{rating}</div>
 								<div className="fixora-pp-rsummary__stars"><Stars count={Math.round(rating)} /></div>
-								<div className="fixora-pp-rsummary__count">{reviewsCount} reviews</div>
+								<div className="fixora-pp-rsummary__count">{reviewsTotal} reviews</div>
 							</div>
 							<div className="fixora-pp-rsummary__bars">
 								{RATING_STARS.map((star) => {
 									const count = distribution.find((d) => d.star === star)?.count ?? 0;
-									const pct = reviewsCount > 0 ? Math.round((count / reviewsCount) * 100) : 0;
+									const pct = reviewsTotal > 0 ? Math.round((count / reviewsTotal) * 100) : 0;
 									return (
 										<div key={star} className="fixora-pp-rbar">
 											<span className="fixora-pp-rbar__star">{star} <StarRounded style={{ fontSize: 12, color: '#F59E0B' }} /></span>

@@ -18,7 +18,7 @@ This folder (`docs/ai-context/`) is extra working context for **Codex in VS Code
 
 ## Last Agent
 
-Claude — 2026-06-17 (Public Profile `/technician/profile` fully wired to live data — header/About/My Articles + Services/Portfolio/Reviews/Followers via getUser/getMyArticles/getTechnicianReviews/getUserFollowers; functional Message/View-Live/Follow buttons; empty states; stats→0 when empty. Repair Stories blocked on missing `docs/STORY_CREATE_FRONTEND.md`. See DECISIONS UI-07…UI-10)
+Claude — 2026-06-17 (Technician Dashboard `/technician/dashboard` interactions: quick actions functional, Weekly Earnings Week/Month/Year real with smart default, Today's Schedule Add via localStorage [no backend model]. See DECISIONS UI-11. Earlier same day: Public Profile `/technician/profile` fully wired — header/About/My Articles + Services/Portfolio/Reviews/Followers; functional Message/View-Live/Follow buttons; stats→0 when empty. **Repair Stories live**: display via getTechnicianStories + gated Add Story create (CreateStoryModal → imagesUploader(target:"story") + createStory). See DECISIONS UI-07…UI-10)
 
 ## Extended Notes
 

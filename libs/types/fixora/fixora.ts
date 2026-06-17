@@ -272,6 +272,39 @@ export interface Article {
 	meLiked?: MeLiked[];
 }
 
+export interface StoryImage {
+	url: string;
+	order: number;
+}
+
+export interface Story {
+	_id: string;
+	userId: string;
+	images: StoryImage[];
+	caption?: string | null;
+	viewCount: number;
+	reportCount?: number;
+	createdAt: string;
+	expiresAt?: string;
+	isExpired?: boolean;
+	userData?: {
+		_id: string;
+		userNickname?: string;
+		userFullName?: string;
+		userProfileImage?: string;
+	};
+}
+
+export interface StoryImageInput {
+	url: string;
+	order: number;
+}
+
+export interface CreateStoryInput {
+	images: StoryImageInput[];
+	caption?: string | null;
+}
+
 export interface FollowedTechnician {
 	_id: string;
 	userNickname?: string;

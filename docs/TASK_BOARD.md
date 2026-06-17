@@ -84,7 +84,7 @@
 |----|------|--------|-------|
 | P3-11 | Rename UI copy: Property → Device | ⬜ Todo | Labels, routes, components |
 | P3-12 | Rename UI copy: Agent → Technician | ⬜ Todo | Labels, routes, components |
-| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | FIXORAB MVP ready — `docs/FRONTEND_API.md`, `docs/schema.gql` synced. **Public Profile (`/technician/profile`) fully wired to live data:** header/About/My Articles + Services/Portfolio/Reviews/Followers via `getUser`/`getMyArticles`/`getTechnicianReviews`/`getUserFollowers`; functional Message/View-Live/Follow buttons; empty states; stats→0 when empty (DECISIONS UI-07…UI-09). **Repair Stories blocked** — `docs/STORY_CREATE_FRONTEND.md` missing + story ops not in `schema.gql` (UI-10) |
+| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | FIXORAB MVP ready — `docs/FRONTEND_API.md`, `docs/schema.gql` synced. **Public Profile (`/technician/profile`) fully wired:** header/About/My Articles + Services/Portfolio/Reviews/Followers + **Repair Stories (display + create)**; functional buttons; stats→0 when empty (DECISIONS UI-07…UI-10). **Dashboard (`/technician/dashboard`):** quick actions functional; Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, no backend model) merged with bookings (UI-11) |
 | P3-14 | ON_SITE "Coming Soon" UI | ⬜ Todo | Badge only — no flow |
 | P3-15 | Admin UI (incremental) | ⬜ Todo | No mockup — see `docs/design/admin/README.md` |
 | P3-15a | Admin shell (light, Fixora orange) | ⬜ Todo | Adapt `LayoutAdmin` — part of P3-15 |

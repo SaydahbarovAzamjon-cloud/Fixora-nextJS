@@ -609,6 +609,8 @@ export const GET_USER = gql`
 			userLocation
 			isOnline
 			isVerified
+			userType
+			verificationStatus
 			averageRating
 			reviewCount
 			completedJobsCount

@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useQuery, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
@@ -18,10 +19,23 @@ import LaptopMacOutlined from '@mui/icons-material/LaptopMacOutlined';
 import WatchOutlined from '@mui/icons-material/WatchOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
+import AddRounded from '@mui/icons-material/AddRounded';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS } from '../../apollo/user/profile';
+import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
+import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+
+type Period = 'Week' | 'Month' | 'Year';
+
+interface CustomScheduleItem {
+	id: string;
+	when: string; // ISO datetime (today)
+	task: string;
+	client: string;
+}
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -163,8 +177,15 @@ const formatTime = (dateStr?: string | null) => {
 };
 
 const TechnicianDashboard: NextPage = () => {
+	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [hoveredJob, setHoveredJob] = useState<string | null>(null);
+	const [period, setPeriod] = useState<Period | null>(null);
+	const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+	const [customSchedule, setCustomSchedule] = useState<CustomScheduleItem[]>([]);
+	const scheduleRef = useRef<HTMLDivElement>(null);
+
+	const [updateUser] = useMutation(UPDATE_USER);
 
 	const { data: incomingRequestsData } = useQuery(GET_INCOMING_REQUESTS, {
 		skip: !user?._id,
@@ -178,11 +199,32 @@ const TechnicianDashboard: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const { data: userData } = useQuery(GET_USER, {
+	const { data: userData, refetch: refetchUser } = useQuery(GET_USER, {
 		skip: !user?._id,
 		variables: { userId: user?._id },
 		fetchPolicy: 'network-only',
 	});
+
+	// Locally-stored custom schedule items (no backend schedule model — device only)
+	const scheduleStorageKey = user?._id ? `fixora_tech_schedule_${user._id}` : '';
+	useEffect(() => {
+		if (!scheduleStorageKey) return;
+		try {
+			const raw = localStorage.getItem(scheduleStorageKey);
+			setCustomSchedule(raw ? JSON.parse(raw) : []);
+		} catch {
+			setCustomSchedule([]);
+		}
+	}, [scheduleStorageKey]);
+
+	const persistSchedule = (items: CustomScheduleItem[]) => {
+		setCustomSchedule(items);
+		try {
+			if (scheduleStorageKey) localStorage.setItem(scheduleStorageKey, JSON.stringify(items));
+		} catch {
+			/* ignore storage errors */
+		}
+	};
 
 	const { data: reviewsData } = useQuery(GET_TECHNICIAN_REVIEWS, {
 		skip: !user?._id,
@@ -212,12 +254,13 @@ const TechnicianDashboard: NextPage = () => {
 			.toFixed(2);
 	}, [completedBookings]);
 
-	// Real weekly earnings: bucket completed bookings into the current week (Mon–Sun)
-	// by completion date, summing finalPrice. Replaces the previous hardcoded mock series.
-	const earningsData = useMemo(() => {
-		const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-		const week = labels.map((day) => ({ day, earnings: 0, jobs: 0 }));
+	// Completion date for a booking, with sensible fallbacks
+	const completionDate = (b: any): Date => new Date(b?.completedAt || b?.bookingDate || b?.updatedAt || b?.createdAt);
 
+	// --- Real earnings series, bucketed by the selected period ---
+	const weekData = useMemo(() => {
+		const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+		const week = labels.map((label) => ({ label, earnings: 0, jobs: 0 }));
 		const now = new Date();
 		const monday = new Date(now);
 		const dow = (now.getDay() + 6) % 7; // 0 = Monday
@@ -227,15 +270,62 @@ const TechnicianDashboard: NextPage = () => {
 		nextMonday.setDate(monday.getDate() + 7);
 
 		completedBookings.forEach((b: any) => {
-			const when = new Date(b?.completedAt || b?.bookingDate || b?.updatedAt || b?.createdAt);
+			const when = completionDate(b);
 			if (Number.isNaN(when.getTime()) || when < monday || when >= nextMonday) return;
 			const idx = (when.getDay() + 6) % 7;
 			week[idx].earnings += parseFloat(b?.finalPrice) || 0;
 			week[idx].jobs += 1;
 		});
-
 		return week;
 	}, [completedBookings]);
+
+	// Last ~4 weeks (oldest → newest), labelled by week-start date
+	const monthData = useMemo(() => {
+		const now = new Date();
+		const thisMonday = new Date(now);
+		const dow = (now.getDay() + 6) % 7;
+		thisMonday.setHours(0, 0, 0, 0);
+		thisMonday.setDate(now.getDate() - dow);
+
+		const buckets = Array.from({ length: 4 }).map((_, i) => {
+			const start = new Date(thisMonday);
+			start.setDate(thisMonday.getDate() - (3 - i) * 7);
+			return { start, label: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), earnings: 0, jobs: 0 };
+		});
+		const firstStart = buckets[0].start;
+		const end = new Date(thisMonday);
+		end.setDate(thisMonday.getDate() + 7);
+
+		completedBookings.forEach((b: any) => {
+			const when = completionDate(b);
+			if (Number.isNaN(when.getTime()) || when < firstStart || when >= end) return;
+			const idx = Math.min(3, Math.floor((when.getTime() - firstStart.getTime()) / (7 * 86400000)));
+			buckets[idx].earnings += parseFloat(b?.finalPrice) || 0;
+			buckets[idx].jobs += 1;
+		});
+		return buckets.map(({ label, earnings, jobs }) => ({ label, earnings, jobs }));
+	}, [completedBookings]);
+
+	// 12 months of the current year
+	const yearData = useMemo(() => {
+		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		const year = new Date().getFullYear();
+		const data = months.map((label) => ({ label, earnings: 0, jobs: 0 }));
+		completedBookings.forEach((b: any) => {
+			const when = completionDate(b);
+			if (Number.isNaN(when.getTime()) || when.getFullYear() !== year) return;
+			data[when.getMonth()].earnings += parseFloat(b?.finalPrice) || 0;
+			data[when.getMonth()].jobs += 1;
+		});
+		return data;
+	}, [completedBookings]);
+
+	// Default to the smallest period that actually has earnings, so the line is never falsely empty
+	const hasSeriesData = (s: { earnings: number }[]) => s.some((d) => d.earnings > 0);
+	const activePeriod: Period =
+		period ?? (hasSeriesData(weekData) ? 'Week' : hasSeriesData(monthData) ? 'Month' : hasSeriesData(yearData) ? 'Year' : 'Week');
+	const chartData = activePeriod === 'Year' ? yearData : activePeriod === 'Month' ? monthData : weekData;
+	const periodEarnings = chartData.reduce((sum, d) => sum + d.earnings, 0);
 
 	const previousEarnings = useMemo(() => {
 		const lastMonth = new Date();
@@ -271,14 +361,67 @@ const TechnicianDashboard: NextPage = () => {
 		return (((activeJobs.length - previousCount) / previousCount) * 100).toFixed(0);
 	}, [bookings, activeJobs]);
 
-	const hasEarningsData = useMemo(() => earningsData.some((d) => d.earnings > 0), [earningsData]);
+	const hasEarningsData = useMemo(() => hasSeriesData(chartData), [chartData]);
 
-	const scheduleItems = useMemo(() => {
-		return [...bookings]
+	// Booking-derived schedule merged with locally-saved custom items, sorted by time
+	const mergedSchedule = useMemo(() => {
+		const fromBookings = bookings
 			.filter((b: any) => b?.bookingDate && !['CANCELLED', 'REJECTED'].includes(b?.bookingStatus))
-			.sort((a: any, b: any) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime())
-			.slice(0, 5);
-	}, [bookings]);
+			.map((b: any) => ({
+				id: b._id,
+				when: new Date(b.bookingDate),
+				task: b.problemTitle || 'Repair Task',
+				client: customerName(b),
+				status: b.bookingStatus as string,
+				custom: false,
+			}));
+		const fromCustom = customSchedule.map((c) => ({
+			id: c.id,
+			when: new Date(c.when),
+			task: c.task,
+			client: c.client,
+			status: 'CUSTOM',
+			custom: true,
+		}));
+		return [...fromBookings, ...fromCustom]
+			.filter((s) => !Number.isNaN(s.when.getTime()))
+			.sort((a, b) => a.when.getTime() - b.when.getTime())
+			.slice(0, 8);
+	}, [bookings, customSchedule]);
+
+	// ---- Handlers ----
+	const newQuoteHandler = () => router.push('/community/write');
+
+	const markAvailableHandler = async () => {
+		try {
+			if (!user?._id) return;
+			const next = !(technicianUser?.isOnline ?? false);
+			await updateUser({ variables: { input: { _id: user._id, isOnline: next } } });
+			await refetchUser();
+			await sweetTopSmallSuccessAlert(next ? 'You are now available' : 'You are now offline', 900);
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
+	};
+
+	const viewScheduleHandler = () => scheduleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+	const exportReportHandler = () => router.push('/technician/earnings');
+
+	const addScheduleHandler = (item: NewScheduleItem) => {
+		const [h, m] = item.time.split(':');
+		const when = new Date();
+		when.setHours(Number(h) || 0, Number(m) || 0, 0, 0);
+		const next = [
+			...customSchedule,
+			{ id: `sch_${Date.now()}`, when: when.toISOString(), task: item.task, client: item.client },
+		];
+		persistSchedule(next);
+	};
+
+	const removeScheduleHandler = (id: string) => {
+		persistSchedule(customSchedule.filter((c) => c.id !== id));
+	};
 
 	return (
 		<div className="fixora-tech-dashboard">
@@ -296,19 +439,19 @@ const TechnicianDashboard: NextPage = () => {
 					</p>
 				</div>
 				<div className="fixora-tech-dashboard__quick-actions">
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange">
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange" type="button" onClick={newQuoteHandler}>
 							<BoltOutlined style={{ fontSize: 20 }} />
 							<span>New Quote</span>
 						</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--green">
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--green" type="button" onClick={markAvailableHandler}>
 							<CheckCircleOutline style={{ fontSize: 20 }} />
-							<span>Mark Available</span>
+							<span>{technicianUser?.isOnline ? 'Available' : 'Mark Available'}</span>
 						</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue">
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue" type="button" onClick={viewScheduleHandler}>
 							<CalendarTodayOutlined style={{ fontSize: 19 }} />
 							<span>View Schedule</span>
 						</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple">
+					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple" type="button" onClick={exportReportHandler}>
 							<NorthEastOutlined style={{ fontSize: 20 }} />
 							<span>Export Report</span>
 						</button>
@@ -455,20 +598,27 @@ const TechnicianDashboard: NextPage = () => {
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
 								<div className="fixora-tech-earnings-info">
-									<div className="fixora-tech-earnings-amount">${formatMoney(earnings)}</div>
+									<div className="fixora-tech-earnings-amount">${formatMoney(periodEarnings)}</div>
 									<div className="fixora-tech-earnings-change"><TrendingUpOutlined style={{ fontSize: 13 }} /> +{earningsChange}% vs last week</div>
 								</div>
 							</div>
 							<div className="fixora-tech-period-toggle">
-								<button className="fixora-tech-period-btn fixora-tech-period-btn--active">Week</button>
-								<button className="fixora-tech-period-btn">Month</button>
-								<button className="fixora-tech-period-btn">Year</button>
+								{(['Week', 'Month', 'Year'] as Period[]).map((p) => (
+									<button
+										key={p}
+										type="button"
+										className={`fixora-tech-period-btn ${activePeriod === p ? 'fixora-tech-period-btn--active' : ''}`}
+										onClick={() => setPeriod(p)}
+									>
+										{p}
+									</button>
+								))}
 							</div>
 						</div>
 						<div style={{ height: '180px', marginTop: '16px' }}>
 							{hasEarningsData ? (
 								<ResponsiveContainer width="100%" height="100%">
-									<AreaChart data={earningsData}>
+									<AreaChart data={chartData}>
 										<defs>
 											<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
 												<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
@@ -477,7 +627,7 @@ const TechnicianDashboard: NextPage = () => {
 											</linearGradient>
 										</defs>
 										<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-										<XAxis dataKey="day" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
+										<XAxis dataKey="label" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
 										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, (max: number) => Math.max(Number(max) || 0, 100)]} allowDecimals={false} />
 										<Tooltip
 											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
@@ -505,27 +655,39 @@ const TechnicianDashboard: NextPage = () => {
 					</div>
 
 				{/* Today's Schedule */}
-					<div className="fixora-tech-card fixora-tech-card--span-narrow">
+					<div className="fixora-tech-card fixora-tech-card--span-narrow" ref={scheduleRef}>
 						<div className="fixora-tech-card__header">
 							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
+							<button className="fixora-tech-schedule-add" type="button" onClick={() => setScheduleModalOpen(true)}>
+								<AddRounded style={{ fontSize: 16 }} /> Add
+							</button>
 						</div>
 						<div className="fixora-tech-schedule-list">
-							{scheduleItems.length > 0 ? (
-								scheduleItems.map((booking: any, idx: number) => {
-									const done = booking.bookingStatus === 'COMPLETED';
-									const dotColor = scheduleDotColor(booking.bookingStatus);
+							{mergedSchedule.length > 0 ? (
+								mergedSchedule.map((item, idx) => {
+									const done = item.status === 'COMPLETED';
+									const dotColor = item.custom ? '#FF6B00' : scheduleDotColor(item.status);
 									return (
-										<div key={booking._id} className="fixora-tech-schedule-item" style={{ opacity: done ? 0.45 : 1 }}>
+										<div key={item.id} className="fixora-tech-schedule-item" style={{ opacity: done ? 0.45 : 1 }}>
 											<div className="fixora-tech-schedule-rail">
 												<div className="fixora-tech-schedule-dot" style={{ background: done ? '#404040' : dotColor, boxShadow: done ? 'none' : `0 0 6px ${dotColor}` }} />
-												{idx < scheduleItems.length - 1 && <div className="fixora-tech-schedule-line" />}
+												{idx < mergedSchedule.length - 1 && <div className="fixora-tech-schedule-line" />}
 											</div>
 											<div className="fixora-tech-schedule-content">
-												<div className="fixora-tech-schedule-time">{formatTime(booking.bookingDate)}</div>
-												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{booking.problemTitle || 'Repair Task'}</div>
-												<div className="fixora-tech-schedule-client">{customerName(booking)}</div>
+												<div className="fixora-tech-schedule-time">{formatTime(item.when.toISOString())}</div>
+												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{item.task}</div>
+												{item.client && <div className="fixora-tech-schedule-client">{item.client}</div>}
 											</div>
-											{done ? (
+											{item.custom ? (
+													<button
+														className="fixora-tech-schedule-del"
+														type="button"
+														onClick={() => removeScheduleHandler(item.id)}
+														aria-label="Remove schedule item"
+													>
+														<CloseRounded style={{ fontSize: 15 }} />
+													</button>
+												) : done ? (
 													<CheckCircleOutline className="fixora-tech-schedule-done" style={{ fontSize: 15, color: '#22C55E' }} />
 												) : (
 													<AccessTimeOutlined className="fixora-tech-schedule-clock" style={{ fontSize: 15 }} />
@@ -539,6 +701,8 @@ const TechnicianDashboard: NextPage = () => {
 						</div>
 					</div>
 			</div>
+
+			<AddScheduleModal open={scheduleModalOpen} onClose={() => setScheduleModalOpen(false)} onAdd={addScheduleHandler} />
 
 			{/* Recent Reviews (full width) */}
 			<div className="fixora-tech-card">

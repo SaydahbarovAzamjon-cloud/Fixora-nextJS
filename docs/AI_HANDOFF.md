@@ -6,7 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-17 |
 | **Last agent** | Claude |
-| **Last session** | **Public Profile fully wired to live data (P3-13)** — `pages/technician/profile/index.tsx`: header + About + My Articles (`getUser`/`getMyArticles`); **Services** (`getUser.services`, Book Now → booking flow), **Portfolio** (`portfolioImages`), **Reviews** (`getTechnicianReviews` + distribution), **Followers** panel + stat (`getUserFollowers`). Functional buttons: Message Me → `/technician/messages`, View Live Profile → opens `/technicians/[id]`, Follow/Following → `subscribe`/`unsubscribe`. Stats fall back to **0** (not mock) when DB empty; Response = static `<15m` (no backend field). New query `GET_USER_FOLLOWERS`; `TechnicianReview.customerData` typed; SCSS `.fixora-pp-followers` + `.fixora-pp-port__media--image`. See DECISIONS UI-07…UI-10. tsc clean (only pre-existing reselect node_modules errors). **Repair Stories NOT wired** — spec `docs/STORY_CREATE_FRONTEND.md` missing from this repo + no story ops in `schema.gql` (UI-10). |
+| **Last session** | **Technician Dashboard interactions (P3-13)** — `pages/technician/dashboard.tsx`: quick actions wired (New Quote → `/community/write`, Mark Available → `updateUser isOnline` toggle, View Schedule → scroll, Export Report → `/technician/earnings`); **Weekly Earnings** Week/Month/Year toggle now real (`getTechnicianBookings`), auto-defaults to the range that has data so the chart line shows; **Today's Schedule** Add button → `AddScheduleModal`, items in **localStorage** (no backend schedule model), merged + deletable. New `AddScheduleModal.tsx`. See DECISIONS UI-11. tsc clean. _(prev: Public Profile + Stories — see below)_ |
+| **Last session (prev)** | **Public Profile fully wired + Repair Stories create (P3-13)** — `pages/technician/profile/index.tsx`: header/About/My Articles/Services/Portfolio/Reviews/Followers all live (`getUser`/`getMyArticles`/`getTechnicianReviews`/`getUserFollowers`); functional Message/View-Live/Follow buttons; stats→0 when empty; Response static `<15m`. **Repair Stories now real:** `getTechnicianStories` covers in the ring (hardcoded removed) + gated **Add Story** (`CreateStoryModal`) → `imagesUploader(target:"story")` (multipart axios) → `createStory`. New files `apollo/user/story.ts`, `libs/components/technician/CreateStoryModal.tsx`; `Story`/`CreateStoryInput` types; `verificationStatus`/`userType` added to `GET_USER`; `GET_USER_FOLLOWERS`; SCSS for followers/portfolio/story-cover/story-modal. See DECISIONS UI-07…UI-10. tsc clean (only pre-existing reselect node_modules errors). |
 | **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
 
 ---
@@ -27,7 +28,8 @@
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/mypage` (profile header + Requests/Following/Repair Stories/Settings tabs) + `/notifications` (Today/Earlier, mark all read, navbar badge), `scss/pc/mypage/fixora-mypage.scss`, `scss/pc/notifications/notifications.scss` |
-| Public Profile live data (P3-13) | ✅ `/technician/profile` — header, About, My Articles, **Services, Portfolio, Reviews, Followers** all wired to live `getUser`/`getMyArticles`/`getTechnicianReviews`/`getUserFollowers`; functional Message Me / View Live Profile / Follow buttons; empty states everywhere; stats → 0 when DB empty (DECISIONS UI-07…UI-09). **Repair Stories still hardcoded** — blocked on missing `docs/STORY_CREATE_FRONTEND.md` + story ops not in `schema.gql` (UI-10) |
+| Technician Dashboard (P3-13) | ✅ `/technician/dashboard` — quick actions functional (New Quote/Mark Available/View Schedule/Export Report); Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, device-only — no backend schedule model) merged with bookings (DECISIONS UI-11) |
+| Public Profile live data (P3-13) | ✅ `/technician/profile` — header, About, My Articles, Services, Portfolio, Reviews, Followers, **Repair Stories (display + create)** all wired to live API; functional Message/View-Live/Follow buttons; empty states; stats → 0 when DB empty (DECISIONS UI-07…UI-10) |
 
 ---
 
@@ -95,7 +97,8 @@ Full checklist: `TASK_BOARD.md`
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 | Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
 | "View Request" in Messages | Links to `/mypage` — no dedicated booking detail view yet |
-| Repair Stories backend | `docs/STORY_CREATE_FRONTEND.md` referenced by user but **absent from FixoraF**; `Story`/`createStory`/`getStories` not in `docs/schema.gql` (only `imagesUploader`). Sync the doc/schema, then wire stories (DECISIONS UI-10) |
+| Dashboard schedule persistence | **No backend schedule/appointment model** (only `User.workingHours`). Today's Schedule "Add" items live in **localStorage** (`fixora_tech_schedule_<userId>`) — device-only. Wire to a real model when the backend adds one (DECISIONS UI-11) |
+| Story image upload | Uses **multipart axios** to `REACT_APP_API_GRAPHQL_URL` with `apollo-require-preflight` (same pattern as `AddNewProperty.tsx`) — not `apollo-upload-client`. Story viewer/playback (tapping a ring to view) is **not** built yet — only display covers + create (DECISIONS UI-10) |
 | Legacy `/mypage` components | `libs/components/mypage/*` (MyProperties, MyFavorites, MyArticles, WriteArticle, etc.) left in place but no longer imported by `/mypage` — still referenced by `/member` and `/_admin`; do not delete without checking |
 
 ---

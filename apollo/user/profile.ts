@@ -157,6 +157,32 @@ export const GET_USER_FOLLOWINGS = gql`
 `;
 
 /**************************
+ *    PROFILE FOLLOWERS   *
+ *************************/
+
+export const GET_USER_FOLLOWERS = gql`
+	query GetUserFollowers($input: FollowInquiry!) {
+		getUserFollowers(input: $input) {
+			list {
+				_id
+				followingId
+				followerId
+				createdAt
+				followerData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
  *      MY ARTICLES       *
  *************************/
 

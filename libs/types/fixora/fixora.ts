@@ -116,6 +116,12 @@ export interface TechnicianReview {
 	repairSpeed: number;
 	communication: number;
 	createdAt: string;
+	customerData?: {
+		_id: string;
+		userNickname?: string;
+		userFullName?: string;
+		userProfileImage?: string;
+	};
 }
 
 export interface ReviewsInquiry {

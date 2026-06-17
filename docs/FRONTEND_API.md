@@ -1,6 +1,6 @@
 # Fixora — Frontend GraphQL Integration Contract
 
-> **Status:** Frozen for FixoraF integration (synced from FixoraB 2026-06-09)  
+> **Status:** Frozen for FixoraF integration (synced from FixoraB 2026-06-17)  
 > **Endpoint:** `POST {{NEXT_PUBLIC_GRAPHQL_URL}}` (default `http://localhost:2000/graphql`)  
 > **Schema file:** [`docs/schema.gql`](schema.gql) — sync from FixoraB `apps/fixora-api/src/graphql/schema.gql`  
 > **Authority:** [`DECISIONS.md`](DECISIONS.md), [`AUTH_API.md`](AUTH_API.md)
@@ -88,6 +88,8 @@ This document is the **single integration reference** for FixoraF. Do not contra
 
 **Embed:** `booking.aiClassification` — `deviceType`, `issueCategory`, `repairComplexity`, `confidenceScore`, `keywords`, `classifiedAt`
 
+**New embeds (synced 2026-06-17):** technician booking queries now expose `customerData` (User) and `deviceData` (Device) inline — use these instead of separate `getUser` / `getDevice` round-trips on the technician dashboard.
+
 ---
 
 ## Payment (mock — PAY-05)
@@ -142,6 +144,41 @@ Prefer AI `recommendTechnicians` / `heroRepairSearch` for Hero-driven discovery.
 
 **Author field:** `authorData` (User) — **preferred**  
 **Do not use:** `BoardArticle`, `getBoardArticles`, `memberId` on article (removed)
+
+---
+
+## Story (24h technician stories) ✅ backend live
+
+> Backend is **fully implemented** in FixoraB (`apps/fixora-api/src/components/story`). The Story types **are** in `docs/schema.gql` (synced 2026-06-17). Do **not** hardcode/disable — use the real API below.
+
+| Operation | Auth | Role / notes |
+|-----------|------|--------------|
+| `imagesUploader(files, target: "story")` | Bearer | Upload **first** → returns `[String]` URLs. `target` **must be** `"story"`. |
+| `createStory(input: CreateStoryInput!)` | Bearer | **TECHNICIAN (APPROVED)** — 1–5 images + caption ≤ 200 |
+| `getStoriesCarousel(input: { limit })` | Public | Homepage carousel — active stories only |
+| `getTechnicianStories(input: { technicianId, limit })` | Public | One technician's active stories |
+| `incrementStoryView(storyId)` | Public | View counter — no token needed (anonymous counts) |
+| `reportStory(input: ReportStoryInput!)` | Bearer | Any user — **1 report per user per story** |
+| `deleteStory(storyId)` | Bearer | **Owner** soft-delete |
+| `removeStory(storyId)` / `getStory(storyId)` | Bearer | ADMIN |
+| `getStoryReports(input: { status? })` | Bearer | ADMIN moderation queue |
+| `reviewStoryReport(input: ReviewStoryReportInput!)` | Bearer | ADMIN — `status`: `REVIEWED`/`DISMISSED`/`ACTIONED` |
+| `warnTechnicianForStory(input)` | Bearer | ADMIN |
+
+**Two-step create flow (important):**
+
+1. `imagesUploader(files: [<File>], target: "story")` → `["uploads/story/ab12.jpg", ...]`
+2. `createStory(input: { images: [{ url, order }], caption })`
+
+`createStory` itself does **not** accept files — only URLs from step 1. Upload mutation needs `apollo-upload-client` (multipart), not the plain HTTP link.
+
+**`CreateStoryInput`:** `images: [StoryImageInput!]!` (`{ url: String!, order: Int! }`, 1–5) + `caption: String` (≤ 200).  
+**`Story` fields:** `_id`, `userId`, `images { url order }`, `caption`, `viewCount`, `reportCount`, `createdAt`, `expiresAt`, `isExpired`, `userData` (User).  
+**Lifecycle:** active 24h → batch job flips `isExpired` → drops out of public queries automatically.  
+**Render URLs:** relative (`uploads/story/...`) — prefix with API origin (`http://localhost:2000/`).  
+**Mime:** `image/png`, `image/jpg`, `image/jpeg` only.
+
+> Full UI spec: copy `FixoraB/docs/STORY_CREATE_FRONTEND.md` (components, hook `useCreateStory`, error map, test checklist).
 
 ---
 
@@ -224,6 +261,7 @@ Pre-booking chat: `bookingId` nullable on messages.
 | My Page | `getMyDevices`, `getMyBookings`, `getUserFollowings` |
 | Messages | `getMyConversations`, `getMessages`, `sendMessage` |
 | Community | `getArticles`, `getArticle`, `getComments`, `createComment` |
+| Stories | `imagesUploader(target:"story")` → `createStory`; `getStoriesCarousel`, `getTechnicianStories`, `incrementStoryView` |
 | Technician dashboard | `getIncomingRequests`, `acceptBooking`, `getTechnicianBookings` |
 
 ---

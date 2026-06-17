@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
 import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import StarRounded from '@mui/icons-material/StarRounded';
@@ -17,10 +18,24 @@ import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
 import GppGoodOutlined from '@mui/icons-material/GppGoodOutlined';
-import WatchOutlined from '@mui/icons-material/WatchOutlined';
 import CheckRounded from '@mui/icons-material/CheckRounded';
+import ArticleOutlined from '@mui/icons-material/ArticleOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
+import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
+import HowToRegOutlined from '@mui/icons-material/HowToRegOutlined';
+import PhotoLibraryOutlined from '@mui/icons-material/PhotoLibraryOutlined';
+import RateReviewOutlined from '@mui/icons-material/RateReviewOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { userVar } from '../../../apollo/store';
+import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../../apollo/user/query';
+import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
+import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
+import TechTipCard from '../../../libs/components/homepage/TechTipCard';
+import { Article, ArticleSummary, TechnicianReview } from '../../../libs/types/fixora/fixora';
+import { T } from '../../../libs/types/common';
+import { Messages } from '../../../libs/config';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
@@ -52,75 +67,7 @@ const SPECIALIZATIONS = [
 	{ color: '#FF6B00', title: 'iPad', sub: 'All iPad models including Pro', jobs: '24 jobs', icon: <TabletMacOutlined style={{ fontSize: 20 }} /> },
 ];
 
-const SERVICES = [
-	{ title: 'Screen Replacement', devices: 'iPhone, iPad, MacBook', price: 'From $89', dur: '1–2 hrs', popular: true },
-	{ title: 'Battery Replacement', devices: 'All Apple Devices', price: 'From $69', dur: '45 min', popular: false },
-	{ title: 'Water Damage Recovery', devices: 'iPhone, MacBook', price: 'From $149', dur: '24–48 hrs', popular: false },
-	{ title: 'Logic Board Repair', devices: 'MacBook, iMac', price: 'From $280', dur: '2–5 days', popular: false },
-	{ title: 'Camera Module', devices: 'iPhone, iPad', price: 'From $99', dur: '1–3 hrs', popular: false },
-	{ title: 'Charging Port', devices: 'iPhone, iPad, MacBook', price: 'From $59', dur: '30–60 min', popular: false },
-];
-
-const portfolioGlyph = (kind: string) => {
-	const sx = { fontSize: 56, color: '#3A3A3A' } as const;
-	switch (kind) {
-		case 'laptop':
-			return <LaptopMacOutlined style={sx} />;
-		case 'tablet':
-			return <TabletMacOutlined style={sx} />;
-		case 'watch':
-			return <WatchOutlined style={sx} />;
-		default:
-			return <SmartphoneOutlined style={sx} />;
-	}
-};
-
-const PORTFOLIO = [
-	{ kind: 'phone', title: 'iPhone 15 Pro Max — Screen', sub: 'OLED display restored', stars: 5, client: 'Sarah M.' },
-	{ kind: 'laptop', title: 'MacBook Pro 16" — Logic Board', sub: 'GPU reflow + solder repair', stars: 5, client: 'David K.' },
-	{ kind: 'tablet', title: 'iPad Pro 12.9" — Screen', sub: 'Genuine Apple display', stars: 5, client: 'Lily C.' },
-	{ kind: 'phone', title: 'iPhone 14 Plus — Water Damage', sub: 'Full motherboard cleaning', stars: 5, client: 'Daniel W.' },
-	{ kind: 'laptop', title: 'MacBook Air M2 — Battery', sub: 'OEM battery, 100% health', stars: 5, client: 'Emma R.' },
-	{ kind: 'watch', title: 'Apple Watch Ultra — Screen', sub: 'Sapphire crystal replaced', stars: 4, client: 'Marcus L.' },
-];
-
-const RATING_DIST = [
-	{ star: 5, pct: 87 },
-	{ star: 4, pct: 10 },
-	{ star: 3, pct: 2 },
-	{ star: 2, pct: 1 },
-	{ star: 1, pct: 0 },
-];
-
-const REVIEWS = [
-	{
-		initials: 'SJ',
-		color: '#B4533F',
-		name: 'Sarah Johnson',
-		stars: 5,
-		date: 'Jun 14, 2026',
-		device: 'iPhone 14 Pro',
-		text: 'Alex is an absolute professional. Fixed my cracked screen in under an hour and it looks brand new. His workspace is super clean and organized. 10/10 would highly recommend.',
-	},
-	{
-		initials: 'MC',
-		color: '#4CAF50',
-		name: 'Michael Chen',
-		stars: 5,
-		date: 'Jun 12, 2026',
-		device: 'MacBook Pro M3',
-		text: 'Fast, reliable, and affordable. Brought in my MacBook with a dead battery and Alex had it fixed same day. Even cleaned the keyboard while he was at it!',
-	},
-	{
-		initials: 'EW',
-		color: '#7C6FF0',
-		name: 'Emma Williams',
-		stars: 5,
-		date: 'Jun 9, 2026',
-		device: 'iPad Pro 12.9"',
-		text: 'Brought my water-damaged iPad in expecting the worst. Alex recovered everything and it works perfectly now. Genuinely impressed with the communication throughout.',
-	},
-];
+const RATING_STARS = [5, 4, 3, 2, 1];
 
 const Stars = ({ count }: { count: number }) => (
 	<>
@@ -130,35 +77,144 @@ const Stars = ({ count }: { count: number }) => (
 	</>
 );
 
+const toArticleSummary = (a: Article): ArticleSummary => ({
+	_id: a._id,
+	articleCategory: a.articleCategory ?? undefined,
+	articleTitle: a.articleTitle,
+	articleExcerpt: a.articleExcerpt ?? undefined,
+	articleImage: a.articleImage ?? undefined,
+	articleLikes: a.articleLikes,
+	articleViews: a.articleViews,
+	articleComments: a.articleComments,
+	createdAt: a.createdAt,
+});
+
+const initialsOf = (value: string): string => {
+	const parts = value.trim().split(/\s+/);
+	return ((parts[0]?.[0] || '?') + (parts[1]?.[0] || parts[0]?.[1] || '')).toUpperCase();
+};
+
+const formatDate = (value?: string): string => {
+	if (!value) return '';
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return '';
+	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const reviewStars = (r: TechnicianReview): number =>
+	Math.round(((r.repairQuality ?? 0) + (r.repairSpeed ?? 0) + (r.communication ?? 0)) / 3);
+
 const PublicProfile: NextPage = () => {
+	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [activeTab, setActiveTab] = useState('Overview');
+	const technicianId = user?._id;
 
-	const name = user?.userNickname || 'Alex Kim';
-	const initials = useMemo(() => {
-		const parts = name.trim().split(/\s+/);
-		return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || parts[0]?.[1] || 'K')).toUpperCase();
-	}, [name]);
+	const [subscribe] = useMutation(SUBSCRIBE);
+	const [unsubscribe] = useMutation(UNSUBSCRIBE);
+
+	// Real technician profile
+	const { data: userData, refetch: refetchUser } = useQuery(GET_USER, {
+		variables: { userId: technicianId },
+		skip: !technicianId,
+		fetchPolicy: 'cache-and-network',
+	});
+	const profile = (userData as T)?.getUser;
+
+	// Articles authored by the current technician
+	const { data: articlesData } = useQuery(GET_MY_ARTICLES, {
+		variables: { input: { page: 1, limit: 6, search: {} } },
+		skip: !technicianId,
+		fetchPolicy: 'cache-and-network',
+		notifyOnNetworkStatusChange: true,
+	});
+	const myArticles: Article[] = (articlesData as T)?.getMyArticles?.list ?? [];
+
+	// Reviews for this technician
+	const { data: reviewsData, loading: reviewsLoading } = useQuery(GET_TECHNICIAN_REVIEWS, {
+		variables: {
+			input: { page: 1, limit: 10, sort: 'createdAt', direction: 'DESC', search: { technicianId: technicianId ?? '' } },
+		},
+		skip: !technicianId,
+		fetchPolicy: 'cache-and-network',
+	});
+	const reviews: TechnicianReview[] = (reviewsData as T)?.getTechnicianReviews?.list ?? [];
+	const distribution: { star: number; count: number }[] = (reviewsData as T)?.getTechnicianReviews?.distribution ?? [];
+
+	// Followers of this technician
+	const { data: followersData } = useQuery(GET_USER_FOLLOWERS, {
+		variables: { input: { page: 1, limit: 12, search: { followingId: technicianId ?? '' } } },
+		skip: !technicianId,
+		fetchPolicy: 'cache-and-network',
+	});
+	const followerList: T[] = (followersData as T)?.getUserFollowers?.list ?? [];
+
+	const name = profile?.userNickname || profile?.userFullName || user?.userNickname || 'Technician';
+	const profileImage = profile?.userProfileImage || user?.userProfileImage || '';
+	const specialty: string = profile?.specialty || '';
+	const location: string = profile?.userLocation || '';
+	const rating = profile?.averageRating ?? 0;
+	const reviewsCount = profile?.reviewCount ?? 0;
+	const completed = profile?.completedJobsCount ?? 0;
+	const followersCount = profile?.followersCount ?? 0;
+	const isOnline = profile?.isOnline === true;
+	const isVerified = profile?.isVerified === true;
+	const bio: string | undefined = profile?.userBio;
+	const isFollowing = !!profile?.meFollowed?.[0]?.myFollowing;
+	const services: { title: string; basePrice: number }[] = profile?.services ?? [];
+	const portfolioImages: string[] = profile?.portfolioImages ?? [];
+
+	const initials = useMemo(() => initialsOf(name), [name]);
+
+	// ---- Handlers (functional buttons) ----
+	const messageHandler = () => router.push('/technician/messages');
+
+	const viewLiveProfileHandler = () => {
+		if (technicianId) window.open(`/technicians/${technicianId}`, '_blank', 'noopener,noreferrer');
+	};
+
+	const toggleFollowHandler = async () => {
+		try {
+			if (!technicianId) throw new Error(Messages.error2);
+			if (isFollowing) {
+				await unsubscribe({ variables: { input: technicianId } });
+			} else {
+				await subscribe({ variables: { input: technicianId } });
+				await sweetTopSmallSuccessAlert('Followed', 800);
+			}
+			await refetchUser();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
+	};
+
+	const bookServiceHandler = () => {
+		if (technicianId) router.push(`/technicians/${technicianId}/book`);
+	};
 
 	return (
 		<div className="fixora-pp-page">
 			{/* Profile header */}
 			<div className="fixora-pp-header">
 				<div className="fixora-pp-header__avatar-wrap">
-					<div className="fixora-pp-header__avatar">{initials}</div>
-					<span className="fixora-pp-header__online" />
+					<div className="fixora-pp-header__avatar">
+						{profileImage ? <img src={profileImage} alt={name} /> : initials}
+					</div>
+					{isOnline && <span className="fixora-pp-header__online" />}
 				</div>
 
 				<div className="fixora-pp-header__main">
 					<div className="fixora-pp-header__name-row">
 						<h1 className="fixora-pp-header__name">{name}</h1>
-						<VerifiedRounded style={{ fontSize: 22, color: '#3B82F6' }} />
+						{isVerified && <VerifiedRounded style={{ fontSize: 22, color: '#3B82F6' }} />}
 					</div>
-					<div className="fixora-pp-header__role">Pro Technician · Apple Device Specialist</div>
-					<div className="fixora-pp-header__loc">
-						<LocationOnOutlined style={{ fontSize: 16 }} />
-						San Francisco Bay Area, CA
-					</div>
+					<div className="fixora-pp-header__role">Pro Technician{specialty ? ` · ${specialty}` : ''}</div>
+					{location && (
+						<div className="fixora-pp-header__loc">
+							<LocationOnOutlined style={{ fontSize: 16 }} />
+							{location}
+						</div>
+					)}
 
 					<div className="fixora-pp-stats">
 						<div className="fixora-pp-stat">
@@ -166,22 +222,28 @@ const PublicProfile: NextPage = () => {
 								<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} /> Rating
 							</div>
 							<div className="fixora-pp-stat__value">
-								4.9<span className="fixora-pp-stat__unit">/5.0</span>
+								{rating}<span className="fixora-pp-stat__unit">/5.0</span>
 							</div>
 						</div>
 						<div className="fixora-pp-stat">
 							<div className="fixora-pp-stat__label">
 								<ThumbUpAltOutlined style={{ fontSize: 14, color: '#3B82F6' }} /> Reviews
 							</div>
-							<div className="fixora-pp-stat__value">214</div>
+							<div className="fixora-pp-stat__value">{reviewsCount}</div>
 						</div>
 						<div className="fixora-pp-stat">
 							<div className="fixora-pp-stat__label">
 								<CheckCircleOutline style={{ fontSize: 14, color: '#22C55E' }} /> Completed
 							</div>
 							<div className="fixora-pp-stat__value">
-								203<span className="fixora-pp-stat__unit">jobs</span>
+								{completed}<span className="fixora-pp-stat__unit">jobs</span>
 							</div>
+						</div>
+						<div className="fixora-pp-stat">
+							<div className="fixora-pp-stat__label">
+								<GroupOutlined style={{ fontSize: 14, color: '#EC4899' }} /> Followers
+							</div>
+							<div className="fixora-pp-stat__value">{followersCount}</div>
 						</div>
 						<div className="fixora-pp-stat">
 							<div className="fixora-pp-stat__label">
@@ -193,10 +255,21 @@ const PublicProfile: NextPage = () => {
 				</div>
 
 				<div className="fixora-pp-header__actions">
-					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button">
+					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={messageHandler}>
 						<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> Message Me
 					</button>
-					<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button">
+					<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={toggleFollowHandler}>
+						{isFollowing ? (
+							<>
+								<HowToRegOutlined style={{ fontSize: 16 }} /> Following
+							</>
+						) : (
+							<>
+								<PersonAddAlt1Outlined style={{ fontSize: 16 }} /> Follow
+							</>
+						)}
+					</button>
+					<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={viewLiveProfileHandler}>
 						<OpenInNewOutlined style={{ fontSize: 16 }} /> View Live Profile
 					</button>
 				</div>
@@ -248,15 +321,64 @@ const PublicProfile: NextPage = () => {
 				<>
 					<div className="fixora-pp-panel">
 						<h3 className="fixora-pp-panel__title">About</h3>
-						<p className="fixora-pp-panel__text">
-							Apple-certified technician with 8+ years of experience specializing in iPhone, iPad, MacBook, and
-							Apple Watch repairs. I run a professional home workshop with all the proper tools — hot air stations,
-							ultrasonic cleaners, microscope, and genuine Apple parts sourced directly from authorized suppliers.
-						</p>
-						<p className="fixora-pp-panel__text">
-							Every repair comes with a 90-day warranty and I provide transparent communication throughout the
-							entire process. My goal is to get your device working like new, every single time.
-						</p>
+						{bio ? (
+							<p className="fixora-pp-panel__text">{bio}</p>
+						) : (
+							<p className="fixora-pp-panel__text">This technician has not added a bio yet.</p>
+						)}
+					</div>
+
+					{/* My Articles */}
+					<div className="fixora-pp-panel">
+						<h3 className="fixora-pp-panel__title">My Articles</h3>
+						{myArticles.length > 0 ? (
+							<div className="fixora-home-tips__grid">
+								{myArticles.map((article) => (
+									<TechTipCard key={article._id} article={toArticleSummary(article)} />
+								))}
+							</div>
+						) : (
+							<div className="fixora-pp-empty">
+								<div className="fixora-pp-empty__icon">
+									<ArticleOutlined style={{ fontSize: 26 }} />
+								</div>
+								<div className="fixora-pp-empty__title">No Articles Yet</div>
+								<div className="fixora-pp-empty__sub">This technician has not published any articles yet.</div>
+							</div>
+						)}
+					</div>
+
+					{/* Followers */}
+					<div className="fixora-pp-panel">
+						<h3 className="fixora-pp-panel__title">Followers ({followersCount})</h3>
+						{followerList.length > 0 ? (
+							<div className="fixora-pp-followers">
+								{followerList.map((f) => {
+									const fd = f.followerData || {};
+									const fName = fd.userNickname || fd.userFullName || 'User';
+									return (
+										<div key={f._id} className="fixora-pp-follower">
+											<div className="fixora-pp-follower__avatar">
+												{fd.userProfileImage ? (
+													<img src={fd.userProfileImage} alt={fName} />
+												) : (
+													initialsOf(fName)
+												)}
+											</div>
+											<span className="fixora-pp-follower__name">{fName}</span>
+										</div>
+									);
+								})}
+							</div>
+						) : (
+							<div className="fixora-pp-empty">
+								<div className="fixora-pp-empty__icon">
+									<GroupOutlined style={{ fontSize: 26 }} />
+								</div>
+								<div className="fixora-pp-empty__title">No Followers Yet</div>
+								<div className="fixora-pp-empty__sub">This technician has no followers yet.</div>
+							</div>
+						)}
 					</div>
 
 					<div className="fixora-pp-row">
@@ -304,85 +426,125 @@ const PublicProfile: NextPage = () => {
 			)}
 
 			{activeTab === 'Services' && (
-				<div className="fixora-pp-services">
-					{SERVICES.map((s) => (
-						<div key={s.title} className={`fixora-pp-service ${s.popular ? 'fixora-pp-service--popular' : ''}`}>
-							{s.popular && <span className="fixora-pp-service__badge">POPULAR</span>}
-							<div className="fixora-pp-service__title">{s.title}</div>
-							<div className="fixora-pp-service__devices">{s.devices}</div>
-							<div className="fixora-pp-service__foot">
-								<div>
-									<div className="fixora-pp-service__price">{s.price}</div>
-									<div className="fixora-pp-service__dur">
-										<AccessTimeOutlined style={{ fontSize: 13 }} /> {s.dur}
+				services.length > 0 ? (
+					<div className="fixora-pp-services">
+						{services.map((s, i) => (
+							<div key={`${s.title}-${i}`} className="fixora-pp-service">
+								<div className="fixora-pp-service__title">{s.title}</div>
+								<div className="fixora-pp-service__foot">
+									<div>
+										<div className="fixora-pp-service__price">From ${s.basePrice}</div>
 									</div>
+									<button className="fixora-pp-service__book" type="button" onClick={bookServiceHandler}>Book Now</button>
 								</div>
-								<button className="fixora-pp-service__book" type="button">Book Now</button>
 							</div>
+						))}
+					</div>
+				) : (
+					<div className="fixora-pp-empty">
+						<div className="fixora-pp-empty__icon">
+							<BuildOutlined style={{ fontSize: 26 }} />
 						</div>
-					))}
-				</div>
+						<div className="fixora-pp-empty__title">No Services Yet</div>
+						<div className="fixora-pp-empty__sub">This technician has not added any services yet.</div>
+					</div>
+				)
 			)}
 
 			{activeTab === 'Portfolio' && (
-				<div className="fixora-pp-portfolio">
-					{PORTFOLIO.map((p) => (
-						<div key={p.title} className="fixora-pp-port">
-							<div className="fixora-pp-port__media">{portfolioGlyph(p.kind)}</div>
-							<div className="fixora-pp-port__body">
-								<div className="fixora-pp-port__title">{p.title}</div>
-								<div className="fixora-pp-port__sub">{p.sub}</div>
-								<div className="fixora-pp-port__foot">
-									<span className="fixora-pp-port__stars"><Stars count={p.stars} /></span>
-									<span className="fixora-pp-port__client">{p.client}</span>
+				portfolioImages.length > 0 ? (
+					<div className="fixora-pp-portfolio">
+						{portfolioImages.map((img, i) => (
+							<div key={`${img}-${i}`} className="fixora-pp-port">
+								<div className="fixora-pp-port__media fixora-pp-port__media--image">
+									<img src={img} alt="" />
 								</div>
 							</div>
+						))}
+					</div>
+				) : (
+					<div className="fixora-pp-empty">
+						<div className="fixora-pp-empty__icon">
+							<PhotoLibraryOutlined style={{ fontSize: 26 }} />
 						</div>
-					))}
-				</div>
+						<div className="fixora-pp-empty__title">No Portfolio Yet</div>
+						<div className="fixora-pp-empty__sub">This technician has not added any portfolio work yet.</div>
+					</div>
+				)
 			)}
 
 			{activeTab === 'Reviews' && (
-				<div className="fixora-pp-reviews">
-					<div className="fixora-pp-panel fixora-pp-rsummary">
-						<div className="fixora-pp-rsummary__score">
-							<div className="fixora-pp-rsummary__num">4.9</div>
-							<div className="fixora-pp-rsummary__stars"><Stars count={5} /></div>
-							<div className="fixora-pp-rsummary__count">214 reviews</div>
-						</div>
-						<div className="fixora-pp-rsummary__bars">
-							{RATING_DIST.map((d) => (
-								<div key={d.star} className="fixora-pp-rbar">
-									<span className="fixora-pp-rbar__star">{d.star} <StarRounded style={{ fontSize: 12, color: '#F59E0B' }} /></span>
-									<span className="fixora-pp-rbar__track">
-										<span className="fixora-pp-rbar__fill" style={{ width: `${d.pct}%` }} />
-									</span>
-									<span className="fixora-pp-rbar__pct">{d.pct}%</span>
-								</div>
-							))}
-						</div>
+				reviewsLoading && reviews.length === 0 ? (
+					<div className="fixora-pp-empty">
+						<div className="fixora-pp-empty__title">Loading…</div>
 					</div>
-
-					{REVIEWS.map((r) => (
-						<div key={r.name} className="fixora-pp-panel fixora-pp-review">
-							<div className="fixora-pp-review__head">
-								<div className="fixora-pp-review__avatar" style={{ background: r.color }}>{r.initials}</div>
-								<div className="fixora-pp-review__id">
-									<div className="fixora-pp-review__name-row">
-										<span className="fixora-pp-review__name">{r.name}</span>
-										<span className="fixora-pp-review__verified"><CheckRounded style={{ fontSize: 13 }} /> Verified</span>
-									</div>
-									<div className="fixora-pp-review__stars"><Stars count={r.stars} /></div>
-								</div>
-								<div className="fixora-pp-review__meta">
-									<div className="fixora-pp-review__date">{r.date}</div>
-									<div className="fixora-pp-review__device">{r.device}</div>
-								</div>
+				) : reviews.length > 0 ? (
+					<div className="fixora-pp-reviews">
+						<div className="fixora-pp-panel fixora-pp-rsummary">
+							<div className="fixora-pp-rsummary__score">
+								<div className="fixora-pp-rsummary__num">{rating}</div>
+								<div className="fixora-pp-rsummary__stars"><Stars count={Math.round(rating)} /></div>
+								<div className="fixora-pp-rsummary__count">{reviewsCount} reviews</div>
 							</div>
-							<p className="fixora-pp-review__text">{r.text}</p>
+							<div className="fixora-pp-rsummary__bars">
+								{RATING_STARS.map((star) => {
+									const count = distribution.find((d) => d.star === star)?.count ?? 0;
+									const pct = reviewsCount > 0 ? Math.round((count / reviewsCount) * 100) : 0;
+									return (
+										<div key={star} className="fixora-pp-rbar">
+											<span className="fixora-pp-rbar__star">{star} <StarRounded style={{ fontSize: 12, color: '#F59E0B' }} /></span>
+											<span className="fixora-pp-rbar__track">
+												<span className="fixora-pp-rbar__fill" style={{ width: `${pct}%` }} />
+											</span>
+											<span className="fixora-pp-rbar__pct">{pct}%</span>
+										</div>
+									);
+								})}
+							</div>
 						</div>
-					))}
-				</div>
+
+						{reviews.map((r) => {
+							const customer = (r as T).customerData || {};
+							const cName = customer.userNickname || customer.userFullName || 'Customer';
+							return (
+								<div key={r._id} className="fixora-pp-panel fixora-pp-review">
+									<div className="fixora-pp-review__head">
+										<div className="fixora-pp-review__avatar" style={{ background: '#4CAF50' }}>
+											{customer.userProfileImage ? (
+												<img
+													src={customer.userProfileImage}
+													alt={cName}
+													style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+												/>
+											) : (
+												initialsOf(cName)
+											)}
+										</div>
+										<div className="fixora-pp-review__id">
+											<div className="fixora-pp-review__name-row">
+												<span className="fixora-pp-review__name">{cName}</span>
+												<span className="fixora-pp-review__verified"><CheckRounded style={{ fontSize: 13 }} /> Verified</span>
+											</div>
+											<div className="fixora-pp-review__stars"><Stars count={reviewStars(r)} /></div>
+										</div>
+										<div className="fixora-pp-review__meta">
+											<div className="fixora-pp-review__date">{formatDate(r.createdAt)}</div>
+										</div>
+									</div>
+									{r.reviewContent && <p className="fixora-pp-review__text">{r.reviewContent}</p>}
+								</div>
+							);
+						})}
+					</div>
+				) : (
+					<div className="fixora-pp-empty">
+						<div className="fixora-pp-empty__icon">
+							<RateReviewOutlined style={{ fontSize: 26 }} />
+						</div>
+						<div className="fixora-pp-empty__title">No Reviews Yet</div>
+						<div className="fixora-pp-empty__sub">This technician has not received any reviews yet.</div>
+					</div>
+				)
 			)}
 		</div>
 	);

@@ -61,6 +61,10 @@
 | UI-04 | Tenant (Technician) Dashboard mockup confirmed final |
 | UI-05 | Admin UI — **not designed yet** — build during frontend phase |
 | UI-06 | Theme: dark, orange primary, dark glass cards |
+| UI-07 | Technician **Public Profile** (`/technician/profile`) wired to live data via `getUser(user._id)` — header (name, avatar, specialty, location, rating, reviews, completed jobs, online dot) + About (`userBio`). Each field **falls back to the existing mock value** when empty, so the mockup look is preserved 100%. Profile image: show `userProfileImage` if present, else initials fallback avatar. |
+| UI-08 | Public Profile **My Articles** section (after About) **reuses the Home `TechTipCard`** component and `fixora-home-tips__grid` layout — no new card style. Data from `getMyArticles` (current technician only). Empty state = premium `.fixora-pp-empty` card ("No Articles Yet"). |
+| UI-09 | Public Profile fully wired to live data: **Services** (`getUser.services`, Book Now → `/technicians/[id]/book`), **Portfolio** (`getUser.portfolioImages`), **Reviews** (`getTechnicianReviews` + distribution; stars = avg of repairQuality/repairSpeed/communication), **Followers** (`getUserFollowers` list + `followersCount` stat). Every tab/section has a `.fixora-pp-empty` empty state. Header buttons functional: **Message Me** → `/technician/messages`, **View Live Profile** → opens `/technicians/[id]`, **Follow/Following** → `subscribe`/`unsubscribe` + refetch. Header stats (rating/reviews/completed/followers) fall back to **0** when DB has no value (per request). **Response time has no backend field** → static `<15m`. |
+| UI-10 | **Repair Stories pending backend doc:** the story backend lives in `apps/fixora-api` but the referenced spec `docs/STORY_CREATE_FRONTEND.md` is **not present in FixoraF** and no `Story`/`createStory`/`getStories` exist in `docs/schema.gql` (only `imagesUploader(files, target)`). Stories left as-is until the spec/schema is synced into this repo — then wire `imagesUploader(target:"story")` → `createStory` + a `getStories` read for the circular Repair Stories row. |
 
 ---
 

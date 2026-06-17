@@ -4,9 +4,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-14 |
+| **Last updated** | 2026-06-17 |
 | **Last agent** | Claude |
-| **Last session** | **P3-10 COMPLETE** — Community + Post Detail (full implementation): `/community` feed page with category tabs + article cards + pagination; `/community/[id]` dynamic post detail page with markdown viewer + comments section; `/community/write` create article page; 4 new Fixora components (CategoryTabs, ArticleCard, PostHeader, CommentSection, ArticleEditor), 6 GraphQL operations (GET_ARTICLE, LIKE_TARGET_ARTICLE, CREATE_ARTICLE, GET_ARTICLE_COMMENTS, CREATE_ARTICLE_COMMENT, UPDATE_ARTICLE_COMMENT), new types (Article, ArticleAuthor, Comment, CommentGroup, CommentStatus, CommentInput, CommentUpdate, ArticleInput), 2 SCSS files with dark/orange theme, route migration from `/community/detail?id=` to `/community/[id]`, legacy detail.tsx deleted, yarn build clean |
+| **Last session** | **Public Profile fully wired to live data (P3-13)** — `pages/technician/profile/index.tsx`: header + About + My Articles (`getUser`/`getMyArticles`); **Services** (`getUser.services`, Book Now → booking flow), **Portfolio** (`portfolioImages`), **Reviews** (`getTechnicianReviews` + distribution), **Followers** panel + stat (`getUserFollowers`). Functional buttons: Message Me → `/technician/messages`, View Live Profile → opens `/technicians/[id]`, Follow/Following → `subscribe`/`unsubscribe`. Stats fall back to **0** (not mock) when DB empty; Response = static `<15m` (no backend field). New query `GET_USER_FOLLOWERS`; `TechnicianReview.customerData` typed; SCSS `.fixora-pp-followers` + `.fixora-pp-port__media--image`. See DECISIONS UI-07…UI-10. tsc clean (only pre-existing reselect node_modules errors). **Repair Stories NOT wired** — spec `docs/STORY_CREATE_FRONTEND.md` missing from this repo + no story ops in `schema.gql` (UI-10). |
 | **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
 
 ---
@@ -27,6 +27,7 @@
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/mypage` (profile header + Requests/Following/Repair Stories/Settings tabs) + `/notifications` (Today/Earlier, mark all read, navbar badge), `scss/pc/mypage/fixora-mypage.scss`, `scss/pc/notifications/notifications.scss` |
+| Public Profile live data (P3-13) | ✅ `/technician/profile` — header, About, My Articles, **Services, Portfolio, Reviews, Followers** all wired to live `getUser`/`getMyArticles`/`getTechnicianReviews`/`getUserFollowers`; functional Message Me / View Live Profile / Follow buttons; empty states everywhere; stats → 0 when DB empty (DECISIONS UI-07…UI-09). **Repair Stories still hardcoded** — blocked on missing `docs/STORY_CREATE_FRONTEND.md` + story ops not in `schema.gql` (UI-10) |
 
 ---
 
@@ -94,6 +95,7 @@ Full checklist: `TASK_BOARD.md`
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 | Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
 | "View Request" in Messages | Links to `/mypage` — no dedicated booking detail view yet |
+| Repair Stories backend | `docs/STORY_CREATE_FRONTEND.md` referenced by user but **absent from FixoraF**; `Story`/`createStory`/`getStories` not in `docs/schema.gql` (only `imagesUploader`). Sync the doc/schema, then wire stories (DECISIONS UI-10) |
 | Legacy `/mypage` components | `libs/components/mypage/*` (MyProperties, MyFavorites, MyArticles, WriteArticle, etc.) left in place but no longer imported by `/mypage` — still referenced by `/member` and `/_admin`; do not delete without checking |
 
 ---

@@ -185,7 +185,9 @@ type Booking {
   cancelledAt: DateTime
   completedAt: DateTime
   createdAt: DateTime!
+  customerData: User
   deletedAt: DateTime
+  deviceData: Device
   deviceId: String!
   estimatedPrice: Float
   finalPrice: Float
@@ -342,6 +344,11 @@ input CreateReviewInput {
   repairSpeed: Float!
   reviewContent: String
   reviewImages: [String!]
+}
+
+input CreateStoryInput {
+  caption: String
+  images: [StoryImageInput!]!
 }
 
 input DISearch {
@@ -590,9 +597,12 @@ type Mutation {
   createComment(input: CommentInput!): Comment!
   createDevice(input: DeviceInput!): Device!
   createReview(input: CreateReviewInput!): Review!
+  createStory(input: CreateStoryInput!): Story!
   deleteArticle(articleId: String!): Article!
+  deleteStory(storyId: String!): Story!
   imageUploader(file: Upload!, target: String!): String!
   imagesUploader(files: [Upload!]!, target: String!): [String!]!
+  incrementStoryView(storyId: String!): Story!
   initiatePayment(input: InitiatePaymentInput!): Payment!
   likeTargetArticle(articleId: String!): Article!
   likeTargetUser(userId: String!): User!
@@ -610,8 +620,11 @@ type Mutation {
   removeBooking(bookingId: String!): Booking!
   removeCommentByAdmin(commentId: String!): Comment!
   removeDevice(deviceId: String!): Device!
+  removeStory(storyId: String!): Story!
+  reportStory(input: ReportStoryInput!): String!
   requestPasswordReset(userEmail: String!): PasswordResetRequestResult!
   resetPassword(input: ResetPasswordInput!): PasswordResetRequestResult!
+  reviewStoryReport(input: ReviewStoryReportInput!): StoryReport!
   sendMessage(input: SendMessageInput!): Message!
   signup(input: UserInput!): User!
   submitTechnicianVerification: User!
@@ -625,6 +638,7 @@ type Mutation {
   updateDevice(input: DeviceUpdate!): Device!
   updateUser(input: UserUpdate!): User!
   updateUserByAdmin(input: UserUpdate!): User!
+  warnTechnicianForStory(input: WarnTechnicianInput!): String!
 }
 
 input MyArticlesInquiry {
@@ -812,8 +826,12 @@ type Query {
   getMyPayments(input: PaymentsInquiry!): Payments!
   getMyReviews(input: MyReviewsInquiry!): Reviews!
   getNotifications(input: NotificationsInquiry!): Notifications!
+  getStoriesCarousel(input: StoriesCarouselInquiry!): Stories!
+  getStory(storyId: String!): Story!
+  getStoryReports(input: StoryReportsInquiry!): StoryReports!
   getTechnicianBookings(input: BookingsInquiry!): Bookings!
   getTechnicianReviews(input: ReviewsInquiry!): TechnicianReviews!
+  getTechnicianStories(input: TechnicianStoriesInquiry!): Stories!
   getTechnicianVerificationQueue(input: TechnicianVerificationInquiry!): Users!
   getTechnicians(input: TechniciansInquiry!): Users!
   getUser(userId: String!): User!
@@ -841,6 +859,28 @@ enum RepairComplexity {
   MEDIUM
 }
 
+enum ReportReason {
+  COPYRIGHT_VIOLATION
+  IRRELEVANT_PERSONAL
+  MISLEADING_CLAIMS
+  OFFENSIVE_CONTENT
+  OTHER
+  SPAM_PROMOTIONAL
+}
+
+enum ReportStatus {
+  ACTIONED
+  DISMISSED
+  PENDING
+  REVIEWED
+}
+
+input ReportStoryInput {
+  comment: String
+  reason: ReportReason!
+  storyId: String!
+}
+
 input ResetPasswordInput {
   newPassword: String!
   token: String!
@@ -851,6 +891,8 @@ type Review {
   bookingId: String!
   communication: Float!
   createdAt: DateTime!
+  customerData: User
+  deviceData: Device
   repairQuality: Float!
   repairSpeed: Float!
   reviewContent: String
@@ -867,6 +909,12 @@ type ReviewDistribution {
 
 input ReviewSearch {
   technicianId: String!
+}
+
+input ReviewStoryReportInput {
+  adminNotes: String
+  reportId: String!
+  status: ReportStatus!
 }
 
 type Reviews {
@@ -889,9 +937,68 @@ input SendMessageInput {
   receiverId: String!
 }
 
+type Stories {
+  list: [Story!]!
+  metaCounter: [TotalCounter!]
+}
+
+input StoriesCarouselInquiry {
+  limit: Int!
+}
+
+type Story {
+  _id: String!
+  caption: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  expiresAt: DateTime!
+  images: [StoryImage!]!
+  isExpired: Boolean!
+  reportCount: Int!
+  userData: User
+  userId: String!
+  viewCount: Int!
+}
+
+type StoryImage {
+  order: Int!
+  url: String!
+}
+
+input StoryImageInput {
+  order: Int!
+  url: String!
+}
+
+type StoryReport {
+  _id: String!
+  adminNotes: String
+  comment: String
+  createdAt: DateTime!
+  reason: ReportReason!
+  reporterData: User
+  reviewedAt: DateTime
+  reviewedBy: String
+  reviewerData: User
+  status: String!
+  storyId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type StoryReports {
+  list: [StoryReport!]!
+  metaCounter: [TotalCounter!]
+}
+
+input StoryReportsInquiry {
+  status: ReportStatus
+}
+
 input TISearch {
   deviceCategory: DeviceCategory
   isOnline: Boolean
+  issueCategory: IssueCategory
   latitude: Float
   longitude: Float
   minAverageRating: Float
@@ -919,6 +1026,11 @@ type TechnicianReviews {
   distribution: [ReviewDistribution!]!
   list: [Review!]!
   metaCounter: [TotalCounter!]
+}
+
+input TechnicianStoriesInquiry {
+  limit: Int!
+  technicianId: String!
 }
 
 input TechnicianVerificationInquiry {
@@ -1050,6 +1162,8 @@ input UserUpdate {
   isOnline: Boolean
   portfolioImages: [String!]
   services: [UserServiceItemInput!]
+  shopLatitude: Float
+  shopLongitude: Float
   shopName: String
   specialty: String
   userBio: String
@@ -1097,4 +1211,9 @@ enum VerificationStatus {
   PENDING
   REJECTED
   UNDER_REVIEW
+}
+
+input WarnTechnicianInput {
+  reason: String!
+  storyId: String!
 }

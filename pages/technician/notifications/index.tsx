@@ -1,12 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import MoveToInboxOutlined from '@mui/icons-material/MoveToInboxOutlined';
-import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
-import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
+import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
+import AssignmentTurnedInRounded from '@mui/icons-material/AssignmentTurnedInRounded';
+import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
+import PersonAddAlt1Rounded from '@mui/icons-material/PersonAddAlt1Rounded';
 import StarRounded from '@mui/icons-material/StarRounded';
-import ErrorOutlineOutlined from '@mui/icons-material/ErrorOutlineOutlined';
+import ChatBubbleRounded from '@mui/icons-material/ChatBubbleRounded';
+import PaidRounded from '@mui/icons-material/PaidRounded';
+import CampaignRounded from '@mui/icons-material/CampaignRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
@@ -17,52 +21,113 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
-type NotifKind = 'requests' | 'messages' | 'payments' | 'reviews' | 'alerts';
+type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert';
+type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'alerts';
 
-const KIND_META: Record<NotifKind, { gradient: string; color: string; icon: React.ReactNode }> = {
-	requests: {
-		gradient: 'linear-gradient(135deg, #FF5A5A, #FF9A3C)',
+interface CatMeta {
+	gradient: string;
+	color: string;
+	icon: React.ReactNode;
+	filter: Exclude<FilterId, 'all'>;
+	action: (n: any) => { label: string; link: string } | null;
+}
+
+const ICON_SX = { fontSize: 22, color: '#fff' } as const;
+
+const CAT_META: Record<NotifCat, CatMeta> = {
+	request: {
+		gradient: 'linear-gradient(135deg, #FF6B00, #FF9A3C)',
 		color: '#FF6B00',
-		icon: <MoveToInboxOutlined style={{ fontSize: 22, color: '#fff' }} />,
+		icon: <MoveToInboxRounded style={ICON_SX} />,
+		filter: 'requests',
+		action: () => ({ label: 'View Request', link: '/technician/requests' }),
 	},
-	messages: {
-		gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
-		color: '#A855F7',
-		icon: <ChatBubbleOutlineOutlined style={{ fontSize: 21, color: '#fff' }} />,
+	status: {
+		gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+		color: '#3B82F6',
+		icon: <AssignmentTurnedInRounded style={ICON_SX} />,
+		filter: 'requests',
+		action: () => ({ label: 'View Job', link: '/technician/jobs' }),
 	},
-	payments: {
-		gradient: 'linear-gradient(135deg, #22C55E, #16A34A)',
-		color: '#22C55E',
-		icon: <AttachMoneyOutlined style={{ fontSize: 22, color: '#fff' }} />,
-	},
-	reviews: {
+	review: {
 		gradient: 'linear-gradient(135deg, #F59E0B, #FACC15)',
 		color: '#F59E0B',
-		icon: <StarRounded style={{ fontSize: 22, color: '#fff' }} />,
+		icon: <StarRounded style={ICON_SX} />,
+		filter: 'reviews',
+		action: () => ({ label: 'View Review', link: '/technician/profile' }),
 	},
-	alerts: {
+	follow: {
+		gradient: 'linear-gradient(135deg, #06B6D4, #3B82F6)',
+		color: '#22D3EE',
+		icon: <PersonAddAlt1Rounded style={ICON_SX} />,
+		filter: 'follows',
+		action: () => ({ label: 'View Profile', link: '/technician/profile' }),
+	},
+	like: {
+		gradient: 'linear-gradient(135deg, #EC4899, #F43F5E)',
+		color: '#EC4899',
+		icon: <FavoriteRounded style={ICON_SX} />,
+		filter: 'likes',
+		action: (n) =>
+			n.referenceType === 'ARTICLE'
+				? { label: 'View Article', link: n.referenceId ? `/community/${n.referenceId}` : '/community' }
+				: { label: 'View Profile', link: '/technician/profile' },
+	},
+	comment: {
+		gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
+		color: '#A855F7',
+		icon: <ChatBubbleRounded style={ICON_SX} />,
+		filter: 'alerts',
+		action: (n) => ({ label: 'View Article', link: n.referenceId ? `/community/${n.referenceId}` : '/community' }),
+	},
+	payment: {
+		gradient: 'linear-gradient(135deg, #22C55E, #16A34A)',
+		color: '#22C55E',
+		icon: <PaidRounded style={ICON_SX} />,
+		filter: 'payments',
+		action: () => ({ label: 'View Earnings', link: '/technician/earnings' }),
+	},
+	alert: {
 		gradient: 'linear-gradient(135deg, #EC4899, #D946EF)',
 		color: '#EC4899',
-		icon: <ErrorOutlineOutlined style={{ fontSize: 22, color: '#fff' }} />,
+		icon: <CampaignRounded style={ICON_SX} />,
+		filter: 'alerts',
+		action: () => null,
 	},
 };
 
-const FILTERS: { id: 'all' | NotifKind; label: string }[] = [
+const FILTERS: { id: FilterId; label: string }[] = [
 	{ id: 'all', label: 'All' },
 	{ id: 'requests', label: 'Requests' },
-	{ id: 'messages', label: 'Messages' },
 	{ id: 'payments', label: 'Payments' },
 	{ id: 'reviews', label: 'Reviews' },
-	{ id: 'alerts', label: 'Alerts' },
+	{ id: 'likes', label: 'Likes' },
+	{ id: 'follows', label: 'Follows' },
 ];
 
-const mapKind = (notificationType?: string): NotifKind => {
-	const t = (notificationType ?? '').toUpperCase();
-	if (t.includes('BOOKING') || t.includes('REQUEST')) return 'requests';
-	if (t.includes('MESSAGE')) return 'messages';
-	if (t.includes('PAYMENT')) return 'payments';
-	if (t.includes('REVIEW')) return 'reviews';
-	return 'alerts';
+const BOOKING_REQUEST_PATTERN = /request|requested|new booking/i;
+const PAYMENT_PATTERN = /payment|paid|payout|earnings/i;
+
+/** Derive the display category from real DB fields (notificationType + referenceType + text). */
+const detectCat = (n: any): NotifCat => {
+	const type = (n.notificationType ?? '').toUpperCase();
+	const text = `${n.notificationTitle ?? ''} ${n.notificationDescription ?? ''}`;
+	switch (type) {
+		case 'REVIEW':
+			return 'review';
+		case 'FOLLOW':
+			return 'follow';
+		case 'LIKE':
+			return 'like';
+		case 'COMMENT':
+			return 'comment';
+		case 'BOOKING':
+			if (PAYMENT_PATTERN.test(text)) return 'payment';
+			return BOOKING_REQUEST_PATTERN.test(text) ? 'request' : 'status';
+		default:
+			if (PAYMENT_PATTERN.test(text)) return 'payment';
+			return 'alert';
+	}
 };
 
 const timeAgo = (dateStr?: string | null) => {
@@ -74,41 +139,99 @@ const timeAgo = (dateStr?: string | null) => {
 	const h = Math.floor(m / 60);
 	if (h < 24) return `${h}h ago`;
 	const d = Math.floor(h / 24);
+	if (d === 1) {
+		const t = new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric' });
+		return `Yesterday, ${t}`;
+	}
 	if (d < 7) return `${d}d ago`;
 	return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+const isToday = (dateStr?: string | null) =>
+	!!dateStr && new Date(dateStr).toDateString() === new Date().toDateString();
+
 const Notifications: NextPage = () => {
+	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const [activeFilter, setActiveFilter] = useState<'all' | NotifKind>('all');
+	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 
 	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
-		variables: { input: { page: 1, limit: 50, search: {} } },
+		variables: { input: { page: 1, limit: 100, sort: 'createdAt', direction: 'DESC', search: {} } },
 		fetchPolicy: 'network-only',
 	});
 
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 
-	const notifications = useMemo(() => data?.getNotifications?.list ?? [], [data]);
+	// Every notification except chat messages (those live in the Messages screen).
+	const notifications = useMemo(
+		() => (data?.getNotifications?.list ?? []).filter((n: any) => n.notificationType !== 'MESSAGE'),
+		[data]
+	);
 
 	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
 
 	const filtered = useMemo(() => {
-		const list = notifications.filter((n: any) => n.notificationType !== 'MESSAGE');
-		if (activeFilter === 'all') return list;
-		return list.filter((n: any) => mapKind(n.notificationType) === activeFilter);
+		if (activeFilter === 'all') return notifications;
+		return notifications.filter((n: any) => CAT_META[detectCat(n)].filter === activeFilter);
 	}, [notifications, activeFilter]);
+
+	const { today, earlier } = useMemo(() => {
+		const today: any[] = [];
+		const earlier: any[] = [];
+		filtered.forEach((n: any) => (isToday(n.createdAt) ? today : earlier).push(n));
+		return { today, earlier };
+	}, [filtered]);
 
 	const handleMarkAllRead = async () => {
 		await markAllRead();
 		refetch();
 	};
 
-	const handleMarkRead = async (id: string) => {
-		await markRead({ variables: { input: { notificationId: id } } });
-		refetch();
+	const handleOpen = async (n: any) => {
+		if (!n.isRead) {
+			await markRead({ variables: { input: { notificationId: n._id } } });
+			refetch();
+		}
+		const action = CAT_META[detectCat(n)].action(n);
+		if (action) router.push(action.link);
+	};
+
+	const renderCard = (n: any) => {
+		const meta = CAT_META[detectCat(n)];
+		const action = meta.action(n);
+		return (
+			<div
+				key={n._id}
+				className={`fixora-notif-card ${!n.isRead ? 'fixora-notif-card--unread' : ''}`}
+				onClick={() => handleOpen(n)}
+			>
+				<div className="fixora-notif-card__icon" style={{ background: meta.gradient }}>
+					{meta.icon}
+				</div>
+				<div className="fixora-notif-card__body">
+					<div className="fixora-notif-card__top">
+						<div className="fixora-notif-card__title">{n.notificationTitle}</div>
+						<div className="fixora-notif-card__time">{timeAgo(n.createdAt)}</div>
+					</div>
+					<div className="fixora-notif-card__desc">{n.notificationDescription}</div>
+					{action && (
+						<button
+							className="fixora-notif-card__action"
+							style={{ color: meta.color, borderColor: meta.color }}
+							onClick={(e) => {
+								e.stopPropagation();
+								handleOpen(n);
+							}}
+							type="button"
+						>
+							{action.label}
+						</button>
+					)}
+				</div>
+			</div>
+		);
 	};
 
 	return (
@@ -141,41 +264,33 @@ const Notifications: NextPage = () => {
 				))}
 			</div>
 
-			<div className="fixora-notif-list">
-				{loading ? (
-					<div className="fixora-notif-loading">
-						<div className="fixora-notif-loading__spinner" />
-					</div>
-				) : filtered.length === 0 ? (
-					<div className="fixora-notif-empty">
-						<NotificationsNoneOutlined style={{ fontSize: 48, color: '#333' }} />
-						<p>You have no notifications</p>
-					</div>
-				) : (
-					filtered.map((n: any) => {
-						const kind = mapKind(n.notificationType);
-						const meta = KIND_META[kind];
-						return (
-							<div
-								key={n._id}
-								className={`fixora-notif-card ${!n.isRead ? 'fixora-notif-card--unread' : ''}`}
-								onClick={() => !n.isRead && handleMarkRead(n._id)}
-							>
-								<div className="fixora-notif-card__icon" style={{ background: meta.gradient }}>
-									{meta.icon}
-								</div>
-								<div className="fixora-notif-card__body">
-									<div className="fixora-notif-card__top">
-										<div className="fixora-notif-card__title">{n.notificationTitle}</div>
-										<div className="fixora-notif-card__time">{timeAgo(n.createdAt)}</div>
-									</div>
-									<div className="fixora-notif-card__desc">{n.notificationDescription}</div>
-								</div>
+			{loading ? (
+				<div className="fixora-notif-loading">
+					<div className="fixora-notif-loading__spinner" />
+				</div>
+			) : filtered.length === 0 ? (
+				<div className="fixora-notif-empty">
+					<NotificationsNoneOutlined style={{ fontSize: 48, color: '#333' }} />
+					<p>You have no notifications</p>
+				</div>
+			) : (
+				<>
+					{today.length > 0 && (
+						<>
+							<div className="fixora-notif-section-label">Today</div>
+							<div className="fixora-notif-list">{today.map(renderCard)}</div>
+						</>
+					)}
+					{earlier.length > 0 && (
+						<>
+							<div className="fixora-notif-section-label" style={{ marginTop: today.length > 0 ? 28 : 0 }}>
+								Earlier
 							</div>
-						);
-					})
-				)}
-			</div>
+							<div className="fixora-notif-list">{earlier.map(renderCard)}</div>
+						</>
+					)}
+				</>
+			)}
 		</div>
 	);
 };

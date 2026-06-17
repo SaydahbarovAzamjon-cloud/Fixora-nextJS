@@ -469,25 +469,53 @@
 	to { transform: rotate(360deg); }
 }
 
+@keyframes notif-border-flow {
+	0% { background-position: 0% 50%; }
+	100% { background-position: 300% 50%; }
+}
+
 .fixora-notif-card {
 	position: relative;
 	display: flex;
 	gap: 16px;
 	background: #0E0E0E;
-	border: 1px solid rgba(255, 255, 255, 0.06);
+	border: 1px solid transparent;
 	border-radius: 16px;
 	padding: 20px 22px;
-	overflow: hidden;
-	transition: all 0.15s ease;
+	transition: background 0.15s ease;
 	cursor: pointer;
 
+	/* Animated linear-gradient border (thin 1px masked ring) */
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		padding: 1px;
+		background: linear-gradient(120deg, #FF6B00, #EC4899, #8B5CF6, #22D3EE, #22C55E, #FF6B00);
+		background-size: 300% 300%;
+		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		animation: notif-border-flow 7s linear infinite;
+		opacity: 0.35;
+		pointer-events: none;
+	}
+
 	&:hover {
-		border-color: rgba(255, 255, 255, 0.1);
 		background: #121212;
+
+		&::after {
+			opacity: 0.7;
+		}
 	}
 
 	&--unread {
-		background: rgba(255, 107, 0, 0.03);
+		background: rgba(255, 107, 0, 0.04);
+
+		&::after {
+			opacity: 0.6;
+		}
 
 		&::before {
 			content: '';
@@ -498,6 +526,7 @@
 			width: 3px;
 			border-radius: 0 3px 3px 0;
 			background: #FF6B00;
+			z-index: 1;
 		}
 	}
 

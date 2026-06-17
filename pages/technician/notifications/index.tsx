@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { gql, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
 import Inventory2Rounded from '@mui/icons-material/Inventory2Rounded';
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
@@ -24,6 +24,27 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
+// Lightweight followers query — the shared GET_MEMBER_FOLLOWERS asks for legacy
+// member* fields that don't exist on the Fixora `User` type, so we request only
+// the User fields we actually need here.
+const GET_FOLLOWERS_FOR_NOTIF = gql`
+	query GetFollowersForNotif($input: FollowInquiry!) {
+		getMemberFollowers(input: $input) {
+			list {
+				_id
+				followerId
+				createdAt
+				followerData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
+			}
+		}
+	}
+`;
+
 type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert';
 type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'alerts';
 
@@ -35,39 +56,43 @@ interface CatMeta {
 	action: (n: any) => { label: string; link: string } | null;
 }
 
-const ICON_SX = { fontSize: 22, color: '#fff' } as const;
+const ICON_SX = { fontSize: 20, color: '#fff' } as const;
 
 const CAT_META: Record<NotifCat, CatMeta> = {
 	request: {
-		gradient: 'linear-gradient(135deg, #FF6B00, #FF9A3C)',
+		gradient: 'linear-gradient(135deg, #FF3D54 0%, #FF7A00 100%)',
 		color: '#FF6B00',
 		icon: <MoveToInboxRounded style={ICON_SX} />,
 		filter: 'requests',
 		action: () => ({ label: 'View Request', link: '/technician/requests' }),
 	},
 	status: {
-		gradient: 'linear-gradient(135deg, #A855F7, #8B5CF6)',
+		gradient: 'linear-gradient(135deg, #7B2CFF 0%, #D500F9 100%)',
 		color: '#A855F7',
 		icon: <Inventory2Rounded style={ICON_SX} />,
 		filter: 'requests',
 		action: () => ({ label: 'View Job', link: '/technician/jobs' }),
 	},
 	review: {
-		gradient: 'linear-gradient(135deg, #F59E0B, #FACC15)',
+		gradient: 'linear-gradient(135deg, #F59E0B 0%, #FACC15 100%)',
 		color: '#F59E0B',
 		icon: <StarRounded style={ICON_SX} />,
 		filter: 'reviews',
 		action: () => ({ label: 'View Review', link: '/technician/profile' }),
 	},
 	follow: {
-		gradient: 'linear-gradient(135deg, #06B6D4, #3B82F6)',
+		gradient: 'linear-gradient(135deg, #35A8FF 0%, #3FE5FF 100%)',
 		color: '#22D3EE',
 		icon: <PersonAddAlt1Rounded style={ICON_SX} />,
 		filter: 'follows',
-		action: () => ({ label: 'View Profile', link: '/technician/profile' }),
+		// The follower's id is stored on the notification (userId === referenceId === followerId).
+		action: (n) => {
+			const followerId = n.referenceId || n.userId;
+			return { label: 'View Profile', link: followerId ? `/member?memberId=${followerId}` : '/technician/profile' };
+		},
 	},
 	like: {
-		gradient: 'linear-gradient(135deg, #EC4899, #F43F5E)',
+		gradient: 'linear-gradient(135deg, #FF4FA3 0%, #C42EFF 100%)',
 		color: '#EC4899',
 		icon: <FavoriteRounded style={ICON_SX} />,
 		filter: 'likes',
@@ -77,21 +102,21 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 				: { label: 'View Profile', link: '/technician/profile' },
 	},
 	comment: {
-		gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
+		gradient: 'linear-gradient(135deg, #7B2CFF 0%, #D500F9 100%)',
 		color: '#A855F7',
 		icon: <ChatBubbleRounded style={ICON_SX} />,
 		filter: 'alerts',
 		action: (n) => ({ label: 'View Article', link: n.referenceId ? `/community/${n.referenceId}` : '/community' }),
 	},
 	payment: {
-		gradient: 'linear-gradient(135deg, #22C55E, #16A34A)',
+		gradient: 'linear-gradient(135deg, #19D68C 0%, #3EE8A5 100%)',
 		color: '#22C55E',
 		icon: <PaidRounded style={ICON_SX} />,
 		filter: 'payments',
 		action: () => ({ label: 'View Earnings', link: '/technician/earnings' }),
 	},
 	alert: {
-		gradient: 'linear-gradient(135deg, #EC4899, #D946EF)',
+		gradient: 'linear-gradient(135deg, #FF4FA3 0%, #C42EFF 100%)',
 		color: '#EC4899',
 		icon: <CampaignRounded style={ICON_SX} />,
 		filter: 'alerts',
@@ -200,18 +225,52 @@ const Notifications: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
+	// The backend only creates FOLLOW notification records for follows that happen
+	// after that feature shipped, so older followers never appear in the feed. We
+	// pull the technician's full followers list and surface every follower (old and
+	// new) as a follow notification — this is the source of truth for "who followed".
+	const { data: followersData } = useQuery(GET_FOLLOWERS_FOR_NOTIF, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 100, search: { followingId: user?._id } } },
+		fetchPolicy: 'network-only',
+	});
+
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 
-	// Every notification except chat messages (those live in the Messages screen)
-	// and any the user dismissed locally this session.
-	const notifications = useMemo(
-		() =>
-			(data?.getNotifications?.list ?? []).filter(
-				(n: any) => n.notificationType !== 'MESSAGE' && !dismissed.has(n._id)
-			),
-		[data, dismissed]
-	);
+	// Turn each follower relationship into a synthetic follow notification.
+	const followNotifications = useMemo(() => {
+		const list = followersData?.getMemberFollowers?.list ?? [];
+		return list.map((f: any) => {
+			const fd = f.followerData ?? {};
+			const followerId = fd._id || f.followerId;
+			const name = fd.userNickname || fd.userFullName || 'Someone';
+			return {
+				_id: `follow-${f._id}`,
+				userId: followerId,
+				receiverId: user?._id,
+				notificationType: 'FOLLOW',
+				notificationTitle: 'New follower',
+				notificationDescription: `${name} started following you`,
+				referenceId: followerId,
+				referenceType: null,
+				isRead: true,
+				createdAt: f.createdAt,
+			};
+		});
+	}, [followersData, user]);
+
+	// Real notifications (minus chat messages, which live in the Messages screen,
+	// and real FOLLOW rows — the followers list above already covers those so we
+	// avoid duplicates), merged with the derived follow notifications and sorted.
+	const notifications = useMemo(() => {
+		const real = (data?.getNotifications?.list ?? []).filter(
+			(n: any) => n.notificationType !== 'MESSAGE' && n.notificationType !== 'FOLLOW'
+		);
+		return [...real, ...followNotifications]
+			.filter((n: any) => !dismissed.has(n._id))
+			.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	}, [data, followNotifications, dismissed]);
 
 	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
 
@@ -248,8 +307,11 @@ const Notifications: NextPage = () => {
 	};
 
 	const renderCard = (n: any) => {
-		const meta = CAT_META[detectCat(n)];
+		const cat = detectCat(n);
+		const meta = CAT_META[cat];
 		const action = meta.action(n);
+		// Only repair-related notifications carry an "issue" (e.g. screen damage) shown in red.
+		const isIssue = cat === 'request' || cat === 'status';
 		return (
 			<div
 				key={n._id}
@@ -264,7 +326,9 @@ const Notifications: NextPage = () => {
 					<div className="fixora-notif-card__subrow">
 						<NotifSender userId={n.userId} />
 						{n.notificationDescription && (
-							<span className="fixora-notif-card__issue">{n.notificationDescription}</span>
+							<span className={`fixora-notif-card__issue ${isIssue ? 'fixora-notif-card__issue--alert' : ''}`}>
+								{n.notificationDescription}
+							</span>
 						)}
 						<div className="fixora-notif-card__meta">
 							<span className="fixora-notif-card__time">{timeAgo(n.createdAt)}</span>
@@ -284,7 +348,7 @@ const Notifications: NextPage = () => {
 					{action && (
 						<button
 							className="fixora-notif-card__action"
-							style={{ color: meta.color, borderColor: meta.color }}
+							style={{ ['--notif-action-color' as any]: meta.color, color: meta.color, borderColor: meta.color }}
 							onClick={(e) => {
 								e.stopPropagation();
 								handleOpen(n);

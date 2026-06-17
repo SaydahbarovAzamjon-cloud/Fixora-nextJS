@@ -326,6 +326,7 @@ const TechnicianDashboard: NextPage = () => {
 		period ?? (hasSeriesData(weekData) ? 'Week' : hasSeriesData(monthData) ? 'Month' : hasSeriesData(yearData) ? 'Year' : 'Week');
 	const chartData = activePeriod === 'Year' ? yearData : activePeriod === 'Month' ? monthData : weekData;
 	const periodEarnings = chartData.reduce((sum, d) => sum + d.earnings, 0);
+	const chartYMax = Math.max(100, ...chartData.map((d) => d.earnings));
 
 	const previousEarnings = useMemo(() => {
 		const lastMonth = new Date();
@@ -615,9 +616,9 @@ const TechnicianDashboard: NextPage = () => {
 								))}
 							</div>
 						</div>
-						<div style={{ height: '180px', marginTop: '16px' }}>
+						<div style={{ width: '100%', height: 180, marginTop: 16 }}>
 							{hasEarningsData ? (
-								<ResponsiveContainer width="100%" height="100%">
+								<ResponsiveContainer width="100%" height={180} minWidth={0}>
 									<AreaChart data={chartData}>
 										<defs>
 											<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
@@ -628,7 +629,7 @@ const TechnicianDashboard: NextPage = () => {
 										</defs>
 										<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
 										<XAxis dataKey="label" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, (max: number) => Math.max(Number(max) || 0, 100)]} allowDecimals={false} />
+										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, chartYMax]} allowDecimals={false} />
 										<Tooltip
 											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
 											labelStyle={{ color: '#A0A0A0', fontSize: 11 }}

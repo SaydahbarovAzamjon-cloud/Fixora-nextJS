@@ -897,6 +897,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	border-radius: 14px;
 	padding: 16px 20px;
 	outline: none;
+	// Grid items default to min-width:auto, which makes recharts ResponsiveContainer
+	// measure 0 width on first layout (no axes/line render). Allow it to shrink.
+	min-width: 0;
 
 	// prevent global a:hover / focus-within rules from bleeding orange border
 	&:focus-within {

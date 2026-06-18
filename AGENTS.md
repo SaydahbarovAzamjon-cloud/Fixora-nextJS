@@ -17,12 +17,13 @@ Works with **Cursor** and **Codex (VS Code)**. Both tools share the same handoff
 | 5 | [docs/FIXORA-ANALIZ.md](docs/FIXORA-ANALIZ.md) | Full spec — UI mockups §9, ER model §4.9 |
 | 6 | [docs/FRONTEND_API.md](docs/FRONTEND_API.md) | GraphQL contract — sync copy from FIXORAB |
 | 7 | [docs/schema.gql](docs/schema.gql) | Generated schema — operation & type names |
-| 8 | [docs/AUTH_API.md](docs/AUTH_API.md) | Auth flows — OAuth, signup, refresh |
-| 9 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
-| 10 | [.cursor/skills/fixora-ui/SKILL.md](.cursor/skills/fixora-ui/SKILL.md) | UI implementation — overview |
-| 11 | [.cursor/skills/fixora-theme/SKILL.md](.cursor/skills/fixora-theme/SKILL.md) | Colors, MUI theme, SCSS tokens (P3-02) |
-| 12 | [.cursor/skills/fixora-ui-kit/SKILL.md](.cursor/skills/fixora-ui-kit/SKILL.md) | Button, Input, GlassCard (P3-02b) |
-| 13 | [.cursor/skills/fixora-navbar/SKILL.md](.cursor/skills/fixora-navbar/SKILL.md) | Navbar / Top.tsx (P3-04) |
+| 8 | [docs/BACKEND_GAPS.md](docs/BACKEND_GAPS.md) | **UI bor / backend yo‘q** — mock & workaround registry; yangi gap qo‘shish shu yerda |
+| 9 | [docs/AUTH_API.md](docs/AUTH_API.md) | Auth flows — OAuth, signup, refresh |
+| 10 | [docs/design/README.md](docs/design/README.md) | UI mockups — pixel-perfect reference |
+| 11 | [.cursor/skills/fixora-ui/SKILL.md](.cursor/skills/fixora-ui/SKILL.md) | UI implementation — overview |
+| 12 | [.cursor/skills/fixora-theme/SKILL.md](.cursor/skills/fixora-theme/SKILL.md) | Colors, MUI theme, SCSS tokens (P3-02) |
+| 13 | [.cursor/skills/fixora-ui-kit/SKILL.md](.cursor/skills/fixora-ui-kit/SKILL.md) | Button, Input, GlassCard (P3-02b) |
+| 14 | [.cursor/skills/fixora-navbar/SKILL.md](.cursor/skills/fixora-navbar/SKILL.md) | Navbar / Top.tsx (P3-04) |
 
 Keep FixoraF `docs/DECISIONS.md`, `docs/FRONTEND_API.md`, `docs/schema.gql`, and `docs/AUTH_API.md` **in sync** with FIXORAB when the backend contract changes.
 

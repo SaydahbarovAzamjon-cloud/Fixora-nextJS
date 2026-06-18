@@ -44,3 +44,41 @@ export const GET_TECHNICIAN_STORIES = gql`
 		}
 	}
 `;
+
+export const GET_STORIES_CAROUSEL = gql`
+	query GetStoriesCarousel($input: StoriesCarouselInquiry!) {
+		getStoriesCarousel(input: $input) {
+			list {
+				_id
+				userId
+				images {
+					url
+					order
+				}
+				caption
+				viewCount
+				createdAt
+				expiresAt
+				isExpired
+				userData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const INCREMENT_STORY_VIEW = gql`
+	mutation IncrementStoryView($storyId: String!) {
+		incrementStoryView(storyId: $storyId) {
+			_id
+			viewCount
+		}
+	}
+`;

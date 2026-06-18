@@ -13,12 +13,16 @@ import TechnicianProfileServices from '../../libs/components/technician-profile/
 import TechnicianProfilePortfolio from '../../libs/components/technician-profile/TechnicianProfilePortfolio';
 import TechnicianProfileReviews from '../../libs/components/technician-profile/TechnicianProfileReviews';
 import TechnicianProfileSidebar from '../../libs/components/technician-profile/TechnicianProfileSidebar';
-import { GET_TECHNICIAN_REVIEWS, GET_USER } from '../../apollo/user/query';
+import RepairStoriesRow from '../../libs/components/story/RepairStoriesRow';
+import TechnicianProfileArticles from '../../libs/components/technician-profile/TechnicianProfileArticles';
+import { GET_ARTICLES, GET_TECHNICIAN_REVIEWS, GET_USER } from '../../apollo/user/query';
+import { GET_TECHNICIAN_STORIES } from '../../apollo/user/story';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
-import { TechnicianProfile, TechnicianReview } from '../../libs/types/fixora/fixora';
+import { ArticleSummary, Story, TechnicianProfile, TechnicianReview } from '../../libs/types/fixora/fixora';
 import { userVar } from '../../apollo/store';
 import { Messages } from '../../libs/config';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { T } from '../../libs/types/common';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -60,6 +64,31 @@ const TechnicianProfilePage: NextPage = () => {
 
 	const technician: TechnicianProfile | null = userData?.getUser ?? null;
 	const reviews: TechnicianReview[] = reviewsData?.getTechnicianReviews?.list ?? [];
+
+	const { data: storiesData } = useQuery(GET_TECHNICIAN_STORIES, {
+		skip: !technicianId,
+		variables: { input: { technicianId: technicianId ?? '', limit: 20 } },
+		fetchPolicy: 'cache-and-network',
+	});
+	const stories: Story[] = (storiesData as T)?.getTechnicianStories?.list ?? [];
+
+	const { data: articlesData } = useQuery(GET_ARTICLES, {
+		skip: !technicianId,
+		variables: {
+			input: {
+				page: 1,
+				limit: 6,
+				sort: 'createdAt',
+				direction: 'DESC',
+				search: { userId: technicianId ?? '' },
+			},
+		},
+		fetchPolicy: 'cache-and-network',
+	});
+	const articles: ArticleSummary[] = (articlesData as T)?.getArticles?.list ?? [];
+
+	const storyOwnerName =
+		technician?.userNickname || technician?.userFullName || technician?.shopName || t('technicianProfile.loading');
 
 	const toggleFollowHandler = async () => {
 		try {
@@ -111,6 +140,21 @@ const TechnicianProfilePage: NextPage = () => {
 							onChat={chatHandler}
 						/>
 
+						{stories.length > 0 && (
+							<div className="fixora-tech-profile__stories">
+								<RepairStoriesRow
+									stories={stories}
+									owner={{
+										id: technician._id,
+										name: storyOwnerName,
+										avatar: technician.userProfileImage || undefined,
+									}}
+									mode="interactive"
+									wrapped
+								/>
+							</div>
+						)}
+
 						<div className="fixora-tech-profile__layout">
 							<div className="fixora-tech-profile__main">
 								<Tabs
@@ -131,6 +175,12 @@ const TechnicianProfilePage: NextPage = () => {
 												<p>{technician.userBio}</p>
 											) : (
 												<p className="fixora-tech-profile__empty">{t('technicianProfile.about.empty')}</p>
+											)}
+											{articles.length > 0 && (
+												<div className="fixora-tech-profile__articles-section">
+													<h3>{t('technicianProfile.articles.title')}</h3>
+													<TechnicianProfileArticles articles={articles} />
+												</div>
 											)}
 										</div>
 									)}

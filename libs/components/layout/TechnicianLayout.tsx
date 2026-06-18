@@ -32,6 +32,7 @@ const withTechnicianLayout = (Component: any) => {
 			if (path.includes('/settings')) return 'settings';
 			if (path.includes('/write')) return 'write';
 			if (path.includes('/articles')) return 'articles';
+			if (path.includes('/help')) return 'help';
 			return 'dashboard';
 		}, [router.pathname]);
 

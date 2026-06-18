@@ -8,7 +8,7 @@ import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutl
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import { userVar } from '../../../apollo/store';
+import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 
@@ -35,6 +35,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const badges = useTechnicianBadges();
 	const [searchFocused, setSearchFocused] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +50,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 		.toUpperCase();
 
 	const pageTitleKey = PAGE_TITLE_KEYS[activePage] ?? 'nav.dashboard';
+	const avatarSrc = profileDraft ?? user?.memberImage;
 
 	const handleLogout = () => {
 		localStorage.removeItem('accessToken');
@@ -96,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			<button
 				className="fixora-tech-header__new-quote"
-				onClick={() => router.push('/community/write')}
+				onClick={() => router.push('/technician/write')}
 			>
 				<AddOutlined style={{ fontSize: 16 }} /> {t('header.newQuote')}
 			</button>
@@ -133,8 +135,8 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 					onClick={() => setDropdownOpen(!dropdownOpen)}
 				>
 					<div className="fixora-tech-header__avatar">
-						{user?.memberImage
-							? <img src={resolveProfileImageUrl(user.memberImage)} alt={displayName} />
+						{avatarSrc
+							? <img src={resolveProfileImageUrl(avatarSrc)} alt={displayName} />
 							: initials || 'T'}
 					</div>
 					<div className="fixora-tech-header__profile-info">

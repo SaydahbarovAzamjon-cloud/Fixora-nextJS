@@ -286,7 +286,7 @@ const TechnicianDashboard: NextPage = () => {
 	}, [bookings, customSchedule, t]);
 
 	// ---- Handlers ----
-	const newQuoteHandler = () => router.push('/community/write');
+	const newQuoteHandler = () => router.push('/technician/write');
 
 	const markAvailableHandler = async () => {
 		try {

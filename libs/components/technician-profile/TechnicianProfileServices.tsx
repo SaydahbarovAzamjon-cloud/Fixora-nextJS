@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
 import { TechnicianProfile } from '../../types/fixora/fixora';
+import { formatKrwNumber } from '../../utils/formatCurrency';
 
 interface TechnicianProfileServicesProps {
 	services: TechnicianProfile['services'];
@@ -18,7 +19,7 @@ const TechnicianProfileServices = ({ services }: TechnicianProfileServicesProps)
 			{services.map((service) => (
 				<li key={service.title} className="fixora-tech-profile__service-item">
 					<span>{service.title}</span>
-					<strong>{t('technicianProfile.services.fromPrice', { price: service.basePrice })}</strong>
+					<strong>{t('technicianProfile.services.fromPrice', { price: formatKrwNumber(service.basePrice) })}</strong>
 				</li>
 			))}
 		</ul>

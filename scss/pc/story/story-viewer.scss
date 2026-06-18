@@ -1,0 +1,396 @@
+// Instagram-style story viewer overlay
+.fixora-story-viewer {
+	position: fixed;
+	inset: 0;
+	z-index: 1300;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+
+	&__backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.92);
+		cursor: pointer;
+	}
+
+	&__nav {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 2;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		border: none;
+		background: rgba(255, 255, 255, 0.12);
+		color: #fff;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.2);
+		}
+
+		&--prev {
+			left: max(12px, calc(50% - 240px));
+		}
+
+		&--next {
+			right: max(12px, calc(50% - 240px));
+		}
+	}
+
+	&__card {
+		position: relative;
+		z-index: 1;
+		width: min(380px, 100%);
+		height: min(660px, calc(100vh - 32px));
+		border-radius: 24px;
+		overflow: hidden;
+		background: #0d0d0d;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__media {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&__overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0.55) 0%,
+			transparent 28%,
+			transparent 55%,
+			rgba(0, 0, 0, 0.75) 100%
+		);
+		pointer-events: none;
+	}
+
+	&__progress {
+		position: relative;
+		z-index: 4;
+		display: flex;
+		gap: 4px;
+		padding: 14px 14px 0;
+		flex-shrink: 0;
+	}
+
+	&__progress-seg {
+		flex: 1;
+		height: 3px;
+		background: rgba(255, 255, 255, 0.15);
+		border-radius: 2px;
+		overflow: hidden;
+	}
+
+	&__progress-fill {
+		height: 100%;
+		background: #fff;
+		border-radius: 2px;
+	}
+
+	&__header {
+		position: relative;
+		z-index: 4;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 12px 14px 0;
+		flex-shrink: 0;
+	}
+
+	&__avatar {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #ff6b00, #ff9a3c);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		font-weight: 800;
+		color: #fff;
+		overflow: hidden;
+		flex-shrink: 0;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__meta {
+		min-width: 0;
+		flex: 1;
+	}
+
+	&__name {
+		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__time {
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 10px;
+	}
+
+	&__views {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px 10px;
+		border-radius: 20px;
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 12px;
+		font-weight: 600;
+		flex-shrink: 0;
+
+		svg {
+			font-size: 14px !important;
+			opacity: 0.85;
+		}
+	}
+
+	&__controls {
+		margin-left: auto;
+		display: flex;
+		gap: 8px;
+		flex-shrink: 0;
+	}
+
+	&__ctrl {
+		width: 28px;
+		height: 28px;
+		border-radius: 20px;
+		border: none;
+		background: rgba(255, 255, 255, 0.12);
+		color: #fff;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__content {
+		position: relative;
+		z-index: 2;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		min-height: 0;
+		pointer-events: none;
+	}
+
+	&__caption {
+		margin: 0;
+		padding: 12px 16px;
+		color: rgba(255, 255, 255, 0.92);
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	&__footer {
+		position: relative;
+		z-index: 5;
+		flex-shrink: 0;
+		padding: 8px 12px 14px;
+		background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.85));
+		pointer-events: auto;
+	}
+
+	&__reactions {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 4px 4px 10px;
+		flex-wrap: wrap;
+	}
+
+	&__reaction-btn {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(8px);
+		font-size: 22px;
+		line-height: 1;
+		cursor: pointer;
+		transition: transform 0.15s ease, background 0.15s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:hover:not(:disabled) {
+			transform: scale(1.12);
+			background: rgba(255, 107, 0, 0.35);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: wait;
+		}
+	}
+
+	&__reaction-float {
+		position: absolute;
+		bottom: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 48px;
+		pointer-events: none;
+		animation: fixora-story-emoji-float 0.9s ease-out forwards;
+	}
+
+	&__reply {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__reply-input {
+		flex: 1;
+		min-width: 0;
+		height: 40px;
+		padding: 0 14px;
+		border-radius: 20px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(8px);
+		color: #fff;
+		font-size: 13px;
+		font-family: inherit;
+		outline: none;
+
+		&::placeholder {
+			color: rgba(255, 255, 255, 0.45);
+		}
+
+		&:focus {
+			border-color: rgba(255, 107, 0, 0.5);
+			background: rgba(255, 255, 255, 0.14);
+		}
+	}
+
+	&__reply-send {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: none;
+		background: linear-gradient(135deg, #ff6b00, #ff9a3c);
+		color: #fff;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: opacity 0.15s ease, box-shadow 0.15s ease;
+
+		&:hover:not(:disabled) {
+			box-shadow: 0 0 14px rgba(255, 107, 0, 0.45);
+		}
+
+		&:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+	}
+
+	&__tap {
+		position: absolute;
+		top: 60px;
+		bottom: 140px;
+		width: 35%;
+		z-index: 3;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		padding: 0;
+
+		&--prev {
+			left: 0;
+		}
+
+		&--next {
+			right: 0;
+		}
+	}
+}
+
+@keyframes fixora-story-emoji-float {
+	0% {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0) scale(0.6);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-80px) scale(1.2);
+	}
+}
+
+// Ring styles — gradient border via padding trick
+.fixora-pp-story__ring {
+	padding: 2.5px !important;
+	border: none !important;
+	background: linear-gradient(135deg, #ff6b00 0%, #ff9a3c 50%, #ffcc00 100%) !important;
+	box-shadow: 0 0 16px rgba(255, 107, 0, 0.35);
+
+	&--seen {
+		background: linear-gradient(135deg, #2a2a2a, #2a2a2a) !important;
+		box-shadow: none;
+	}
+}
+
+.fixora-pp-story__ring-inner {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: #0d0d0d;
+	border: 2px solid #0d0d0d;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.fixora-pp-story__badge {
+	background: #ff6b00;
+}
+
+.fixora-pp-story__label--seen {
+	color: #505050 !important;
+	font-weight: 400 !important;
+	max-width: 72px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: center;
+}
+
+.fixora-tech-profile__stories {
+	margin-bottom: 24px;
+}

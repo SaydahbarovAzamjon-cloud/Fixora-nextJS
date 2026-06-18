@@ -13,6 +13,7 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { TechnicianSummary } from '../../types/fixora/fixora';
 import { userVar } from '../../../apollo/store';
+import { formatKrwNumber } from '../../utils/formatCurrency';
 
 interface TechnicianResultCardProps {
 	technician: TechnicianSummary;
@@ -138,7 +139,9 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 			{view === 'list' && (
 				<div className="fixora-result-card__aside">
 					{fromPrice !== null && (
-						<span className="fixora-result-card__price">{t('search.results.fromPrice', { price: fromPrice })}</span>
+						<span className="fixora-result-card__price">
+							{t('search.results.fromPrice', { price: formatKrwNumber(fromPrice) })}
+						</span>
 					)}
 					<span className="fixora-result-card__response">{t('search.results.responseTime')}</span>
 				</div>

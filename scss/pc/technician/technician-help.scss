@@ -1,0 +1,164 @@
+/** Technician Help & Support — dashboard page */
+
+.fth-page {
+	padding: 4px 4px 32px;
+	font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+	&__subtitle {
+		margin: 0 0 22px;
+		color: #808080;
+		font-size: 14px;
+		line-height: 1.6;
+		max-width: 640px;
+	}
+}
+
+.fth-grid {
+	display: grid;
+	grid-template-columns: 1.2fr 0.8fr;
+	gap: 18px;
+	align-items: start;
+}
+
+.fth-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.fth-card {
+	background: #0e0e0e;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 16px;
+	padding: 22px 24px;
+
+	&__title {
+		margin: 0 0 16px;
+		color: #f0f0f0;
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	&__hint {
+		margin: 12px 0 0;
+		color: #606060;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+}
+
+.fth-faq {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fth-faq__item {
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.02);
+	overflow: hidden;
+
+	&--open {
+		border-color: rgba(255, 107, 0, 0.25);
+		background: rgba(255, 107, 0, 0.04);
+	}
+}
+
+.fth-faq__q {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 16px;
+	border: none;
+	background: transparent;
+	color: #e8e8e8;
+	font-size: 14px;
+	font-weight: 600;
+	text-align: left;
+	cursor: pointer;
+	font-family: inherit;
+}
+
+.fth-faq__chevron {
+	color: #808080;
+	transition: transform 0.2s ease;
+	flex-shrink: 0;
+}
+
+.fth-faq__item--open .fth-faq__chevron {
+	transform: rotate(180deg);
+	color: #ff6b00;
+}
+
+.fth-faq__a {
+	margin: 0;
+	padding: 0 16px 14px;
+	color: #a0a0a0;
+	font-size: 13px;
+	line-height: 1.65;
+}
+
+.fth-contact-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: #ff6b00;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	margin-bottom: 10px;
+
+	&--muted {
+		color: #b0b0b0;
+		font-weight: 500;
+	}
+}
+
+.fth-links {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fth-link {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 10px 14px;
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.03);
+	color: #d0d0d0;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	transition: border-color 0.15s ease, background 0.15s ease;
+
+	&:hover {
+		border-color: rgba(255, 107, 0, 0.35);
+		background: rgba(255, 107, 0, 0.08);
+		color: #fff;
+	}
+}
+
+.fth-issues {
+	margin: 0;
+	padding-left: 18px;
+	color: #a0a0a0;
+	font-size: 13px;
+	line-height: 1.7;
+
+	li + li {
+		margin-top: 8px;
+	}
+}
+
+@media (max-width: 960px) {
+	.fth-grid {
+		grid-template-columns: 1fr;
+	}
+}

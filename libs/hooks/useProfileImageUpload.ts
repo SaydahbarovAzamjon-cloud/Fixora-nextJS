@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { profileImageDraftVar } from '../../apollo/store';
 import { getJwtToken } from '../auth';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 import { formatFileSize, validateCoverFile } from './useArticleCoverUpload';
@@ -10,6 +11,8 @@ export interface ProfileFileState {
 	file: File;
 	previewUrl: string;
 }
+
+const UPLOAD_TARGETS = ['member', 'user'] as const;
 
 export function useProfileImageUpload(onError?: (key: string) => void) {
 	const [cover, setCover] = useState<ProfileFileState | null>(null);
@@ -31,7 +34,10 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 	const setExistingImage = useCallback((path?: string | null) => {
 		setExistingPath(path ?? null);
 		setRemoteUrl(path ? resolveProfileImageUrl(path) : null);
-	}, []);
+		if (!cover?.file) {
+			profileImageDraftVar(null);
+		}
+	}, [cover?.file]);
 
 	const clearCover = useCallback(() => {
 		setCover((prev) => {
@@ -40,6 +46,7 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 		});
 		setRemoteUrl(null);
 		setExistingPath(null);
+		profileImageDraftVar(null);
 	}, []);
 
 	const applyFile = useCallback(
@@ -51,7 +58,9 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 			}
 			setCover((prev) => {
 				if (prev?.previewUrl) URL.revokeObjectURL(prev.previewUrl);
-				return { file, previewUrl: URL.createObjectURL(file) };
+				const previewUrl = URL.createObjectURL(file);
+				profileImageDraftVar(previewUrl);
+				return { file, previewUrl };
 			});
 			return true;
 		},
@@ -77,9 +86,7 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 		[applyFile],
 	);
 
-	const uploadProfileImage = useCallback(async (): Promise<string | undefined> => {
-		if (!cover?.file) return existingPath ?? undefined;
-		const token = getJwtToken();
+	const uploadWithTarget = async (file: File, target: string, token: string): Promise<string> => {
 		const formData = new FormData();
 		formData.append(
 			'operations',
@@ -87,29 +94,57 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 				query: `mutation ImageUploader($file: Upload!, $target: String!) {
 					imageUploader(file: $file, target: $target)
 				}`,
-				variables: { file: null, target: 'user' },
+				variables: { file: null, target },
 			}),
 		);
 		formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
-		formData.append('0', cover.file);
+		formData.append('0', file);
+
+		const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+			headers: {
+				'Content-Type': 'multipart/form-data',
+				'apollo-require-preflight': true,
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if (response.data?.errors?.length) throw response.data;
+		const path: string | undefined = response.data?.data?.imageUploader;
+		if (!path) throw new Error('Upload failed');
+		return path.startsWith('http') ? path : path.replace(/^\//, '');
+	};
+
+	const uploadProfileImage = useCallback(async (): Promise<string | undefined> => {
+		if (!cover?.file) return existingPath ?? undefined;
+		const token = getJwtToken();
+		if (!token) throw new Error('Not authenticated');
 
 		setUploading(true);
 		try {
-			const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
-				headers: {
-					'Content-Type': 'multipart/form-data',
-					'apollo-require-preflight': true,
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			if (response.data?.errors?.length) throw response.data;
-			const path: string | undefined = response.data?.data?.imageUploader;
-			if (!path) throw new Error('Upload failed');
-			return path.startsWith('http') ? path : path.replace(/^\//, '');
+			let lastErr: unknown;
+			for (const target of UPLOAD_TARGETS) {
+				try {
+					return await uploadWithTarget(cover.file, target, token);
+				} catch (err) {
+					lastErr = err;
+				}
+			}
+			throw lastErr ?? new Error('Upload failed');
 		} finally {
 			setUploading(false);
 		}
 	}, [cover?.file, existingPath]);
+
+	const clearDraftAfterSave = useCallback((savedPath?: string | null) => {
+		setCover((prev) => {
+			if (prev?.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+			return null;
+		});
+		profileImageDraftVar(null);
+		if (savedPath) {
+			setExistingPath(savedPath);
+			setRemoteUrl(resolveProfileImageUrl(savedPath));
+		}
+	}, []);
 
 	return {
 		cover,
@@ -125,7 +160,8 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 		uploadProfileImage,
 		uploading,
 		setExistingImage,
+		clearDraftAfterSave,
 		openPicker: () => fileRef.current?.click(),
 		hasImage: !!(cover || remoteUrl),
 	};
-}
+};

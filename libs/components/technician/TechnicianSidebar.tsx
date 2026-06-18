@@ -16,7 +16,7 @@ import ArticleOutlined from '@mui/icons-material/ArticleOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import { userVar } from '../../../apollo/store';
+import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 import { FixoraLogo } from '../brand';
 
@@ -34,6 +34,7 @@ const TechnicianSidebar: React.FC = () => {
 	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const [isOnline] = useState(true);
 	const badges = useTechnicianBadges();
 
@@ -44,6 +45,8 @@ const TechnicianSidebar: React.FC = () => {
 		.slice(0, 2)
 		.join('')
 		.toUpperCase();
+
+	const avatarSrc = profileDraft ?? user?.memberImage;
 
 	const navItems: NavItem[] = [
 		{ id: 'dashboard', icon: <GridViewOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.dashboard', route: '/technician/dashboard' },
@@ -60,7 +63,7 @@ const TechnicianSidebar: React.FC = () => {
 
 	const bottomItems: NavItem[] = [
 		{ id: 'settings', icon: <SettingsOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.settings', route: '/technician/settings' },
-		{ id: 'help', icon: <HelpOutlineOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.help', route: '/cs' },
+		{ id: 'help', icon: <HelpOutlineOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.help', route: '/technician/help' },
 	];
 
 	const isActive = (route: string) => router.pathname === route;
@@ -117,8 +120,8 @@ const TechnicianSidebar: React.FC = () => {
 					onClick={() => router.push('/technician/profile')}
 				>
 					<div className="fixora-technician-sidebar__user-avatar">
-						{user?.memberImage
-							? <img src={resolveProfileImageUrl(user.memberImage)} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+						{avatarSrc
+							? <img src={resolveProfileImageUrl(avatarSrc)} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
 							: initials || 'T'}
 					</div>
 					<div className="fixora-technician-sidebar__user-info">

@@ -53,13 +53,23 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 
 	const handleSave = async () => {
 		let imagePath: string | undefined;
-		if (avatar.cover?.file) {
-			imagePath = await avatar.uploadProfileImage();
-			if (!imagePath) return;
-		} else if (!avatar.hasImage && user?.userProfileImage) {
-			imagePath = '';
+		try {
+			if (avatar.cover?.file) {
+				imagePath = await avatar.uploadProfileImage();
+				if (!imagePath) {
+					await sweetMixinErrorAlert(t('settings.profile.uploadFailed'));
+					return;
+				}
+			} else if (!avatar.hasImage && user?.userProfileImage) {
+				imagePath = '';
+			}
+			const ok = await onSave(imagePath);
+			if (ok) {
+				avatar.clearDraftAfterSave(imagePath === '' ? null : imagePath ?? user?.userProfileImage);
+			}
+		} catch {
+			await sweetMixinErrorAlert(t('settings.profile.uploadFailed'));
 		}
-		await onSave(imagePath);
 	};
 
 	return (

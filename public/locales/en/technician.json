@@ -284,7 +284,8 @@
       "profileUrl": "PROFILE URL",
       "bio": "BIO",
       "invalidType": "Only PNG, JPG, or WebP images are allowed.",
-      "tooLarge": "Image must be 5MB or smaller."
+      "tooLarge": "Image must be 5MB or smaller.",
+      "uploadFailed": "Could not upload profile photo. Please try again."
     },
     "account": {
       "title": "Account Settings",
@@ -501,6 +502,47 @@
       "empty": "No comments on this article yet.",
       "total": "{{count}} comments",
       "viewArticle": "View full article"
+    }
+  },
+  "help": {
+    "subtitle": "Find answers, contact support, and get back to work quickly.",
+    "faqTitle": "Frequently Asked Questions",
+    "contactTitle": "Contact Support",
+    "contactEmail": "support@fixora.io",
+    "contactHours": "Monday – Friday, 9:00 AM – 6:00 PM KST",
+    "contactHint": "We typically respond within one business day.",
+    "quickLinksTitle": "Quick Links",
+    "linkSettings": "Account Settings",
+    "linkMessages": "Messages",
+    "linkProfile": "Public Profile",
+    "issuesTitle": "Common Issues",
+    "issues": {
+      "0": "Story not visible — ensure your technician account is approved and the story is less than 24 hours old.",
+      "1": "Profile photo not updating — click Save Changes after uploading your image.",
+      "2": "Messages not received — check that the customer is logged in and not messaging their own story.",
+      "3": "Booking requests missing — confirm you are marked Available on the dashboard."
+    },
+    "faq": {
+      "0": {
+        "q": "How do I accept a repair request?",
+        "a": "Go to Incoming Requests, review the job details, and tap Accept. The customer is notified immediately."
+      },
+      "1": {
+        "q": "When can customers see my phone number?",
+        "a": "Phone numbers are hidden in chat until a booking is accepted (ACCEPTED status or later)."
+      },
+      "2": {
+        "q": "How do repair stories work?",
+        "a": "Stories are live for 24 hours. Upload 1–5 photos from your Public Profile to showcase recent work."
+      },
+      "3": {
+        "q": "How do payouts work?",
+        "a": "View Earnings for completed jobs. Deposits and final payments follow the 50/50 Fixora payment flow."
+      },
+      "4": {
+        "q": "How do I update my services and prices?",
+        "a": "Open Settings → Profile or contact Fixora support if your service list needs a backend update."
+      }
     }
   }
 }

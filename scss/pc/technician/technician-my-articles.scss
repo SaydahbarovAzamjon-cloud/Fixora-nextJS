@@ -248,6 +248,11 @@ $text-dim: #606060;
 	height: 100%;
 	object-fit: cover;
 	display: block;
+	transition: transform 0.25s ease;
+}
+
+.ftma-card:hover .ftma-card__thumb-img {
+	transform: scale(1.08);
 }
 
 .ftma-card__thumb-empty {

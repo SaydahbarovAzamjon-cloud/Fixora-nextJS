@@ -11,7 +11,6 @@ import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
-import AddRounded from '@mui/icons-material/AddRounded';
 import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
 import LaptopMacOutlined from '@mui/icons-material/LaptopMacOutlined';
 import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
@@ -32,23 +31,18 @@ import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../../apollo/user/query';
 import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
 import { GET_TECHNICIAN_STORIES } from '../../../apollo/user/story';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
+import { useTranslation } from 'next-i18next';
 import TechTipCard from '../../../libs/components/homepage/TechTipCard';
-import CreateStoryModal from '../../../libs/components/technician/CreateStoryModal';
+import RepairStoriesRow from '../../../libs/components/story/RepairStoriesRow';
 import { Article, ArticleSummary, Story, TechnicianReview } from '../../../libs/types/fixora/fixora';
 import { T } from '../../../libs/types/common';
-import { Messages, REACT_APP_API_URL } from '../../../libs/config';
+import { Messages } from '../../../libs/config';
+import { formatKrwNumber } from '../../../libs/utils/formatCurrency';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
 });
-
-const STORY_COLORS = ['#FF6B00', '#3B82F6', '#A855F7', '#22C55E', '#F59E0B', '#EC4899'];
-
-const storyImageUrl = (url?: string): string => {
-	if (!url) return '';
-	return url.startsWith('http') ? url : `${REACT_APP_API_URL}/${url}`;
-};
 
 const TABS = ['Overview', 'Services', 'Portfolio', 'Reviews'];
 
@@ -106,9 +100,9 @@ const reviewStars = (r: TechnicianReview): number =>
 
 const PublicProfile: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const [activeTab, setActiveTab] = useState('Overview');
-	const [storyModalOpen, setStoryModalOpen] = useState(false);
 	const technicianId = user?._id;
 
 	const [subscribe] = useMutation(SUBSCRIBE);
@@ -289,50 +283,13 @@ const PublicProfile: NextPage = () => {
 				</div>
 			</div>
 
-			{/* Repair Stories */}
-			<div className="fixora-pp-stories-card">
-				<div className="fixora-pp-stories-card__head">
-					<h2 className="fixora-pp-stories-card__title">Repair Stories</h2>
-					<div className="fixora-pp-stories-card__live">
-						<span className="fixora-pp-stories-card__live-dot" /> Live Portfolio
-					</div>
-				</div>
-				<div className="fixora-pp-stories">
-					{canCreateStory && (
-						<div className="fixora-pp-story">
-							<button className="fixora-pp-story__add" type="button" onClick={() => setStoryModalOpen(true)}>
-								<AddRounded style={{ fontSize: 24 }} />
-							</button>
-							<span className="fixora-pp-story__label fixora-pp-story__label--add">Add Story</span>
-						</div>
-					)}
-					{stories.map((s, i) => {
-						const color = STORY_COLORS[i % STORY_COLORS.length];
-						const cover = storyImageUrl(s.images?.[0]?.url);
-						const label = s.caption?.trim() || formatDate(s.createdAt);
-						return (
-							<div key={s._id} className="fixora-pp-story">
-								<button className="fixora-pp-story__ring" style={{ borderColor: color }} type="button">
-									{cover ? (
-										<img className="fixora-pp-story__cover" src={cover} alt="" />
-									) : (
-										<span className="fixora-pp-story__icon" style={{ color }}>
-											<BoltOutlined style={{ fontSize: 24 }} />
-										</span>
-									)}
-									<span className="fixora-pp-story__badge" style={{ background: color }} />
-								</button>
-								<span className="fixora-pp-story__label">{label}</span>
-							</div>
-						);
-					})}
-					{!canCreateStory && stories.length === 0 && (
-						<span className="fixora-pp-stories__empty">No stories yet.</span>
-					)}
-				</div>
-			</div>
-
-			<CreateStoryModal open={storyModalOpen} onClose={() => setStoryModalOpen(false)} onCreated={() => refetchStories()} />
+			<RepairStoriesRow
+				stories={stories}
+				owner={{ id: technicianId ?? '', name, avatar: profileImage || undefined }}
+				mode="preview"
+				canCreateStory={canCreateStory}
+				onStoriesChange={() => refetchStories()}
+			/>
 
 			{/* Tabs */}
 			<div className="fixora-pp-tabs">
@@ -465,7 +422,9 @@ const PublicProfile: NextPage = () => {
 								<div className="fixora-pp-service__title">{s.title}</div>
 								<div className="fixora-pp-service__foot">
 									<div>
-										<div className="fixora-pp-service__price">From ${s.basePrice}</div>
+										<div className="fixora-pp-service__price">
+											{t('technicianProfile.services.fromPrice', { price: formatKrwNumber(s.basePrice) })}
+										</div>
 									</div>
 									<button className="fixora-pp-service__book" type="button" onClick={bookServiceHandler}>Book Now</button>
 								</div>

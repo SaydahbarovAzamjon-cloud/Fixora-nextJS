@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
-import { CREATE_ARTICLE } from '../../apollo/user/article';
+import { CREATE_ARTICLE, UPDATE_ARTICLE } from '../../apollo/user/article';
 import { ArticleInput, ArticleStatus } from '../types/fixora/fixora';
 import { sweetErrorHandling, sweetMixinSuccessAlert } from '../sweetAlert';
 import {
 	REPAIR_TO_ARTICLE_CATEGORY,
 	RepairCategoryId,
 } from '../utils/articleCategoryMap';
+import { isLegacyArticleTemplate } from '../utils/articleContentTemplate';
+import {
+	getArticleLocalSettings,
+	saveArticleLocalSettings,
+} from '../utils/articleLocalSettings';
 
 export type PublicationMode = 'draft' | 'publish' | 'schedule';
 export type VisibilityMode = 'public' | 'technicians';
@@ -35,12 +40,20 @@ export interface FieldErrors {
 	keywords?: string;
 }
 
+export interface UseWriteArticleFormOptions {
+	editId?: string;
+	initialContent?: string;
+	skipDraft?: boolean;
+}
+
 const TITLE_MAX = 120;
 const EXCERPT_MAX = 280;
 const META_TITLE_MAX = 60;
 const META_DESC_MAX = 160;
 const KEYWORDS_MAX = 200;
 const CONTENT_MIN = 10;
+
+const DRAFT_KEY_PREFIX = 'fixora_article_draft_';
 
 export function stripMarkdownExcerpt(text: string, max = 140): string {
 	const stripped = text.replace(/#+\s|[*_`>|]/g, '').replace(/\s+/g, ' ').trim();
@@ -57,10 +70,14 @@ export function countWords(text: string): number {
 	return text.split(/\s+/).filter(Boolean).length;
 }
 
-const DRAFT_KEY_PREFIX = 'fixora_article_draft_';
-
-export function useWriteArticleForm(userId?: string, initialContent = '') {
+export function useWriteArticleForm(
+	userId?: string,
+	options: UseWriteArticleFormOptions = {},
+) {
+	const { editId, initialContent = '', skipDraft = false } = options;
 	const router = useRouter();
+	const isEdit = !!editId;
+
 	const [form, setForm] = useState<WriteArticleFormState>({
 		title: '',
 		excerpt: '',
@@ -78,8 +95,9 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 	const [submitting, setSubmitting] = useState(false);
 	const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 	const [createArticle] = useMutation(CREATE_ARTICLE);
+	const [updateArticle] = useMutation(UPDATE_ARTICLE);
 
-	const draftKey = userId ? `${DRAFT_KEY_PREFIX}${userId}` : null;
+	const draftKey = !skipDraft && !isEdit && userId ? `${DRAFT_KEY_PREFIX}${userId}` : null;
 
 	useEffect(() => {
 		if (!draftKey || typeof window === 'undefined') return;
@@ -87,6 +105,9 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 			const raw = localStorage.getItem(draftKey);
 			if (raw) {
 				const parsed = JSON.parse(raw) as Partial<WriteArticleFormState> & { savedAt?: string };
+				if (parsed.content && isLegacyArticleTemplate(parsed.content)) {
+					parsed.content = '';
+				}
 				setForm((prev) => ({ ...prev, ...parsed, pubMode: prev.pubMode }));
 				if (parsed.savedAt) setLastSavedAt(parsed.savedAt);
 			}
@@ -94,6 +115,18 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 			/* ignore corrupt draft */
 		}
 	}, [draftKey]);
+
+	useEffect(() => {
+		if (!editId || typeof window === 'undefined') return;
+		const local = getArticleLocalSettings(editId);
+		if (!local) return;
+		setForm((prev) => ({
+			...prev,
+			featured: local.featured,
+			allowComments: local.allowComments,
+			visibility: local.visibility,
+		}));
+	}, [editId]);
 
 	useEffect(() => {
 		if (!draftKey || typeof window === 'undefined') return;
@@ -187,28 +220,61 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 				}
 
 				const articleTitle = form.title.trim() || 'Untitled';
-				const result = await createArticle({
-					variables: {
-						input: {
-							articleTitle,
-							articleContent: form.content.trim() || ' ',
-							articleExcerpt: form.excerpt.trim() || undefined,
-							articleCategory: REPAIR_TO_ARTICLE_CATEGORY[form.categoryId],
-							articleImage,
-							articleStatus: status,
-						} as ArticleInput,
-					},
-				});
+				const payload = {
+					articleTitle,
+					articleContent: form.content.trim() || ' ',
+					articleExcerpt: form.excerpt.trim() || undefined,
+					articleImage,
+					articleStatus: status,
+				};
 
-				const newId = result.data?.createArticle?._id;
-				if (draftKey) localStorage.removeItem(draftKey);
+				if (isEdit && editId) {
+					const result = await updateArticle({
+						variables: {
+							input: {
+								_id: editId,
+								...payload,
+							},
+						},
+					});
+					const updatedId = result.data?.updateArticle?._id;
+					if (updatedId) {
+						saveArticleLocalSettings(updatedId, {
+							featured: form.featured,
+							allowComments: form.allowComments,
+							visibility: form.visibility,
+						});
+						await sweetMixinSuccessAlert(
+							status === 'DRAFT' ? 'Draft updated successfully.' : 'Article updated successfully.',
+							2000,
+						);
+						router.push('/technician/articles');
+					}
+				} else {
+					const result = await createArticle({
+						variables: {
+							input: {
+								...payload,
+								articleCategory: REPAIR_TO_ARTICLE_CATEGORY[form.categoryId],
+							} as ArticleInput,
+						},
+					});
 
-				if (newId) {
-					await sweetMixinSuccessAlert(
-						status === 'DRAFT' ? 'Draft saved successfully.' : 'Article published successfully.',
-						2000,
-					);
-					router.push(`/community/${newId}`);
+					const newId = result.data?.createArticle?._id;
+					if (draftKey) localStorage.removeItem(draftKey);
+
+					if (newId) {
+						saveArticleLocalSettings(newId, {
+							featured: form.featured,
+							allowComments: form.allowComments,
+							visibility: form.visibility,
+						});
+						await sweetMixinSuccessAlert(
+							status === 'DRAFT' ? 'Draft saved successfully.' : 'Article published successfully.',
+							2000,
+						);
+						router.push('/technician/articles');
+					}
 				}
 			} catch (err) {
 				await sweetErrorHandling(err);
@@ -216,7 +282,7 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 				setSubmitting(false);
 			}
 		},
-		[createArticle, draftKey, form, router, validate],
+		[createArticle, draftKey, editId, form, isEdit, router, updateArticle, validate],
 	);
 
 	return {
@@ -231,6 +297,7 @@ export function useWriteArticleForm(userId?: string, initialContent = '') {
 		wordCount,
 		submit,
 		validate,
+		isEdit,
 		limits: {
 			titleMax: TITLE_MAX,
 			excerptMax: EXCERPT_MAX,

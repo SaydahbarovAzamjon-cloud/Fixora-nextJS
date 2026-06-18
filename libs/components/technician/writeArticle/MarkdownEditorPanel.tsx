@@ -14,19 +14,7 @@ import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import WriteArticleCard from './WriteArticleCard';
 import { sweetMixinErrorAlert } from '../../../sweetAlert';
-
-const TOOLBAR_INSERT: Record<string, string> = {
-	heading: '\n## ',
-	bold: '**text**',
-	italic: '*text*',
-	bullet: '\n- ',
-	ordered: '\n1. ',
-	quote: '\n> ',
-	code: '\n```\ncode\n```\n',
-	link: '[text](url)',
-	image: '![alt](url)',
-	table: '\n| Col1 | Col2 |\n|------|------|\n| val  | val  |\n',
-};
+import { applyMarkdownFormat, MarkdownToolbarCmd } from '../../../utils/markdownEditorFormat';
 
 interface MarkdownEditorPanelProps {
 	value: string;
@@ -46,37 +34,54 @@ const MarkdownEditorPanel: React.FC<MarkdownEditorPanelProps> = ({
 	const { t } = useTranslation('technician');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const [activeCmd, setActiveCmd] = useState<string | null>(null);
+	const [focused, setFocused] = useState(false);
+	const templateText = t('writeArticle.contentTemplate');
 
-	const insertFormat = useCallback(
-		(cmd: string) => {
-			const snippet = TOOLBAR_INSERT[cmd];
-			if (!snippet) return;
+	const showPlaceholder = !value.trim() && !focused;
+
+	const focusEditor = useCallback(() => {
+		setFocused(true);
+		textareaRef.current?.focus();
+	}, []);
+
+	const applyFormat = useCallback(
+		(cmd: MarkdownToolbarCmd) => {
+			setFocused(true);
 			setActiveCmd(cmd);
 			setTimeout(() => setActiveCmd(null), 300);
 
 			const el = textareaRef.current;
-			if (!el) {
-				onChange(value + snippet);
-				return;
-			}
-			const start = el.selectionStart;
-			const end = el.selectionEnd;
-			const next = value.slice(0, start) + snippet + value.slice(end);
+			const start = el?.selectionStart ?? value.length;
+			const end = el?.selectionEnd ?? value.length;
+			const { next, selectionStart, selectionEnd } = applyMarkdownFormat(value, start, end, cmd);
 			onChange(next);
+
 			requestAnimationFrame(() => {
-				el.focus();
-				const pos = start + snippet.length;
-				el.setSelectionRange(pos, pos);
+				el?.focus();
+				el?.setSelectionRange(selectionStart, selectionEnd);
 			});
 		},
 		[onChange, value],
 	);
 
+	const handleFocus = () => {
+		setFocused(true);
+	};
+
+	const handleBlur = () => {
+		setFocused(false);
+	};
+
+	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setFocused(true);
+		onChange(e.target.value);
+	};
+
 	const onAiAssist = () => {
 		sweetMixinErrorAlert(t('writeArticle.aiAssistSoon')).then();
 	};
 
-	const toolbarGroups = [
+	const toolbarGroups: { cmd: MarkdownToolbarCmd; icon: React.ReactNode; label: string }[][] = [
 		[
 			{ cmd: 'heading', icon: <TitleOutlined style={{ fontSize: 14 }} />, label: t('writeArticle.toolbar.heading') },
 			{ cmd: 'bold', icon: <FormatBoldOutlined style={{ fontSize: 14 }} />, label: t('writeArticle.toolbar.bold') },
@@ -95,6 +100,16 @@ const MarkdownEditorPanel: React.FC<MarkdownEditorPanelProps> = ({
 		],
 	];
 
+	const statsText = showPlaceholder ? templateText : value;
+	const displayWordCount = showPlaceholder
+		? statsText.trim()
+			? statsText.trim().split(/\s+/).length
+			: 0
+		: wordCount;
+	const displayReadMinutes = showPlaceholder
+		? Math.max(1, Math.ceil(displayWordCount / 200))
+		: readMinutes;
+
 	return (
 		<WriteArticleCard padding={false}>
 			<div className="ftwa-editor">
@@ -103,10 +118,10 @@ const MarkdownEditorPanel: React.FC<MarkdownEditorPanelProps> = ({
 					<div className="ftwa-editor__stats">
 						<span className="ftwa-editor__stat">
 							<AccessTimeOutlined style={{ fontSize: 10 }} />
-							{t('writeArticle.readTime', { count: readMinutes })}
+							{t('writeArticle.readTime', { count: displayReadMinutes })}
 						</span>
 						<span className="ftwa-editor__dot">·</span>
-						<span className="ftwa-editor__stat">{t('writeArticle.wordCount', { count: wordCount })}</span>
+						<span className="ftwa-editor__stat">{t('writeArticle.wordCount', { count: displayWordCount })}</span>
 					</div>
 				</div>
 
@@ -119,7 +134,8 @@ const MarkdownEditorPanel: React.FC<MarkdownEditorPanelProps> = ({
 									type="button"
 									title={label}
 									className={`ftwa-toolbar__btn ${activeCmd === cmd ? 'ftwa-toolbar__btn--active' : ''}`}
-									onClick={() => insertFormat(cmd)}
+									onMouseDown={(e) => e.preventDefault()}
+									onClick={() => applyFormat(cmd)}
 								>
 									{icon}
 								</button>
@@ -133,13 +149,31 @@ const MarkdownEditorPanel: React.FC<MarkdownEditorPanelProps> = ({
 					</button>
 				</div>
 
-				<textarea
-					ref={textareaRef}
-					className={`ftwa-editor__area ${error ? 'ftwa-editor__area--error' : ''}`}
-					value={value}
-					onChange={(e) => onChange(e.target.value)}
-					spellCheck={false}
-				/>
+				<div
+					className="ftwa-editor__wrap"
+					onMouseDown={(e) => {
+						if (e.target === e.currentTarget) {
+							e.preventDefault();
+							focusEditor();
+						}
+					}}
+				>
+					{showPlaceholder && (
+						<div className="ftwa-editor__placeholder" aria-hidden="true">
+							{templateText}
+						</div>
+					)}
+					<textarea
+						ref={textareaRef}
+						className={`ftwa-editor__area ${error ? 'ftwa-editor__area--error' : ''}`}
+						value={value}
+						onChange={handleChange}
+						onFocus={handleFocus}
+						onBlur={handleBlur}
+						onMouseDown={() => setFocused(true)}
+						spellCheck={false}
+					/>
+				</div>
 				{error && <div className="ftwa-editor__error">{t(`writeArticle.errors.${error}`)}</div>}
 
 				<div className="ftwa-editor__footer">

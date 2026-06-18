@@ -12,6 +12,7 @@ interface WriteArticleActionBarProps {
 	onSaveDraft: () => void;
 	onPublish: () => void;
 	locale?: string;
+	isEdit?: boolean;
 }
 
 const WriteArticleActionBar: React.FC<WriteArticleActionBarProps> = ({
@@ -21,6 +22,7 @@ const WriteArticleActionBar: React.FC<WriteArticleActionBarProps> = ({
 	onSaveDraft,
 	onPublish,
 	locale,
+	isEdit = false,
 }) => {
 	const { t } = useTranslation('technician');
 
@@ -45,7 +47,13 @@ const WriteArticleActionBar: React.FC<WriteArticleActionBarProps> = ({
 			</button>
 			<button type="button" className="ftwa-action-bar__btn ftwa-action-bar__btn--primary" onClick={onPublish} disabled={submitting}>
 				<SendOutlined style={{ fontSize: 14 }} />
-				{submitting ? t('writeArticle.publishing') : t('writeArticle.publishArticle')}
+				{submitting
+					? isEdit
+						? t('writeArticle.updating')
+						: t('writeArticle.publishing')
+					: isEdit
+						? t('writeArticle.updateArticle')
+						: t('writeArticle.publishArticle')}
 			</button>
 		</div>
 	);

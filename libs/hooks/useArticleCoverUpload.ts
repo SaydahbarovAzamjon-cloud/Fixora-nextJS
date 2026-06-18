@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { getJwtToken } from '../auth';
 import { REACT_APP_API_URL } from '../config';
 import { sweetMixinErrorAlert } from '../sweetAlert';
+import { resolveArticleImageUrl } from '../utils/articleImage';
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -30,9 +31,13 @@ export interface CoverFileState {
 
 export function useArticleCoverUpload(onError?: (key: string) => void) {
 	const [cover, setCover] = useState<CoverFileState | null>(null);
+	const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
+	const [existingPath, setExistingPath] = useState<string | null>(null);
 	const [dragging, setDragging] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const fileRef = useRef<HTMLInputElement>(null);
+
+	const previewUrl = cover?.previewUrl ?? remoteUrl;
 
 	useEffect(() => {
 		return () => {
@@ -42,11 +47,18 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 		};
 	}, [cover?.previewUrl]);
 
+	const setExistingImage = useCallback((path?: string | null) => {
+		setExistingPath(path ?? null);
+		setRemoteUrl(path ? resolveArticleImageUrl(path) : null);
+	}, []);
+
 	const clearCover = useCallback(() => {
 		setCover((prev) => {
 			if (prev?.previewUrl) URL.revokeObjectURL(prev.previewUrl);
 			return null;
 		});
+		setRemoteUrl(null);
+		setExistingPath(null);
 	}, []);
 
 	const applyFile = useCallback(
@@ -56,6 +68,8 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 				onError?.(err);
 				return false;
 			}
+			setRemoteUrl(null);
+			setExistingPath(null);
 			setCover((prev) => {
 				if (prev?.previewUrl) URL.revokeObjectURL(prev.previewUrl);
 				return { file, previewUrl: URL.createObjectURL(file) };
@@ -85,7 +99,7 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 	);
 
 	const uploadCover = useCallback(async (): Promise<string | undefined> => {
-		if (!cover?.file) return undefined;
+		if (!cover?.file) return existingPath ?? undefined;
 		const token = getJwtToken();
 		const formData = new FormData();
 		formData.append(
@@ -112,14 +126,15 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 			if (response.data?.errors?.length) throw response.data;
 			const path: string | undefined = response.data?.data?.imageUploader;
 			if (!path) throw new Error('Upload failed');
-			return path.startsWith('http') ? path : `${REACT_APP_API_URL}/${path}`;
+			return path.startsWith('http') ? path : path.replace(/^\//, '');
 		} finally {
 			setUploading(false);
 		}
-	}, [cover?.file]);
+	}, [cover?.file, existingPath]);
 
 	return {
 		cover,
+		previewUrl,
 		dragging,
 		setDragging,
 		fileRef,
@@ -129,6 +144,8 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 		applyFile,
 		uploadCover,
 		uploading,
+		setExistingImage,
 		openPicker: () => fileRef.current?.click(),
+		hasImage: !!(cover || remoteUrl),
 	};
 }

@@ -26,6 +26,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
 	analytics: 'nav.analytics',
 	earnings: 'nav.earnings',
 	write: 'nav.writeArticle',
+	articles: 'nav.myArticles',
 	settings: 'nav.settings',
 	help: 'nav.help',
 };

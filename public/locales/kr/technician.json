@@ -12,6 +12,7 @@
     "analytics": "분석",
     "earnings": "수익",
     "writeArticle": "글 작성",
+    "myArticles": "내 글",
     "settings": "설정",
     "help": "도움말 및 지원",
     "mainMenu": "메인 메뉴",
@@ -310,6 +311,7 @@
     "excerptLabel": "짧은 설명",
     "excerptPlaceholder": "독자가 이 글에서 배울 내용을 간략히 요약하세요...",
     "contentLabel": "글 내용",
+    "contentTemplate": "## 소개\n\n여기에 글을 작성하세요. 수리 전문 지식을 공유하고 다른 기술자들을 도와주세요.\n\n### 일반적인 원인\n\n- 통풍구 먼지 축적\n- 서멀 페이스트 열화\n- 과도한 작업 부하\n\n### 단계별 해결 방법\n\n1. 기기를 완전히 끕니다\n2. 압축 공기로 통풍구를 청소합니다\n3. 새 서멀 페이스트를 바릅니다",
     "readTime": "약 {{count}}분 읽기",
     "readTimeShort": "{{count}}분",
     "wordCount": "{{count}}단어",
@@ -361,6 +363,13 @@
     "saving": "저장 중…",
     "publishing": "게시 중…",
     "loadingUser": "프로필 불러오는 중…",
+    "loadingArticle": "글 불러오는 중…",
+    "loadArticleError": "글을 불러올 수 없습니다.",
+    "editPageTitle": "글 수정",
+    "editPageSubtitle": "글 내용과 설정을 업데이트하세요.",
+    "editBadge": "수정 중",
+    "updateArticle": "글 업데이트",
+    "updating": "업데이트 중…",
     "errors": {
       "titleRequired": "게시하려면 제목이 필요합니다.",
       "titleMax": "제목은 120자 이하여야 합니다.",
@@ -371,6 +380,49 @@
       "keywordsMax": "키워드는 200자 이하여야 합니다.",
       "invalidImageType": "PNG, JPG, JPEG, WebP 이미지만 허용됩니다.",
       "imageTooLarge": "이미지는 5MB 이하여야 합니다."
+    }
+  },
+  "myArticles": {
+    "pageTitle": "내 글",
+    "pageSubtitle": "게시된 글을 관리하고, 참여도를 확인하고, 내용을 수정하세요.",
+    "newArticle": "새 글 작성",
+    "loading": "글 불러오는 중…",
+    "error": "글을 불러올 수 없습니다.",
+    "retry": "다시 시도",
+    "emptyTitle": "아직 글이 없습니다",
+    "emptySub": "수리 전문 지식을 공유하세요 — 첫 글을 작성하여 평판을 쌓으세요.",
+    "deleteConfirm": "이 글을 삭제하시겠습니까? 되돌릴 수 없습니다.",
+    "deleteSuccess": "글이 삭제되었습니다.",
+    "filters": {
+      "all": "전체",
+      "published": "게시됨",
+      "draft": "초안"
+    },
+    "status": {
+      "draft": "초안",
+      "published": "게시됨",
+      "featured": "추천"
+    },
+    "commentsDisabled": "이 글은 댓글이 비활성화되어 있습니다",
+    "summary": {
+      "articles": "글",
+      "likes": "좋아요",
+      "views": "조회",
+      "comments": "댓글"
+    },
+    "actions": {
+      "edit": "수정",
+      "delete": "삭제",
+      "deleting": "삭제 중…",
+      "view": "보기",
+      "viewComments": "댓글 보기"
+    },
+    "comments": {
+      "title": "댓글",
+      "close": "닫기",
+      "empty": "아직 댓글이 없습니다.",
+      "total": "댓글 {{count}}개",
+      "viewArticle": "전체 글 보기"
     }
   }
 }

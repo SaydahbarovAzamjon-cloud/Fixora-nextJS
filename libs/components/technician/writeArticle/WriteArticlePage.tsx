@@ -1,12 +1,14 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { useReactiveVar } from '@apollo/client';
+import { useQuery, useReactiveVar } from '@apollo/client';
 import { useRouter } from 'next/router';
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import TranslateOutlined from '@mui/icons-material/TranslateOutlined';
 import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import { userVar } from '../../../../apollo/store';
+import { GET_ARTICLE } from '../../../../apollo/user/article';
 import { sweetMixinErrorAlert } from '../../../sweetAlert';
+import { articleCategoryToRepairCategory } from '../../../utils/articleCategoryMap';
 import { useArticleCoverUpload } from '../../../hooks/useArticleCoverUpload';
 import { useWriteArticleForm } from '../../../hooks/useWriteArticleForm';
 import WriteArticleHeader from './WriteArticleHeader';
@@ -20,30 +22,15 @@ import ArticleSettingsPanel from './ArticleSettingsPanel';
 import WriteArticleActionBar from './WriteArticleActionBar';
 import PreviewFullArticleModal from './PreviewFullArticleModal';
 
-const INITIAL_CONTENT = `## Introduction
-
-Start writing your article here. Share your repair expertise and help other technicians.
-
-### Common Causes
-
-- Dust accumulation in vents
-- Thermal paste degradation
-- Heavy workload tasks
-
-### Step-by-Step Solution
-
-1. Power off the device completely
-2. Use compressed air to clean vents
-3. Apply fresh thermal paste
-
-> **Pro Tip:** Always work in an anti-static environment when opening Apple devices.
-`;
-
 const WriteArticlePage: React.FC = () => {
 	const { t, i18n } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [previewOpen, setPreviewOpen] = useState(false);
+	const [articleLoaded, setArticleLoaded] = useState(false);
+
+	const editId = typeof router.query.edit === 'string' ? router.query.edit : undefined;
+	const isEdit = !!editId;
 
 	const onUploadError = useCallback(
 		(key: string) => {
@@ -67,7 +54,35 @@ const WriteArticlePage: React.FC = () => {
 		wordCount,
 		submit,
 		limits,
-	} = useWriteArticleForm(user?._id, INITIAL_CONTENT);
+	} = useWriteArticleForm(user?._id, {
+		editId,
+		initialContent: '',
+		skipDraft: isEdit,
+	});
+
+	const { data: articleData, loading: articleLoading, error: articleError } = useQuery(GET_ARTICLE, {
+		variables: { input: editId! },
+		skip: !editId,
+		fetchPolicy: 'network-only',
+	});
+
+	useEffect(() => {
+		if (!editId || articleLoaded) return;
+		const article = articleData?.getArticle;
+		if (!article) return;
+
+		patch({
+			title: article.articleTitle ?? '',
+			excerpt: article.articleExcerpt ?? '',
+			content: article.articleContent ?? '',
+			categoryId: articleCategoryToRepairCategory(article.articleCategory),
+			pubMode: article.articleStatus === 'DRAFT' ? 'draft' : 'publish',
+		});
+		if (article.articleImage) {
+			coverUpload.setExistingImage(article.articleImage);
+		}
+		setArticleLoaded(true);
+	}, [articleData, articleLoaded, editId, patch, coverUpload.setExistingImage]);
 
 	const displayName = user?.memberFullName || user?.memberNick || t('nav.fallbackName');
 	const initials = useMemo(
@@ -92,9 +107,25 @@ const WriteArticlePage: React.FC = () => {
 		);
 	}
 
+	if (isEdit && articleLoading) {
+		return (
+			<div className="ftwa-page ftwa-page--empty">
+				<p>{t('writeArticle.loadingArticle')}</p>
+			</div>
+		);
+	}
+
+	if (isEdit && articleError) {
+		return (
+			<div className="ftwa-page ftwa-page--empty">
+				<p>{t('writeArticle.loadArticleError')}</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="ftwa-page">
-			<WriteArticleHeader />
+			<WriteArticleHeader isEdit={isEdit} />
 
 			<div className="ftwa-grid">
 				<div className="ftwa-grid__left">
@@ -106,6 +137,8 @@ const WriteArticlePage: React.FC = () => {
 					/>
 					<CoverImageUpload
 						cover={coverUpload.cover}
+						previewUrl={coverUpload.previewUrl}
+						hasImage={coverUpload.hasImage}
 						dragging={coverUpload.dragging}
 						fileRef={coverUpload.fileRef}
 						onPick={coverUpload.pickFile}
@@ -140,7 +173,7 @@ const WriteArticlePage: React.FC = () => {
 						title={previewTitle}
 						excerpt={previewExcerpt}
 						categoryId={form.categoryId}
-						coverPreviewUrl={coverUpload.cover?.previewUrl ?? null}
+						coverPreviewUrl={coverUpload.previewUrl}
 						readMinutes={readMinutes}
 					/>
 					<SeoSettingsPanel
@@ -173,6 +206,7 @@ const WriteArticlePage: React.FC = () => {
 				onSaveDraft={handleSaveDraft}
 				onPublish={handlePublish}
 				locale={i18n.language}
+				isEdit={isEdit}
 			/>
 
 			<div className="ftwa-fabs">
@@ -204,7 +238,7 @@ const WriteArticlePage: React.FC = () => {
 				excerpt={previewExcerpt}
 				content={form.content}
 				categoryId={form.categoryId}
-				coverPreviewUrl={coverUpload.cover?.previewUrl ?? null}
+				coverPreviewUrl={coverUpload.previewUrl}
 				readMinutes={readMinutes}
 				authorName={displayName}
 				authorRole={t('nav.proTechnician')}

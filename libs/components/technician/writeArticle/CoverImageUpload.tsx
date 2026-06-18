@@ -8,6 +8,8 @@ import { CoverFileState, formatFileSize } from '../../../hooks/useArticleCoverUp
 
 interface CoverImageUploadProps {
 	cover: CoverFileState | null;
+	previewUrl: string | null;
+	hasImage: boolean;
 	dragging: boolean;
 	fileRef: React.RefObject<HTMLInputElement>;
 	onPick: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -21,6 +23,8 @@ interface CoverImageUploadProps {
 
 const CoverImageUpload: React.FC<CoverImageUploadProps> = ({
 	cover,
+	previewUrl,
+	hasImage,
 	dragging,
 	fileRef,
 	onPick,
@@ -36,15 +40,17 @@ const CoverImageUpload: React.FC<CoverImageUploadProps> = ({
 	return (
 		<WriteArticleCard>
 			<label className="ftwa-label">{t('writeArticle.coverLabel')}</label>
-			{cover ? (
+			{hasImage && previewUrl ? (
 				<div className="ftwa-cover-preview">
-					<img src={cover.previewUrl} alt="" className="ftwa-cover-preview__img" />
-					<div className="ftwa-cover-preview__meta">
-						<div className="ftwa-cover-preview__name">{cover.file.name}</div>
-						<div className="ftwa-cover-preview__details">
-							{formatFileSize(cover.file.size)} · {cover.file.type || t('writeArticle.unknownType')}
+					<img src={previewUrl} alt="" className="ftwa-cover-preview__img" />
+					{cover && (
+						<div className="ftwa-cover-preview__meta">
+							<div className="ftwa-cover-preview__name">{cover.file.name}</div>
+							<div className="ftwa-cover-preview__details">
+								{formatFileSize(cover.file.size)} · {cover.file.type || t('writeArticle.unknownType')}
+							</div>
 						</div>
-					</div>
+					)}
 					<div className="ftwa-cover-preview__actions">
 						<button type="button" className="ftwa-cover-preview__btn" onClick={onReplace}>
 							<SwapHorizOutlined style={{ fontSize: 14 }} />

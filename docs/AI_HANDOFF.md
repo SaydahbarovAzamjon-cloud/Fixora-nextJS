@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-18 |
 | **Last agent** | Cursor |
-| **Last session** | **Write Article — Technician Dashboard 1:1 (P3-13)** — `/technician/write`: Figma-matched editor (title, cover DnD upload, category pills, excerpt, markdown editor, live preview, SEO/settings panels, sticky action bar); `createArticle` + `imageUploader(target:"article")`; EN/KR `technician.writeArticle` i18n; sidebar Write Article nav; technicians on `/community/write` redirect. GAP-080…084 in `BACKEND_GAPS.md`. |
-| **Last session (prev)** | **Technician Dashboard interactions (P3-13)** — dashboard quick actions, earnings chart, schedule modal. |
+| **Last session** | **My Articles dashboard (P3-13)** — `/technician/articles`: real `getMyArticles`, homepage `TechTipCard` design + edit/delete/view, comments modal, filters; `updateArticle`/`deleteArticle`; Write Article edit mode (`?edit=id`). Sidebar **My Articles** nav. EN/KR i18n. |
+| **Last session (prev)** | **Write Article 1:1** — `/technician/write` Figma editor + `createArticle`. |
 | **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
 
 ---

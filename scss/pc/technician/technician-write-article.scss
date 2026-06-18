@@ -395,12 +395,38 @@ $border-input: rgba(255, 255, 255, 0.09);
 		color: #404040;
 	}
 
-	&__area {
-		width: 100%;
-		min-height: 420px;
+	&__wrap {
+		position: relative;
 		background: $bg-editor;
 		border: 1px solid $border;
 		border-top: none;
+		border-radius: 0 0 10px 10px;
+
+		&:focus-within {
+			border-color: rgba(255, 107, 0, 0.3);
+		}
+	}
+
+	&__placeholder {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		padding: 18px 20px;
+		color: #888888;
+		font-size: 14px;
+		line-height: 1.8;
+		font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+		white-space: pre-wrap;
+		word-break: break-word;
+		pointer-events: none;
+		overflow: hidden;
+	}
+
+	&__area {
+		width: 100%;
+		min-height: 420px;
+		background: transparent;
+		border: none;
 		border-radius: 0 0 10px 10px;
 		padding: 18px 20px;
 		color: #D0D0D0;
@@ -410,13 +436,15 @@ $border-input: rgba(255, 255, 255, 0.09);
 		outline: none;
 		font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 		box-sizing: border-box;
+		position: relative;
+		z-index: 1;
 
 		&:focus {
-			border-color: rgba(255, 107, 0, 0.3);
+			outline: none;
 		}
 
 		&--error {
-			border-color: rgba(239, 68, 68, 0.4);
+			box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.4);
 		}
 	}
 

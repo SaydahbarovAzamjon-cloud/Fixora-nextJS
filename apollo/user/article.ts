@@ -125,3 +125,30 @@ export const UPDATE_ARTICLE_COMMENT = gql`
 		}
 	}
 `;
+
+export const UPDATE_ARTICLE = gql`
+	mutation UpdateArticle($input: ArticleUpdate!) {
+		updateArticle(input: $input) {
+			_id
+			articleCategory
+			articleTitle
+			articleContent
+			articleExcerpt
+			articleImage
+			articleStatus
+			articleLikes
+			articleViews
+			articleComments
+			updatedAt
+		}
+	}
+`;
+
+export const DELETE_ARTICLE = gql`
+	mutation DeleteArticle($articleId: String!) {
+		deleteArticle(articleId: $articleId) {
+			_id
+			articleStatus
+		}
+	}
+`;

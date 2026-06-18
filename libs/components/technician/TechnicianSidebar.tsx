@@ -12,6 +12,7 @@ import PersonOutlineOutlined from '@mui/icons-material/PersonOutlineOutlined';
 import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
 import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined';
+import ArticleOutlined from '@mui/icons-material/ArticleOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -54,6 +55,7 @@ const TechnicianSidebar: React.FC = () => {
 		{ id: 'analytics', icon: <BarChartOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.analytics', route: '/technician/analytics' },
 		{ id: 'earnings', icon: <AttachMoneyOutlined style={{ fontSize: ICON_SIZE + 1 }} />, labelKey: 'nav.earnings', route: '/technician/earnings' },
 		{ id: 'write', icon: <MenuBookOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.writeArticle', route: '/technician/write' },
+		{ id: 'articles', icon: <ArticleOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.myArticles', route: '/technician/articles' },
 	];
 
 	const bottomItems: NavItem[] = [

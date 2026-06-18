@@ -12,6 +12,7 @@
     "analytics": "Analytics",
     "earnings": "Earnings",
     "writeArticle": "Write Article",
+    "myArticles": "My Articles",
     "settings": "Settings",
     "help": "Help & Support",
     "mainMenu": "MAIN MENU",
@@ -310,6 +311,7 @@
     "excerptLabel": "SHORT DESCRIPTION",
     "excerptPlaceholder": "A concise summary of what readers will learn from this article...",
     "contentLabel": "ARTICLE CONTENT",
+    "contentTemplate": "## Intro\n\nStart writing your article here. Share your repair expertise and help other technicians.\n\n### Common Causes\n\n- Dust accumulation in vents\n- Thermal paste degradation\n- Heavy workload tasks\n\n### Step-by-Step Solution\n\n1. Power off the device completely\n2. Use compressed air to clean vents\n3. Apply fresh thermal paste",
     "readTime": "~{{count}} min read",
     "readTimeShort": "{{count}} min",
     "wordCount": "{{count}} words",
@@ -361,6 +363,13 @@
     "saving": "Saving…",
     "publishing": "Publishing…",
     "loadingUser": "Loading your profile…",
+    "loadingArticle": "Loading article…",
+    "loadArticleError": "Could not load this article.",
+    "editPageTitle": "Edit Article",
+    "editPageSubtitle": "Update your article content and settings.",
+    "editBadge": "Editing",
+    "updateArticle": "Update Article",
+    "updating": "Updating…",
     "errors": {
       "titleRequired": "Title is required to publish.",
       "titleMax": "Title must be 120 characters or fewer.",
@@ -371,6 +380,49 @@
       "keywordsMax": "Keywords must be 200 characters or fewer.",
       "invalidImageType": "Only PNG, JPG, JPEG, or WebP images are allowed.",
       "imageTooLarge": "Image must be 5MB or smaller."
+    }
+  },
+  "myArticles": {
+    "pageTitle": "My Articles",
+    "pageSubtitle": "Manage your published articles, track engagement, and edit content.",
+    "newArticle": "New Article",
+    "loading": "Loading articles…",
+    "error": "Could not load your articles.",
+    "retry": "Try again",
+    "emptyTitle": "No articles yet",
+    "emptySub": "Share your repair expertise — write your first article to build your reputation.",
+    "deleteConfirm": "Delete this article? This action cannot be undone.",
+    "deleteSuccess": "Article deleted.",
+    "filters": {
+      "all": "All",
+      "published": "Published",
+      "draft": "Drafts"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "featured": "Featured"
+    },
+    "commentsDisabled": "Comments are disabled for this article",
+    "summary": {
+      "articles": "Articles",
+      "likes": "Likes",
+      "views": "Views",
+      "comments": "Comments"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "view": "View",
+      "viewComments": "View comments"
+    },
+    "comments": {
+      "title": "Comments",
+      "close": "Close",
+      "empty": "No comments on this article yet.",
+      "total": "{{count}} comments",
+      "viewArticle": "View full article"
     }
   }
 }

@@ -27,6 +27,16 @@ import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
 import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { formatKrw, formatKrwCompact } from '../../libs/utils/formatCurrency';
+import {
+	buildDashboardMonthSeries,
+	buildDashboardWeekSeries,
+	buildDashboardYearSeries,
+	customerName,
+	deviceServiceLabel,
+	hasSeriesData,
+	parsePrice,
+} from '../../libs/utils/technicianMetrics';
 
 type Period = 'Week' | 'Month' | 'Year';
 
@@ -59,26 +69,12 @@ const DeviceIcon = ({ type }: { type?: string | null }) => {
 	}
 };
 
-const formatMoney = (value: number | string) => {
-	const num = typeof value === 'string' ? parseFloat(value) : value;
-	if (Number.isNaN(num)) return '0';
-	return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
-};
-
-const customerName = (entity?: any) =>
-	entity?.customerData?.userFullName || entity?.customerData?.userNickname || 'Customer';
-
 const customerInitial = (entity?: any) => {
-	const name = entity?.customerData?.userFullName || entity?.customerData?.userNickname;
+	const name = customerName(entity);
 	return name ? name.charAt(0).toUpperCase() : 'C';
 };
 
-const deviceLabel = (booking?: any) => {
-	const d = booking?.deviceData;
-	// Show the model alone ("iPhone 15 Plus", "MacBook Air M2") — the brand is
-	// redundant for Apple devices and would render "APPLE Apple Watch SE 2".
-	return d?.deviceModel?.trim() || d?.deviceBrand?.trim() || booking?.problemTitle || 'Repair';
-};
+const deviceLabel = deviceServiceLabel;
 
 const inferComplexity = (title?: string | null, desc?: string | null): string => {
 	const t = ((title || '') + ' ' + (desc || '')).toLowerCase();
@@ -100,10 +96,8 @@ const urgencyInfo = (complexity?: string | null, title?: string | null, desc?: s
 };
 
 const bookingPrice = (booking: any): string | null => {
-	const raw = booking?.estimatedPrice ?? booking?.finalPrice ?? booking?.serviceFee ?? booking?.aiClassification?.estimatedCost ?? booking?.price;
-	if (raw == null) return null;
-	const num = parseFloat(raw);
-	return Number.isNaN(num) ? null : `$${Math.round(num)}`;
+	const num = parsePrice(booking);
+	return num > 0 ? formatKrw(num) : null;
 };
 
 const jobStatusInfo = (status: string) => {
@@ -249,79 +243,14 @@ const TechnicianDashboard: NextPage = () => {
 	const completedBookings = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'COMPLETED'), [bookings]);
 
 	const earnings = useMemo(() => {
-		return completedBookings
-			.reduce((sum: number, b: any) => sum + (parseFloat(b?.finalPrice) || 0), 0)
-			.toFixed(2);
+		return completedBookings.reduce((sum: number, b: any) => sum + parsePrice(b), 0).toFixed(2);
 	}, [completedBookings]);
 
-	// Completion date for a booking, with sensible fallbacks
-	const completionDate = (b: any): Date => new Date(b?.completedAt || b?.bookingDate || b?.updatedAt || b?.createdAt);
-
-	// --- Real earnings series, bucketed by the selected period ---
-	const weekData = useMemo(() => {
-		const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-		const week = labels.map((label) => ({ label, earnings: 0, jobs: 0 }));
-		const now = new Date();
-		const monday = new Date(now);
-		const dow = (now.getDay() + 6) % 7; // 0 = Monday
-		monday.setHours(0, 0, 0, 0);
-		monday.setDate(now.getDate() - dow);
-		const nextMonday = new Date(monday);
-		nextMonday.setDate(monday.getDate() + 7);
-
-		completedBookings.forEach((b: any) => {
-			const when = completionDate(b);
-			if (Number.isNaN(when.getTime()) || when < monday || when >= nextMonday) return;
-			const idx = (when.getDay() + 6) % 7;
-			week[idx].earnings += parseFloat(b?.finalPrice) || 0;
-			week[idx].jobs += 1;
-		});
-		return week;
-	}, [completedBookings]);
-
-	// Last ~4 weeks (oldest → newest), labelled by week-start date
-	const monthData = useMemo(() => {
-		const now = new Date();
-		const thisMonday = new Date(now);
-		const dow = (now.getDay() + 6) % 7;
-		thisMonday.setHours(0, 0, 0, 0);
-		thisMonday.setDate(now.getDate() - dow);
-
-		const buckets = Array.from({ length: 4 }).map((_, i) => {
-			const start = new Date(thisMonday);
-			start.setDate(thisMonday.getDate() - (3 - i) * 7);
-			return { start, label: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), earnings: 0, jobs: 0 };
-		});
-		const firstStart = buckets[0].start;
-		const end = new Date(thisMonday);
-		end.setDate(thisMonday.getDate() + 7);
-
-		completedBookings.forEach((b: any) => {
-			const when = completionDate(b);
-			if (Number.isNaN(when.getTime()) || when < firstStart || when >= end) return;
-			const idx = Math.min(3, Math.floor((when.getTime() - firstStart.getTime()) / (7 * 86400000)));
-			buckets[idx].earnings += parseFloat(b?.finalPrice) || 0;
-			buckets[idx].jobs += 1;
-		});
-		return buckets.map(({ label, earnings, jobs }) => ({ label, earnings, jobs }));
-	}, [completedBookings]);
-
-	// 12 months of the current year
-	const yearData = useMemo(() => {
-		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-		const year = new Date().getFullYear();
-		const data = months.map((label) => ({ label, earnings: 0, jobs: 0 }));
-		completedBookings.forEach((b: any) => {
-			const when = completionDate(b);
-			if (Number.isNaN(when.getTime()) || when.getFullYear() !== year) return;
-			data[when.getMonth()].earnings += parseFloat(b?.finalPrice) || 0;
-			data[when.getMonth()].jobs += 1;
-		});
-		return data;
-	}, [completedBookings]);
+	const weekData = useMemo(() => buildDashboardWeekSeries(completedBookings), [completedBookings]);
+	const monthData = useMemo(() => buildDashboardMonthSeries(completedBookings), [completedBookings]);
+	const yearData = useMemo(() => buildDashboardYearSeries(completedBookings), [completedBookings]);
 
 	// Default to the smallest period that actually has earnings, so the line is never falsely empty
-	const hasSeriesData = (s: { earnings: number }[]) => s.some((d) => d.earnings > 0);
 	const activePeriod: Period =
 		period ?? (hasSeriesData(weekData) ? 'Week' : hasSeriesData(monthData) ? 'Month' : hasSeriesData(yearData) ? 'Year' : 'Week');
 	const chartData = activePeriod === 'Year' ? yearData : activePeriod === 'Month' ? monthData : weekData;
@@ -490,7 +419,7 @@ const TechnicianDashboard: NextPage = () => {
 							<div className="fixora-tech-stat-label">This Week</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green"><AttachMoneyOutlined style={{ fontSize: 20 }} /></div>
 						</div>
-						<div className="fixora-tech-stat-value">${formatMoney(earnings)}</div>
+						<div className="fixora-tech-stat-value">{formatKrw(earnings)}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
 							<span className="fixora-tech-stat-change__up">+{earningsChange}%</span> vs last week
@@ -599,7 +528,7 @@ const TechnicianDashboard: NextPage = () => {
 							<div>
 								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
 								<div className="fixora-tech-earnings-info">
-									<div className="fixora-tech-earnings-amount">${formatMoney(periodEarnings)}</div>
+									<div className="fixora-tech-earnings-amount">{formatKrw(periodEarnings)}</div>
 									<div className="fixora-tech-earnings-change"><TrendingUpOutlined style={{ fontSize: 13 }} /> +{earningsChange}% vs last week</div>
 								</div>
 							</div>
@@ -629,12 +558,12 @@ const TechnicianDashboard: NextPage = () => {
 										</defs>
 										<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
 										<XAxis dataKey="label" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, chartYMax]} allowDecimals={false} />
+										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, chartYMax]} allowDecimals={false} tickFormatter={(v) => formatKrwCompact(v)} />
 										<Tooltip
 											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
 											labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
 											itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
-											formatter={(v: any) => [`$${v}`, 'Earnings']}
+											formatter={(v: any) => [formatKrw(v), 'Earnings']}
 										/>
 										<Area
 											type="monotone"

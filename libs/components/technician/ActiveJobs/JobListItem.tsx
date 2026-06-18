@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Chip, LinearProgress, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { JOB_STAGE_INFO, JobStage, deviceIcon, deviceLabel, getJobProgress } from './jobHelpers';
+import { formatKrw } from '../../../utils/formatCurrency';
 
 interface JobListItemProps {
 	job: any;
@@ -80,7 +81,7 @@ const JobListItem: React.FC<JobListItemProps> = ({ job, active, onClick }) => {
 
 			<ProgressTrack variant="determinate" value={progress} barcolor={stageInfo.color} />
 			<Stack direction="row" justifyContent="space-between" alignItems="center" mt={0.75}>
-				<Typography sx={{ color: '#FF6B00', fontSize: 13, fontWeight: 700 }}>${price.toFixed(2)}</Typography>
+				<Typography sx={{ color: '#FF6B00', fontSize: 13, fontWeight: 700 }}>{formatKrw(price)}</Typography>
 				<Typography sx={{ color: '#606060', fontSize: 11 }}>{progress}%</Typography>
 			</Stack>
 		</Card>

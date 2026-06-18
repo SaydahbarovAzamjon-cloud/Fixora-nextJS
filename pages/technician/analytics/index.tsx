@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useQuery, useReactiveVar } from '@apollo/client';
 import {
 	ComposedChart,
 	Area,
@@ -26,49 +27,57 @@ import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
 import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import StarRounded from '@mui/icons-material/StarRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
+import { GET_TECHNICIAN_REVIEWS, GET_USER } from '../../../apollo/user/query';
+import { userVar } from '../../../apollo/store';
+import { buildKrwTicks, formatKrw, formatKrwCompact } from '../../../libs/utils/formatCurrency';
+import {
+	AnalyticsRange,
+	buildDeviceBreakdown,
+	buildIssueRevenue,
+	buildRatingTrend,
+	buildRevenueJobsSeries,
+	buildTopClients,
+	computeCompletionRate,
+	computeRepeatClientRate,
+	getCompletedBookings,
+	hasRealBookings,
+	withFallback,
+} from '../../../libs/utils/technicianMetrics';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
 });
 
-const RANGES = ['7 Days', '30 Days', '3 Months', 'Year'];
+const RANGES: AnalyticsRange[] = ['7 Days', '30 Days', '3 Months', 'Year'];
 
-const KPIS = [
-	{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: '+12%', value: '137', label: 'Total Jobs' },
-	{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: '+3%', value: '94%', label: 'Completion Rate' },
-	{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: '-4m', value: '11m', label: 'Avg Response' },
-	{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: '+6%', value: '38%', label: 'Repeat Clients' },
-	{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: '+0.1', value: '4.9', label: 'Avg Rating' },
-	{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: 'rank', value: 'Top 3%', label: 'Top Performer' },
+const DEMO_REVENUE = [
+	{ day: 'Mon', revenue: 560000, jobs: 3 },
+	{ day: 'Tue', revenue: 907000, jobs: 4 },
+	{ day: 'Wed', revenue: 320000, jobs: 2 },
+	{ day: 'Thu', revenue: 1307000, jobs: 7 },
+	{ day: 'Fri', revenue: 1534000, jobs: 8 },
+	{ day: 'Sat', revenue: 933000, jobs: 5 },
+	{ day: 'Sun', revenue: 400000, jobs: 2 },
 ];
 
-const revenueData = [
-	{ day: 'Mon', revenue: 420, jobs: 3 },
-	{ day: 'Tue', revenue: 680, jobs: 4 },
-	{ day: 'Wed', revenue: 240, jobs: 2 },
-	{ day: 'Thu', revenue: 980, jobs: 7 },
-	{ day: 'Fri', revenue: 1150, jobs: 8 },
-	{ day: 'Sat', revenue: 700, jobs: 5 },
-	{ day: 'Sun', revenue: 300, jobs: 2 },
-];
-
-const deviceData = [
+const DEMO_DEVICES = [
 	{ name: 'iPhone', value: 54, color: '#FF6B00' },
 	{ name: 'MacBook', value: 28, color: '#3B82F6' },
 	{ name: 'iPad', value: 12, color: '#22C55E' },
 	{ name: 'Apple Watch', value: 6, color: '#A855F7' },
 ];
 
-const repairTypeData = [
-	{ type: 'Screen', revenue: 6200, color: '#FF6B00' },
-	{ type: 'Battery', revenue: 2700, color: '#FBBF77' },
-	{ type: 'Water', revenue: 4200, color: '#3B82F6' },
-	{ type: 'Camera', revenue: 2800, color: '#22C55E' },
-	{ type: 'Logic', revenue: 5400, color: '#A855F7' },
-	{ type: 'Charging', revenue: 1500, color: '#F5C518' },
+const DEMO_REPAIR_TYPES = [
+	{ type: 'Screen', revenue: 8266000, color: '#FF6B00' },
+	{ type: 'Battery', revenue: 3601000, color: '#FBBF77' },
+	{ type: 'Water', revenue: 5602000, color: '#3B82F6' },
+	{ type: 'Camera', revenue: 3734000, color: '#22C55E' },
+	{ type: 'Logic', revenue: 7202000, color: '#A855F7' },
+	{ type: 'Charging', revenue: 2001000, color: '#F5C518' },
 ];
 
-const ratingTrend = [
+const DEMO_RATING = [
 	{ week: 'W1', rating: 4.65 },
 	{ week: 'W2', rating: 4.7 },
 	{ week: 'W3', rating: 4.78 },
@@ -78,12 +87,12 @@ const ratingTrend = [
 	{ week: 'W7', rating: 4.9 },
 ];
 
-const topClients = [
-	{ name: 'Sarah', initial: 'S', stars: 5, amount: '$640', jobs: '4 jobs' },
-	{ name: 'Daniel', initial: 'D', stars: 5, amount: '$890', jobs: '3 jobs' },
-	{ name: 'James', initial: 'J', stars: 5, amount: '$720', jobs: '3 jobs' },
-	{ name: 'Lily', initial: 'L', stars: 4, amount: '$760', jobs: '2 jobs' },
-	{ name: 'Anna', initial: 'A', stars: 5, amount: '$1,360', jobs: '2 jobs' },
+const DEMO_CLIENTS = [
+	{ name: 'Sarah', initial: 'S', stars: 5, amount: '₩853,000', jobs: '4 jobs' },
+	{ name: 'Daniel', initial: 'D', stars: 5, amount: '₩1,187,000', jobs: '3 jobs' },
+	{ name: 'James', initial: 'J', stars: 5, amount: '₩960,000', jobs: '3 jobs' },
+	{ name: 'Lily', initial: 'L', stars: 4, amount: '₩1,013,000', jobs: '2 jobs' },
+	{ name: 'Anna', initial: 'A', stars: 5, amount: '₩1,813,000', jobs: '2 jobs' },
 ];
 
 const RevenueTooltip = ({ active, payload, label }: any) => {
@@ -93,18 +102,118 @@ const RevenueTooltip = ({ active, payload, label }: any) => {
 	return (
 		<div className="fixora-an-tooltip">
 			<div className="fixora-an-tooltip__title">{label}</div>
-			<div className="fixora-an-tooltip__row" style={{ color: '#FF9A3C' }}>Revenue ($) : {rev}</div>
+			<div className="fixora-an-tooltip__row" style={{ color: '#FF9A3C' }}>Revenue : {formatKrw(rev ?? 0)}</div>
 			<div className="fixora-an-tooltip__row" style={{ color: '#3B82F6' }}>Jobs : {jobs}</div>
 		</div>
 	);
 };
 
 const Analytics: NextPage = () => {
-	const [range, setRange] = useState('7 Days');
+	const user = useReactiveVar(userVar);
+	const [range, setRange] = useState<AnalyticsRange>('7 Days');
+
+	const { data: bookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 200, search: {} } },
+		fetchPolicy: 'network-only',
+	});
+
+	const { data: userData } = useQuery(GET_USER, {
+		skip: !user?._id,
+		variables: { userId: user?._id },
+		fetchPolicy: 'network-only',
+	});
+
+	const { data: reviewsData } = useQuery(GET_TECHNICIAN_REVIEWS, {
+		skip: !user?._id,
+		variables: {
+			input: {
+				page: 1,
+				limit: 100,
+				sort: 'createdAt',
+				direction: 'DESC',
+				search: { technicianId: user?._id ?? '' },
+			},
+		},
+		fetchPolicy: 'network-only',
+	});
+
+	const bookings = useMemo(() => bookingsData?.getTechnicianBookings?.list ?? [], [bookingsData]);
+	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
+	const technicianUser = userData?.getUser;
+	const useReal = hasRealBookings(bookings);
+
+	const revenueSeries = useMemo(() => {
+		const real = buildRevenueJobsSeries(bookings, range);
+		return withFallback(real, DEMO_REVENUE, useReal);
+	}, [bookings, range, useReal]);
+
+	const deviceData = useMemo(() => {
+		const real = buildDeviceBreakdown(bookings);
+		return withFallback(real, DEMO_DEVICES, useReal);
+	}, [bookings, useReal]);
+
+	const repairTypeData = useMemo(() => {
+		const real = buildIssueRevenue(bookings);
+		return withFallback(real, DEMO_REPAIR_TYPES, useReal);
+	}, [bookings, useReal]);
+
+	const ratingTrend = useMemo(() => {
+		const real = buildRatingTrend(reviews, range);
+		return withFallback(real, DEMO_RATING, reviews.length > 0);
+	}, [reviews, range]);
+
+	const topClients = useMemo(() => {
+		const real = buildTopClients(bookings);
+		return withFallback(real, DEMO_CLIENTS, useReal);
+	}, [bookings, useReal]);
+
+	const completedCount = useMemo(() => {
+		if (useReal) return technicianUser?.completedJobsCount ?? getCompletedBookings(bookings).length;
+		return 137;
+	}, [bookings, technicianUser, useReal]);
+
+	const completionRate = useMemo(() => {
+		const rate = computeCompletionRate(bookings);
+		return rate != null && useReal ? `${rate}%` : '94%';
+	}, [bookings, useReal]);
+
+	const repeatRate = useMemo(() => {
+		const rate = computeRepeatClientRate(bookings);
+		return rate != null && useReal ? `${rate}%` : '38%';
+	}, [bookings, useReal]);
+
+	const avgRating = useMemo(() => {
+		if (useReal && technicianUser?.averageRating) return technicianUser.averageRating.toFixed(1);
+		return '4.9';
+	}, [technicianUser, useReal]);
+
+	const ratingAvgDisplay = useMemo(() => {
+		if (ratingTrend.length === 0) return '4.9';
+		const avg = ratingTrend.reduce((s, p) => s + p.rating, 0) / ratingTrend.length;
+		return avg.toFixed(1);
+	}, [ratingTrend]);
+
+	const revMax = Math.max(100000, ...revenueSeries.map((d) => d.revenue));
+	const revTicks = buildKrwTicks(revMax, 4);
+	const jobsMax = Math.max(2, ...revenueSeries.map((d) => d.jobs));
+	const repairMax = Math.max(100000, ...repairTypeData.map((d) => d.revenue));
+	const repairTicks = buildKrwTicks(repairMax, 4);
+
+	const ratingMin = Math.max(4, Math.min(...ratingTrend.map((d) => d.rating)) - 0.1);
+	const ratingMax = Math.min(5, Math.max(...ratingTrend.map((d) => d.rating)) + 0.05);
+
+	const kpis = [
+		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: '+12%', value: String(completedCount), label: 'Total Jobs' },
+		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: '+3%', value: completionRate, label: 'Completion Rate' },
+		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: '-4m', value: '11m', label: 'Avg Response' },
+		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: '+6%', value: repeatRate, label: 'Repeat Clients' },
+		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: '+0.1', value: avgRating, label: 'Avg Rating' },
+		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: 'rank', value: 'Top 3%', label: 'Top Performer' },
+	];
 
 	return (
 		<div className="fixora-an-page">
-			{/* Header */}
 			<div className="fixora-an-header">
 				<div>
 					<h1 className="fixora-an-header__title">Performance Analytics</h1>
@@ -124,9 +233,8 @@ const Analytics: NextPage = () => {
 				</div>
 			</div>
 
-			{/* KPI cards */}
 			<div className="fixora-an-kpis">
-				{KPIS.map((k) => (
+				{kpis.map((k) => (
 					<div key={k.label} className="fixora-an-kpi">
 						<div className="fixora-an-kpi__top">
 							<div className="fixora-an-kpi__icon" style={{ background: k.bg }}>{k.icon}</div>
@@ -140,7 +248,6 @@ const Analytics: NextPage = () => {
 				))}
 			</div>
 
-			{/* Row 1: revenue chart + device donut */}
 			<div className="fixora-an-row fixora-an-row--2-1">
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
@@ -149,7 +256,7 @@ const Analytics: NextPage = () => {
 					</div>
 					<div className="fixora-an-chart">
 						<ResponsiveContainer width="100%" height="100%">
-							<ComposedChart data={revenueData} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
+							<ComposedChart data={revenueSeries} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
 								<defs>
 									<linearGradient id="anRevFill" x1="0" y1="0" x2="0" y2="1">
 										<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.22} />
@@ -158,8 +265,8 @@ const Analytics: NextPage = () => {
 								</defs>
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="day" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-								<YAxis yAxisId="left" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, 1200]} ticks={[0, 300, 600, 900, 1200]} tickFormatter={(v) => `$${v}`} />
-								<YAxis yAxisId="right" orientation="right" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, 8]} ticks={[0, 2, 4, 6, 8]} />
+								<YAxis yAxisId="left" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, revTicks[revTicks.length - 1]]} ticks={revTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+								<YAxis yAxisId="right" orientation="right" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, jobsMax]} />
 								<Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
 								<Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#FF6B00" strokeWidth={1.5} fill="url(#anRevFill)" />
 								<Line yAxisId="right" type="monotone" dataKey="jobs" stroke="#3B82F6" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#3B82F6' }} />
@@ -202,7 +309,6 @@ const Analytics: NextPage = () => {
 				</div>
 			</div>
 
-			{/* Row 2: repair type bars + rating trend */}
 			<div className="fixora-an-row fixora-an-row--2-1">
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
@@ -213,8 +319,8 @@ const Analytics: NextPage = () => {
 							<BarChart data={repairTypeData} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="32%">
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="type" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-								<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, 8000]} ticks={[0, 2000, 4000, 6000, 8000]} tickFormatter={(v) => `$${v}`} />
-								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [`$${v}`, 'Revenue']} />
+								<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, repairTicks[repairTicks.length - 1]]} ticks={repairTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), 'Revenue']} />
 								<Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={46}>
 									{repairTypeData.map((d) => (
 										<Cell key={d.type} fill={d.color} />
@@ -230,7 +336,7 @@ const Analytics: NextPage = () => {
 						<h2 className="fixora-an-card__title">Rating Trend</h2>
 					</div>
 					<div className="fixora-an-rating">
-						<span className="fixora-an-rating__value">4.9</span>
+						<span className="fixora-an-rating__value">{ratingAvgDisplay}</span>
 						<span className="fixora-an-rating__sub">avg this period</span>
 					</div>
 					<div className="fixora-an-chart fixora-an-chart--sm">
@@ -244,7 +350,7 @@ const Analytics: NextPage = () => {
 								</defs>
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="week" stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#808080' }} axisLine={false} tickLine={false} />
-								<YAxis stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#707070' }} axisLine={false} tickLine={false} domain={[4.5, 5]} ticks={[4.5, 4.65, 4.8, 5]} />
+								<YAxis stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#707070' }} axisLine={false} tickLine={false} domain={[ratingMin, ratingMax]} />
 								<Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} />
 								<Area type="monotone" dataKey="rating" stroke="#FF9A3C" strokeWidth={2.5} fill="url(#anRatingFill)" dot={false} />
 							</AreaChart>
@@ -253,7 +359,6 @@ const Analytics: NextPage = () => {
 				</div>
 			</div>
 
-			{/* Top clients */}
 			<div className="fixora-an-card">
 				<div className="fixora-an-card__head">
 					<h2 className="fixora-an-card__title">Top Clients</h2>

@@ -17,6 +17,7 @@ import RadioButtonUnchecked from '@mui/icons-material/RadioButtonUnchecked';
 import EastOutlined from '@mui/icons-material/EastOutlined';
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
 import {
@@ -169,7 +170,7 @@ const ActiveJobs: NextPage = () => {
 
 									<div className="fixora-job-card__bottom">
 										<span className="fixora-job-card__price">
-											${parseFloat(job.finalPrice || job.estimatedPrice || '0').toFixed(0)}
+											{formatKrw(parseFloat(job.finalPrice || job.estimatedPrice || '0'))}
 										</span>
 										<span className="fixora-job-card__due">
 											<AccessTimeOutlined style={{ fontSize: 13 }} />
@@ -190,7 +191,7 @@ const ActiveJobs: NextPage = () => {
 						const stage = getJobStage(displayedJob);
 						const info = JOB_STAGE_INFO[stage];
 						const timeline = buildTimeline(displayedJob);
-						const price = parseFloat(displayedJob.finalPrice || displayedJob.estimatedPrice || '0').toFixed(0);
+						const price = parseFloat(displayedJob.finalPrice || displayedJob.estimatedPrice || '0');
 						return (
 							<>
 								<div className="fixora-jobs-detail">
@@ -224,7 +225,7 @@ const ActiveJobs: NextPage = () => {
 											</div>
 											<div>
 												<div className="fixora-jobs-infocard__label">Price</div>
-												<div className="fixora-jobs-infocard__value fixora-jobs-infocard__value--price">${price}</div>
+												<div className="fixora-jobs-infocard__value fixora-jobs-infocard__value--price">{formatKrw(price)}</div>
 												<div className="fixora-jobs-infocard__sub">Pending payment</div>
 											</div>
 										</div>

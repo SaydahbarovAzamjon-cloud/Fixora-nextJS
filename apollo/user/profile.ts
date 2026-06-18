@@ -209,6 +209,29 @@ export const GET_MY_ARTICLES = gql`
 `;
 
 /**************************
+ *       MY PAYMENTS      *
+ *************************/
+
+export const GET_MY_PAYMENTS = gql`
+	query GetMyPayments($input: PaymentsInquiry!) {
+		getMyPayments(input: $input) {
+			list {
+				_id
+				bookingId
+				paymentAmount
+				paymentStatus
+				paymentType
+				paidAt
+				createdAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
  *     PROFILE UPDATE     *
  *************************/
 

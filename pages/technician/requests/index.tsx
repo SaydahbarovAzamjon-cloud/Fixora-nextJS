@@ -18,6 +18,7 @@ import PhotoCameraOutlined from '@mui/icons-material/PhotoCameraOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import HighlightOffOutlined from '@mui/icons-material/HighlightOffOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { GET_INCOMING_REQUESTS } from '../../../apollo/user/profile';
 import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
 import { userVar } from '../../../apollo/store';
@@ -223,7 +224,7 @@ const IncomingRequests: NextPage = () => {
 									<div className="fixora-request-card__issue">{req.problemTitle || req.problemDescription}</div>
 									<div className="fixora-request-card__bottom">
 										<span className="fixora-request-card__price">
-											{req.estimatedPrice ? `$${parseFloat(req.estimatedPrice).toFixed(0)}` : '—'}
+											{req.estimatedPrice ? formatKrw(parseFloat(req.estimatedPrice)) : '—'}
 										</span>
 										<span className="fixora-request-card__time">
 											<AccessTimeOutlined style={{ fontSize: 13 }} />
@@ -243,7 +244,7 @@ const IncomingRequests: NextPage = () => {
 					(() => {
 						const urgency = urgencyInfo(displayedBooking.aiClassification?.repairComplexity);
 						const priceLabel = displayedBooking.estimatedPrice
-							? `$${parseFloat(displayedBooking.estimatedPrice).toFixed(0)}`
+							? formatKrw(parseFloat(displayedBooking.estimatedPrice))
 							: 'No estimate';
 						return (
 							<>

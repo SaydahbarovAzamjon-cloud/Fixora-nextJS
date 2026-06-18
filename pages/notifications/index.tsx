@@ -12,7 +12,10 @@ import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ 
 import { userVar } from '../../apollo/store';
 import { Notification } from '../../libs/types/fixora/fixora';
 import { FixoraButton } from '../../libs/components/ui';
+import NotificationSender from '../../libs/components/notifications/NotificationSender';
 import { NOTIFICATION_CATEGORY_ICONS, getNotificationCategory, getNotificationLink, getNotificationText } from '../../libs/utils/notifications';
+
+const SENDER_NOTIFICATION_TYPES = new Set(['BOOKING', 'FOLLOW', 'REVIEW', 'LIKE', 'COMMENT']);
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -127,6 +130,9 @@ const NotificationsPage: NextPage = () => {
 									<Icon fontSize="small" />
 								</span>
 								<span className="fixora-notifications__body">
+									{notification.userId && SENDER_NOTIFICATION_TYPES.has(notification.notificationType) && (
+										<NotificationSender userId={notification.userId} className="fixora-notifications__sender-row" />
+									)}
 									<span className="fixora-notifications__text">{getNotificationText(notification, t)}</span>
 									<Moment fromNow className="fixora-notifications__time">
 										{notification.createdAt}

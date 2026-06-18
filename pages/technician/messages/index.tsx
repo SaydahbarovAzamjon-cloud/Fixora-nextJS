@@ -21,6 +21,7 @@ import { userVar } from '../../../apollo/store';
 import { Conversation, Message } from '../../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
 import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
+import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
@@ -317,29 +318,38 @@ const Messages: NextPage = () => {
 						filteredConversations.map((conv) => {
 							const name = peerName(conv);
 							const code = bookingCode(conv);
+							const peerId = conv.peerId;
 							return (
-								<button
+								<div
 									key={`${conv.peerId}-${conv.bookingId ?? 'none'}`}
 									className={`fixora-msg-conv ${conv.peerId === selected?.peerId ? 'fixora-msg-conv--active' : ''}`}
-									onClick={() => setSelected({ peerId: conv.peerId, bookingId: conv.bookingId ?? null })}
-									type="button"
 								>
-									<div className="fixora-msg-conv__avatar-wrap">
-										<Avatar image={conv.peer?.userProfileImage} name={name} className="fixora-msg-conv__avatar" />
-										{conv.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
-									</div>
-									<div className="fixora-msg-conv__body">
-										<div className="fixora-msg-conv__row">
-											<span className="fixora-msg-conv__name">{name}</span>
-											<span className="fixora-msg-conv__meta">
-												<span className="fixora-msg-conv__time">{timeAgo(conv.updatedAt)}</span>
-												{conv.unreadCount > 0 && <span className="fixora-msg-conv__unread">{conv.unreadCount}</span>}
-											</span>
+									<UserProfileLink userId={peerId} userType={conv.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link">
+										<div className="fixora-msg-conv__avatar-wrap">
+											<Avatar image={conv.peer?.userProfileImage} name={name} className="fixora-msg-conv__avatar" />
+											{conv.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
 										</div>
-										<div className="fixora-msg-conv__preview">{conv.lastMessage?.messageContent ?? ''}</div>
-										{code && <div className="fixora-msg-conv__code">{code}</div>}
-									</div>
-								</button>
+									</UserProfileLink>
+									<button
+										className="fixora-msg-conv__select"
+										onClick={() => setSelected({ peerId: conv.peerId, bookingId: conv.bookingId ?? null })}
+										type="button"
+									>
+										<div className="fixora-msg-conv__body">
+											<div className="fixora-msg-conv__row">
+												<UserProfileLink userId={peerId} userType={conv.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
+													<span className="fixora-msg-conv__name">{name}</span>
+												</UserProfileLink>
+												<span className="fixora-msg-conv__meta">
+													<span className="fixora-msg-conv__time">{timeAgo(conv.updatedAt)}</span>
+													{conv.unreadCount > 0 && <span className="fixora-msg-conv__unread">{conv.unreadCount}</span>}
+												</span>
+											</div>
+											<div className="fixora-msg-conv__preview">{conv.lastMessage?.messageContent ?? ''}</div>
+											{code && <div className="fixora-msg-conv__code">{code}</div>}
+										</div>
+									</button>
+								</div>
 							);
 						})
 					)}
@@ -351,12 +361,16 @@ const Messages: NextPage = () => {
 				{activeConversation ? (
 					<>
 						<div className="fixora-msg-chat__header">
-							<div className="fixora-msg-conv__avatar-wrap">
-								<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-chat__avatar" />
-								{activeConversation.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
-							</div>
+							<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link">
+								<div className="fixora-msg-conv__avatar-wrap">
+									<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-chat__avatar" />
+									{activeConversation.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
+								</div>
+							</UserProfileLink>
 							<div className="fixora-msg-chat__head-info">
-								<div className="fixora-msg-chat__name">{activeName}</div>
+								<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
+									<div className="fixora-msg-chat__name">{activeName}</div>
+								</UserProfileLink>
 								<div className="fixora-msg-chat__status">
 									{activeConversation.peer?.isOnline && <span className="fixora-msg-chat__status-dot" />}
 									{activeConversation.peer?.isOnline ? 'Online' : 'Offline'}
@@ -391,7 +405,9 @@ const Messages: NextPage = () => {
 								return (
 									<div key={m._id} className={`fixora-msg-row fixora-msg-row--${dir}`}>
 										{dir === 'in' && (
-											<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-row__avatar" />
+											<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link" stopPropagation={false}>
+												<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-row__avatar" />
+											</UserProfileLink>
 										)}
 										<div className="fixora-msg-row__wrap">
 											<div className={`fixora-msg-bubble fixora-msg-bubble--${dir}`}>
@@ -410,7 +426,9 @@ const Messages: NextPage = () => {
 											</div>
 										</div>
 										{dir === 'out' && (
-											<Avatar image={myImage} name={myName} className="fixora-msg-row__avatar" />
+											<UserProfileLink userId={user?._id} className="fixora-profile-link fixora-msg-conv__profile-link" stopPropagation={false}>
+												<Avatar image={myImage} name={myName} className="fixora-msg-row__avatar" />
+											</UserProfileLink>
 										)}
 									</div>
 								);

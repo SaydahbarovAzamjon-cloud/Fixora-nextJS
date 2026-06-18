@@ -740,13 +740,13 @@
 	display: flex;
 	gap: 12px;
 	width: 100%;
+	align-items: flex-start;
 	text-align: left;
 	padding: 13px;
 	border-radius: 12px;
 	margin-bottom: 4px;
 	background: transparent;
 	border: 1px solid transparent;
-	cursor: pointer;
 	transition: all 0.15s ease;
 
 	&:hover {
@@ -759,6 +759,31 @@
 
 		&:hover {
 			background: rgba(255, 107, 0, 0.08);
+		}
+	}
+
+	&__select {
+		flex: 1;
+		min-width: 0;
+		padding: 0;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		text-align: left;
+		color: inherit;
+	}
+
+	&__profile-link {
+		flex-shrink: 0;
+		cursor: pointer;
+
+		&:hover .fixora-msg-conv__avatar {
+			transform: scale(1.05);
+		}
+
+		&--name:hover .fixora-msg-conv__name {
+			color: #FF9A3C;
+			text-decoration: underline;
 		}
 	}
 
@@ -778,6 +803,7 @@
 		color: #fff;
 		font-weight: 700;
 		font-size: 14px;
+		transition: transform 0.15s ease;
 	}
 
 	&__dot {

@@ -9,9 +9,13 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { ConversationPeer, Message } from '../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
+import UserProfileLink from '../common/UserProfileLink';
+import { useReactiveVar } from '@apollo/client';
+import { userVar } from '../../../apollo/store';
 
 interface ChatThreadProps {
 	peer?: ConversationPeer | null;
+	peerId?: string | null;
 	messages: Message[];
 	currentUserId?: string;
 	currentUserImage?: string;
@@ -19,8 +23,9 @@ interface ChatThreadProps {
 	sending?: boolean;
 }
 
-const ChatThread = ({ peer, messages, currentUserId, currentUserImage, onSend, sending }: ChatThreadProps) => {
+const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, onSend, sending }: ChatThreadProps) => {
 	const { t } = useTranslation('common');
+	const authUser = useReactiveVar(userVar);
 	const [text, setText] = useState('');
 	const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
 	const bottomRef = useRef<HTMLDivElement>(null);
@@ -69,16 +74,21 @@ const ChatThread = ({ peer, messages, currentUserId, currentUserImage, onSend, s
 	}
 
 	const displayName = peer.shopName || peer.userFullName || peer.userNickname || '';
+	const resolvedPeerId = peerId || peer._id;
 
 	return (
 		<div className="fixora-messages__thread">
 			<div className="fixora-messages__thread-header">
-				<span className="fixora-messages__avatar">
-					<img src={resolveProfileImageUrl(peer.userProfileImage)} alt="" />
-					{peer.isOnline && <span className="fixora-messages__online-dot" />}
-				</span>
+				<UserProfileLink userId={resolvedPeerId} userType={peer.userType} className="fixora-messages__profile-link fixora-messages__profile-link--avatar">
+					<span className="fixora-messages__avatar">
+						<img src={resolveProfileImageUrl(peer.userProfileImage)} alt="" />
+						{peer.isOnline && <span className="fixora-messages__online-dot" />}
+					</span>
+				</UserProfileLink>
 				<span className="fixora-messages__thread-info">
-					<strong>{displayName}</strong>
+					<UserProfileLink userId={resolvedPeerId} userType={peer.userType} className="fixora-messages__profile-link fixora-messages__profile-link--name">
+						<strong>{displayName}</strong>
+					</UserProfileLink>
 					<span className={`fixora-messages__thread-status ${peer.isOnline ? 'fixora-messages__thread-status--online' : ''}`}>
 						{peer.isOnline ? t('messages.online') : t('messages.offline')}
 					</span>
@@ -93,12 +103,20 @@ const ChatThread = ({ peer, messages, currentUserId, currentUserImage, onSend, s
 					const isMine = message.senderId === currentUserId;
 					const isLiked = likedMessages.has(message._id);
 					const avatarSrc = isMine ? resolveProfileImageUrl(currentUserImage) : resolveProfileImageUrl(peer.userProfileImage);
+					const avatarUserId = isMine ? currentUserId : resolvedPeerId;
 					return (
 						<div
 							key={message._id}
 							className={`fixora-messages__bubble-row ${isMine ? 'fixora-messages__bubble-row--mine' : ''}`}
 						>
-							<img className="fixora-messages__bubble-avatar" src={avatarSrc} alt="" />
+							<UserProfileLink
+								userId={avatarUserId}
+								userType={isMine ? (authUser?.userType as string | undefined) : peer.userType}
+								className="fixora-messages__profile-link fixora-messages__profile-link--bubble"
+								stopPropagation={false}
+							>
+								<img className="fixora-messages__bubble-avatar" src={avatarSrc} alt="" />
+							</UserProfileLink>
 							<div className="fixora-messages__bubble-group">
 								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''}`}>
 									<p>{message.messageContent}</p>

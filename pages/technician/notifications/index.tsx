@@ -16,9 +16,8 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
-import { GET_USER } from '../../../apollo/user/query';
 import { userVar } from '../../../apollo/store';
-import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
+import NotificationSender from '../../../libs/components/notifications/NotificationSender';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
@@ -178,40 +177,10 @@ const timeAgo = (dateStr?: string | null) => {
 const isToday = (dateStr?: string | null) =>
 	!!dateStr && new Date(dateStr).toDateString() === new Date().toDateString();
 
-const initialsOf = (name: string) => {
-	const parts = name.trim().split(/\s+/).filter(Boolean);
-	if (parts.length === 0) return 'U';
-	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-	return (parts[0][0] + parts[1][0]).toUpperCase();
-};
-
 /** Shows the sender's avatar + nickname (fetched by userId) linking to their profile. */
-const NotifSender = ({ userId }: { userId?: string | null }) => {
-	const router = useRouter();
-	const { data } = useQuery(GET_USER, {
-		skip: !userId,
-		variables: { userId },
-		fetchPolicy: 'cache-first',
-	});
-	const sender = data?.getUser;
-	if (!userId || !sender) return null;
-	const name = sender.userNickname || sender.userFullName || sender.shopName || 'User';
-	const img = sender.userProfileImage;
-	const goProfile = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		router.push(`/member?memberId=${userId}`);
-	};
-	return (
-		<div className="fixora-notif-card__sender-row" onClick={goProfile}>
-			<div className="fixora-notif-card__avatar">
-				{img && img.trim() !== '' ? <img src={resolveProfileImageUrl(img)} alt={name} /> : initialsOf(name)}
-			</div>
-			<button type="button" className="fixora-notif-card__sender" onClick={goProfile}>
-				{name}
-			</button>
-		</div>
-	);
-};
+const NotifSender = ({ userId }: { userId?: string | null }) => (
+	<NotificationSender userId={userId} />
+);
 
 const Notifications: NextPage = () => {
 	const router = useRouter();

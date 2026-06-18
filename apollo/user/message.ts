@@ -20,6 +20,7 @@ export const GET_MY_CONVERSATIONS = gql`
 					shopName
 					userProfileImage
 					isOnline
+					userType
 				}
 				lastMessage {
 					_id

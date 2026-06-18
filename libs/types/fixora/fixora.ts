@@ -111,6 +111,8 @@ export interface TechnicianProfile {
 
 export interface TechnicianReview {
 	_id: string;
+	userId?: string;
+	technicianId?: string;
 	reviewContent?: string;
 	repairQuality: number;
 	repairSpeed: number;
@@ -121,6 +123,10 @@ export interface TechnicianReview {
 		userNickname?: string;
 		userFullName?: string;
 		userProfileImage?: string;
+	};
+	deviceData?: {
+		deviceBrand?: string;
+		deviceModel?: string;
 	};
 }
 
@@ -229,6 +235,7 @@ export interface ConversationPeer {
 	shopName?: string;
 	userProfileImage?: string;
 	isOnline?: boolean;
+	userType?: string;
 }
 
 export interface Conversation {

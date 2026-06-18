@@ -649,6 +649,8 @@ export const GET_TECHNICIAN_REVIEWS = gql`
 				repairSpeed
 				communication
 				createdAt
+				userId
+				technicianId
 				customerData {
 					_id
 					userNickname

@@ -101,11 +101,9 @@
 	align-items: center;
 	gap: 10px;
 	padding: 10px 10px 10px 13px;
-	border: none;
 	border-left: 3px solid transparent;
 	border-radius: 10px;
 	background: transparent;
-	cursor: pointer;
 	text-align: left;
 	transition: background-color 0.2s ease, border-color 0.2s ease;
 
@@ -116,6 +114,42 @@
 	&--active {
 		background: rgba(255, 107, 0, 0.08);
 		border-left-color: var(--fixora-primary);
+	}
+}
+
+.fixora-messages__conversation-select {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+}
+
+.fixora-profile-link {
+	cursor: pointer;
+
+	&:hover strong,
+	&:hover .fixora-messages__avatar img {
+		opacity: 0.85;
+	}
+
+	&--name:hover strong {
+		color: var(--fixora-primary);
+		text-decoration: underline;
+	}
+
+	&--bubble:hover .fixora-messages__bubble-avatar {
+		opacity: 0.85;
+		transform: scale(1.05);
+	}
+
+	.fixora-messages__bubble-avatar {
+		transition: opacity 0.15s ease, transform 0.15s ease;
 	}
 }
 

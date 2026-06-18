@@ -148,6 +148,7 @@ const MessagesPage: NextPage = () => {
 
 				<ChatThread
 					peer={activePeer}
+					peerId={selected?.peerId}
 					messages={messages}
 					currentUserId={user?._id}
 					currentUserImage={user?.memberImage}

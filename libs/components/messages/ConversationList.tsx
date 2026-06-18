@@ -4,6 +4,7 @@ import { useTranslation } from 'next-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import { Conversation } from '../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
+import UserProfileLink from '../common/UserProfileLink';
 
 interface ConversationListProps {
 	conversations: Conversation[];
@@ -41,36 +42,41 @@ const ConversationList = ({ conversations, selectedPeerId, onSelect }: Conversat
 				{filtered.map((conversation) => {
 					const peer = conversation.peer;
 					const displayName = peer?.shopName || peer?.userFullName || peer?.userNickname || '';
+					const peerId = conversation.peerId || peer?._id;
 					const isActive = conversation.peerId === selectedPeerId;
 					const lastMessage = conversation.lastMessage?.messageContent ?? '';
 
 					return (
-						<button
+						<div
 							key={conversation.peerId}
-							type="button"
 							className={`fixora-messages__conversation ${isActive ? 'fixora-messages__conversation--active' : ''}`}
-							onClick={() => onSelect(conversation)}
 						>
-							<span className="fixora-messages__avatar">
-								<img src={resolveProfileImageUrl(peer?.userProfileImage)} alt="" />
-								{peer?.isOnline && <span className="fixora-messages__online-dot" />}
-							</span>
+							<UserProfileLink userId={peerId} userType={peer?.userType} className="fixora-messages__profile-link fixora-messages__profile-link--avatar">
+								<span className="fixora-messages__avatar">
+									<img src={resolveProfileImageUrl(peer?.userProfileImage)} alt="" />
+									{peer?.isOnline && <span className="fixora-messages__online-dot" />}
+								</span>
+							</UserProfileLink>
 
-							<span className="fixora-messages__conversation-body">
-								<span className="fixora-messages__conversation-row">
-									<strong>{displayName}</strong>
-									<Moment fromNow ago className="fixora-messages__time">
-										{conversation.updatedAt}
-									</Moment>
+							<button type="button" className="fixora-messages__conversation-select" onClick={() => onSelect(conversation)}>
+								<span className="fixora-messages__conversation-body">
+									<span className="fixora-messages__conversation-row">
+										<UserProfileLink userId={peerId} userType={peer?.userType} className="fixora-messages__profile-link fixora-messages__profile-link--name">
+											<strong>{displayName}</strong>
+										</UserProfileLink>
+										<Moment fromNow ago className="fixora-messages__time">
+											{conversation.updatedAt}
+										</Moment>
+									</span>
+									<span className="fixora-messages__conversation-row">
+										<span className="fixora-messages__preview">{lastMessage}</span>
+										{conversation.unreadCount > 0 && (
+											<span className="fixora-messages__unread">{conversation.unreadCount}</span>
+										)}
+									</span>
 								</span>
-								<span className="fixora-messages__conversation-row">
-									<span className="fixora-messages__preview">{lastMessage}</span>
-									{conversation.unreadCount > 0 && (
-										<span className="fixora-messages__unread">{conversation.unreadCount}</span>
-									)}
-								</span>
-							</span>
-						</button>
+							</button>
+						</div>
 					);
 				})}
 			</div>

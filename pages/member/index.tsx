@@ -1,158 +1,144 @@
 import React, { useEffect } from 'react';
 import { NextPage } from 'next';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import { Stack } from '@mui/material';
-import MemberMenu from '../../libs/components/member/MemberMenu';
-import MemberProperties from '../../libs/components/member/MemberProperties';
 import { useRouter } from 'next/router';
-import MemberFollowers from '../../libs/components/member/MemberFollowers';
-import MemberArticles from '../../libs/components/member/MemberArticles';
-import { useMutation, useReactiveVar } from '@apollo/client';
-import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import MemberFollowings from '../../libs/components/member/MemberFollowings';
-import { userVar } from '../../apollo/store';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { Messages } from '../../libs/config';
-import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
+import { useQuery, useReactiveVar } from '@apollo/client';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import { GET_USER } from '../../apollo/user/query';
+import { GET_USER_FOLLOWINGS } from '../../apollo/user/profile';
+import { userVar } from '../../apollo/store';
+import { FixoraButton } from '../../libs/components/ui';
+import { resolveProfileImageUrl } from '../../libs/utils/profileImage';
+import CustomerReviewsSection from '../../libs/components/member/CustomerReviewsSection';
 
-export const getStaticProps = async ({ locale }: any) => ({
+export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
-		...(await serverSideTranslations(locale, ['common'])),
+		...(await serverSideTranslations(locale ?? 'en', ['common'])),
 	},
 });
 
+/** Public client (USER) profile — /member?memberId= . Technicians use /technicians/[id]. */
 const MemberPage: NextPage = () => {
-	const device = useDeviceDetect();
+	const { t } = useTranslation('common');
 	const router = useRouter();
-	const category: any = router.query?.category;
 	const user = useReactiveVar(userVar);
+	const memberId = router.query.memberId as string | undefined;
 
-	/** APOLLO REQUESTS **/
-	const [subscribe] = useMutation(SUBSCRIBE);
-	const [unsubscribe] = useMutation(UNSUBSCRIBE);
-	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const { data, loading } = useQuery(GET_USER, {
+		skip: !memberId || !router.isReady,
+		variables: { userId: memberId },
+		fetchPolicy: 'network-only',
+	});
 
-	/** LIFECYCLES **/
+	const profile = data?.getUser;
+	const isTechnician = profile?.userType === 'TECHNICIAN';
+
+	const { data: followingsData } = useQuery(GET_USER_FOLLOWINGS, {
+		skip: !memberId || isTechnician,
+		variables: {
+			input: {
+				page: 1,
+				limit: 1,
+				search: { followerId: memberId },
+			},
+		},
+		fetchPolicy: 'network-only',
+	});
+
+	const followingTotal = followingsData?.getUserFollowings?.metaCounter?.[0]?.total ?? profile?.followingCount ?? 0;
+	const displayName = profile?.userFullName || profile?.userNickname || profile?.shopName || '';
+
 	useEffect(() => {
 		if (!router.isReady) return;
-		if (!category) {
-			router.replace(
-				{
-					pathname: router.pathname,
-					query: { ...router.query, category: 'properties' },
-				},
-				undefined,
-				{ shallow: true },
-			);
+		if (!memberId) {
+			router.replace('/').then();
+			return;
 		}
-	}, [category, router]);
-
-	/** HANDLERS **/
-	const subscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			console.log('id: ', id);
-			if (!id) throw new Error(Messages.error1);
-			if (!user?._id) throw new Error(Messages.error2);
-
-			await subscribe({
-				variables: {
-					input: id,
-				},
-			});
-
-			await sweetTopSmallSuccessAlert('Subscribed!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
+		if (user?._id && memberId === user._id) {
+			router.replace('/mypage').then();
 		}
+	}, [router.isReady, memberId, user?._id]);
+
+	useEffect(() => {
+		if (!profile || !memberId) return;
+		if (profile.userType === 'TECHNICIAN') {
+			router.replace(`/technicians/${memberId}`).then();
+		}
+	}, [profile, memberId, router]);
+
+	const messageHandler = () => {
+		if (!memberId) return;
+		router.push(`/messages?peerId=${memberId}`);
 	};
 
-	const unsubscribeHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) throw new Error(Messages.error1);
-			if (!user?._id) throw new Error(Messages.error2);
-
-			await unsubscribe({
-				variables: {
-					input: id,
-				},
-			});
-
-			await sweetTopSmallSuccessAlert('Unsubscribed!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
-	};
-
-	const likeMemberHandler = async (id: string, refetch: any, query: any) => {
-		try {
-			if (!id) return;
-			if (!user?._id) throw new Error(Messages.error2);
-
-			await likeTargetMember({
-				variables: {
-					input: id,
-				},
-			});
-
-			await sweetTopSmallSuccessAlert('Success!', 800);
-			await refetch({ input: query });
-		} catch (err: any) {
-			console.log('ERROR, likeMemberHandler:', err.message);
-			sweetMixinErrorAlert(err.message).then();
-		}
-	};
-
-	const redirectToMemberPageHandler = async (memberId: string) => {
-		try {
-			if (memberId === user?._id) await router.push(`/mypage?memberId=${memberId}`);
-			else await router.push(`/member?memberId=${memberId}`);
-		} catch (error) {
-			await sweetErrorHandling(error);
-		}
-	};
-
-	if (device === 'mobile') {
-		return <>MEMBER PAGE MOBILE</>;
-	} else {
+	if (!router.isReady || !memberId || loading || !profile) {
 		return (
-			<div id="member-page" style={{ position: 'relative' }}>
-				<div className="container">
-					<Stack className={'member-page'}>
-						<Stack className={'back-frame'}>
-							<Stack className={'left-config'}>
-								<MemberMenu subscribeHandler={subscribeHandler} unsubscribeHandler={unsubscribeHandler} />
-							</Stack>
-							<Stack className="main-config" mb={'76px'}>
-								<Stack className={'list-config'}>
-									{category === 'properties' && <MemberProperties />}
-									{category === 'followers' && (
-										<MemberFollowers
-											subscribeHandler={subscribeHandler}
-											unsubscribeHandler={unsubscribeHandler}
-											likeMemberHandler={likeMemberHandler}
-											redirectToMemberPageHandler={redirectToMemberPageHandler}
-										/>
-									)}
-									{category === 'followings' && (
-										<MemberFollowings
-											subscribeHandler={subscribeHandler}
-											unsubscribeHandler={unsubscribeHandler}
-											likeMemberHandler={likeMemberHandler}
-											redirectToMemberPageHandler={redirectToMemberPageHandler}
-										/>
-									)}
-									{category === 'articles' && <MemberArticles />}
-								</Stack>
-							</Stack>
-						</Stack>
-					</Stack>
+			<div className="fixora-member-page">
+				<div className="container fixora-member">
+					<p className="fixora-member__loading">{t('common.loading', 'Loading...')}</p>
 				</div>
 			</div>
 		);
 	}
+
+	if (isTechnician) {
+		return (
+			<div className="fixora-member-page">
+				<div className="container fixora-member">
+					<p className="fixora-member__loading">{t('common.loading', 'Loading...')}</p>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="fixora-member-page">
+			<div className="container fixora-member">
+				<div className="fixora-mypage__header fixora-member__header">
+					<div className="fixora-mypage__identity">
+						<img
+							className="fixora-mypage__avatar"
+							src={resolveProfileImageUrl(profile.userProfileImage)}
+							alt=""
+						/>
+						<div className="fixora-mypage__identity-info">
+							<strong className="fixora-mypage__name">{displayName}</strong>
+							{profile.userNickname && profile.userNickname !== displayName && (
+								<span className="fixora-member__nickname">@{profile.userNickname}</span>
+							)}
+							{profile.userLocation && (
+								<span className="fixora-member__location">{profile.userLocation}</span>
+							)}
+							{profile.userBio && <p className="fixora-member__bio">{profile.userBio}</p>}
+							{user?._id && user._id !== memberId && (
+								<div className="fixora-member__actions">
+									<FixoraButton variant="outline" onClick={messageHandler}>
+										{t('messages.sendMessage', 'Message')}
+									</FixoraButton>
+								</div>
+							)}
+						</div>
+					</div>
+
+					<div className="fixora-mypage__stats">
+						<div className="fixora-mypage__stat">
+							<strong>{followingTotal}</strong>
+							<span>{t('mypage.following')}</span>
+						</div>
+					</div>
+				</div>
+
+				<section className="fixora-member__reviews-section">
+					<h2 className="fixora-member__section-title">{t('member.reviewsTitle', 'Reviews')}</h2>
+					<p className="fixora-member__section-hint">
+						{t('member.reviewsHint', 'Reviews left after completed repair bookings (BIZ-05).')}
+					</p>
+					{memberId && <CustomerReviewsSection userId={memberId} />}
+				</section>
+			</div>
+		</div>
+	);
 };
 
-export default withLayoutBasic(MemberPage);
+export default withLayoutFull(MemberPage);

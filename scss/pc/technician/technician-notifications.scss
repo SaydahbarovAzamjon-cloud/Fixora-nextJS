@@ -607,6 +607,10 @@
 		transform: scale(1.2);
 	}
 
+	&__sender-row:hover &__sender {
+		color: #FF9A3C;
+	}
+
 	&__sender {
 		background: none;
 		border: none;
@@ -617,10 +621,6 @@
 		font-weight: 600;
 		white-space: nowrap;
 		transition: color 0.15s ease;
-
-		&:hover {
-			color: #FF9A3C;
-		}
 	}
 
 	&__issue {

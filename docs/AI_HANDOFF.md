@@ -4,11 +4,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-18 |
+| **Last updated** | 2026-06-19 |
 | **Last agent** | Cursor |
-| **Last session** | **My Articles dashboard (P3-13)** — `/technician/articles`: real `getMyArticles`, homepage `TechTipCard` design + edit/delete/view, comments modal, filters; `updateArticle`/`deleteArticle`; Write Article edit mode (`?edit=id`). Sidebar **My Articles** nav. EN/KR i18n. |
-| **Last session (prev)** | **Write Article 1:1** — `/technician/write` Figma editor + `createArticle`. |
-| **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
+| **Last session** | **Technician Settings 1:1** — `/technician/settings`: 8-section internal nav (Figma), Profile/Account/Security/Availability wired to `getUser`/`updateUser`/`imageUploader`; Notifications/Payment/Preferences/2FA/Delete → GAP empty states. `docs/BACKEND_SETTINGS.md` GAP-090…096. |
+| **Last session (prev)** | **My Articles dashboard (P3-13)** — `/technician/articles` + Write Article edit mode. |
+| **Next agent should start with** | `PM-01` — Mobile foundation OR FIXORAB GAP-090…096 for settings backend |
 
 ---
 

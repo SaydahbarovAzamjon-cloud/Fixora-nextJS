@@ -45,7 +45,7 @@
 | P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + new device form + booking details, `createDevice`/`createBooking` wired |
 | P3-07 | Messages UI | ✅ Done | `/messages` — chat list + thread + request details, mockup `customer-pages-full.png` §6 |
 | P3-08 | My Page + Notifications | ✅ Done | `/mypage` (profile + Requests/Following/Repair Stories/Settings tabs) + `/notifications` — mockup `customer-pages-full.png` §7–8 |
-| P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens: Dashboard + Requests + Jobs + Messages + Notifications + Profile + Settings + Analytics; TechnicianLayout + sidebar; 18 components; mock data; dark/orange theme |
+| P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens incl. Settings 1:1 (`libs/components/technician/settings/`); Profile/Account/Security/Availability GraphQL; GAP-090…096 in BACKEND_SETTINGS.md |
 | P3-10 | Community + Post Detail | ✅ Done | `/community` feed + `/community/[id]` detail + `/community/write`; 4 components; 6 GraphQL ops; route migration from `?id=` to `[id]` |
 
 > **During Phase 2:** build **responsive-safe** (flex/grid, `@media`, both `#pc-wrap` / `#mobile-wrap`) — not full mobile polish. See `MOB-01` in `DECISIONS.md`.

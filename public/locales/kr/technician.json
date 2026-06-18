@@ -244,25 +244,103 @@
     "loading": "로딩 중…"
   },
   "settings": {
-    "groupAccount": "계정",
-    "groupWork": "업무",
-    "groupNotifications": "알림",
-    "groupBilling": "결제",
-    "profileInfo": "프로필 정보",
-    "profileInfoDesc": "이름과 사진 업데이트",
-    "serviceArea": "서비스 지역",
-    "serviceAreaDesc": "서비스 범위 설정",
-    "workHours": "근무 시간",
-    "workHoursDesc": "이용 가능 시간 설정",
-    "pushNotifications": "푸시 알림",
-    "pushNotificationsDesc": "알림 및 리마인더 관리",
-    "messages": "메시지",
-    "messagesDesc": "새 메시지 알림",
-    "paymentMethod": "결제 수단",
-    "paymentMethodDesc": "결제 정보 업데이트",
-    "payoutSettings": "정산 설정",
-    "payoutSettingsDesc": "은행 계좌 설정",
-    "signOut": "로그아웃"
+    "loading": "설정 불러오는 중…",
+    "saveChanges": "변경 사항 저장",
+    "loadErrorTitle": "설정을 불러올 수 없습니다",
+    "loadError": "프로필을 불러오지 못했습니다. 연결을 확인하고 다시 시도하세요.",
+    "nav": {
+      "aria": "설정 섹션",
+      "profile": "프로필 설정",
+      "account": "계정",
+      "notifications": "알림",
+      "security": "보안",
+      "payment": "결제 수단",
+      "availability": "근무 가능 시간",
+      "preferences": "환경 설정",
+      "deleteAccount": "계정 삭제"
+    },
+    "backendPending": {
+      "title": "백엔드 연동 대기 중",
+      "desc": "이 기능은 FIXORAB 지원이 필요합니다 ({{gap}}). docs/BACKEND_SETTINGS.md 참조.",
+      "retry": "다시 시도",
+      "notifications": "알림 설정은 getNotificationPreferences API가 필요합니다 (GAP-092).",
+      "payment": "저장된 결제 수단은 getPaymentMethods API가 필요합니다 (GAP-093).",
+      "preferences": "사용자 환경 설정은 getUserPreferences API가 필요합니다 (GAP-094).",
+      "twoFactorTitle": "2단계 인증 미지원",
+      "twoFactor": "2단계 인증은 FIXORAB 2FA mutation이 필요합니다 (GAP-091)."
+    },
+    "profile": {
+      "title": "프로필 설정",
+      "desc": "FIXORA 공개 기술자 프로필",
+      "photoTitle": "프로필 사진",
+      "photoHint": "PNG, JPG 또는 WebP. 최대 5MB.",
+      "uploadPhoto": "사진 업로드",
+      "replacePhoto": "교체",
+      "removePhoto": "삭제",
+      "fullName": "이름",
+      "location": "위치",
+      "email": "이메일",
+      "phone": "전화번호",
+      "profileUrl": "프로필 URL",
+      "bio": "소개",
+      "invalidType": "PNG, JPG, WebP 이미지만 허용됩니다.",
+      "tooLarge": "이미지는 5MB 이하여야 합니다."
+    },
+    "account": {
+      "title": "계정 설정",
+      "desc": "계정 정보 및 상태 관리",
+      "usernameLabel": "사용자명 / 프로필 URL",
+      "urlPrefix": "fixora.io/tech/",
+      "accountType": "계정 유형",
+      "proTechnician": "프로 기술자",
+      "proSub": "현재 요금제",
+      "enterprise": "엔터프라이즈",
+      "enterpriseSub": "팀 기능"
+    },
+    "notifications": {
+      "title": "알림",
+      "desc": "알림 받을 항목 선택"
+    },
+    "security": {
+      "title": "보안",
+      "desc": "비밀번호 및 인증 관리",
+      "changePassword": "비밀번호 변경",
+      "currentPassword": "현재 비밀번호",
+      "newPassword": "새 비밀번호",
+      "confirmPassword": "새 비밀번호 확인",
+      "newPasswordHint": "최소 8자",
+      "confirmPasswordHint": "비밀번호 재입력",
+      "passwordMin": "비밀번호는 최소 8자 이상이어야 합니다.",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+      "currentRequired": "현재 비밀번호를 입력하세요.",
+      "gap090Hint": "참고: 현재 비밀번호 확인은 FIXORAB changePassword mutation이 필요합니다 (GAP-090).",
+      "twoFactor": "2단계 인증",
+      "twoFactorFuture": "예정: 인증 앱, 이메일 ({{email}}), SMS ({{phone}})."
+    },
+    "payment": {
+      "title": "결제 수단",
+      "desc": "수익 수령 방법 관리"
+    },
+    "availability": {
+      "title": "근무 가능 시간",
+      "desc": "고객 예약을 위한 근무 일정 설정",
+      "workingDays": "근무 요일",
+      "startTime": "시작 시간",
+      "endTime": "종료 시간"
+    },
+    "preferences": {
+      "title": "환경 설정",
+      "desc": "FIXORA 경험 맞춤 설정"
+    },
+    "delete": {
+      "title": "계정 삭제",
+      "desc": "FIXORA 계정 및 모든 데이터를 영구 삭제",
+      "dangerZone": "위험 구역",
+      "warning": "계정 삭제는 영구적이며 되돌릴 수 없습니다. 프로필, 작업 기록, 리뷰, 수익 기록이 모두 삭제됩니다. 진행 중인 작업과 미결제는 삭제 전 해결해야 합니다.",
+      "confirmLabel": "확인을 위해 \"DELETE MY ACCOUNT\" 입력",
+      "submit": "계정 영구 삭제",
+      "gap095Message": "계정 삭제는 FIXORAB deleteAccount mutation이 필요합니다 ({{gap}})."
+    }
   },
   "schedule": {
     "title": "일정에 추가",

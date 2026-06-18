@@ -244,25 +244,103 @@
     "loading": "Loading…"
   },
   "settings": {
-    "groupAccount": "Account",
-    "groupWork": "Work",
-    "groupNotifications": "Notifications",
-    "groupBilling": "Billing",
-    "profileInfo": "Profile Information",
-    "profileInfoDesc": "Update your name and photo",
-    "serviceArea": "Service Area",
-    "serviceAreaDesc": "Set your coverage area",
-    "workHours": "Work Hours",
-    "workHoursDesc": "Configure your availability",
-    "pushNotifications": "Push Notifications",
-    "pushNotificationsDesc": "Manage alerts and reminders",
-    "messages": "Messages",
-    "messagesDesc": "New message notifications",
-    "paymentMethod": "Payment Method",
-    "paymentMethodDesc": "Update payment details",
-    "payoutSettings": "Payout Settings",
-    "payoutSettingsDesc": "Configure bank account",
-    "signOut": "Sign Out"
+    "loading": "Loading settings…",
+    "saveChanges": "Save Changes",
+    "loadErrorTitle": "Could not load settings",
+    "loadError": "Failed to load your profile. Check your connection and try again.",
+    "nav": {
+      "aria": "Settings sections",
+      "profile": "Profile Settings",
+      "account": "Account",
+      "notifications": "Notifications",
+      "security": "Security",
+      "payment": "Payment Methods",
+      "availability": "Availability",
+      "preferences": "Preferences",
+      "deleteAccount": "Delete Account"
+    },
+    "backendPending": {
+      "title": "Backend integration pending",
+      "desc": "This feature requires FIXORAB support ({{gap}}). See docs/BACKEND_SETTINGS.md.",
+      "retry": "Try again",
+      "notifications": "Notification preferences need getNotificationPreferences / updateNotificationPreferences (GAP-092).",
+      "payment": "Saved payment methods need getPaymentMethods API (GAP-093).",
+      "preferences": "User preferences need getUserPreferences API (GAP-094).",
+      "twoFactorTitle": "2FA not available yet",
+      "twoFactor": "Two-factor authentication requires FIXORAB 2FA mutations (GAP-091)."
+    },
+    "profile": {
+      "title": "Profile Settings",
+      "desc": "Your public technician profile on FIXORA",
+      "photoTitle": "Profile Photo",
+      "photoHint": "PNG, JPG or WebP. Max 5MB.",
+      "uploadPhoto": "Upload Photo",
+      "replacePhoto": "Replace",
+      "removePhoto": "Remove",
+      "fullName": "FULL NAME",
+      "location": "LOCATION",
+      "email": "EMAIL",
+      "phone": "PHONE",
+      "profileUrl": "PROFILE URL",
+      "bio": "BIO",
+      "invalidType": "Only PNG, JPG, or WebP images are allowed.",
+      "tooLarge": "Image must be 5MB or smaller."
+    },
+    "account": {
+      "title": "Account Settings",
+      "desc": "Manage your account details and status",
+      "usernameLabel": "USERNAME / PROFILE URL",
+      "urlPrefix": "fixora.io/tech/",
+      "accountType": "ACCOUNT TYPE",
+      "proTechnician": "Pro Technician",
+      "proSub": "Your current plan",
+      "enterprise": "Enterprise",
+      "enterpriseSub": "Team features"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "desc": "Choose what you get notified about"
+    },
+    "security": {
+      "title": "Security",
+      "desc": "Manage your password and authentication",
+      "changePassword": "Change Password",
+      "currentPassword": "CURRENT PASSWORD",
+      "newPassword": "NEW PASSWORD",
+      "confirmPassword": "CONFIRM NEW PASSWORD",
+      "newPasswordHint": "Min 8 characters",
+      "confirmPasswordHint": "Repeat new password",
+      "passwordMin": "Password must be at least 8 characters.",
+      "passwordMismatch": "Passwords do not match.",
+      "currentRequired": "Enter your current password.",
+      "gap090Hint": "Note: current password verification requires FIXORAB changePassword mutation (GAP-090).",
+      "twoFactor": "Two-Factor Authentication",
+      "twoFactorFuture": "Planned: Authenticator, email ({{email}}), SMS ({{phone}})."
+    },
+    "payment": {
+      "title": "Payment Methods",
+      "desc": "Manage how you receive earnings"
+    },
+    "availability": {
+      "title": "Availability",
+      "desc": "Set your working schedule for client bookings",
+      "workingDays": "Working Days",
+      "startTime": "START TIME",
+      "endTime": "END TIME"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "desc": "Customize your FIXORA experience"
+    },
+    "delete": {
+      "title": "Delete Account",
+      "desc": "Permanently remove your FIXORA account and all data",
+      "dangerZone": "Danger Zone",
+      "warning": "Deleting your account is permanent and cannot be undone. All of your profile data, job history, reviews, and earnings records will be permanently erased. Active jobs and pending payments must be resolved before deletion.",
+      "confirmLabel": "TYPE \"DELETE MY ACCOUNT\" TO CONFIRM",
+      "submit": "Permanently Delete Account",
+      "gap095Message": "Account deletion requires FIXORAB deleteAccount mutation ({{gap}})."
+    }
   },
   "schedule": {
     "title": "Add to Schedule",

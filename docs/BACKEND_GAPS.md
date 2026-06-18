@@ -128,8 +128,22 @@ Yangi UI element qo‘shganda:
 | GAP-080 | **Repair category pills** (iPhone/MacBook/iPad/Watch) | `ArticleCategory` yoki `articleTags` kengaytmasi — device/repair turlari | Figma mockup repair pill'lar; schema faqat FREE/RECOMMEND/NEWS/HUMOR | UI repair label; API ga 4 pill → 4 enum mapping (workaround) | `WORKAROUND` | `libs/utils/articleCategoryMap.ts`, `pages/technician/write/` |
 | GAP-081 | **SEO fields** (meta title, description, keywords) | `ArticleInput` yoki `ArticleSeo` nested input | Write Article SEO panel mockup | Form state + validation; `createArticle` ga yuborilmaydi | `MISSING` | `libs/components/technician/writeArticle/SeoSettingsPanel.tsx` |
 | GAP-082 | **Visibility** (Public / Techs Only) | `articleVisibility` enum yoki `ArticleInput` field | Mockup visibility toggle | UI state only | `MISSING` | `ArticleSettingsPanel.tsx` |
-| GAP-083 | **Featured Article** | `isFeatured: Boolean` on Article | Mockup featured switch | UI state only | `MISSING` | `ArticleSettingsPanel.tsx` |
-| GAP-084 | **Allow Comments** / **Schedule Publication** | `allowComments`, `scheduledPublishAt` | Mockup article settings | Schedule blocks publish with toast; comments UI-only | `MISSING` | `useWriteArticleForm.ts`, `ArticleSettingsPanel.tsx` |
+| GAP-083 | **Featured Article** | `isFeatured: Boolean` on Article | Mockup featured switch | UI state only; `localStorage` workaround | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `ArticleSettingsPanel.tsx` |
+| GAP-084 | **Allow Comments** / **Schedule Publication** | `allowComments`, `scheduledPublishAt` | Mockup article settings | Schedule blocks publish with toast; comments UI-only + `localStorage` | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `useWriteArticleForm.ts`, `ArticleSettingsPanel.tsx` |
+
+---
+
+### Technician Settings (`/technician/settings`)
+
+| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
+|----|------------|---------------|------------|------------------|--------|------|
+| GAP-090 | **Change password (current verify)** | `changePassword(old, new)` | Security mockup current password field | `updateUser.userPassword` only — no verify | `PARTIAL` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md), `SecuritySettingsSection.tsx` |
+| GAP-091 | **2FA** | `enable2FA`, `disable2FA`, `verify2FACode` | Security 2FA toggles | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| GAP-092 | **Notification preferences** (7 toggles) | `getNotificationPreferences`, `updateNotificationPreferences` | Notifications section mockup | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| GAP-093 | **Saved payment methods** | `getPaymentMethods`, CRUD, set primary | Payment Methods mockup | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| GAP-094 | **User preferences** | `getUserPreferences`, `updateUserPreferences` | Preferences toggles | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| GAP-095 | **Delete account** | `deleteAccount(confirmation)` | Danger zone mockup | UI only — mutation missing | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| GAP-096 | **Profile slug / email update** | `userSlug`, `updateEmail` | Account profile URL + email edit | `userNickname` only; email read-only | `PARTIAL` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
 
 ---
 
@@ -165,6 +179,12 @@ getWalletBalance: WalletBalance!
 
 # GAP-002 — Ranking
 getTechnicianRank(technicianId: String!): TechnicianRank  # e.g. percentile, badge
+
+# GAP-083, GAP-084 — Article settings (Featured, Allow Comments)
+# Batafsil: docs/BACKEND_ARTICLE_FEATURED_COMMENTS.md
+
+# GAP-090…096 — Technician Settings
+# Batafsil: docs/BACKEND_SETTINGS.md
 ```
 
 ---
@@ -174,3 +194,5 @@ getTechnicianRank(technicianId: String!): TechnicianRank  # e.g. percentile, bad
 | Sana | Agent | O‘zgarish |
 |------|-------|-----------|
 | 2026-06-18 | Cursor | Dastlabki registry: Analytics, Earnings, Dashboard, Member reviews, Search, Notifications |
+| 2026-06-18 | Cursor | `BACKEND_ARTICLE_FEATURED_COMMENTS.md` — GAP-083/084 backend spec (isFeatured, allowComments, community logic) |
+| 2026-06-19 | Cursor | Technician Settings 1:1 UI + Profile/Account/Security/Availability GraphQL; `BACKEND_SETTINGS.md` GAP-090…096 |

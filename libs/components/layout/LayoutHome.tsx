@@ -9,6 +9,7 @@ import HeroRepairSearch from '../homepage/HeroRepairSearch';
 import { userVar } from '../../../apollo/store';
 import { useReactiveVar } from '@apollo/client';
 import { getJwtToken, updateUserInfo } from '../../auth';
+import { getPostAuthRoute } from '../../utils/postAuthRoute';
 import Chat from '../Chat';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -27,9 +28,9 @@ const withLayoutMain = (Component: any) => {
 		}, []);
 
 		useEffect(() => {
-			if (user?._id && user?.memberType === 'TECHNICIAN') {
-				router.replace('/technician/dashboard').then();
-			}
+			const jwt = getJwtToken();
+			if (!jwt || !user?._id) return;
+			router.replace(getPostAuthRoute(user)).then();
 		}, [user, router]);
 
 		/** HANDLERS **/

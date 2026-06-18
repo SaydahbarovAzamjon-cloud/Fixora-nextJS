@@ -103,7 +103,7 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 			...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
 			...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
 			...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
-			...(profile.userType ? { memberType: profile.userType } : {}),
+			...(profile.userType ? { memberType: profile.userType, userType: profile.userType } : {}),
 		});
 	}
 }

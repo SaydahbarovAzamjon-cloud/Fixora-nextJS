@@ -7,6 +7,7 @@ import { fixoraOAuthLogin } from '../../auth/fixoraAuth';
 import { requestGoogleAuthCode } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import { getPostAuthRoute } from '../../utils/postAuthRoute';
 
 const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 	const { t } = useTranslation('auth');
@@ -20,11 +21,7 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 				await router.push('/register/role?oauth=1');
 				return;
 			}
-			if (userType === 'TECHNICIAN') {
-				await router.push('/register/technician/pending');
-				return;
-			}
-			await router.push('/mypage');
+			await router.push(getPostAuthRoute({ userType, memberType: userType }));
 		},
 		[router],
 	);

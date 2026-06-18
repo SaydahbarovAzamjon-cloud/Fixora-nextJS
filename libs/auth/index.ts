@@ -132,6 +132,7 @@ export const updateUserInfo = (jwtToken: any) => {
 	userVar({
 		_id: claims._id ?? '',
 		memberType: claims.userType ?? claims.memberType ?? '',
+		userType: claims.userType ?? claims.memberType ?? '',
 		memberStatus: claims.memberStatus ?? '',
 		memberAuthType: claims.memberAuthType,
 		memberPhone: claims.memberPhone ?? '',

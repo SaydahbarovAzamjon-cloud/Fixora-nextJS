@@ -1,87 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
-import withLayoutFull from '../../libs/components/layout/LayoutFull';
-import { FixoraButton } from '../../libs/components/ui';
+import { getJwtToken, updateUserInfo } from '../../libs/auth';
 
-export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: {
-		...(await serverSideTranslations(locale ?? 'en', ['common'])),
-	},
-});
+const isTechnicianUser = (user: ReturnType<typeof userVar>) =>
+	user?.memberType === 'TECHNICIAN' || user?.userType === 'TECHNICIAN';
 
-const TechnicianLanding: NextPage = () => {
-	const { t } = useTranslation('common');
+/** `/technician` — redirect only; dashboard lives at `/technician/dashboard`. */
+const TechnicianIndex: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const [bootstrapped, setBootstrapped] = useState(false);
 
 	useEffect(() => {
-		if (user?._id && user?.memberType === 'TECHNICIAN') {
-			router.replace('/technician/dashboard').then();
+		const jwt = getJwtToken();
+		if (jwt) updateUserInfo(jwt);
+		setBootstrapped(true);
+	}, []);
+
+	useEffect(() => {
+		if (!bootstrapped) return;
+
+		const jwt = getJwtToken();
+		if (!jwt) {
+			router.replace('/login?referrer=/technician/dashboard').then();
+			return;
 		}
-	}, [user, router]);
 
-	return (
-		<div className="fixora-technician-landing">
-			<div className="fixora-technician-landing__container">
-				<div className="fixora-technician-landing__content">
-					<h1 className="fixora-technician-landing__title">
-						Join <span className="fixora-technician-landing__accent">Fixora</span> Technicians
-					</h1>
-					<p className="fixora-technician-landing__subtitle">
-						Grow your repair business with Fixora's AI-powered marketplace
-					</p>
+		const current = userVar();
+		if (isTechnicianUser(current)) {
+			router.replace('/technician/dashboard').then();
+			return;
+		}
 
-					<div className="fixora-technician-landing__features">
-						<div className="fixora-technician-landing__feature">
-							<div className="fixora-technician-landing__feature-icon">📱</div>
-							<h3>Easy Booking Management</h3>
-							<p>Manage all your repairs in one place</p>
-						</div>
+		if (current._id) {
+			router.replace('/').then();
+		}
+	}, [bootstrapped, user, router]);
 
-						<div className="fixora-technician-landing__feature">
-							<div className="fixora-technician-landing__feature-icon">⭐</div>
-							<h3>Build Your Reputation</h3>
-							<p>Get rated and trusted by customers</p>
-						</div>
-
-						<div className="fixora-technician-landing__feature">
-							<div className="fixora-technician-landing__feature-icon">💰</div>
-							<h3>Earn More</h3>
-							<p>Grow your income without overhead</p>
-						</div>
-
-						<div className="fixora-technician-landing__feature">
-							<div className="fixora-technician-landing__feature-icon">🛡️</div>
-							<h3>Secure & Safe</h3>
-							<p>Protected payments and verified customers</p>
-						</div>
-					</div>
-
-					<div className="fixora-technician-landing__actions">
-						<FixoraButton
-							variant="primary"
-							size="large"
-							onClick={() => router.push('/login?referrer=/technician/dashboard')}
-						>
-							Log In as Technician
-						</FixoraButton>
-						<FixoraButton
-							variant="secondary"
-							size="large"
-							onClick={() => router.push('/register/technician/1')}
-						>
-							Become a Technician
-						</FixoraButton>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+	return null;
 };
 
-export default withLayoutFull(TechnicianLanding);
+export default TechnicianIndex;

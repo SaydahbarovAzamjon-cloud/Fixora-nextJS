@@ -47,7 +47,7 @@ const TechIdUpload = () => {
 		setLoading(true);
 		try {
 			await fixoraTechnicianSignup({ ...currentDraft, idFileName: fileName });
-			await router.push('/register/technician/pending');
+			await router.push('/technician/dashboard');
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Submission failed');
 		} finally {

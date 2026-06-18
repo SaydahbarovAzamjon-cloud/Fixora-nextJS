@@ -3,7 +3,7 @@ import { useApolloClient } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import StarIcon from '@mui/icons-material/Star';
-import { GET_TECHNICIANS, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
+import { GET_TECHNICIANS, GET_TECHNICIAN_REVIEWS } from '../../../apollo/user/query';
 import { TechnicianReview } from '../../types/fixora/fixora';
 
 interface CustomerReview extends TechnicianReview {

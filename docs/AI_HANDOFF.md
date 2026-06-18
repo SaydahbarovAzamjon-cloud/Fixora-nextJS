@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-17 |
-| **Last agent** | Claude |
-| **Last session** | **Technician Dashboard interactions (P3-13)** — `pages/technician/dashboard.tsx`: quick actions wired (New Quote → `/community/write`, Mark Available → `updateUser isOnline` toggle, View Schedule → scroll, Export Report → `/technician/earnings`); **Weekly Earnings** Week/Month/Year toggle now real (`getTechnicianBookings`), auto-defaults to the range that has data so the chart line shows; **Today's Schedule** Add button → `AddScheduleModal`, items in **localStorage** (no backend schedule model), merged + deletable. New `AddScheduleModal.tsx`. See DECISIONS UI-11. tsc clean. _(prev: Public Profile + Stories — see below)_ |
-| **Last session (prev)** | **Public Profile fully wired + Repair Stories create (P3-13)** — `pages/technician/profile/index.tsx`: header/About/My Articles/Services/Portfolio/Reviews/Followers all live (`getUser`/`getMyArticles`/`getTechnicianReviews`/`getUserFollowers`); functional Message/View-Live/Follow buttons; stats→0 when empty; Response static `<15m`. **Repair Stories now real:** `getTechnicianStories` covers in the ring (hardcoded removed) + gated **Add Story** (`CreateStoryModal`) → `imagesUploader(target:"story")` (multipart axios) → `createStory`. New files `apollo/user/story.ts`, `libs/components/technician/CreateStoryModal.tsx`; `Story`/`CreateStoryInput` types; `verificationStatus`/`userType` added to `GET_USER`; `GET_USER_FOLLOWERS`; SCSS for followers/portfolio/story-cover/story-modal. See DECISIONS UI-07…UI-10. tsc clean (only pre-existing reselect node_modules errors). |
+| **Last updated** | 2026-06-18 |
+| **Last agent** | Cursor |
+| **Last session** | **Write Article — Technician Dashboard 1:1 (P3-13)** — `/technician/write`: Figma-matched editor (title, cover DnD upload, category pills, excerpt, markdown editor, live preview, SEO/settings panels, sticky action bar); `createArticle` + `imageUploader(target:"article")`; EN/KR `technician.writeArticle` i18n; sidebar Write Article nav; technicians on `/community/write` redirect. GAP-080…084 in `BACKEND_GAPS.md`. |
+| **Last session (prev)** | **Technician Dashboard interactions (P3-13)** — dashboard quick actions, earnings chart, schedule modal. |
 | **Next agent should start with** | `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device |
 
 ---

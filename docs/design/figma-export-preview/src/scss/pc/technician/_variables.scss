@@ -1,0 +1,59 @@
+// ─── FIXORA Design Tokens ────────────────────────────────────────────────────
+
+// Backgrounds
+$bg-base:       #0A0A0A;
+$bg-sidebar:    #0D0D0D;
+$bg-surface-1:  #111111;
+$bg-surface-2:  #161616;
+$bg-surface-3:  #1A1A1A;
+$bg-surface-4:  #1E1E1E;
+
+// Brand / Accent
+$orange:        #FF6B00;
+$orange-light:  #FF9A3C;
+$orange-dim:    rgba(255, 107, 0, 0.12);
+$orange-border: rgba(255, 107, 0, 0.25);
+$orange-glow:   0 0 18px rgba(255, 107, 0, 0.4);
+$orange-glow-h: 0 0 30px rgba(255, 107, 0, 0.65);
+$orange-grad:   linear-gradient(135deg, $orange, $orange-light);
+
+// Status colors
+$green:         #22C55E;
+$green-dim:     rgba(34, 197, 94, 0.12);
+$blue:          #3B82F6;
+$blue-dim:      rgba(59, 130, 246, 0.12);
+$yellow:        #F59E0B;
+$yellow-dim:    rgba(245, 158, 11, 0.12);
+$red:           #EF4444;
+$red-dim:       rgba(239, 68, 68, 0.12);
+$purple:        #A855F7;
+
+// Text
+$text-primary:   #F0F0F0;
+$text-secondary: #C0C0C0;
+$text-muted:     #808080;
+$text-dim:       #606060;
+$text-dimmer:    #505050;
+$text-ghost:     #404040;
+
+// Borders
+$border:         rgba(255, 255, 255, 0.07);
+$border-light:   rgba(255, 255, 255, 0.05);
+$border-dimmer:  rgba(255, 255, 255, 0.04);
+
+// Radius
+$radius-xs:  6px;
+$radius-sm:  8px;
+$radius-md:  10px;
+$radius-lg:  12px;
+$radius-xl:  14px;
+$radius-2xl: 16px;
+$radius-3xl: 18px;
+
+// Transitions
+$transition-fast:   all 0.15s ease;
+$transition-normal: all 0.2s ease;
+
+// Typography
+$font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+$font-mono:   'JetBrains Mono', monospace;

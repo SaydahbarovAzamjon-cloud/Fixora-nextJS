@@ -22,10 +22,14 @@ const WritePage: NextPage = () => {
 	useEffect(() => {
 		if (!user?._id) {
 			router.push('/login');
+			return;
+		}
+		if (user.memberType === 'TECHNICIAN') {
+			router.replace('/technician/write').then();
 		}
 	}, [user, router]);
 
-	if (!user?._id) {
+	if (!user?._id || user.memberType === 'TECHNICIAN') {
 		return null;
 	}
 

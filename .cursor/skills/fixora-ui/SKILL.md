@@ -22,7 +22,7 @@ description: >-
 - Login field: **email** (`userEmail`) — not phone (AGENTS.md)
 - Theme: dark bg, orange primary `#FF6B00`, dark glass cards
 - MVP: dark only — use CSS variables with light placeholders for Phase 4
-- i18n: KO + EN via `next-i18next` — no hardcoded UI strings
+- i18n: **KO + EN mandatory** — every UI string in `public/locales/en/` + `public/locales/kr/`; use `technician` namespace for technician portal; see AGENTS.md i18n section
 - Package manager: **yarn** only
 
 ## Mockup paths

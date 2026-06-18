@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
 import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
@@ -40,7 +40,7 @@ import { Messages, REACT_APP_API_URL } from '../../../libs/config';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 const STORY_COLORS = ['#FF6B00', '#3B82F6', '#A855F7', '#22C55E', '#F59E0B', '#EC4899'];

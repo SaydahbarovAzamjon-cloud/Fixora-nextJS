@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import AddOutlined from '@mui/icons-material/AddOutlined';
@@ -15,20 +16,21 @@ interface HeaderProps {
 	activePage: string;
 }
 
-const PAGE_TITLES: Record<string, string> = {
-	dashboard: 'Dashboard',
-	requests: 'Incoming Requests',
-	jobs: 'Active Jobs',
-	messages: 'Messages',
-	notifications: 'Notifications',
-	profile: 'Public Profile',
-	analytics: 'Analytics',
-	earnings: 'Earnings',
-	settings: 'Settings',
-	help: 'Help & Support',
+const PAGE_TITLE_KEYS: Record<string, string> = {
+	dashboard: 'nav.dashboard',
+	requests: 'nav.requests',
+	jobs: 'nav.jobs',
+	messages: 'nav.messages',
+	notifications: 'nav.notifications',
+	profile: 'nav.profile',
+	analytics: 'nav.analytics',
+	earnings: 'nav.earnings',
+	settings: 'nav.settings',
+	help: 'nav.help',
 };
 
 const Header: React.FC<HeaderProps> = ({ activePage }) => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const badges = useTechnicianBadges();
@@ -36,13 +38,15 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
-	const displayName = user?.memberFullName || user?.memberNick || 'Technician';
+	const displayName = user?.memberFullName || user?.memberNick || t('nav.fallbackName');
 	const initials = displayName
 		.split(' ')
 		.map((part) => part.charAt(0))
 		.slice(0, 2)
 		.join('')
 		.toUpperCase();
+
+	const pageTitleKey = PAGE_TITLE_KEYS[activePage] ?? 'nav.dashboard';
 
 	const handleLogout = () => {
 		localStorage.removeItem('accessToken');
@@ -65,12 +69,10 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 	return (
 		<header className="fixora-tech-header">
-			{/* Page title */}
 			<div className="fixora-tech-header__title">
-				<h1>{PAGE_TITLES[activePage] || 'Dashboard'}</h1>
+				<h1>{t(pageTitleKey)}</h1>
 			</div>
 
-			{/* Search */}
 			<div
 				className={`fixora-tech-header__search ${searchFocused ? 'fixora-tech-header__search--focused' : ''}`}
 				onClick={() => !searchFocused && (document.querySelector('.fixora-tech-header__search-input') as HTMLInputElement)?.focus()}
@@ -78,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				<SearchOutlined className="fixora-tech-header__search-icon" style={{ fontSize: 17 }} />
 				<input
 					className="fixora-tech-header__search-input"
-					placeholder="Search jobs, clients, devices..."
+					placeholder={t('header.searchPlaceholder')}
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 					onKeyDown={handleSearchKeyDown}
@@ -90,18 +92,16 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			<div className="fixora-tech-header__spacer" />
 
-			{/* New Quote button → create a new article */}
 			<button
 				className="fixora-tech-header__new-quote"
 				onClick={() => router.push('/community/write')}
 			>
-				<AddOutlined style={{ fontSize: 16 }} /> New Quote
+				<AddOutlined style={{ fontSize: 16 }} /> {t('header.newQuote')}
 			</button>
 
-			{/* Icon buttons */}
 			<button
 				className="fixora-tech-header__icon-btn"
-				title="Messages"
+				title={t('nav.messages')}
 				onClick={() => router.push('/technician/messages')}
 			>
 				<ChatBubbleOutlineOutlined style={{ fontSize: 18 }} />
@@ -110,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			<button
 				className="fixora-tech-header__icon-btn"
-				title="Notifications"
+				title={t('nav.notifications')}
 				onClick={() => router.push('/technician/notifications')}
 			>
 				<NotificationsNoneOutlined style={{ fontSize: 19 }} />
@@ -119,13 +119,12 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 
 			<button
 				className="fixora-tech-header__icon-btn"
-				title="Settings"
+				title={t('nav.settings')}
 				onClick={() => router.push('/technician/settings')}
 			>
 				<SettingsOutlined style={{ fontSize: 18 }} />
 			</button>
 
-			{/* Profile dropdown */}
 			<div className="fixora-tech-header__profile">
 				<button
 					className="fixora-tech-header__profile-btn"
@@ -138,7 +137,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 					</div>
 					<div className="fixora-tech-header__profile-info">
 						<div className="fixora-tech-header__profile-name">{displayName}</div>
-						<div className="fixora-tech-header__profile-role">Pro Technician</div>
+						<div className="fixora-tech-header__profile-role">{t('nav.proTechnician')}</div>
 					</div>
 					<KeyboardArrowDown style={{ fontSize: 16, color: '#606060' }} />
 				</button>
@@ -152,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 								setDropdownOpen(false);
 							}}
 						>
-							View Profile
+							{t('header.viewProfile')}
 						</button>
 						<button
 							className="fixora-tech-header__dropdown-item"
@@ -161,14 +160,14 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 								setDropdownOpen(false);
 							}}
 						>
-							Settings
+							{t('nav.settings')}
 						</button>
 						<div className="fixora-tech-header__dropdown-divider" />
 						<button
 							className="fixora-tech-header__dropdown-item fixora-tech-header__dropdown-item--danger"
 							onClick={handleLogout}
 						>
-							Sign Out
+							{t('header.signOut')}
 						</button>
 					</div>
 				)}

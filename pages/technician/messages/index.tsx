@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import CallOutlined from '@mui/icons-material/CallOutlined';
@@ -24,7 +25,7 @@ import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 const EMOJIS = [
@@ -78,6 +79,7 @@ const formatTime = (dateStr?: string | null) => {
 };
 
 const Messages: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 
@@ -292,7 +294,7 @@ const Messages: NextPage = () => {
 						<SearchOutlined style={{ fontSize: 17 }} />
 						<input
 							type="text"
-							placeholder="Search conversations..."
+							placeholder={t('messages.searchPlaceholder')}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
 						/>
@@ -313,7 +315,7 @@ const Messages: NextPage = () => {
 							))}
 						</>
 					) : filteredConversations.length === 0 ? (
-						<div className="fixora-tech-empty">No conversations yet</div>
+						<div className="fixora-tech-empty">{t('messages.noConversations')}</div>
 					) : (
 						filteredConversations.map((conv) => {
 							const name = peerName(conv);
@@ -373,7 +375,7 @@ const Messages: NextPage = () => {
 								</UserProfileLink>
 								<div className="fixora-msg-chat__status">
 									{activeConversation.peer?.isOnline && <span className="fixora-msg-chat__status-dot" />}
-									{activeConversation.peer?.isOnline ? 'Online' : 'Offline'}
+									{activeConversation.peer?.isOnline ? t('messages.online') : t('messages.offline')}
 									{deviceLabel ? ` · ${deviceLabel}` : ''}
 								</div>
 							</div>
@@ -480,7 +482,7 @@ const Messages: NextPage = () => {
 								<textarea
 									ref={textareaRef}
 									className="fixora-msg-composer__input"
-									placeholder="Type a message..."
+									placeholder={t('messages.typePlaceholder')}
 									rows={1}
 									value={draft}
 									onChange={(e) => setDraft(e.target.value)}
@@ -508,7 +510,7 @@ const Messages: NextPage = () => {
 						<div className="fixora-msg-loading__spinner" />
 					</div>
 				) : (
-					<div className="fixora-tech-empty" style={{ margin: 'auto' }}>Select a conversation to start chatting</div>
+					<div className="fixora-tech-empty" style={{ margin: 'auto' }}>{t('messages.selectConversation')}</div>
 				)}
 			</div>
 		</div>

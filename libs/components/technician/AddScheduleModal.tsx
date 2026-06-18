@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 
 export interface NewScheduleItem {
@@ -14,6 +15,7 @@ interface AddScheduleModalProps {
 }
 
 const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
+	const { t } = useTranslation('technician');
 	const [time, setTime] = useState('');
 	const [task, setTask] = useState('');
 	const [client, setClient] = useState('');
@@ -40,7 +42,7 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 		<div className="fixora-story-modal__overlay" onClick={onClose}>
 			<div className="fixora-story-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
 				<div className="fixora-story-modal__head">
-					<h3 className="fixora-story-modal__title">Add to Schedule</h3>
+					<h3 className="fixora-story-modal__title">{t('schedule.title')}</h3>
 					<button className="fixora-story-modal__close" type="button" onClick={onClose}>
 						<CloseRounded style={{ fontSize: 20 }} />
 					</button>
@@ -48,7 +50,7 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 
 				<div className="fixora-story-modal__body">
 					<label className="fixora-sched-field">
-						<span className="fixora-sched-field__label">Time</span>
+						<span className="fixora-sched-field__label">{t('schedule.time')}</span>
 						<input
 							className="fixora-sched-field__input"
 							type="time"
@@ -58,11 +60,11 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 					</label>
 
 					<label className="fixora-sched-field">
-						<span className="fixora-sched-field__label">Task</span>
+						<span className="fixora-sched-field__label">{t('schedule.task')}</span>
 						<input
 							className="fixora-sched-field__input"
 							type="text"
-							placeholder="e.g. iPhone 15 screen replacement"
+							placeholder={t('schedule.taskPlaceholder')}
 							value={task}
 							onChange={(e) => setTask(e.target.value)}
 							maxLength={120}
@@ -70,11 +72,11 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 					</label>
 
 					<label className="fixora-sched-field">
-						<span className="fixora-sched-field__label">Client (optional)</span>
+						<span className="fixora-sched-field__label">{t('schedule.clientOptional')}</span>
 						<input
 							className="fixora-sched-field__input"
 							type="text"
-							placeholder="e.g. Kim Sofia"
+							placeholder={t('schedule.clientPlaceholder')}
 							value={client}
 							onChange={(e) => setClient(e.target.value)}
 							maxLength={80}
@@ -84,10 +86,10 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 
 				<div className="fixora-story-modal__foot">
 					<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={onClose}>
-						Cancel
+						{t('schedule.cancel')}
 					</button>
 					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={saveHandler} disabled={!canSave}>
-						Add
+						{t('schedule.add')}
 					</button>
 				</div>
 			</div>

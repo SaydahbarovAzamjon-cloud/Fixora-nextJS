@@ -157,11 +157,23 @@ Reuse existing `libs/`, `pages/`, and `apollo/` patterns before creating new fol
 
 ---
 
-## i18n (KO + EN)
+## i18n (KO + EN) — mandatory for all UI
 
-- `next-i18next` — `public/locales/ko/`, `public/locales/en/`
-- No hardcoded UI strings
-- Backend errors: English OK
+**Rule:** Every new or updated UI string must have **English + Korean** translations before the task is done. No hardcoded user-facing copy in components.
+
+| Item | Value |
+|------|-------|
+| Library | `next-i18next` — `useTranslation(namespace)` + `t('key')` |
+| Locales | `en`, **`kr`** (Korean — not `ko`), `ru` |
+| Paths | `public/locales/{locale}/{namespace}.json` |
+| Namespaces | `common` (customer UI), `auth` (login/register), `technician` (technician portal) |
+| SSR | `serverSideTranslations(locale, ['common', …])` in `getServerSideProps` |
+| Technician pages | Use `technicianPageProps(locale)` from `libs/i18n/technicianPageProps.ts` |
+| Dates/times | Use `dateLocale(router.locale)` — never hardcode `'en-US'` for user-visible dates |
+| Backend errors | English OK (shown as-is from API) |
+| IDE | `.vscode/settings.json` — i18n-ally config; auth keys live in `auth.json`, not `common` |
+
+When adding UI: add key to **both** `public/locales/en/*.json` and `public/locales/kr/*.json`, wire `t()` in the component, load namespace in page SSR.
 
 ---
 

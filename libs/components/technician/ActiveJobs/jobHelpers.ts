@@ -1,5 +1,28 @@
+import type { TFunction } from 'next-i18next';
+import { dateLocale } from '../../utils/i18nLocale';
+
 export type JobStage = 'DIAGNOSING' | 'IN_PROGRESS' | 'PARTS_ORDERED' | 'READY_FOR_PICKUP';
 
+const STAGE_COLORS: Record<JobStage, { color: string; bg: string }> = {
+	DIAGNOSING: { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+	IN_PROGRESS: { color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' },
+	PARTS_ORDERED: { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
+	READY_FOR_PICKUP: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
+};
+
+const STAGE_LABEL_KEYS: Record<JobStage, string> = {
+	DIAGNOSING: 'jobs.stage.diagnosing',
+	IN_PROGRESS: 'jobs.stage.inProgress',
+	PARTS_ORDERED: 'jobs.stage.partsOrdered',
+	READY_FOR_PICKUP: 'jobs.stage.readyForPickup',
+};
+
+export const getJobStageInfo = (stage: JobStage, t: TFunction) => ({
+	label: t(STAGE_LABEL_KEYS[stage]),
+	...STAGE_COLORS[stage],
+});
+
+/** @deprecated use getJobStageInfo(stage, t) */
 export const JOB_STAGE_INFO: Record<JobStage, { label: string; color: string; bg: string }> = {
 	DIAGNOSING: { label: 'Diagnosing', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
 	IN_PROGRESS: { label: 'In Progress', color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' },
@@ -39,51 +62,57 @@ const DEVICE_LABEL: Record<string, string> = {
 export const deviceIcon = (deviceType?: string | null) => DEVICE_ICON[deviceType ?? ''] ?? '🔧';
 export const deviceLabel = (deviceType?: string | null) => DEVICE_LABEL[deviceType ?? ''] ?? 'Device';
 
-export const REPAIR_TIMELINE_STEPS = [
-	'Received & Logged',
-	'Initial Diagnosis',
-	'Parts Ordered',
-	'Repair In Progress',
-	'Quality Testing',
-	'Ready for Pickup',
-];
+const TIMELINE_KEYS = [
+	'jobs.timeline.received',
+	'jobs.timeline.diagnosis',
+	'jobs.timeline.partsOrdered',
+	'jobs.timeline.repairInProgress',
+	'jobs.timeline.qualityTesting',
+	'jobs.timeline.readyForPickup',
+] as const;
 
-export const formatDateTime = (dateStr?: string | null) => {
-	if (!dateStr) return '';
-	const date = new Date(dateStr);
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-		', ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-};
-
-export const formatDue = (dateStr?: string | null) => {
-	if (!dateStr) return 'TBD';
-	const date = new Date(dateStr);
-	const now = new Date();
-	const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-	if (date.toDateString() === now.toDateString()) return `Today, ${time}`;
-	const tomorrow = new Date(now);
-	tomorrow.setDate(now.getDate() + 1);
-	if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow, ${time}`;
-	return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
-};
-
-export const buildTimeline = (booking: any) => {
+export const buildTimeline = (booking: any, t: TFunction) => {
 	const isCompleted = booking?.bookingStatus === 'COMPLETED';
 	const updates = booking?.progressUpdates ?? [];
 	const doneCount = isCompleted
-		? REPAIR_TIMELINE_STEPS.length
-		: Math.min(REPAIR_TIMELINE_STEPS.length, 1 + updates.length);
+		? TIMELINE_KEYS.length
+		: Math.min(TIMELINE_KEYS.length, 1 + updates.length);
 
-	return REPAIR_TIMELINE_STEPS.map((label, idx) => {
+	return TIMELINE_KEYS.map((key, idx) => {
 		let timestamp: string | null = null;
 		if (idx === 0) timestamp = booking?.createdAt ?? null;
 		else if (idx - 1 < updates.length) timestamp = updates[idx - 1]?.timestamp ?? null;
-		else if (isCompleted && idx === REPAIR_TIMELINE_STEPS.length - 1) timestamp = booking?.completedAt ?? null;
+		else if (isCompleted && idx === TIMELINE_KEYS.length - 1) timestamp = booking?.completedAt ?? null;
 
 		return {
-			label,
+			label: t(key),
 			done: idx < doneCount,
 			timestamp,
 		};
 	});
+};
+
+export const formatDateTime = (dateStr?: string | null, locale?: string) => {
+	if (!dateStr) return '';
+	const date = new Date(dateStr);
+	const loc = dateLocale(locale);
+	return date.toLocaleDateString(loc, { month: 'short', day: 'numeric' }) +
+		', ' + date.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' });
+};
+
+export const formatDue = (dateStr?: string | null, t?: TFunction, locale?: string) => {
+	if (!dateStr) return t ? t('time.tbd') : 'TBD';
+	const date = new Date(dateStr);
+	const now = new Date();
+	const loc = dateLocale(locale);
+	const time = date.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' });
+	if (date.toDateString() === now.toDateString()) {
+		return t ? t('time.today', { time }) : `Today, ${time}`;
+	}
+	const tomorrow = new Date(now);
+	tomorrow.setDate(now.getDate() + 1);
+	if (date.toDateString() === tomorrow.toDateString()) {
+		return t ? t('time.tomorrow', { time }) : `Tomorrow, ${time}`;
+	}
+	return `${date.toLocaleDateString(loc, { month: 'short', day: 'numeric' })}, ${time}`;
 };

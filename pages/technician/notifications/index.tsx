@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { gql, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
 import Inventory2Rounded from '@mui/icons-material/Inventory2Rounded';
@@ -20,7 +21,7 @@ import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 // Lightweight followers query — the shared GET_MEMBER_FOLLOWERS asks for legacy
@@ -123,14 +124,15 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 	},
 };
 
-const FILTERS: { id: FilterId; label: string }[] = [
-	{ id: 'all', label: 'All' },
-	{ id: 'requests', label: 'Requests' },
-	{ id: 'payments', label: 'Payments' },
-	{ id: 'reviews', label: 'Reviews' },
-	{ id: 'likes', label: 'Likes' },
-	{ id: 'follows', label: 'Follows' },
-];
+const FILTER_KEYS: Record<FilterId, string> = {
+	all: 'notifications.filterAll',
+	requests: 'notifications.filterRequests',
+	payments: 'notifications.filterPayments',
+	reviews: 'notifications.filterReviews',
+	likes: 'notifications.filterLikes',
+	follows: 'notifications.filterFollows',
+	alerts: 'notifications.filterAlerts',
+};
 
 const BOOKING_REQUEST_PATTERN = /request|requested|new booking/i;
 const PAYMENT_PATTERN = /payment|paid|payout|earnings/i;
@@ -183,10 +185,13 @@ const NotifSender = ({ userId }: { userId?: string | null }) => (
 );
 
 const Notifications: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 	const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+
+	const FILTERS: FilterId[] = ['all', 'requests', 'payments', 'reviews', 'likes', 'follows'];
 
 	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
@@ -219,8 +224,8 @@ const Notifications: NextPage = () => {
 				userId: followerId,
 				receiverId: user?._id,
 				notificationType: 'FOLLOW',
-				notificationTitle: 'New follower',
-				notificationDescription: `${name} started following you`,
+				notificationTitle: t('notifications.newFollower'),
+				notificationDescription: `${name} ${t('notifications.startedFollowing')}`,
 				referenceId: followerId,
 				referenceType: null,
 				isRead: true,
@@ -337,14 +342,14 @@ const Notifications: NextPage = () => {
 			<div className="fixora-notif-header">
 				<div>
 					<div className="fixora-notif-header__title-row">
-						<h2 className="fixora-notif-header__title">Notification Center</h2>
-						{unreadCount > 0 && <span className="fixora-notif-header__badge">{unreadCount} new</span>}
+						<h2 className="fixora-notif-header__title">{t('notifications.title')}</h2>
+						{unreadCount > 0 && <span className="fixora-notif-header__badge">{t('notifications.newBadge', { count: unreadCount })}</span>}
 					</div>
-					<p className="fixora-notif-header__sub">Stay on top of your repair workflow</p>
+					<p className="fixora-notif-header__sub">{t('notifications.subtitle')}</p>
 				</div>
 				{unreadCount > 0 && (
 					<button className="fixora-notif-markall" onClick={handleMarkAllRead} type="button">
-						<DoneAllRounded style={{ fontSize: 17 }} /> Mark all as read
+						<DoneAllRounded style={{ fontSize: 17 }} /> {t('notifications.markAllRead')}
 					</button>
 				)}
 			</div>
@@ -352,12 +357,12 @@ const Notifications: NextPage = () => {
 			<div className="fixora-notif-filters">
 				{FILTERS.map((f) => (
 					<button
-						key={f.id}
-						className={`fixora-notif-filter ${activeFilter === f.id ? 'fixora-notif-filter--active' : ''}`}
-						onClick={() => setActiveFilter(f.id)}
+						key={f}
+						className={`fixora-notif-filter ${activeFilter === f ? 'fixora-notif-filter--active' : ''}`}
+						onClick={() => setActiveFilter(f)}
 						type="button"
 					>
-						{f.label}
+						{t(FILTER_KEYS[f])}
 					</button>
 				))}
 			</div>
@@ -369,20 +374,20 @@ const Notifications: NextPage = () => {
 			) : filtered.length === 0 ? (
 				<div className="fixora-notif-empty">
 					<NotificationsNoneOutlined style={{ fontSize: 48, color: '#333' }} />
-					<p>You have no notifications</p>
+					<p>{t('notifications.empty')}</p>
 				</div>
 			) : (
 				<>
 					{today.length > 0 && (
 						<>
-							<div className="fixora-notif-section-label">Today</div>
+							<div className="fixora-notif-section-label">{t('notifications.today')}</div>
 							<div className="fixora-notif-list">{today.map(renderCard)}</div>
 						</>
 					)}
 					{earlier.length > 0 && (
 						<>
 							<div className="fixora-notif-section-label" style={{ marginTop: today.length > 0 ? 28 : 0 }}>
-								Earlier
+								{t('notifications.earlier')}
 							</div>
 							<div className="fixora-notif-list">{earlier.map(renderCard)}</div>
 						</>

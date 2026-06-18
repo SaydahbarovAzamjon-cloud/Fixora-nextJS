@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
@@ -31,10 +32,22 @@ import {
 import { sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
-const RANGES: EarningsRange[] = ['This Week', 'This Month', 'Last 3 Mo', 'This Year'];
+const RANGE_KEYS: Record<EarningsRange, string> = {
+	'This Week': 'earnings.rangeThisWeek',
+	'This Month': 'earnings.rangeThisMonth',
+	'Last 3 Mo': 'earnings.rangeLast3Mo',
+	'This Year': 'earnings.rangeThisYear',
+};
+
+const TX_FILTER_KEYS: Record<'All' | TxStatus, string> = {
+	All: 'earnings.filterAll',
+	Paid: 'earnings.statusPaid',
+	Pending: 'earnings.statusPending',
+	Processing: 'earnings.statusProcessing',
+};
 
 const DEMO_DAILY = [
 	{ day: 'Mon', earned: 440000, pending: 133000 },
@@ -81,20 +94,23 @@ const TX_STATUS_STYLE: Record<TxStatus, { color: string; bg: string }> = {
 	Processing: { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
 };
 
-const DailyTooltip = ({ active, payload, label }: any) => {
+const RANGES: EarningsRange[] = ['This Week', 'This Month', 'Last 3 Mo', 'This Year'];
+
+const DailyTooltip = ({ active, payload, label, t }: any) => {
 	if (!active || !payload?.length) return null;
 	const earned = payload.find((p: any) => p.dataKey === 'earned')?.value;
 	const pending = payload.find((p: any) => p.dataKey === 'pending')?.value;
 	return (
 		<div className="fixora-ea-tooltip">
 			<div className="fixora-ea-tooltip__title">{label}</div>
-			<div className="fixora-ea-tooltip__row" style={{ color: '#FF9A3C' }}>Earned : {formatKrw(earned ?? 0)}</div>
-			<div className="fixora-ea-tooltip__row" style={{ color: '#F59E0B' }}>Pending : {formatKrw(pending ?? 0)}</div>
+			<div className="fixora-ea-tooltip__row" style={{ color: '#FF9A3C' }}>{t('earnings.earned')} : {formatKrw(earned ?? 0)}</div>
+			<div className="fixora-ea-tooltip__row" style={{ color: '#F59E0B' }}>{t('earnings.pending')} : {formatKrw(pending ?? 0)}</div>
 		</div>
 	);
 };
 
 const Earnings: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const user = useReactiveVar(userVar);
 	const [range, setRange] = useState<EarningsRange>('This Week');
 	const [txFilter, setTxFilter] = useState<'All' | TxStatus>('All');
@@ -176,17 +192,17 @@ const Earnings: NextPage = () => {
 	);
 
 	const stats = [
-		{ label: 'Total Earned', value: totalEarnedLabel, sub: weekChange, subColor: '#22C55E', icon: <AttachMoneyOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)' },
+		{ label: t('earnings.totalEarned'), value: totalEarnedLabel, sub: weekChange, subColor: '#22C55E', icon: <AttachMoneyOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)' },
 		{
-			label: 'Pending',
+			label: t('earnings.pending'),
 			value: pendingLabel,
-			sub: useReal && pendingJobsCount > 0 ? `${pendingJobsCount} jobs awaiting payment` : '5 jobs awaiting payment',
+			sub: useReal && pendingJobsCount > 0 ? t('earnings.jobsAwaiting', { count: pendingJobsCount }) : t('earnings.jobsAwaitingDemo'),
 			subColor: '#F59E0B',
 			icon: <AccessTimeOutlined style={{ fontSize: 19, color: '#F59E0B' }} />,
 			bg: 'rgba(245,158,11,0.12)',
 		},
-		{ label: 'Next Payout', value: formatKrw(DEMO_KRW.nextPayout), sub: 'Est. Jun 21, 2026', subColor: '#808080', icon: <AccountBalanceWalletOutlined style={{ fontSize: 19, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)' },
-		{ label: 'This Month', value: monthLabel, sub: '+22% vs May', subColor: '#22C55E', icon: <ShowChartOutlined style={{ fontSize: 19, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)' },
+		{ label: t('earnings.nextPayout'), value: formatKrw(DEMO_KRW.nextPayout), sub: 'Est. Jun 21, 2026', subColor: '#808080', icon: <AccountBalanceWalletOutlined style={{ fontSize: 19, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)' },
+		{ label: t('earnings.thisMonth'), value: monthLabel, sub: '+22% vs May', subColor: '#22C55E', icon: <ShowChartOutlined style={{ fontSize: 19, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)' },
 	];
 
 	const monthNote = useMemo(() => {
@@ -196,15 +212,15 @@ const Earnings: NextPage = () => {
 	}, [monthlySeries]);
 
 	const handlePayoutAction = () => {
-		sweetTopSmallSuccessAlert('Payout requests coming soon', 1200);
+		sweetTopSmallSuccessAlert(t('earnings.payoutComingSoon'), 1200);
 	};
 
 	return (
 		<div className="fixora-ea-page">
 			<div className="fixora-ea-header">
 				<div>
-					<h1 className="fixora-ea-header__title">Earnings &amp; Payouts</h1>
-					<p className="fixora-ea-header__sub">Track income, pending payments and payout history</p>
+					<h1 className="fixora-ea-header__title">{t('earnings.title')}</h1>
+					<p className="fixora-ea-header__sub">{t('earnings.subtitle')}</p>
 				</div>
 				<div className="fixora-ea-header__right">
 					<div className="fixora-ea-range">
@@ -215,12 +231,12 @@ const Earnings: NextPage = () => {
 								onClick={() => setRange(r)}
 								type="button"
 							>
-								{r}
+								{t(RANGE_KEYS[r])}
 							</button>
 						))}
 					</div>
 					<button className="fixora-ea-payout-btn" type="button" onClick={handlePayoutAction}>
-						<FileDownloadOutlined style={{ fontSize: 18 }} /> Request Payout
+						<FileDownloadOutlined style={{ fontSize: 18 }} /> {t('earnings.requestPayout')}
 					</button>
 				</div>
 			</div>
@@ -241,10 +257,10 @@ const Earnings: NextPage = () => {
 			<div className="fixora-ea-row fixora-ea-row--2-1">
 				<div className="fixora-ea-card">
 					<div className="fixora-ea-card__head">
-						<h2 className="fixora-ea-card__title">Daily Earnings</h2>
+						<h2 className="fixora-ea-card__title">{t('earnings.dailyEarnings')}</h2>
 						<div className="fixora-ea-legend">
-							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#FF6B00' }} /> Earned</span>
-							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#F59E0B' }} /> Pending</span>
+							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#FF6B00' }} /> {t('earnings.earned')}</span>
+							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#F59E0B' }} /> {t('earnings.pending')}</span>
 						</div>
 					</div>
 					<div className="fixora-ea-bignum">
@@ -263,7 +279,7 @@ const Earnings: NextPage = () => {
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="day" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
 								<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, chartTicks[chartTicks.length - 1]]} ticks={chartTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-								<Tooltip content={<DailyTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
+								<Tooltip content={<DailyTooltip t={t} />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
 								<Area type="monotone" dataKey="pending" stroke="#F59E0B" strokeWidth={1} fillOpacity={0} dot={false} />
 								<Area type="monotone" dataKey="earned" stroke="#FF6B00" strokeWidth={2.5} fill="url(#eaEarned)" dot={false} activeDot={{ r: 5, fill: '#FF6B00' }} />
 							</AreaChart>
@@ -273,7 +289,7 @@ const Earnings: NextPage = () => {
 
 				<div className="fixora-ea-card">
 					<div className="fixora-ea-card__head">
-						<h2 className="fixora-ea-card__title">Monthly Payouts</h2>
+						<h2 className="fixora-ea-card__title">{t('earnings.monthlyPayouts')}</h2>
 					</div>
 					<div className="fixora-ea-bignum">
 						<span className="fixora-ea-bignum__val fixora-ea-bignum__val--blue">{monthlyTotalLabel}</span>
@@ -285,7 +301,7 @@ const Earnings: NextPage = () => {
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="month" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
 								<YAxis stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, payoutTicks[payoutTicks.length - 1]]} ticks={payoutTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), 'Payout']} />
+								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), t('earnings.payout')]} />
 								<Bar dataKey="payout" radius={[6, 6, 0, 0]} maxBarSize={42}>
 									{monthlySeries.map((d) => (
 										<Cell key={d.month} fill={d.color} />
@@ -300,7 +316,7 @@ const Earnings: NextPage = () => {
 			<div className="fixora-ea-row fixora-ea-row--2-1">
 				<div className="fixora-ea-card">
 					<div className="fixora-ea-card__head">
-						<h2 className="fixora-ea-card__title">Transactions</h2>
+						<h2 className="fixora-ea-card__title">{t('earnings.transactions')}</h2>
 						<div className="fixora-ea-txfilters">
 							{TX_FILTERS.map((f) => (
 								<button
@@ -309,7 +325,7 @@ const Earnings: NextPage = () => {
 									onClick={() => setTxFilter(f)}
 									type="button"
 								>
-									{f}
+									{t(TX_FILTER_KEYS[f])}
 								</button>
 							))}
 						</div>
@@ -328,7 +344,7 @@ const Earnings: NextPage = () => {
 									</div>
 									<div className="fixora-ea-tx__right">
 										<div className="fixora-ea-tx__amount">{formatKrw(tx.amount)}</div>
-										<span className="fixora-ea-tx__status" style={{ color: st.color, background: st.bg }}>{tx.status}</span>
+										<span className="fixora-ea-tx__status" style={{ color: st.color, background: st.bg }}>{t(TX_FILTER_KEYS[tx.status])}</span>
 									</div>
 								</div>
 							);
@@ -338,16 +354,16 @@ const Earnings: NextPage = () => {
 
 				<div className="fixora-ea-card">
 					<div className="fixora-ea-card__head">
-						<h2 className="fixora-ea-card__title">Payout History</h2>
-						<button className="fixora-ea-seeall" type="button">See all</button>
+						<h2 className="fixora-ea-card__title">{t('earnings.payoutHistory')}</h2>
+						<button className="fixora-ea-seeall" type="button">{t('earnings.seeAll')}</button>
 					</div>
 
 					<div className="fixora-ea-balance">
-						<div className="fixora-ea-balance__label">Available Balance</div>
+						<div className="fixora-ea-balance__label">{t('earnings.availableBalance')}</div>
 						<div className="fixora-ea-balance__value">{formatKrw(DEMO_KRW.availableBalance)}</div>
-						<div className="fixora-ea-balance__note">Next auto-payout: Jun 21</div>
+						<div className="fixora-ea-balance__note">{t('earnings.nextAutoPayout')}</div>
 						<button className="fixora-ea-balance__btn" type="button" onClick={handlePayoutAction}>
-							<FileDownloadOutlined style={{ fontSize: 17 }} /> Withdraw Now
+							<FileDownloadOutlined style={{ fontSize: 17 }} /> {t('earnings.withdrawNow')}
 						</button>
 					</div>
 
@@ -362,7 +378,7 @@ const Earnings: NextPage = () => {
 									<div className="fixora-ea-payout__acct">{p.acct}</div>
 								</div>
 								<div className="fixora-ea-payout__right">
-									<div className="fixora-ea-payout__status">Completed</div>
+									<div className="fixora-ea-payout__status">{t('earnings.completed')}</div>
 									<div className="fixora-ea-payout__dur">{p.dur}</div>
 								</div>
 							</div>

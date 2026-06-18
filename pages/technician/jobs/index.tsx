@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
 import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
@@ -21,8 +22,8 @@ import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
 import {
-	JOB_STAGE_INFO,
 	getJobStage,
+	getJobStageInfo,
 	getJobProgress,
 	buildTimeline,
 	deviceLabel,
@@ -31,7 +32,7 @@ import {
 } from '../../../libs/components/technician/ActiveJobs/jobHelpers';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 const DeviceGlyph = ({ type, size = 18, color = '#9A9A9A' }: { type?: string | null; size?: number; color?: string }) => {
@@ -52,16 +53,18 @@ const fmtDate = (dateStr?: string | null) => {
 	return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const FILTERS = [
-	{ id: 'all', label: 'All Jobs' },
-	{ id: 'DIAGNOSING', label: 'Diagnosing' },
-	{ id: 'IN_PROGRESS', label: 'In Progress' },
-	{ id: 'PARTS_ORDERED', label: 'Parts Ordered' },
-	{ id: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
-];
-
 const ActiveJobs: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
+	const locale = router.locale;
+
+	const FILTERS = [
+		{ id: 'all', label: t('jobs.filterAll') },
+		{ id: 'DIAGNOSING', label: t('jobs.stage.diagnosing') },
+		{ id: 'IN_PROGRESS', label: t('jobs.stage.inProgress') },
+		{ id: 'PARTS_ORDERED', label: t('jobs.stage.partsOrdered') },
+		{ id: 'READY_FOR_PICKUP', label: t('jobs.stage.readyForPickup') },
+	];
 	const user = useReactiveVar(userVar);
 	const [selectedJob, setSelectedJob] = useState<any>(null);
 	const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -128,11 +131,11 @@ const ActiveJobs: NextPage = () => {
 
 				<div className="fixora-jobs-list">
 					{filtered.length === 0 ? (
-						<div className="fixora-jobs-empty">No active jobs</div>
+						<div className="fixora-jobs-empty">{t('jobs.noActive')}</div>
 					) : (
 						filtered.map((job: any) => {
 							const stage = getJobStage(job);
-							const info = JOB_STAGE_INFO[stage];
+							const info = getJobStageInfo(stage, t);
 							const progress = getJobProgress(job);
 							const active = displayedJob?._id === job._id;
 							return (
@@ -174,7 +177,7 @@ const ActiveJobs: NextPage = () => {
 										</span>
 										<span className="fixora-job-card__due">
 											<AccessTimeOutlined style={{ fontSize: 13 }} />
-											{formatDue(job.bookingDate)}
+											{formatDue(job.bookingDate, t, locale)}
 										</span>
 									</div>
 								</div>
@@ -189,8 +192,8 @@ const ActiveJobs: NextPage = () => {
 				{displayedJob ? (
 					(() => {
 						const stage = getJobStage(displayedJob);
-						const info = JOB_STAGE_INFO[stage];
-						const timeline = buildTimeline(displayedJob);
+						const info = getJobStageInfo(stage, t);
+						const timeline = buildTimeline(displayedJob, t);
 						const price = parseFloat(displayedJob.finalPrice || displayedJob.estimatedPrice || '0');
 						return (
 							<>
@@ -198,7 +201,7 @@ const ActiveJobs: NextPage = () => {
 									<div className="fixora-jobs-detail__header">
 										<div>
 											<div className="fixora-jobs-detail__meta">
-												{jobCode(displayedJob._id)} • Started {fmtDate(displayedJob.createdAt)}
+												{jobCode(displayedJob._id)} • {t('jobs.startedLabel')} {fmtDate(displayedJob.createdAt)}
 											</div>
 											<h2 className="fixora-jobs-detail__title">{displayedJob.problemTitle}</h2>
 											<div className="fixora-jobs-detail__sub">{deviceLabel(displayedJob.aiClassification?.deviceType)}</div>
@@ -214,9 +217,9 @@ const ActiveJobs: NextPage = () => {
 												<PersonOutlineOutlined style={{ fontSize: 18, color: '#3B82F6' }} />
 											</div>
 											<div>
-												<div className="fixora-jobs-infocard__label">Client</div>
-												<div className="fixora-jobs-infocard__value">{displayedJob.customerData?.userFullName || displayedJob.customerData?.userNickname || 'Unknown'}</div>
-												<div className="fixora-jobs-infocard__sub">Verified Customer</div>
+												<div className="fixora-jobs-infocard__label">{t('jobs.client')}</div>
+												<div className="fixora-jobs-infocard__value">{displayedJob.customerData?.userFullName || displayedJob.customerData?.userNickname || t('jobs.unknown')}</div>
+												<div className="fixora-jobs-infocard__sub">{t('jobs.verifiedCustomer')}</div>
 											</div>
 										</div>
 										<div className="fixora-jobs-infocard">
@@ -224,9 +227,9 @@ const ActiveJobs: NextPage = () => {
 												<AttachMoneyOutlined style={{ fontSize: 18, color: '#22C55E' }} />
 											</div>
 											<div>
-												<div className="fixora-jobs-infocard__label">Price</div>
+												<div className="fixora-jobs-infocard__label">{t('jobs.price')}</div>
 												<div className="fixora-jobs-infocard__value fixora-jobs-infocard__value--price">{formatKrw(price)}</div>
-												<div className="fixora-jobs-infocard__sub">Pending payment</div>
+												<div className="fixora-jobs-infocard__sub">{t('jobs.pendingPayment')}</div>
 											</div>
 										</div>
 										<div className="fixora-jobs-infocard">
@@ -234,15 +237,15 @@ const ActiveJobs: NextPage = () => {
 												<CalendarTodayOutlined style={{ fontSize: 17, color: '#F59E0B' }} />
 											</div>
 											<div>
-												<div className="fixora-jobs-infocard__label">Due Date</div>
-												<div className="fixora-jobs-infocard__value">{formatDue(displayedJob.bookingDate)}</div>
-												<div className="fixora-jobs-infocard__sub">Estimated completion</div>
+												<div className="fixora-jobs-infocard__label">{t('jobs.dueDate')}</div>
+												<div className="fixora-jobs-infocard__value">{formatDue(displayedJob.bookingDate, t, locale)}</div>
+												<div className="fixora-jobs-infocard__sub">{t('jobs.estimatedCompletion')}</div>
 											</div>
 										</div>
 									</div>
 
 									<div className="fixora-jobs-timeline-card">
-										<h3 className="fixora-jobs-timeline-card__title">Repair Timeline</h3>
+										<h3 className="fixora-jobs-timeline-card__title">{t('jobs.repairTimeline')}</h3>
 										<div className="fixora-jobs-timeline">
 											{timeline.map(({ label, done, timestamp }, idx) => {
 												const current = !done && (idx === 0 || timeline[idx - 1]?.done);
@@ -265,7 +268,7 @@ const ActiveJobs: NextPage = () => {
 														<div className="fixora-jobs-tl-step__content">
 															<div className="fixora-jobs-tl-step__label">{label}</div>
 															{reached && timestamp && (
-																<div className="fixora-jobs-tl-step__time">{formatDateTime(timestamp)}</div>
+																<div className="fixora-jobs-tl-step__time">{formatDateTime(timestamp, locale)}</div>
 															)}
 														</div>
 													</div>
@@ -277,7 +280,7 @@ const ActiveJobs: NextPage = () => {
 
 								<div className="fixora-jobs-actionbar">
 									<button className="fixora-jobs-btn fixora-jobs-btn--complete">
-										<EastOutlined style={{ fontSize: 18 }} /> Mark Repair Complete
+										<EastOutlined style={{ fontSize: 18 }} /> {t('jobs.markComplete')}
 									</button>
 									<button className="fixora-jobs-btn fixora-jobs-btn--more">
 										<MoreHorizOutlined style={{ fontSize: 20 }} />
@@ -287,7 +290,7 @@ const ActiveJobs: NextPage = () => {
 						);
 					})()
 				) : (
-					<div className="fixora-jobs-detail__empty">No active jobs</div>
+					<div className="fixora-jobs-detail__empty">{t('jobs.noActive')}</div>
 				)}
 			</div>
 		</div>

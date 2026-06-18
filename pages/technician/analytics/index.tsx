@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import {
 	ComposedChart,
@@ -46,10 +47,15 @@ import {
 } from '../../../libs/utils/technicianMetrics';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
-const RANGES: AnalyticsRange[] = ['7 Days', '30 Days', '3 Months', 'Year'];
+const RANGE_KEYS: Record<AnalyticsRange, string> = {
+	'7 Days': 'analytics.range7Days',
+	'30 Days': 'analytics.range30Days',
+	'3 Months': 'analytics.range3Months',
+	Year: 'analytics.rangeYear',
+};
 
 const DEMO_REVENUE = [
 	{ day: 'Mon', revenue: 560000, jobs: 3 },
@@ -95,20 +101,23 @@ const DEMO_CLIENTS = [
 	{ name: 'Anna', initial: 'A', stars: 5, amount: '₩1,813,000', jobs: '2 jobs' },
 ];
 
-const RevenueTooltip = ({ active, payload, label }: any) => {
+const RANGES: AnalyticsRange[] = ['7 Days', '30 Days', '3 Months', 'Year'];
+
+const RevenueTooltip = ({ active, payload, label, t }: any) => {
 	if (!active || !payload?.length) return null;
 	const rev = payload.find((p: any) => p.dataKey === 'revenue')?.value;
 	const jobs = payload.find((p: any) => p.dataKey === 'jobs')?.value;
 	return (
 		<div className="fixora-an-tooltip">
 			<div className="fixora-an-tooltip__title">{label}</div>
-			<div className="fixora-an-tooltip__row" style={{ color: '#FF9A3C' }}>Revenue : {formatKrw(rev ?? 0)}</div>
-			<div className="fixora-an-tooltip__row" style={{ color: '#3B82F6' }}>Jobs : {jobs}</div>
+			<div className="fixora-an-tooltip__row" style={{ color: '#FF9A3C' }}>{t('analytics.revenue')} : {formatKrw(rev ?? 0)}</div>
+			<div className="fixora-an-tooltip__row" style={{ color: '#3B82F6' }}>{t('analytics.tooltipJobs')} : {jobs}</div>
 		</div>
 	);
 };
 
 const Analytics: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const user = useReactiveVar(userVar);
 	const [range, setRange] = useState<AnalyticsRange>('7 Days');
 
@@ -204,20 +213,20 @@ const Analytics: NextPage = () => {
 	const ratingMax = Math.min(5, Math.max(...ratingTrend.map((d) => d.rating)) + 0.05);
 
 	const kpis = [
-		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: '+12%', value: String(completedCount), label: 'Total Jobs' },
-		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: '+3%', value: completionRate, label: 'Completion Rate' },
-		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: '-4m', value: '11m', label: 'Avg Response' },
-		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: '+6%', value: repeatRate, label: 'Repeat Clients' },
-		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: '+0.1', value: avgRating, label: 'Avg Rating' },
-		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: 'rank', value: 'Top 3%', label: 'Top Performer' },
+		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: '+12%', value: String(completedCount), label: t('analytics.totalJobs') },
+		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: '+3%', value: completionRate, label: t('analytics.completionRate') },
+		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: '-4m', value: '11m', label: t('analytics.avgResponse') },
+		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: '+6%', value: repeatRate, label: t('analytics.repeatClients') },
+		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: '+0.1', value: avgRating, label: t('analytics.avgRating') },
+		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: 'rank', value: 'Top 3%', label: t('analytics.topPerformer') },
 	];
 
 	return (
 		<div className="fixora-an-page">
 			<div className="fixora-an-header">
 				<div>
-					<h1 className="fixora-an-header__title">Performance Analytics</h1>
-					<p className="fixora-an-header__sub">Track your repair business metrics and trends</p>
+					<h1 className="fixora-an-header__title">{t('analytics.title')}</h1>
+					<p className="fixora-an-header__sub">{t('analytics.subtitle')}</p>
 				</div>
 				<div className="fixora-an-range">
 					{RANGES.map((r) => (
@@ -227,7 +236,7 @@ const Analytics: NextPage = () => {
 							onClick={() => setRange(r)}
 							type="button"
 						>
-							{r}
+							{t(RANGE_KEYS[r])}
 						</button>
 					))}
 				</div>
@@ -251,8 +260,8 @@ const Analytics: NextPage = () => {
 			<div className="fixora-an-row fixora-an-row--2-1">
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
-						<h2 className="fixora-an-card__title">Jobs Completed vs Revenue</h2>
-						<span className="fixora-an-card__hint">{range}</span>
+						<h2 className="fixora-an-card__title">{t('analytics.jobsVsRevenue')}</h2>
+						<span className="fixora-an-card__hint">{t(RANGE_KEYS[range])}</span>
 					</div>
 					<div className="fixora-an-chart">
 						<ResponsiveContainer width="100%" height="100%">
@@ -267,21 +276,21 @@ const Analytics: NextPage = () => {
 								<XAxis dataKey="day" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
 								<YAxis yAxisId="left" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, revTicks[revTicks.length - 1]]} ticks={revTicks} tickFormatter={(v) => formatKrwCompact(v)} />
 								<YAxis yAxisId="right" orientation="right" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, jobsMax]} />
-								<Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
+								<Tooltip content={<RevenueTooltip t={t} />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
 								<Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#FF6B00" strokeWidth={1.5} fill="url(#anRevFill)" />
 								<Line yAxisId="right" type="monotone" dataKey="jobs" stroke="#3B82F6" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#3B82F6' }} />
 							</ComposedChart>
 						</ResponsiveContainer>
 					</div>
 					<div className="fixora-an-legend">
-						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: '#FF6B00' }} /> Revenue</span>
-						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: '#3B82F6' }} /> Jobs Completed</span>
+						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: '#FF6B00' }} /> {t('analytics.revenue')}</span>
+						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: '#3B82F6' }} /> {t('analytics.jobsCompleted')}</span>
 					</div>
 				</div>
 
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
-						<h2 className="fixora-an-card__title">Repairs by Device</h2>
+						<h2 className="fixora-an-card__title">{t('analytics.repairsByDevice')}</h2>
 					</div>
 					<div className="fixora-an-donut">
 						<ResponsiveContainer width="100%" height={180}>
@@ -312,7 +321,7 @@ const Analytics: NextPage = () => {
 			<div className="fixora-an-row fixora-an-row--2-1">
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
-						<h2 className="fixora-an-card__title">Revenue by Repair Type</h2>
+						<h2 className="fixora-an-card__title">{t('analytics.revenueByType')}</h2>
 					</div>
 					<div className="fixora-an-chart">
 						<ResponsiveContainer width="100%" height="100%">
@@ -320,7 +329,7 @@ const Analytics: NextPage = () => {
 								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
 								<XAxis dataKey="type" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
 								<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, repairTicks[repairTicks.length - 1]]} ticks={repairTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), 'Revenue']} />
+								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), t('analytics.revenue')]} />
 								<Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={46}>
 									{repairTypeData.map((d) => (
 										<Cell key={d.type} fill={d.color} />
@@ -333,11 +342,11 @@ const Analytics: NextPage = () => {
 
 				<div className="fixora-an-card">
 					<div className="fixora-an-card__head">
-						<h2 className="fixora-an-card__title">Rating Trend</h2>
+						<h2 className="fixora-an-card__title">{t('analytics.ratingTrend')}</h2>
 					</div>
 					<div className="fixora-an-rating">
 						<span className="fixora-an-rating__value">{ratingAvgDisplay}</span>
-						<span className="fixora-an-rating__sub">avg this period</span>
+						<span className="fixora-an-rating__sub">{t('analytics.avgThisPeriod')}</span>
 					</div>
 					<div className="fixora-an-chart fixora-an-chart--sm">
 						<ResponsiveContainer width="100%" height="100%">
@@ -361,8 +370,8 @@ const Analytics: NextPage = () => {
 
 			<div className="fixora-an-card">
 				<div className="fixora-an-card__head">
-					<h2 className="fixora-an-card__title">Top Clients</h2>
-					<span className="fixora-an-card__hint">By lifetime revenue</span>
+					<h2 className="fixora-an-card__title">{t('analytics.topClients')}</h2>
+					<span className="fixora-an-card__hint">{t('analytics.byLifetimeRevenue')}</span>
 				</div>
 				<div className="fixora-an-clients">
 					{topClients.map((c) => (

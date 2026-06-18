@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
+import { formatTimeAgo } from '../../../libs/utils/i18nTime';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
 import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
@@ -24,7 +26,7 @@ import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
 import { userVar } from '../../../apollo/store';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 const DEVICE_LABEL: Record<string, string> = {
@@ -64,42 +66,31 @@ const deviceLabel = (deviceType?: string | null) => DEVICE_LABEL[deviceType ?? '
 const issueLabel = (issueCategory?: string | null) => ISSUE_LABEL[issueCategory ?? ''] ?? 'General';
 const reqCode = (id: string) => `REQ-${id.slice(-4).toUpperCase()}`;
 
-const urgencyInfo = (complexity?: string | null) => {
+const urgencyInfo = (complexity: string | null | undefined, t: (k: string) => string) => {
 	switch (complexity) {
 		case 'HIGH':
-			return { label: 'Urgent', color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
+			return { label: t('urgency.urgent'), color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
 		case 'LOW':
-			return { label: 'Low', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' };
+			return { label: t('urgency.low'), color: '#22C55E', bg: 'rgba(34,197,94,0.12)' };
 		default:
-			return { label: 'Medium', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
+			return { label: t('urgency.medium'), color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
 	}
 };
 
-const timeAgo = (dateStr?: string | null) => {
-	if (!dateStr) return '';
-	const date = new Date(dateStr);
-	const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
-	if (minutes < 1) return 'just now';
-	if (minutes < 60) return `${minutes} min ago`;
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours}h ago`;
-	const days = Math.floor(hours / 24);
-	return `${days}d ago`;
-};
-
-const FILTERS = [
-	{ id: 'all', label: 'All' },
-	{ id: 'urgent', label: 'Urgent' },
-	{ id: 'nearby', label: 'Nearby' },
-	{ id: 'highbudget', label: 'High Budget' },
-	{ id: 'IPHONE', label: 'iPhone' },
-	{ id: 'MACBOOK', label: 'MacBook' },
-	{ id: 'IPAD', label: 'iPad' },
-];
-
 const IncomingRequests: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
+	const locale = router.locale;
 	const user = useReactiveVar(userVar);
+	const FILTERS = [
+		{ id: 'all', label: t('requests.filterAll') },
+		{ id: 'urgent', label: t('requests.filterUrgent') },
+		{ id: 'nearby', label: t('requests.filterNearby') },
+		{ id: 'highbudget', label: t('requests.filterHighBudget') },
+		{ id: 'IPHONE', label: 'iPhone' },
+		{ id: 'MACBOOK', label: 'MacBook' },
+		{ id: 'IPAD', label: 'iPad' },
+	];
 	const [search, setSearch] = useState('');
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -147,7 +138,7 @@ const IncomingRequests: NextPage = () => {
 	};
 
 	const handleDecline = async (bookingId: string) => {
-		if (!window.confirm('Decline this request?')) return;
+		if (!window.confirm(t('requests.declineConfirm'))) return;
 		try {
 			await rejectBooking({ variables: { bookingId } });
 			await refetch();
@@ -166,7 +157,7 @@ const IncomingRequests: NextPage = () => {
 						<SearchOutlined className="fixora-requests-search__icon" style={{ fontSize: 17 }} />
 						<input
 							type="text"
-							placeholder="Search requests..."
+							placeholder={t('requests.searchPlaceholder')}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
 						/>
@@ -192,10 +183,10 @@ const IncomingRequests: NextPage = () => {
 
 				<div className="fixora-requests-list">
 					{filtered.length === 0 ? (
-						<div className="fixora-requests-empty">No requests found</div>
+						<div className="fixora-requests-empty">{t('requests.noRequests')}</div>
 					) : (
 						filtered.map((req: any) => {
-							const urgency = urgencyInfo(req.aiClassification?.repairComplexity);
+							const urgency = urgencyInfo(req.aiClassification?.repairComplexity, t);
 							return (
 								<div
 									key={req._id}
@@ -208,7 +199,7 @@ const IncomingRequests: NextPage = () => {
 										</div>
 										<div className="fixora-request-card__info">
 											<div className="fixora-request-card__title-row">
-												<span className="fixora-request-card__name">Customer</span>
+												<span className="fixora-request-card__name">{t('requests.customer')}</span>
 												<span className="fixora-request-card__dot">•</span>
 												<span className="fixora-request-card__id">{reqCode(req._id)}</span>
 											</div>
@@ -228,7 +219,7 @@ const IncomingRequests: NextPage = () => {
 										</span>
 										<span className="fixora-request-card__time">
 											<AccessTimeOutlined style={{ fontSize: 13 }} />
-											{timeAgo(req.createdAt)}
+											{formatTimeAgo(req.createdAt, t, locale)}
 										</span>
 									</div>
 								</div>
@@ -242,7 +233,7 @@ const IncomingRequests: NextPage = () => {
 			<div className="fixora-requests-right">
 				{displayedBooking ? (
 					(() => {
-						const urgency = urgencyInfo(displayedBooking.aiClassification?.repairComplexity);
+						const urgency = urgencyInfo(displayedBooking.aiClassification?.repairComplexity, t);
 						const priceLabel = displayedBooking.estimatedPrice
 							? formatKrw(parseFloat(displayedBooking.estimatedPrice))
 							: 'No estimate';
@@ -253,7 +244,7 @@ const IncomingRequests: NextPage = () => {
 										<div className="fixora-requests-detail__header-top">
 											<div>
 												<div className="fixora-requests-detail__meta">
-													{reqCode(displayedBooking._id)} • {timeAgo(displayedBooking.createdAt)}
+													{reqCode(displayedBooking._id)} • {formatTimeAgo(displayedBooking.createdAt, t, locale)}
 												</div>
 												<h2 className="fixora-requests-detail__title">{displayedBooking.problemTitle}</h2>
 											</div>
@@ -277,7 +268,7 @@ const IncomingRequests: NextPage = () => {
 											<div className="fixora-requests-detail__entity">
 												<div className="fixora-requests-detail__avatar">C</div>
 												<div>
-													<div className="fixora-requests-detail__entity-name">Customer</div>
+													<div className="fixora-requests-detail__entity-name">{t('requests.customer')}</div>
 													<div className="fixora-requests-detail__rating">
 														<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} />
 														<span className="fixora-requests-detail__rating-val">Client</span>
@@ -314,7 +305,7 @@ const IncomingRequests: NextPage = () => {
 									</div>
 
 									<div className="fixora-requests-detail__description">
-										<div className="fixora-requests-detail__card-label">Issue Description</div>
+										<div className="fixora-requests-detail__card-label">{t('requests.issueDescription')}</div>
 										<p>{displayedBooking.problemDescription || 'No description provided'}</p>
 									</div>
 
@@ -337,20 +328,20 @@ const IncomingRequests: NextPage = () => {
 										disabled={accepting}
 										onClick={() => handleAccept(displayedBooking._id)}
 									>
-										<CheckCircleOutline style={{ fontSize: 18 }} /> Accept &amp; Send Quote
+										<CheckCircleOutline style={{ fontSize: 18 }} /> {t('requests.acceptQuote')}
 									</button>
 									<button
 										className="fixora-requests-detail__btn fixora-requests-detail__btn--message"
 										onClick={() => router.push('/technician/messages')}
 									>
-										<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> Message Client
+										<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> {t('requests.messageClient')}
 									</button>
 									<button
 										className="fixora-requests-detail__btn fixora-requests-detail__btn--decline"
 										disabled={rejecting}
 										onClick={() => handleDecline(displayedBooking._id)}
 									>
-										<HighlightOffOutlined style={{ fontSize: 17 }} /> Decline
+										<HighlightOffOutlined style={{ fontSize: 17 }} /> {t('requests.decline')}
 									</button>
 								</div>
 							</>

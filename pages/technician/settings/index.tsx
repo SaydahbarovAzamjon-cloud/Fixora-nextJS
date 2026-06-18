@@ -1,26 +1,41 @@
 ﻿import { NextPage } from 'next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: { ...(await serverSideTranslations(locale ?? 'en', ['common'])) },
+	props: await technicianPageProps(locale),
 });
 
 const Settings: NextPage = () => {
+	const { t } = useTranslation('technician');
+
 	const settings = [
-		{ group: 'Account', items: [{ icon: '👤', label: 'Profile Information', desc: 'Update your name and photo' }] },
-		{ group: 'Work', items: [
-			{ icon: '📍', label: 'Service Area', desc: 'Set your coverage area' },
-			{ icon: '⏰', label: 'Work Hours', desc: 'Configure your availability' },
-		]},
-		{ group: 'Notifications', items: [
-			{ icon: '🔔', label: 'Push Notifications', desc: 'Manage alerts and reminders' },
-			{ icon: '💬', label: 'Messages', desc: 'New message notifications' },
-		]},
-		{ group: 'Billing', items: [
-			{ icon: '💳', label: 'Payment Method', desc: 'Update payment details' },
-			{ icon: '📊', label: 'Payout Settings', desc: 'Configure bank account' },
-		]},
+		{
+			group: t('settings.groupAccount'),
+			items: [{ icon: '👤', label: t('settings.profileInfo'), desc: t('settings.profileInfoDesc') }],
+		},
+		{
+			group: t('settings.groupWork'),
+			items: [
+				{ icon: '📍', label: t('settings.serviceArea'), desc: t('settings.serviceAreaDesc') },
+				{ icon: '⏰', label: t('settings.workHours'), desc: t('settings.workHoursDesc') },
+			],
+		},
+		{
+			group: t('settings.groupNotifications'),
+			items: [
+				{ icon: '🔔', label: t('settings.pushNotifications'), desc: t('settings.pushNotificationsDesc') },
+				{ icon: '💬', label: t('settings.messages'), desc: t('settings.messagesDesc') },
+			],
+		},
+		{
+			group: t('settings.groupBilling'),
+			items: [
+				{ icon: '💳', label: t('settings.paymentMethod'), desc: t('settings.paymentMethodDesc') },
+				{ icon: '📊', label: t('settings.payoutSettings'), desc: t('settings.payoutSettingsDesc') },
+			],
+		},
 	];
 
 	return (
@@ -42,7 +57,7 @@ const Settings: NextPage = () => {
 							gap: 12,
 							cursor: 'pointer',
 							marginBottom: 8,
-							transition: 'all 0.15s ease'
+							transition: 'all 0.15s ease',
 						}}
 						onMouseEnter={(e) => {
 							(e.currentTarget as HTMLButtonElement).style.background = '#1A1A1A';
@@ -64,7 +79,6 @@ const Settings: NextPage = () => {
 				</div>
 			))}
 
-			{/* Logout */}
 			<button style={{
 				width: '100%',
 				padding: '14px',
@@ -76,9 +90,9 @@ const Settings: NextPage = () => {
 				fontWeight: 600,
 				cursor: 'pointer',
 				fontSize: 13,
-				transition: 'all 0.15s ease'
+				transition: 'all 0.15s ease',
 			}}>
-				🚪 Sign Out
+				{t('settings.signOut')}
 			</button>
 		</div>
 	);

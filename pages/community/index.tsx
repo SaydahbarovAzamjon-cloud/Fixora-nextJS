@@ -70,7 +70,7 @@ const CommunityPage: NextPage = () => {
 
 	const handleNewPost = async () => {
 		if (!user?._id) {
-			await sweetErrorHandling(new Error('Please log in to create a post'));
+			await sweetErrorHandling(new Error(t('community.loginToPost')));
 			return;
 		}
 		router.push('/community/write');
@@ -78,7 +78,7 @@ const CommunityPage: NextPage = () => {
 
 	const handleLike = async (articleId: string) => {
 		if (!user?._id) {
-			await sweetErrorHandling(new Error('Please log in to like a post'));
+			await sweetErrorHandling(new Error(t('community.loginToLike')));
 			return;
 		}
 
@@ -113,9 +113,9 @@ const CommunityPage: NextPage = () => {
 			<div className="fixora-community">
 				{/* Header */}
 				<div className="fixora-community__header">
-					<h1 className="fixora-community__title">Community</h1>
+					<h1 className="fixora-community__title">{t('community.title')}</h1>
 					<FixoraButton variant="primary" onClick={handleNewPost}>
-						New Post
+						{t('community.newPost')}
 					</FixoraButton>
 				</div>
 
@@ -124,10 +124,10 @@ const CommunityPage: NextPage = () => {
 
 				{/* Feed */}
 				{loading && articles.length === 0 ? (
-					<div className="fixora-community__loading">Loading articles...</div>
+					<div className="fixora-community__loading">{t('community.loading')}</div>
 				) : articles.length === 0 ? (
 					<div className="fixora-community__empty">
-						<p>No articles in this category yet</p>
+						<p>{t('community.empty')}</p>
 					</div>
 				) : (
 					<div className="fixora-community__feed">

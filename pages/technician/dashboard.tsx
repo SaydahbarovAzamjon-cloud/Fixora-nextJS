@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { technicianPageProps } from '../../libs/i18n/technicianPageProps';
+import { dateLocale } from '../../libs/utils/i18nLocale';
+import { formatClockTime, formatDueDate, formatTimeAgo } from '../../libs/utils/i18nTime';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
@@ -48,9 +51,7 @@ interface CustomScheduleItem {
 }
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
-	props: {
-		...(await serverSideTranslations(locale ?? 'en', ['common'])),
-	},
+	props: await technicianPageProps(locale),
 });
 
 const DeviceIcon = ({ type }: { type?: string | null }) => {
@@ -83,15 +84,15 @@ const inferComplexity = (title?: string | null, desc?: string | null): string =>
 	return 'LOW';
 };
 
-const urgencyInfo = (complexity?: string | null, title?: string | null, desc?: string | null) => {
+const urgencyInfo = (complexity: string | null | undefined, title: string | null | undefined, desc: string | null | undefined, t: (key: string) => string) => {
 	const level = complexity || inferComplexity(title, desc);
 	switch (level) {
 		case 'HIGH':
-			return { label: 'high', color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
+			return { label: t('urgency.high'), color: '#EF4444', bg: 'rgba(239,68,68,0.12)' };
 		case 'LOW':
-			return { label: 'low', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' };
+			return { label: t('urgency.low'), color: '#22C55E', bg: 'rgba(34,197,94,0.12)' };
 		default:
-			return { label: 'medium', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
+			return { label: t('urgency.medium'), color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
 	}
 };
 
@@ -100,14 +101,14 @@ const bookingPrice = (booking: any): string | null => {
 	return num > 0 ? formatKrw(num) : null;
 };
 
-const jobStatusInfo = (status: string) => {
+const jobStatusInfo = (status: string, t: (key: string) => string) => {
 	switch (status) {
 		case 'IN_PROGRESS':
-			return { label: 'In Progress', color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' };
+			return { label: t('jobStatus.inProgress'), color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' };
 		case 'ACCEPTED':
-			return { label: 'Diagnosing', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' };
+			return { label: t('jobStatus.diagnosing'), color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' };
 		default:
-			return { label: 'Parts Ordered', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
+			return { label: t('jobStatus.partsOrdered'), color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' };
 	}
 };
 
@@ -133,45 +134,10 @@ const scheduleDotColor = (status: string) => {
 	}
 };
 
-const timeAgo = (dateStr?: string | null) => {
-	if (!dateStr) return '';
-	const date = new Date(dateStr);
-	const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
-	if (minutes < 1) return 'just now';
-	if (minutes < 60) return `${minutes} min ago`;
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours}h ago`;
-	return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
-
-const formatDue = (dateStr?: string | null, createdAt?: string | null) => {
-	let date: Date | null = null;
-	let isEstimate = false;
-	if (dateStr) {
-		date = new Date(dateStr);
-	} else if (createdAt) {
-		date = new Date(createdAt);
-		date.setDate(date.getDate() + 3);
-		isEstimate = true;
-	}
-	if (!date || Number.isNaN(date.getTime())) return 'TBD';
-	const now = new Date();
-	const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-	if (date.toDateString() === now.toDateString()) return `Today ${time}`;
-	const tomorrow = new Date(now);
-	tomorrow.setDate(now.getDate() + 1);
-	if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow ${time}`;
-	const label = `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
-	return isEstimate ? `~${label}` : label;
-};
-
-const formatTime = (dateStr?: string | null) => {
-	if (!dateStr) return '--';
-	return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-};
-
 const TechnicianDashboard: NextPage = () => {
+	const { t } = useTranslation('technician');
 	const router = useRouter();
+	const locale = router.locale;
 	const user = useReactiveVar(userVar);
 	const [hoveredJob, setHoveredJob] = useState<string | null>(null);
 	const [period, setPeriod] = useState<Period | null>(null);
@@ -300,7 +266,7 @@ const TechnicianDashboard: NextPage = () => {
 			.map((b: any) => ({
 				id: b._id,
 				when: new Date(b.bookingDate),
-				task: b.problemTitle || 'Repair Task',
+				task: b.problemTitle || t('dashboard.repairTask'),
 				client: customerName(b),
 				status: b.bookingStatus as string,
 				custom: false,
@@ -317,7 +283,7 @@ const TechnicianDashboard: NextPage = () => {
 			.filter((s) => !Number.isNaN(s.when.getTime()))
 			.sort((a, b) => a.when.getTime() - b.when.getTime())
 			.slice(0, 8);
-	}, [bookings, customSchedule]);
+	}, [bookings, customSchedule, t]);
 
 	// ---- Handlers ----
 	const newQuoteHandler = () => router.push('/community/write');
@@ -328,7 +294,7 @@ const TechnicianDashboard: NextPage = () => {
 			const next = !(technicianUser?.isOnline ?? false);
 			await updateUser({ variables: { input: { _id: user._id, isOnline: next } } });
 			await refetchUser();
-			await sweetTopSmallSuccessAlert(next ? 'You are now available' : 'You are now offline', 900);
+			await sweetTopSmallSuccessAlert(next ? t('status.nowAvailable') : t('status.nowOffline'), 900);
 		} catch (err) {
 			await sweetErrorHandling(err);
 		}
@@ -359,31 +325,33 @@ const TechnicianDashboard: NextPage = () => {
 			<div className="fixora-tech-dashboard__welcome">
 				<div>
 					<div className="fixora-tech-dashboard__date">
-						{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+						{new Date().toLocaleDateString(dateLocale(locale), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
 					</div>
 					<h1 className="fixora-tech-dashboard__greeting">
-						Good morning, {technicianUser?.userFullName?.trim().split(/\s+/)[0] || technicianUser?.userNickname || 'Technician'} 👋
+						{t('dashboard.greeting', {
+							name: technicianUser?.userFullName?.trim().split(/\s+/)[0] || technicianUser?.userNickname || t('nav.fallbackName'),
+						})}
 					</h1>
 					<p className="fixora-tech-dashboard__info">
-						You have <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--orange">{incomingRequests.length} new requests</span> and <span className="fixora-tech-dashboard__highlight fixora-tech-dashboard__highlight--green">{activeJobs.length} active jobs</span> today.
+						{t('dashboard.info', { requests: incomingRequests.length, jobs: activeJobs.length })}
 					</p>
 				</div>
 				<div className="fixora-tech-dashboard__quick-actions">
 					<button className="fixora-tech-quick-action fixora-tech-quick-action--orange" type="button" onClick={newQuoteHandler}>
 							<BoltOutlined style={{ fontSize: 20 }} />
-							<span>New Quote</span>
+							<span>{t('dashboard.newQuote')}</span>
 						</button>
 					<button className="fixora-tech-quick-action fixora-tech-quick-action--green" type="button" onClick={markAvailableHandler}>
 							<CheckCircleOutline style={{ fontSize: 20 }} />
-							<span>{technicianUser?.isOnline ? 'Available' : 'Mark Available'}</span>
+							<span>{technicianUser?.isOnline ? t('dashboard.available') : t('dashboard.markAvailable')}</span>
 						</button>
 					<button className="fixora-tech-quick-action fixora-tech-quick-action--blue" type="button" onClick={viewScheduleHandler}>
 							<CalendarTodayOutlined style={{ fontSize: 19 }} />
-							<span>View Schedule</span>
+							<span>{t('dashboard.viewSchedule')}</span>
 						</button>
 					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple" type="button" onClick={exportReportHandler}>
 							<NorthEastOutlined style={{ fontSize: 20 }} />
-							<span>Export Report</span>
+							<span>{t('dashboard.exportReport')}</span>
 						</button>
 				</div>
 			</div>
@@ -392,49 +360,49 @@ const TechnicianDashboard: NextPage = () => {
 			<div className="fixora-tech-dashboard__stats">
 				<div className="fixora-tech-stat-card">
 						<div className="fixora-tech-stat-card__top">
-							<div className="fixora-tech-stat-label">Total Requests</div>
+							<div className="fixora-tech-stat-label">{t('dashboard.totalRequests')}</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--orange"><MailOutline style={{ fontSize: 20 }} /></div>
 						</div>
 						<div className="fixora-tech-stat-value">{incomingRequests.length}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
-							<span className="fixora-tech-stat-change__up">+{requestsChange}</span> vs last week
+							<span className="fixora-tech-stat-change__up">+{requestsChange}</span> {t('dashboard.vsLastWeek')}
 						</div>
 					</div>
 
 				<div className="fixora-tech-stat-card">
 						<div className="fixora-tech-stat-card__top">
-							<div className="fixora-tech-stat-label">Active Jobs</div>
+							<div className="fixora-tech-stat-label">{t('dashboard.activeJobs')}</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--blue"><WorkOutlineOutlined style={{ fontSize: 20 }} /></div>
 						</div>
 						<div className="fixora-tech-stat-value">{activeJobs.length}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
-							<span className="fixora-tech-stat-change__up">+{jobsChange}</span> vs last week
+							<span className="fixora-tech-stat-change__up">+{jobsChange}</span> {t('dashboard.vsLastWeek')}
 						</div>
 					</div>
 
 				<div className="fixora-tech-stat-card">
 						<div className="fixora-tech-stat-card__top">
-							<div className="fixora-tech-stat-label">This Week</div>
+							<div className="fixora-tech-stat-label">{t('dashboard.thisWeek')}</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--green"><AttachMoneyOutlined style={{ fontSize: 20 }} /></div>
 						</div>
 						<div className="fixora-tech-stat-value">{formatKrw(earnings)}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
-							<span className="fixora-tech-stat-change__up">+{earningsChange}%</span> vs last week
+							<span className="fixora-tech-stat-change__up">+{earningsChange}%</span> {t('dashboard.vsLastWeek')}
 						</div>
 					</div>
 
 				<div className="fixora-tech-stat-card">
 						<div className="fixora-tech-stat-card__top">
-							<div className="fixora-tech-stat-label">Avg Rating</div>
+							<div className="fixora-tech-stat-label">{t('dashboard.avgRating')}</div>
 							<div className="fixora-tech-stat-icon fixora-tech-stat-icon--yellow"><StarOutlined style={{ fontSize: 20 }} /></div>
 						</div>
 						<div className="fixora-tech-stat-value">{rating.toFixed(1)}</div>
 						<div className="fixora-tech-stat-change">
 							<TrendingUpOutlined style={{ fontSize: 13 }} />
-							based on {technicianUser?.reviewCount ?? 0} reviews
+							{t('dashboard.basedOnReviews', { count: technicianUser?.reviewCount ?? 0 })}
 						</div>
 					</div>
 			</div>
@@ -444,13 +412,13 @@ const TechnicianDashboard: NextPage = () => {
 				{/* Incoming Requests */}
 					<div className="fixora-tech-card fixora-tech-card--span-half">
 						<div className="fixora-tech-card__header">
-							<h2 className="fixora-tech-card__title">Incoming Requests</h2>
-							<a href="/technician/requests" className="fixora-tech-card__link">View all ›</a>
+							<h2 className="fixora-tech-card__title">{t('dashboard.incomingRequests')}</h2>
+							<a href="/technician/requests" className="fixora-tech-card__link">{t('dashboard.viewAll')}</a>
 						</div>
 						<div className="fixora-tech-card__list">
 							{incomingRequests.length > 0 ? (
 								incomingRequests.slice(0, 4).map((booking: any) => {
-									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity, booking?.problemTitle, booking?.problemDescription);
+									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity, booking?.problemTitle, booking?.problemDescription, t);
 									const price = bookingPrice(booking);
 									return (
 										<div key={booking._id} className="fixora-tech-request-item">
@@ -461,18 +429,18 @@ const TechnicianDashboard: NextPage = () => {
 													<span className="fixora-tech-urgency-badge" style={{ background: ug.bg, color: ug.color }}>{ug.label}</span>
 												</div>
 												<div className="fixora-tech-request-desc">
-													{booking?.deviceData ? `${deviceLabel(booking)} • ${booking.problemTitle || 'Device Repair'}` : (booking.problemTitle || 'Device Repair')}
+													{booking?.deviceData ? `${deviceLabel(booking)} • ${booking.problemTitle || t('dashboard.deviceRepair')}` : (booking.problemTitle || t('dashboard.deviceRepair'))}
 												</div>
 											</div>
 											<div className="fixora-tech-request-meta">
 												{price && <div className="fixora-tech-request-budget">{price}</div>}
-												<div className="fixora-tech-request-time">{timeAgo(booking.createdAt)}</div>
+												<div className="fixora-tech-request-time">{formatTimeAgo(booking.createdAt, t, locale)}</div>
 											</div>
 										</div>
 									);
 								})
 							) : (
-								<div className="fixora-tech-empty">No incoming requests</div>
+								<div className="fixora-tech-empty">{t('dashboard.noIncoming')}</div>
 							)}
 						</div>
 					</div>
@@ -480,13 +448,13 @@ const TechnicianDashboard: NextPage = () => {
 				{/* Active Jobs */}
 					<div className="fixora-tech-card fixora-tech-card--span-half">
 						<div className="fixora-tech-card__header">
-							<h2 className="fixora-tech-card__title">Active Jobs</h2>
-							<a href="/technician/jobs" className="fixora-tech-card__link">View all ›</a>
+							<h2 className="fixora-tech-card__title">{t('dashboard.activeJobs')}</h2>
+							<a href="/technician/jobs" className="fixora-tech-card__link">{t('dashboard.viewAll')}</a>
 						</div>
 						<div className="fixora-tech-card__list">
 							{activeJobs.length > 0 ? (
 								activeJobs.slice(0, 3).map((booking: any) => {
-									const status = jobStatusInfo(booking?.bookingStatus);
+									const status = jobStatusInfo(booking?.bookingStatus, t);
 									const progress = jobProgress(booking);
 									return (
 										<div
@@ -505,19 +473,19 @@ const TechnicianDashboard: NextPage = () => {
 												</div>
 												<span className="fixora-tech-job-status" style={{ color: status.color }}>{status.label}</span>
 											</div>
-											<div className="fixora-tech-job-issue">{booking.problemDescription || 'Device repair'}</div>
+											<div className="fixora-tech-job-issue">{booking.problemDescription || t('dashboard.deviceRepair')}</div>
 											<div className="fixora-tech-job-progress">
 												<div className="fixora-tech-progress-track">
 													<div className="prog-bar" style={{ '--prog-w': `${progress}%` } as React.CSSProperties} />
 												</div>
 												<span className="fixora-tech-progress-value">{progress}%</span>
-												<span className="fixora-tech-job-due">Due: {formatDue(booking.bookingDate, booking.createdAt)}</span>
+												<span className="fixora-tech-job-due">{t('dashboard.due', { date: formatDueDate(booking.bookingDate, t, locale, booking.createdAt) })}</span>
 											</div>
 										</div>
 									);
 								})
 							) : (
-								<div className="fixora-tech-empty">No active jobs</div>
+								<div className="fixora-tech-empty">{t('dashboard.noActiveJobs')}</div>
 							)}
 						</div>
 					</div>
@@ -526,23 +494,25 @@ const TechnicianDashboard: NextPage = () => {
 					<div className="fixora-tech-card fixora-tech-card--span-wide">
 						<div className="fixora-tech-card__header">
 							<div>
-								<h2 className="fixora-tech-card__title">Weekly Earnings</h2>
+								<h2 className="fixora-tech-card__title">{t('dashboard.weeklyEarnings')}</h2>
 								<div className="fixora-tech-earnings-info">
 									<div className="fixora-tech-earnings-amount">{formatKrw(periodEarnings)}</div>
 									<div className="fixora-tech-earnings-change"><TrendingUpOutlined style={{ fontSize: 13 }} /> +{earningsChange}% vs last week</div>
 								</div>
 							</div>
 							<div className="fixora-tech-period-toggle">
-								{(['Week', 'Month', 'Year'] as Period[]).map((p) => (
+								{(['Week', 'Month', 'Year'] as Period[]).map((p) => {
+									const labelKey = p === 'Week' ? 'dashboard.periodWeek' : p === 'Month' ? 'dashboard.periodMonth' : 'dashboard.periodYear';
+									return (
 									<button
 										key={p}
 										type="button"
 										className={`fixora-tech-period-btn ${activePeriod === p ? 'fixora-tech-period-btn--active' : ''}`}
 										onClick={() => setPeriod(p)}
 									>
-										{p}
+										{t(labelKey)}
 									</button>
-								))}
+								);})}
 							</div>
 						</div>
 						<div style={{ width: '100%', height: 180, marginTop: 16 }}>
@@ -563,7 +533,7 @@ const TechnicianDashboard: NextPage = () => {
 											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
 											labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
 											itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
-											formatter={(v: any) => [formatKrw(v), 'Earnings']}
+											formatter={(v: any) => [formatKrw(v), t('dashboard.earningsTooltip')]}
 										/>
 										<Area
 											type="monotone"
@@ -578,7 +548,7 @@ const TechnicianDashboard: NextPage = () => {
 								</ResponsiveContainer>
 							) : (
 								<div className="fixora-tech-chart-empty">
-									<span>No earnings recorded this week</span>
+									<span>{t('dashboard.noEarningsWeek')}</span>
 								</div>
 							)}
 						</div>
@@ -587,9 +557,9 @@ const TechnicianDashboard: NextPage = () => {
 				{/* Today's Schedule */}
 					<div className="fixora-tech-card fixora-tech-card--span-narrow" ref={scheduleRef}>
 						<div className="fixora-tech-card__header">
-							<h2 className="fixora-tech-card__title">Today's Schedule</h2>
+							<h2 className="fixora-tech-card__title">{t('dashboard.todaySchedule')}</h2>
 							<button className="fixora-tech-schedule-add" type="button" onClick={() => setScheduleModalOpen(true)}>
-								<AddRounded style={{ fontSize: 16 }} /> Add
+								<AddRounded style={{ fontSize: 16 }} /> {t('dashboard.add')}
 							</button>
 						</div>
 						<div className="fixora-tech-schedule-list">
@@ -604,7 +574,7 @@ const TechnicianDashboard: NextPage = () => {
 												{idx < mergedSchedule.length - 1 && <div className="fixora-tech-schedule-line" />}
 											</div>
 											<div className="fixora-tech-schedule-content">
-												<div className="fixora-tech-schedule-time">{formatTime(item.when.toISOString())}</div>
+												<div className="fixora-tech-schedule-time">{formatClockTime(item.when.toISOString(), locale)}</div>
 												<div className="fixora-tech-schedule-task" style={{ color: done ? '#606060' : '#F0F0F0' }}>{item.task}</div>
 												{item.client && <div className="fixora-tech-schedule-client">{item.client}</div>}
 											</div>
@@ -613,7 +583,7 @@ const TechnicianDashboard: NextPage = () => {
 														className="fixora-tech-schedule-del"
 														type="button"
 														onClick={() => removeScheduleHandler(item.id)}
-														aria-label="Remove schedule item"
+														aria-label={t('dashboard.removeSchedule')}
 													>
 														<CloseRounded style={{ fontSize: 15 }} />
 													</button>
@@ -626,7 +596,7 @@ const TechnicianDashboard: NextPage = () => {
 									);
 								})
 							) : (
-								<div className="fixora-tech-empty">No scheduled jobs</div>
+								<div className="fixora-tech-empty">{t('dashboard.noScheduled')}</div>
 							)}
 						</div>
 					</div>
@@ -637,8 +607,8 @@ const TechnicianDashboard: NextPage = () => {
 			{/* Recent Reviews (full width) */}
 			<div className="fixora-tech-card">
 						<div className="fixora-tech-card__header">
-							<h2 className="fixora-tech-card__title">Recent Reviews</h2>
-							<a href="/technician/profile" className="fixora-tech-card__link">View all ›</a>
+							<h2 className="fixora-tech-card__title">{t('dashboard.recentReviews')}</h2>
+							<a href="/technician/profile" className="fixora-tech-card__link">{t('dashboard.viewAll')}</a>
 						</div>
 						<div className="fixora-tech-reviews-grid">
 							{reviews.length > 0 ? (
@@ -648,10 +618,10 @@ const TechnicianDashboard: NextPage = () => {
 											<div className="fixora-tech-review-avatar">{customerInitial(review)}</div>
 											<div className="fixora-tech-review-info">
 												<div className="fixora-tech-review-name">{customerName(review)}</div>
-												<div className="fixora-tech-review-device">Verified Customer</div>
+												<div className="fixora-tech-review-device">{t('dashboard.verifiedCustomer')}</div>
 											</div>
 											<div className="fixora-tech-review-date">
-												{new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+												{new Date(review.createdAt).toLocaleDateString(dateLocale(locale), { month: 'short', day: 'numeric' })}
 											</div>
 										</div>
 										<div className="fixora-tech-review-stars">
@@ -662,11 +632,11 @@ const TechnicianDashboard: NextPage = () => {
 												/>
 											))}
 										</div>
-										<p className="fixora-tech-review-text">{review.reviewContent || 'Great service!'}</p>
+										<p className="fixora-tech-review-text">{review.reviewContent || t('dashboard.defaultReview')}</p>
 									</div>
 								))
 							) : (
-								<div className="fixora-tech-empty">No reviews yet</div>
+								<div className="fixora-tech-empty">{t('dashboard.noReviews')}</div>
 							)}
 						</div>
 					</div>

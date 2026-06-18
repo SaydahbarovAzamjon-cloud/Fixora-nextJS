@@ -1,31 +1,35 @@
 # AI Handoff (Codex / Cursor)
 
-> **Canonical handoff:** [`../AI_HANDOFF.md`](../AI_HANDOFF.md) — **always read and update that file first.**
-
-This folder (`docs/ai-context/`) is extra working context for **Codex in VS Code** and **Cursor**. Both tools share one project state via `../AI_HANDOFF.md` and `../TASK_BOARD.md`.
-
----
-
-## Quick Start (Any Agent)
-
-1. Open `../AI_HANDOFF.md` → note `Last agent` and `Next agent should start with`
-2. Open `../TASK_BOARD.md` → confirm task status
-3. Do the work (frontend/client-side only in this repo)
-4. Update `../AI_HANDOFF.md` + `../TASK_BOARD.md` before ending
-5. Set `Last agent:` to `Cursor` or `Codex`
+> **Canonical handoff:** [`../AI_HANDOFF.md`](../AI_HANDOFF.md) — **always read and update that file first.**  
+> This file is a short mirror only; if anything conflicts, **`../AI_HANDOFF.md` wins.**
 
 ---
 
-## Last Agent
+## Quick Start
 
-Claude — 2026-06-17 (Technician Dashboard `/technician/dashboard` interactions: quick actions functional, Weekly Earnings Week/Month/Year real with smart default, Today's Schedule Add via localStorage [no backend model]. See DECISIONS UI-11. Earlier same day: Public Profile `/technician/profile` fully wired — header/About/My Articles + Services/Portfolio/Reviews/Followers; functional Message/View-Live/Follow buttons; stats→0 when empty. **Repair Stories live**: display via getTechnicianStories + gated Add Story create (CreateStoryModal → imagesUploader(target:"story") + createStory). See DECISIONS UI-07…UI-10)
+1. `../AI_HANDOFF.md` → `Last agent`, `Next agent should start with`
+2. `../TASK_BOARD.md` → task status
+3. Work (frontend only) → update canonical files before ending
 
-## Extended Notes
+---
 
-- **OAuth:** Google GIS `initCodeClient` + Kakao SDK → `loginWithOAuth`; OAuth onboarding via `/register/role?oauth=1` + `completeOAuthSignup`.
-- **Auth API:** `apollo/user/auth.ts` — Fixora `login`, `signup`, OAuth mutations; email login uses `userEmail`.
-- **Hero:** `HeroRepairSearch` → `heroRepairSearch` query; user clicks technician (BIZ-07).
-- **Env required:** `NEXT_PUBLIC_GRAPHQL_URL`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_KAKAO_JS_KEY` in `.env.local`.
-- **Next task:** P3-04 homepage sections beyond hero.
+## Snapshot (2026-06-18)
 
-See `../AI_HANDOFF.md` for full state, blockers, and session template.
+| Field | Value |
+|-------|-------|
+| **Last agent** | Claude (2026-06-17) |
+| **Last work** | P3-13 — Technician Dashboard + Public Profile + Repair Stories (UI-07…UI-11) |
+| **Next task** | **`PM-01`** Mobile foundation **OR** **`P3-11`** Property → Device rename |
+| **Active prompt** | [`../NEXT_SESSION.md`](../NEXT_SESSION.md) |
+
+## Done (do not redo)
+
+OAuth (Google/Kakao), Homepage Hero AI, P3-05–P3-10 desktop pages, partial P3-13 Apollo migration.
+
+## Auth (synced with backend)
+
+- Login: `userEmail` + password (AUTH-07)
+- OAuth: `loginWithOAuth` — GOOGLE, KAKAO; Apple UI Coming Soon
+- Phone: signup contact only — never login
+
+See full state, blockers, and session template in [`../AI_HANDOFF.md`](../AI_HANDOFF.md).

@@ -2,7 +2,8 @@
 
 > **Date:** May 30, 2026  
 > **Scope:** Current codebase + Fixora Master Context comparison  
-> **Purpose:** MVP development roadmap and transformation plan
+> **Purpose:** MVP development roadmap and transformation plan  
+> **Superseded (2026-06-18):** §1/§3 backend status and auth enums reflect **pre-MVP** state. **Current authority:** `DECISIONS.md` (AUTH-*), `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql`, `AI_HANDOFF.md`. §9 UI mockups remain valid; §9 auth API details → use `AUTH_API.md`.
 
 ---
 
@@ -489,7 +490,7 @@ services             [{ title, basePrice }]
 workingHours         { days[], startTime, endTime }
 certifications       [string]
 portfolioImages      [string]
-authProvider         enum     PHONE | KAKAO     (future: EMAIL | APPLE | GOOGLE)
+authProvider         enum     EMAIL | KAKAO | GOOGLE | APPLE   (PHONE removed — see DECISIONS AUTH-01)
 kakaoId              string   optional, unique sparse — Kakao OAuth
 termsAcceptedAt      date
 verificationStatus   enum     NONE | PENDING | UNDER_REVIEW | APPROVED | REJECTED
@@ -646,7 +647,7 @@ user {
 #### Auth & verification fields → add to `user`
 
 ```
-authProvider          enum     PHONE | KAKAO     (future: EMAIL | APPLE | GOOGLE)
+authProvider          enum     EMAIL | KAKAO | GOOGLE | APPLE   (PHONE removed — see DECISIONS AUTH-01)
 kakaoId               string   optional, unique sparse — Kakao OAuth
 termsAcceptedAt       date     required on register
 verificationStatus    enum     NONE | PENDING | UNDER_REVIEW | APPROVED | REJECTED
@@ -937,13 +938,13 @@ Choose Role ──► Customer ──► Sign Up ──► Dashboard (My Page)
 
 | Action | API | MVP |
 |--------|-----|-----|
-| Login | `login(phone, password)` → JWT | ✅ |
-| Customer signup | `signupCustomer(input)` → JWT | ✅ |
-| Technician signup | `signupTechnician(input)` → step 1 data | ✅ |
+| Login | `login(userEmail, userPassword)` → JWT | ✅ |
+| Customer signup | `signup(UserInput)` → JWT | ✅ |
+| Technician signup | `signup(UserInput)` with `userType: TECHNICIAN` | ✅ |
 | Upload ID | `uploadVerificationDoc(file)` | ✅ |
 | Admin approve | `approveTechnician(userId)` | ✅ |
-| Kakao login | `loginWithKakao(token)` → JWT | ✅ |
-| Email / Apple / Google login | `loginWithOAuth(provider, token)` | ❌ Future |
+| Kakao / Google login | `loginWithOAuth({ authProvider, token })` | ✅ |
+| Apple login | `loginWithOAuth(APPLE)` | UI Coming Soon (AUTH-02) |
 
 #### Sign up fields by role
 

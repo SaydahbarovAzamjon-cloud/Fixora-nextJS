@@ -1,8 +1,9 @@
 # Story Create Frontend — Implementation Guide
 
 > **Purpose:** Technician screen for posting a 24-hour story (1–5 images + optional caption).
-> **Status:** Backend ✅ complete (incl. `story` upload target); Frontend ⬜ Todo
-> **Related docs:** `STORIES_FEATURE.md`, `STORIES_CREATE_FLOW_DETAIL.md`, `FRONTEND_API.md`
+> **Status:** Backend ✅ complete · Frontend ✅ **Done** (2026-06-17 — DECISIONS UI-10)
+> **Implemented in:** `apollo/user/story.ts`, `libs/components/technician/CreateStoryModal.tsx`, `/technician/profile` story ring
+> **Related docs:** `FRONTEND_API.md`, `DECISIONS.md` UI-10, `AI_HANDOFF.md`
 
 ---
 
@@ -48,7 +49,7 @@ mutation ImagesUploader($files: [Upload!]!, $target: String!) {
 - Allowed mime types: `image/png`, `image/jpg`, `image/jpeg`.
 - Returns an array of relative URLs, e.g. `["uploads/story/ab12.jpg", "uploads/story/cd34.jpg"]`.
 - Requires `Authorization: Bearer <token>` (any logged-in user; createStory enforces the technician role next).
-- Uses the GraphQL multipart spec — send via `apollo-upload-client` (`createUploadLink`).
+- Multipart upload — FixoraF uses **axios multipart** with `apollo-require-preflight` (same pattern as `AddNewProperty.tsx`), not `apollo-upload-client`.
 
 ### Step B — Create the story
 
@@ -139,7 +140,7 @@ export const CREATE_STORY = gql`
 `
 ```
 
-> **Apollo setup:** the upload mutation needs `createUploadLink` from `apollo-upload-client` (not the plain HTTP link), and the request header `Apollo-Require-Preflight: true` / `x-apollo-operation-name` per the multipart spec.
+> **Upload in FixoraF:** multipart **axios** with `apollo-require-preflight` header (see `AddNewProperty.tsx` / `CreateStoryModal.tsx`) — not `apollo-upload-client`.
 
 ---
 
@@ -298,10 +299,8 @@ function toFriendly(err: any) {
 
 ```typescript
 import { gql, useMutation } from '@apollo/client'
-import { createUploadLink } from 'apollo-upload-client'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
-import { useToast } from '@/hooks/useToast'
-import { useAuth } from '@/hooks/useAuth'
+// Upload: axios multipart — see CreateStoryModal.tsx / AddNewProperty.tsx
 ```
 
 ---
@@ -317,4 +316,4 @@ import { useAuth } from '@/hooks/useAuth'
 
 ---
 
-**Ready to implement Story Create!** 🎬🚀
+**Implementation complete.** Story viewer/playback (tap ring to view slides) is **not** built yet — display covers + create only (see `AI_HANDOFF.md` blockers).

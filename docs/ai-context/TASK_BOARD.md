@@ -1,32 +1,26 @@
 # Task Board (Codex / Cursor)
 
-> **Canonical board:** [`../TASK_BOARD.md`](../TASK_BOARD.md) — update that file when tasks change.
+> **Canonical board:** [`../TASK_BOARD.md`](../TASK_BOARD.md) — **update that file when tasks change.**  
+> This summary is read-only context; **`../TASK_BOARD.md` wins** on any conflict.
 
-Shared by Cursor and Codex. Frontend tasks only.
+---
 
-## Current Focus
+## Current Focus (2026-06-18)
 
-**P3-02** — Design system + dark/orange Fixora theme (mockups: `docs/design/`)
+**Next:** `PM-01` — Mobile foundation **OR** `P3-11` — Property → Device rename
 
-## Frontend TODO (summary)
+**Then:** `PM-02`…`PM-12` (mobile phase) · `P3-12` Agent→Technician · `P3-13` Apollo migration (in progress) · `P3-14` ON_SITE badge · `P3-15` Admin
 
-- P0-05 — Design mockups indexed ✅
-- P3-02 — Theme (MUI + SCSS, light token placeholders)
-- P3-03 — Auth UI — `docs/design/auth/`
-- P3-04 — Homepage
-- P3-05 — Search + Technician Profile
-- P3-06 — Booking flow UI
-- P3-07 — Messages UI
-- P3-08 — My Page + Notifications
-- P3-09 — Tenant Dashboard (§9.3)
-- P3-10 — Community + Post Detail
-- P3-11/12 — Property→Device, Agent→Technician rename in UI
-- P3-13 — Apollo queries when FIXORAB schema ready
+---
 
-## Not in this repo
+## Phase 2 — Done ✅
 
-Backend (FIXORAB): DeviceModule, BookingModule, PaymentModule, etc.
+P3-02 (theme) · P3-03/03b (auth + OAuth) · P3-04 (homepage) · P3-05–P3-10 (core pages) · P3-13 partial (profile, stories, dashboard)
+
+## Phase 3 — Todo ⬜
+
+PM-01 → PM-12 — full mobile conversion (`../DECISIONS.md` MOB-*)
 
 ## Handoff rule
 
-When you finish a session, update **`../AI_HANDOFF.md`** with `Last agent: Codex` or `Last agent: Cursor`.
+End every session by updating **`../AI_HANDOFF.md`** (`Last agent: Cursor` or `Codex`) and **`../TASK_BOARD.md`**.

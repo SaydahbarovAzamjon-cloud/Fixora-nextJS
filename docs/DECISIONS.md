@@ -4,7 +4,7 @@
 > **Repo:** FixoraF (frontend). Shared by **Cursor** and **Codex** — same rules apply.  
 > Backend implementation of these decisions lives in **FIXORAB**.
 
-**Last updated:** 2026-06-10
+**Last updated:** 2026-06-18
 
 ---
 
@@ -26,14 +26,18 @@
 
 ## Auth
 
+> **Authority:** `docs/schema.gql` (`AuthProvider` enum), `docs/AUTH_API.md`, FixoraB `apps/fixora-api`.  
+> Login mockup uses **email** field (high-fidelity PNG) — not phone.
+
 | ID | Decision |
 |----|----------|
-| AUTH-01 | MVP providers: **`PHONE` \| `KAKAO` only** |
-| AUTH-02 | Future (not MVP): `EMAIL`, `APPLE`, `GOOGLE` |
-| AUTH-03 | Login via phone + password, or Kakao OAuth (`kakaoId` on user) |
-| AUTH-04 | Sign-up flow: Choose Role → Customer (immediate access) or Technician (6-step onboarding) |
+| AUTH-01 | MVP providers: **`EMAIL`**, **`KAKAO`**, **`GOOGLE`** — `login`, `signup`, `loginWithOAuth` (see `schema.gql`) |
+| AUTH-02 | **`APPLE`** — in schema; frontend **Coming Soon** only until configured (backend may return `APPLE_LOGIN_COMING_SOON`) |
+| AUTH-03 | Login via **`userEmail` + `userPassword`** (EMAIL accounts), or OAuth via `loginWithOAuth` (KAKAO / GOOGLE authorization code or token) |
+| AUTH-04 | Sign-up flow: Choose Role → Customer (immediate access) or Technician (6-step onboarding); OAuth stubs → `completeOAuthSignup` |
 | AUTH-05 | Technician verification: `verificationStatus` PENDING → UNDER_REVIEW → APPROVED |
 | AUTH-06 | Badges: `NEW` → `VERIFIED` (admin approve) → `PREMIUM_PRO` (future) |
+| AUTH-07 | **`userPhoneNumber`** — required at signup as **KR contact only**; **never** a login field. Phone/SMS/OTP login **not supported** (`AuthProvider.PHONE` not in schema). Hide phone in chat until booking **ACCEPTED** (BIZ-04) |
 
 ---
 
@@ -104,9 +108,10 @@
 
 ## Out of Scope (MVP)
 
-- ON_SITE repair
-- Email / Apple / Google auth
-- SMS / KakaoTalk notifications (future)
+- ON_SITE repair (UI badge only — BIZ-01)
+- Phone / SMS / OTP login (`AuthProvider.PHONE` removed from schema)
+- Apple OAuth UI (until configured — AUTH-02)
+- SMS / KakaoTalk push notifications (future)
 - Advanced AI diagnostics
 - Live tracking
 - Separate admin UI design (build incrementally)

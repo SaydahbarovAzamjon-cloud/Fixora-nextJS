@@ -1,141 +1,86 @@
 # FixoraF — Active Session Prompt
 
-> **For Cursor / Codex.** Execute this task. Then update `AI_HANDOFF.md` + `TASK_BOARD.md`.  
-> **Created:** 2026-06-09 (synced from FixoraB backend contract)
+> **For Cursor / Codex.** Execute the task below. Then update `AI_HANDOFF.md` + `TASK_BOARD.md`.  
+> **Last synced:** 2026-06-18 (aligned with FixoraB `schema.gql` + current frontend state)
 
 ---
 
 ## Session instructions
 
-FixoraF frontend agent sessiyasi. Avval `AGENTS.md` va `docs/AI_HANDOFF.md` ni o‘qi.
-
-**Muhim yangilanish:** FIXORAB (FixoraB) backend MVP tayyor — nestar emas. GraphQL: `http://localhost:2000/graphql`
-
-**Kontrakt hujjatlari (shu repoda):**
-
-- `docs/FRONTEND_API.md`
-- `docs/AUTH_API.md`
-- `docs/schema.gql`
-
-Backend ishlab turishi kerak: FixoraB da `npm run start:dev` (port 2000).
+1. Read `AGENTS.md` → `docs/AI_HANDOFF.md` → `docs/TASK_BOARD.md`
+2. Backend (FixoraB): `npm run start:dev` — GraphQL `http://localhost:2000/graphql`
+3. Contract docs: `docs/FRONTEND_API.md`, `docs/AUTH_API.md`, `docs/schema.gql`
 
 ---
 
-## Task 1 — Google OAuth (P3-03 davomi) — **birinchi**
+## Already Done (do not redo)
 
-`libs/components/auth/SocialAuthRow.tsx` da Google hozir `disabled` + "Coming Soon" badge. Uni ishlaydigan qil:
-
-1. Login/Register da **Continue with Google** faol bo‘lsin
-2. Google GIS: `initCodeClient` + `requestCode`, `redirect_uri: postmessage`
-   - GIS `renderButton` / `prompt` **ISHLATMA** — React Strict Mode da duplicate popup
-3. Auth code → `loginWithOAuth({ authProvider: GOOGLE, token: code })`
-4. Javob:
-   - `accessToken` + `refreshToken` saqla (mavjud auth pattern)
-   - `needsOnboarding === true` → `/register/role?oauth=1` → `completeOAuthSignup` (Bearer)
-   - `needsOnboarding === false` → `/my-page`
-5. **Apple** faqat "Coming Soon" toast — API chaqirilmasin
-6. **Kakao** ham ulansin — SDK `authorize` → code → `loginWithOAuth(KAKAO)`
-7. Email login: `userEmail` + password — telefon login **YO‘Q** (AUTH-07)
-
-**Reference implementation (FixoraB repo):**
-
-```
-FixoraB/fixora-web/src/components/OAuthProviderButtons.tsx
-FixoraB/fixora-web/src/components/GoogleSignInButton.tsx
-FixoraB/fixora-web/src/lib/google-gis.ts
-FixoraB/fixora-web/src/components/GoogleGisScript.tsx
-FixoraB/fixora-web/src/graphql/auth.ts
-```
-
-Port qilganda FixoraF arxitekturasiga mosla: `libs/`, `pages/`, `apollo/user/`.
-
-**`.env.local` (commit qilma):**
-
-```bash
-NEXT_PUBLIC_GRAPHQL_URL=http://localhost:2000/graphql
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=<FixoraB .env dagi GOOGLE_CLIENT_ID bilan bir xil>
-NEXT_PUBLIC_KAKAO_JS_KEY=<Kakao JavaScript key>
-NEXT_PUBLIC_WS_URL=ws://localhost:2000
-```
-
-Google Cloud Console: OAuth Web client → **Authorized JavaScript origins**: `http://localhost:3000`
-
-`.env.local` o‘zgargach dev serverni **restart** qil.
-
-**GraphQL (apollo/user/ ga qo‘sh):**
-
-```graphql
-mutation LoginWithOAuth($input: OAuthLoginInput!) {
-  loginWithOAuth(input: $input) {
-    accessToken
-    refreshToken
-    needsOnboarding
-    user { _id userType profileComplete authProvider }
-  }
-}
-
-mutation CompleteOAuthSignup($input: CompleteOAuthSignupInput!) {
-  completeOAuthSignup(input: $input) {
-    _id userType profileComplete verificationStatus
-    accessToken refreshToken
-  }
-}
-```
+| ID | Area |
+|----|------|
+| P3-02 | Design system — dark/orange theme |
+| P3-03 / P3-03b | Auth UI + OAuth (Google GIS + Kakao → `loginWithOAuth`; Apple Coming Soon) |
+| P3-04 | Homepage + Hero AI (`heroRepairSearch`) |
+| P3-05–P3-10 | Search, booking, messages, mypage, technician dashboard, community |
+| P3-13 (partial) | Public Profile + Stories create + Dashboard interactions (see DECISIONS UI-07…UI-11) |
 
 ---
 
-## Task 2 — Homepage Hero AI (P3-04) — **keyin**
+## Next task (pick one — see `AI_HANDOFF.md`)
 
-Mockup: `docs/design/customer/homepage.png`
+### Option A — `PM-01` Mobile foundation (recommended)
 
-Hero qidiruv → public query `heroRepairSearch({ problemText, limit })`:
+**Goal:** Fixora mobile SCSS foundation before per-route polish.
 
-```graphql
-query HeroRepairSearch($input: HeroRepairSearchInput!) {
-  heroRepairSearch(input: $input) {
-    classification {
-      deviceType issueCategory repairComplexity confidenceScore keywords provider
-    }
-    recommendations {
-      _id userNickname
-      technician { shopName rating }
-    }
-  }
-}
-```
+1. Breakpoints: 992px / 768px / 639px (DECISIONS MOB-03)
+2. Replace Nestar styles in `scss/mobile/main.scss` with Fixora dark/orange tokens (MOB-06)
+3. Shared mixins from `scss/pc/`; safe-area CSS vars
+4. Keep `#pc-wrap` / `#mobile-wrap` shell; prefer CSS breakpoints over `useDeviceDetect` for layout
 
-- AI natijani **ko‘rsat** — technician ni avtomatik tanlama (BIZ-07)
-- User technician ni bosadi → profile → `createBooking`
-
-Skills: `.cursor/skills/fixora-navbar/SKILL.md`, `fixora-ui/SKILL.md`
+**Skills:** `.cursor/skills/fixora-theme/SKILL.md`, `fixora-ui/SKILL.md`
 
 ---
 
-## Rules (do not break)
+### Option B — `P3-11` Rename Property → Device
+
+**Goal:** UI copy and labels — not backend renames in this repo.
+
+1. Search labels, booking flow, mypage tabs, legacy component strings
+2. Routes: audit `pages/property` → device paths where still exposed
+3. Do **not** delete legacy `libs/components/mypage/*` until `/member` and `/_admin` references checked (`AI_HANDOFF.md` blockers)
+
+---
+
+## Auth rules (frozen — `DECISIONS.md` AUTH-*)
 
 | Wrong | Correct |
 |-------|---------|
-| Phone + password login | `userEmail` + password |
-| `getBoardArticles`, `BoardArticle` | `getArticles`, `Article`, `authorData` |
-| AI auto-picks technician | User clicks → `createBooking` |
-| `getMemberFollowings` | `getUserFollowings` |
-| Real KakaoPay merchant | Mock `confirmPayment` (PAY-05) |
-| New backend endpoints | Use `FRONTEND_API.md` + `schema.gql` only |
+| Phone + password login | `userEmail` + password (AUTH-07) |
+| `userPhoneNumber` as login | Contact only at signup |
+| Apple OAuth API call from UI | Coming Soon toast only (AUTH-02) |
+| `getBoardArticles` | `getArticles`, `authorData` |
+| AI auto-picks technician | User clicks → `createBooking` (BIZ-07) |
+
+**Env (`.env.local` — do not commit):**
+
+```bash
+NEXT_PUBLIC_GRAPHQL_URL=http://localhost:2000/graphql
+NEXT_PUBLIC_WS_URL=ws://localhost:2000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=<same as FixoraB>
+NEXT_PUBLIC_KAKAO_JS_KEY=<Kakao JavaScript key>
+```
 
 ---
 
-## Acceptance criteria
+## Acceptance criteria (any session)
 
-1. Google login popup → muvaffaqiyat (yangi + qaytgan user)
-2. Apple: Coming Soon only, no API call
-3. Kakao login works when `NEXT_PUBLIC_KAKAO_JS_KEY` set
-4. Homepage Hero calls `heroRepairSearch` and shows results
-5. `npm run build` passes
-6. `docs/AI_HANDOFF.md` + `docs/TASK_BOARD.md` updated before session end
+1. Matches `docs/design/` mockups where applicable (UI-01)
+2. GraphQL ops from `FRONTEND_API.md` / `schema.gql` only — no invented fields
+3. `yarn typecheck` / `yarn lint` clean on touched files
+4. Update `docs/AI_HANDOFF.md` + `docs/TASK_BOARD.md` before ending
 
 ---
 
 ## If blocked
 
-- Backend not running → log blocker in `AI_HANDOFF.md`; do not mock APIs forever
-- Missing operation → check `docs/schema.gql`; ask FixoraB sync, do not invent fields
+- Backend not running → log in `AI_HANDOFF.md`; do not mock APIs indefinitely
+- Missing operation → sync `schema.gql` from FixoraB; do not guess operation names

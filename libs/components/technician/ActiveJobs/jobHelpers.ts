@@ -1,5 +1,5 @@
 import type { TFunction } from 'next-i18next';
-import { dateLocale } from '../../utils/i18nLocale';
+import { dateLocale } from '../../../utils/i18nLocale';
 
 export type JobStage = 'DIAGNOSING' | 'IN_PROGRESS' | 'PARTS_ORDERED' | 'READY_FOR_PICKUP';
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
+import { useTechnicianUserSync } from '../../hooks/useTechnicianUserSync';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
-import { getJwtToken, updateUserInfo } from '../../auth';
+import { getJwtToken } from '../../auth';
 import Chat from '../Chat';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
@@ -18,6 +19,8 @@ const withTechnicianLayout = (Component: any) => {
 		const router = useRouter();
 		const device = useDeviceDetect();
 		const user = useReactiveVar(userVar);
+
+		useTechnicianUserSync();
 
 		const activePage = useMemo(() => {
 			const path = router.pathname;
@@ -37,11 +40,6 @@ const withTechnicianLayout = (Component: any) => {
 		}, [router.pathname]);
 
 		/** LIFECYCLES **/
-		useEffect(() => {
-			const jwt = getJwtToken();
-			if (jwt) updateUserInfo(jwt);
-		}, []);
-
 		useEffect(() => {
 			const jwt = getJwtToken();
 			if (!jwt) {

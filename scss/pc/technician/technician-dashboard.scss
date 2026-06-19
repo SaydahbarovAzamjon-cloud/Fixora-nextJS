@@ -16,7 +16,30 @@ $border-orange: rgba(255, 107, 0, 0.2);
 .fixora-technician-layout {
 	background: $bg-dark;
 	min-height: 100vh;
-	font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+	font-family: $font-technician;
+
+	/* reset.scss sets Poppins on semantic tags — inherit dashboard font everywhere */
+	p,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	button,
+	li,
+	a,
+	span,
+	label,
+	input,
+	textarea,
+	select,
+	div,
+	section,
+	ul,
+	ol {
+		font-family: inherit;
+	}
 }
 
 .fixora-technician-container {
@@ -458,6 +481,27 @@ $border-orange: rgba(255, 107, 0, 0.2);
 
 		span:first-child {
 			font-size: 13px;
+		}
+	}
+
+	&__lang {
+		flex-shrink: 0;
+		margin: 0 2px;
+
+		.fixora-nav__lang-btn {
+			color: #606060;
+
+			&:hover {
+				color: #d0d0d0;
+			}
+
+			&--active {
+				color: #f0f0f0;
+			}
+		}
+
+		.fixora-nav__lang-divider {
+			color: #505050;
 		}
 	}
 

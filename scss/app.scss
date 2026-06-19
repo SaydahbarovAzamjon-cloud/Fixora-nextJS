@@ -60,6 +60,11 @@ body {
 	}
 }
 
+.fixora-auth-gate {
+	min-height: 100vh;
+	background: var(--fixora-bg);
+}
+
 hr {
 	border-width: 0;
 	border-bottom-width: thin;

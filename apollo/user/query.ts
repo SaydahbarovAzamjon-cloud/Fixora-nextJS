@@ -620,6 +620,7 @@ export const GET_USER = gql`
 			followingCount
 			userArticles
 			userEmail
+			userPhoneNumber
 			meFollowed {
 				followingId
 				followerId

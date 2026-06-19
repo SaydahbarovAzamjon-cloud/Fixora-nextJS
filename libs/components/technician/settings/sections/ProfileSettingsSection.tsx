@@ -134,7 +134,12 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					/>
 				</SettingsField>
 				<SettingsField label={t('settings.profile.email')}>
-					<input className="fts-input fts-input--readonly" value={user?.userEmail ?? ''} readOnly />
+					<input
+						className="fts-input"
+						type="email"
+						value={form.email}
+						onChange={(e) => onChange({ email: e.target.value })}
+					/>
 				</SettingsField>
 				<SettingsField label={t('settings.profile.phone')}>
 					<input

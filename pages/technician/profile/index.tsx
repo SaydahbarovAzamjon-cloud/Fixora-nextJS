@@ -26,7 +26,7 @@ import PhotoLibraryOutlined from '@mui/icons-material/PhotoLibraryOutlined';
 import RateReviewOutlined from '@mui/icons-material/RateReviewOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import { userVar } from '../../../apollo/store';
+import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../../apollo/user/query';
 import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
 import { GET_TECHNICIAN_STORIES } from '../../../apollo/user/story';
@@ -38,6 +38,7 @@ import { Article, ArticleSummary, Story, TechnicianReview } from '../../../libs/
 import { T } from '../../../libs/types/common';
 import { Messages } from '../../../libs/config';
 import { formatKrwNumber } from '../../../libs/utils/formatCurrency';
+import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -102,6 +103,7 @@ const PublicProfile: NextPage = () => {
 	const router = useRouter();
 	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
+	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const [activeTab, setActiveTab] = useState('Overview');
 	const technicianId = user?._id;
 
@@ -148,8 +150,15 @@ const PublicProfile: NextPage = () => {
 	// Real follower total from the query (User.followersCount may be stale/seeded)
 	const followersTotal: number = (followersData as T)?.getUserFollowers?.metaCounter?.[0]?.total ?? followerList.length;
 
-	const name = profile?.userNickname || profile?.userFullName || user?.userNickname || 'Technician';
-	const profileImage = profile?.userProfileImage || user?.userProfileImage || '';
+	const name =
+		profile?.userFullName ||
+		profile?.userNickname ||
+		user?.memberFullName ||
+		user?.memberNick ||
+		'Technician';
+	const profileImageSrc =
+		profileDraft ??
+		resolveProfileImageUrl(profile?.userProfileImage ?? user?.memberImage);
 	const specialty: string = profile?.specialty || '';
 	const location: string = profile?.userLocation || '';
 	const rating = profile?.averageRating ?? 0;
@@ -206,7 +215,11 @@ const PublicProfile: NextPage = () => {
 			<div className="fixora-pp-header">
 				<div className="fixora-pp-header__avatar-wrap">
 					<div className="fixora-pp-header__avatar">
-						{profileImage ? <img src={profileImage} alt={name} /> : initials}
+						{profileImageSrc && profileImageSrc !== '/img/profile/defaultUser.svg' ? (
+							<img src={profileImageSrc} alt={name} />
+						) : (
+							initials
+						)}
 					</div>
 					{isOnline && <span className="fixora-pp-header__online" />}
 				</div>
@@ -285,7 +298,7 @@ const PublicProfile: NextPage = () => {
 
 			<RepairStoriesRow
 				stories={stories}
-				owner={{ id: technicianId ?? '', name, avatar: profileImage || undefined }}
+				owner={{ id: technicianId ?? '', name, avatar: profile?.userProfileImage || undefined }}
 				mode="preview"
 				canCreateStory={canCreateStory}
 				onStoriesChange={() => refetchStories()}

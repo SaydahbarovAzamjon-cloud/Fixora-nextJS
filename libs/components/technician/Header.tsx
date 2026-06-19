@@ -11,6 +11,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
+import LanguageToggle from '../common/LanguageToggle';
 
 interface HeaderProps {
 	activePage: string;
@@ -102,6 +103,8 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 			>
 				<AddOutlined style={{ fontSize: 16 }} /> {t('header.newQuote')}
 			</button>
+
+			<LanguageToggle className="fixora-tech-header__lang fixora-nav__lang" />
 
 			<button
 				className="fixora-tech-header__icon-btn"

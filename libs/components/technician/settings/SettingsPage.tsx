@@ -28,6 +28,7 @@ const SettingsPage: React.FC = () => {
 		user: settingsUser,
 		loading,
 		error,
+		offline,
 		refetch,
 		saving,
 		profileForm,
@@ -85,6 +86,11 @@ const SettingsPage: React.FC = () => {
 			<SettingsNav active={activeSection} onChange={changeSection} />
 			<div className="fts-page__content">
 				<div className="fts-page__inner">
+					{offline && (
+						<div className="fts-offline-banner" role="status">
+							{t('settings.offlineBanner')}
+						</div>
+					)}
 					{activeSection === 'profile' && (
 						<ProfileSettingsSection
 							user={settingsUser}

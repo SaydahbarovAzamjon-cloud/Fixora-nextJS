@@ -12,7 +12,7 @@ export interface ProfileFileState {
 	previewUrl: string;
 }
 
-const UPLOAD_TARGETS = ['member', 'user'] as const;
+const UPLOAD_TARGETS = ['user', 'member'] as const;
 
 export function useProfileImageUpload(onError?: (key: string) => void) {
 	const [cover, setCover] = useState<ProfileFileState | null>(null);

@@ -248,6 +248,7 @@
     "saveChanges": "Save Changes",
     "loadErrorTitle": "Could not load settings",
     "loadError": "Failed to load your profile. Check your connection and try again.",
+    "offlineBanner": "Could not reach the server. Showing cached profile — start FixoraB (port 2000) and tap Try again to sync.",
     "nav": {
       "aria": "Settings sections",
       "profile": "Profile Settings",
@@ -285,7 +286,9 @@
       "bio": "BIO",
       "invalidType": "Only PNG, JPG, or WebP images are allowed.",
       "tooLarge": "Image must be 5MB or smaller.",
-      "uploadFailed": "Could not upload profile photo. Please try again."
+      "uploadFailed": "Could not upload profile photo. Please try again.",
+      "saved": "Profile saved.",
+      "emailChangePending": "Profile updated. Email change is not available yet — your login email is unchanged."
     },
     "account": {
       "title": "Account Settings",

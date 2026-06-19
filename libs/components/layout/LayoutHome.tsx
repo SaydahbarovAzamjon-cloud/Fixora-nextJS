@@ -6,10 +6,8 @@ import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
 import HeroRepairSearch from '../homepage/HeroRepairSearch';
-import { userVar } from '../../../apollo/store';
-import { useReactiveVar } from '@apollo/client';
 import { getJwtToken, updateUserInfo } from '../../auth';
-import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { useHomeAuthRedirect } from '../../hooks/useHomeAuthRedirect';
 import Chat from '../Chat';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -17,23 +15,25 @@ import 'swiper/css/navigation';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
-		const router = useRouter();
 		const device = useDeviceDetect();
-		const user = useReactiveVar(userVar);
+		const redirecting = useHomeAuthRedirect();
 
-		/** LIFECYCLES **/
 		useEffect(() => {
 			const jwt = getJwtToken();
 			if (jwt) updateUserInfo(jwt);
 		}, []);
 
-		useEffect(() => {
-			const jwt = getJwtToken();
-			if (!jwt || !user?._id) return;
-			router.replace(getPostAuthRoute(user)).then();
-		}, [user, router]);
-
-		/** HANDLERS **/
+		if (redirecting) {
+			return (
+				<>
+					<Head>
+						<title>Fixora</title>
+						<meta name={'title'} content={`Fixora`} />
+					</Head>
+					<div className="fixora-auth-gate" aria-busy="true" aria-label="Loading" />
+				</>
+			);
+		}
 
 		if (device == 'mobile') {
 			return (

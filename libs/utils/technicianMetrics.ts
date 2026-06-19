@@ -616,6 +616,138 @@ export function sumThisMonthEarnings(bookings: TechnicianBooking[]): number {
 		.reduce((s, b) => s + parsePrice(b), 0);
 }
 
+export function paymentDate(p: TechnicianPayment): Date {
+	return new Date(p.paidAt || p.createdAt || 0);
+}
+
+export function getCompletedPayments(payments: TechnicianPayment[]): TechnicianPayment[] {
+	return payments.filter((p) => p.paymentStatus === 'COMPLETED');
+}
+
+export function hasRealPayments(payments: TechnicianPayment[]): boolean {
+	return payments.some((p) => p.paymentStatus === 'COMPLETED' || p.paymentStatus === 'PENDING');
+}
+
+export function sumCompletedPaymentEarnings(payments: TechnicianPayment[]): number {
+	return getCompletedPayments(payments).reduce((s, p) => s + (p.paymentAmount ?? 0), 0);
+}
+
+export function sumThisMonthPaymentEarnings(payments: TechnicianPayment[]): number {
+	const start = new Date();
+	start.setDate(1);
+	start.setHours(0, 0, 0, 0);
+	return getCompletedPayments(payments)
+		.filter((p) => paymentDate(p) >= start)
+		.reduce((s, p) => s + (p.paymentAmount ?? 0), 0);
+}
+
+export function buildDashboardWeekSeriesFromPayments(payments: TechnicianPayment[]) {
+	const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+	const buckets = labels.map((label) => ({ label, earnings: 0, jobs: 0 }));
+	const now = new Date();
+	const dow = (now.getDay() + 6) % 7;
+	const monday = new Date(now);
+	monday.setHours(0, 0, 0, 0);
+	monday.setDate(now.getDate() - dow);
+	const nextMonday = new Date(monday);
+	nextMonday.setDate(monday.getDate() + 7);
+
+	getCompletedPayments(payments).forEach((p) => {
+		const when = paymentDate(p);
+		if (when < monday || when >= nextMonday) return;
+		const idx = (when.getDay() + 6) % 7;
+		buckets[idx].earnings += p.paymentAmount ?? 0;
+		buckets[idx].jobs += 1;
+	});
+	return buckets;
+}
+
+export function buildDashboardMonthSeriesFromPayments(payments: TechnicianPayment[]) {
+	const now = new Date();
+	const thisMonday = new Date(now);
+	const dow = (now.getDay() + 6) % 7;
+	thisMonday.setHours(0, 0, 0, 0);
+	thisMonday.setDate(now.getDate() - dow);
+
+	const buckets = Array.from({ length: 4 }).map((_, i) => {
+		const start = new Date(thisMonday);
+		start.setDate(thisMonday.getDate() - (3 - i) * 7);
+		return { start, label: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), earnings: 0, jobs: 0 };
+	});
+	const firstStart = buckets[0].start;
+	const end = new Date(thisMonday);
+	end.setDate(thisMonday.getDate() + 7);
+
+	getCompletedPayments(payments).forEach((p) => {
+		const when = paymentDate(p);
+		if (Number.isNaN(when.getTime()) || when < firstStart || when >= end) return;
+		const idx = Math.min(3, Math.floor((when.getTime() - firstStart.getTime()) / (7 * 86400000)));
+		buckets[idx].earnings += p.paymentAmount ?? 0;
+		buckets[idx].jobs += 1;
+	});
+	return buckets.map(({ label, earnings, jobs }) => ({ label, earnings, jobs }));
+}
+
+export function buildDashboardYearSeriesFromPayments(payments: TechnicianPayment[]) {
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const year = new Date().getFullYear();
+	const data = months.map((label) => ({ label, earnings: 0, jobs: 0 }));
+	getCompletedPayments(payments).forEach((p) => {
+		const when = paymentDate(p);
+		if (Number.isNaN(when.getTime()) || when.getFullYear() !== year) return;
+		data[when.getMonth()].earnings += p.paymentAmount ?? 0;
+		data[when.getMonth()].jobs += 1;
+	});
+	return data;
+}
+
+export function buildDailyEarningsSeriesWithPayments(
+	bookings: TechnicianBooking[],
+	payments: TechnicianPayment[],
+	range: EarningsRange,
+): DailyEarningsPoint[] {
+	if (!hasRealPayments(payments)) return buildDailyEarningsSeries(bookings, range);
+
+	const start = rangeStart(range);
+	const completed = getCompletedPayments(payments).filter((p) => paymentDate(p) >= start);
+	const pending = payments.filter((p) => p.paymentStatus === 'PENDING' && paymentDate(p) >= start);
+
+	if (range === 'This Week') {
+		const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+		const buckets = labels.map((day) => ({ day, earned: 0, pending: 0 }));
+		const now = new Date();
+		const dow = (now.getDay() + 6) % 7;
+		const monday = new Date(now);
+		monday.setHours(0, 0, 0, 0);
+		monday.setDate(now.getDate() - dow);
+
+		completed.forEach((p) => {
+			const when = paymentDate(p);
+			if (when < monday) return;
+			const idx = (when.getDay() + 6) % 7;
+			buckets[idx].earned += p.paymentAmount ?? 0;
+		});
+		pending.forEach((p) => {
+			const when = paymentDate(p);
+			if (when < monday) return;
+			const idx = (when.getDay() + 6) % 7;
+			buckets[idx].pending += p.paymentAmount ?? 0;
+		});
+		return buckets;
+	}
+
+	const base = buildDailyEarningsSeries(bookings, range);
+	if (completed.length === 0) return base;
+
+	const earnedTotal = completed.reduce((s, p) => s + (p.paymentAmount ?? 0), 0);
+	const pendingTotal = pending.reduce((s, p) => s + (p.paymentAmount ?? 0), 0);
+	if (base.length > 0) {
+		base[base.length - 1].earned += earnedTotal;
+		base[base.length - 1].pending += pendingTotal;
+	}
+	return base;
+}
+
 export function percentChange(current: number, previous: number): string | null {
 	if (previous <= 0 || current <= 0) return null;
 	const pct = ((current - previous) / previous) * 100;

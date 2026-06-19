@@ -4,7 +4,7 @@
 > Update after each task: `⬜ Todo` · `🔄 In Progress` · `✅ Done` · `⏸ Blocked`  
 > **Cursor and Codex:** keep this in sync with `AI_HANDOFF.md`.
 
-**Last updated:** 2026-06-17
+**Last updated:** 2026-06-19
 
 **Roadmap order:** Phase 0 → 1 → 2 (desktop pages) → **3 (mobile)** → 4 (migration) → 5 (light theme)
 
@@ -41,8 +41,9 @@
 | P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech onboarding — mockup-based |
 | P3-03b | OAuth wiring (Google + Kakao) | ✅ Done | GIS `initCodeClient` + Kakao SDK → `loginWithOAuth` |
 | P3-04 | Homepage | ✅ Done | Hero AI + TopTechnicians, HowItWorks, TechTips, Testimonials per mockup |
-| P3-05 | Search + Technician Profile | ✅ Done | `/search` mockup + `/technicians/[id]` profile + book placeholder |
-| P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + new device form + booking details, `createDevice`/`createBooking` wired |
+| P3-05 | Search + Technician Profile | ✅ Done | `/search` + `/technicians/[id]` — unified `TechnicianPublicProfileView` (`fixora-pp-page`) |
+| P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + `createDevice`/`createBooking` |
+| P3-06b | Deposit payment UI (KakaoPay mock) | ✅ Done | `DepositPaymentCard`, `useDepositPayment`, booking post-step + My Page Pay Deposit — `initiatePayment`/`confirmPayment` (PAY-05) |
 | P3-07 | Messages UI | ✅ Done | `/messages` — chat list + thread + request details, mockup `customer-pages-full.png` §6 |
 | P3-08 | My Page + Notifications | ✅ Done | `/mypage` (profile + Requests/Following/Repair Stories/Settings tabs) + `/notifications` — mockup `customer-pages-full.png` §7–8 |
 | P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens incl. Settings 1:1 (`libs/components/technician/settings/`); Profile/Account/Security/Availability GraphQL; GAP-090…096 in BACKEND_SETTINGS.md |
@@ -116,7 +117,7 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `PM-01` — Mobile foundation OR `P3-11` — Rename Property → Device (remaining Phase 2 cleanup)
+**Next task:** `P3-08b` — Booking detail + final payment OR `PM-01` — Mobile foundation
 
 **Then:** Mobile phase `PM-01` → `PM-12` (after Phase 2 complete) OR Phase 4 migrations `P3-11`/`P3-12`
 

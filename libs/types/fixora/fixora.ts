@@ -95,8 +95,10 @@ export interface TechnicianProfile {
 	shopName?: string;
 	specialty?: string;
 	userLocation?: string;
+	userType?: string;
 	isOnline?: boolean;
 	isVerified?: boolean;
+	verificationStatus?: string;
 	averageRating?: number;
 	reviewCount?: number;
 	completedJobsCount?: number;
@@ -189,6 +191,22 @@ export interface DevicesInquiry {
 	};
 }
 
+export type PaymentMethod = 'KAKAOPAY' | 'CARD' | 'CASH';
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+export type PaymentType = 'DEPOSIT' | 'FINAL';
+
+export interface Payment {
+	_id: string;
+	bookingId: string;
+	paymentAmount: number;
+	paymentMethod: PaymentMethod;
+	paymentStatus: PaymentStatus;
+	paymentType: PaymentType;
+	transactionId?: string | null;
+	paidAt?: string | null;
+	createdAt?: string;
+}
+
 export interface Booking {
 	_id: string;
 	bookingStatus: BookingStatus;
@@ -198,6 +216,7 @@ export interface Booking {
 	problemDescription?: string;
 	estimatedPrice?: number;
 	finalPrice?: number;
+	isPaid?: boolean;
 	deviceId: string;
 	technicianId: string;
 	userId: string;

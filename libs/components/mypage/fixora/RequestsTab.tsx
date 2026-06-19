@@ -7,9 +7,10 @@ const ACTIVE_STATUSES: BookingStatus[] = ['PENDING', 'ACCEPTED', 'IN_PROGRESS'];
 
 export interface RequestsTabProps {
 	bookings: Booking[];
+	onRefetch?: () => void;
 }
 
-const RequestsTab = ({ bookings }: RequestsTabProps) => {
+const RequestsTab = ({ bookings, onRefetch }: RequestsTabProps) => {
 	const { t } = useTranslation('common');
 
 	const { active, completed } = useMemo(() => {
@@ -33,7 +34,7 @@ const RequestsTab = ({ bookings }: RequestsTabProps) => {
 					<h3 className="fixora-mypage__section-title">{t('mypage.activeRequests')}</h3>
 					<div className="fixora-mypage__request-list">
 						{active.map((booking) => (
-							<RequestCard key={booking._id} booking={booking} />
+							<RequestCard key={booking._id} booking={booking} onPaymentComplete={onRefetch} />
 						))}
 					</div>
 				</section>
@@ -44,7 +45,7 @@ const RequestsTab = ({ bookings }: RequestsTabProps) => {
 					<h3 className="fixora-mypage__section-title">{t('mypage.completedRequests')}</h3>
 					<div className="fixora-mypage__request-list">
 						{completed.map((booking) => (
-							<RequestCard key={booking._id} booking={booking} />
+							<RequestCard key={booking._id} booking={booking} onPaymentComplete={onRefetch} />
 						))}
 					</div>
 				</section>

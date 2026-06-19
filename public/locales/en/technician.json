@@ -92,6 +92,7 @@
     "decline": "Decline",
     "issueDescription": "Issue Description",
     "declineConfirm": "Decline this request?",
+    "acceptedToast": "Request accepted — customer can now pay the deposit.",
     "device": "Device",
     "general": "General"
   },
@@ -279,6 +280,7 @@
       "replacePhoto": "Replace",
       "removePhoto": "Remove",
       "fullName": "FULL NAME",
+      "shopName": "BUSINESS / SHOP NAME",
       "location": "LOCATION",
       "email": "EMAIL",
       "phone": "PHONE",

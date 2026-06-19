@@ -687,6 +687,11 @@ export const GET_ARTICLES = gql`
 				articleViews
 				articleComments
 				createdAt
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
 				authorData {
 					_id
 					userNickname

@@ -303,11 +303,57 @@
 
 /* ============================================================
    PUBLIC PROFILE — pixel-perfect (2026 redesign)
+   Customer-facing typography: Poppins ($font), same as homepage
    ============================================================ */
+
+.fixora-pp-visitor-wrap,
+.fixora-pp-page {
+	font-family: $font;
+
+	p,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	button,
+	li,
+	a,
+	span,
+	label,
+	input,
+	textarea,
+	select,
+	div,
+	section,
+	ul,
+	ol {
+		font-family: inherit;
+	}
+}
+
+.fixora-technician-layout .fixora-pp-visitor-wrap,
+.fixora-technician-layout .fixora-pp-page {
+	font-family: $font;
+}
+
+.fixora-pp-visitor-wrap {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 12px 16px 32px;
+
+	.fixora-tech-profile__back {
+		display: inline-flex;
+		align-items: center;
+		margin: 0 0 20px;
+		padding-top: 4px;
+	}
+}
 
 .fixora-pp-page {
 	max-width: 1180px;
-	padding: 4px 4px 32px;
+	padding: 0 16px 32px;
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
@@ -405,10 +451,18 @@
 
 	&__name {
 		color: #F5F5F5;
-		font-size: 30px;
+		font-size: 28px;
 		font-weight: 700;
-		letter-spacing: -0.02em;
+		letter-spacing: normal;
+		line-height: 1.25;
 		margin: 0;
+	}
+
+	&__owner {
+		color: #b8b8b8;
+		font-size: 15px;
+		font-weight: 500;
+		margin-top: 4px;
 	}
 
 	&__role {
@@ -652,6 +706,7 @@
 	padding: 12px 2px;
 	margin-bottom: -1px;
 	color: #808080;
+	font-family: inherit;
 	font-size: 15px;
 	font-weight: 600;
 	cursor: pointer;
@@ -679,6 +734,8 @@
 		font-size: 18px;
 		font-weight: 700;
 		margin: 0 0 16px;
+		font-family: inherit;
+		letter-spacing: normal;
 	}
 
 	&__text {
@@ -1162,11 +1219,12 @@
 
 	&__title {
 		color: #F0F0F0;
-		font-size: 18px;
-		font-weight: 700;
-		margin-bottom: 6px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.45;
+		margin-bottom: 8px;
 		font-family: inherit;
-		letter-spacing: -0.01em;
+		letter-spacing: normal;
 	}
 
 	&__devices {
@@ -1183,9 +1241,10 @@
 
 	&__price {
 		color: #FF6B00;
-		font-size: 22px;
-		font-weight: 700;
-		letter-spacing: -0.02em;
+		font-size: 18px;
+		font-weight: 600;
+		letter-spacing: normal;
+		line-height: 1.3;
 		font-family: inherit;
 	}
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Stack, Box } from '@mui/material';
 import { useQuery } from '@apollo/client';
@@ -12,7 +12,6 @@ import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { GET_TECHNICIANS } from '../../../apollo/user/query';
 import { TechnicianSummary, TechniciansInquiry } from '../../types/fixora/fixora';
 import TechnicianCard from './TechnicianCard';
-import { T } from '../../types/common';
 
 interface TopTechniciansProps {
 	initialInput?: TechniciansInquiry;
@@ -29,16 +28,16 @@ const DEFAULT_INPUT: TechniciansInquiry = {
 const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) => {
 	const { t } = useTranslation('common');
 	const device = useDeviceDetect();
-	const [technicians, setTechnicians] = useState<TechnicianSummary[]>([]);
 
-	useQuery(GET_TECHNICIANS, {
-		fetchPolicy: 'cache-and-network',
+	const { data } = useQuery(GET_TECHNICIANS, {
+		fetchPolicy: 'network-only',
 		variables: { input: initialInput },
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setTechnicians(data?.getTechnicians?.list ?? []);
-		},
 	});
+
+	const technicians = useMemo(
+		() => (data?.getTechnicians?.list ?? []) as TechnicianSummary[],
+		[data],
+	);
 
 	if (technicians.length === 0) return null;
 
@@ -55,7 +54,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 			<Stack className="container">
 				<Box component="div" className="fixora-home-section__head">
 					<h2>{t('homepage.technicians.title')}</h2>
-					<Link href="/agent" className="fixora-home-section__view-all">
+					<Link href="/search" className="fixora-home-section__view-all">
 						{t('homepage.viewAll')} <EastIcon fontSize="inherit" />
 					</Link>
 				</Box>

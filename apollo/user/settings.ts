@@ -10,6 +10,7 @@ export const GET_TECHNICIAN_SETTINGS = gql`
 			userPhoneNumber
 			userLocation
 			userBio
+			shopName
 			userProfileImage
 			userType
 			badgeLevel
@@ -28,6 +29,7 @@ export const UPDATE_TECHNICIAN_SETTINGS = gql`
 			_id
 			userNickname
 			userFullName
+			shopName
 			userBio
 			userLocation
 			userPhoneNumber

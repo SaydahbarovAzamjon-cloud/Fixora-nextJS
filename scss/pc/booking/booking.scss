@@ -156,6 +156,20 @@
 	max-width: 320px;
 }
 
+.fixora-booking__waiting {
+	text-align: center;
+	align-items: center;
+}
+
+.fixora-booking__waiting-icon {
+	color: #f59e0b !important;
+}
+
+.fixora-booking__text--muted {
+	color: var(--fixora-text-muted, #6b6b6b);
+	font-size: 13px;
+}
+
 .fixora-booking__link {
 	color: var(--fixora-text-secondary);
 	text-decoration: none;
@@ -172,4 +186,261 @@
 	.fixora-booking__type-options {
 		grid-template-columns: 1fr;
 	}
+}
+
+.fixora-deposit-payment {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+
+	&--compact {
+		gap: 12px;
+		padding: 16px;
+	}
+
+	&--success {
+		align-items: center;
+		text-align: center;
+	}
+}
+
+.fixora-deposit-payment__title {
+	font-family: $font;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	margin: 0;
+}
+
+.fixora-deposit-payment__text {
+	color: var(--fixora-text-secondary);
+	font-size: 14px;
+	margin: 0;
+	line-height: 1.5;
+}
+
+.fixora-deposit-payment__summary {
+	padding: 12px 14px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid var(--fixora-border-subtle);
+}
+
+.fixora-deposit-payment__row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.fixora-deposit-payment__label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-deposit-payment__tech {
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-deposit-payment__breakdown {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fixora-deposit-payment__line {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 14px;
+	color: var(--fixora-text-secondary);
+
+	strong {
+		color: var(--fixora-text-primary);
+		font-weight: 600;
+	}
+
+	&--highlight strong {
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-deposit-payment__hint {
+	font-size: 12px;
+	color: var(--fixora-text-muted, #6b6b6b);
+	margin: 0;
+	line-height: 1.45;
+}
+
+.fixora-deposit-payment__error {
+	font-size: 13px;
+	color: #ff6b6b;
+	margin: 0;
+	line-height: 1.45;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: rgba(255, 77, 79, 0.08);
+	border: 1px solid rgba(255, 77, 79, 0.25);
+}
+
+.fixora-deposit-payment__methods {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.fixora-deposit-payment__method {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--fixora-text-secondary);
+	font-family: $font;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+	&--active {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-text-primary);
+		background: rgba(255, 107, 0, 0.1);
+	}
+}
+
+.fixora-deposit-payment__card-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-deposit-payment__card-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
+.fixora-deposit-payment__mock-note {
+	font-size: 12px;
+	color: var(--fixora-text-muted, #6b6b6b);
+	margin: 0;
+	line-height: 1.4;
+}
+
+.fixora-deposit-payment__kakao {
+	width: 100%;
+}
+
+.fixora-deposit-payment__processing {
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+	margin: 0;
+	text-align: center;
+}
+
+.fixora-deposit-payment--waiting {
+	align-items: center;
+	text-align: center;
+}
+
+.fixora-deposit-payment__waiting-icon {
+	font-size: 40px !important;
+	color: #f59e0b;
+	margin-bottom: 4px;
+}
+
+.fixora-deposit-payment__success-icon {
+	font-size: 48px;
+	color: var(--fixora-primary);
+}
+
+.fixora-deposit-payment__actions {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 100%;
+	max-width: 320px;
+}
+
+.fixora-deposit-payment__badge-wrap {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+
+	&--compact {
+		margin-top: 8px;
+	}
+}
+
+.fixora-deposit-payment__badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+
+	&--paid {
+		background: rgba(76, 175, 80, 0.15);
+		color: #81c784;
+		border: 1px solid rgba(76, 175, 80, 0.35);
+	}
+
+	&--pending {
+		background: rgba(255, 107, 0, 0.12);
+		color: var(--fixora-primary);
+		border: 1px solid rgba(255, 107, 0, 0.35);
+	}
+}
+
+.fixora-deposit-payment__badge-amount {
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__request-payment {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--fixora-border-subtle);
+}
+
+.fixora-mypage__request-pay-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 16px;
+	border-radius: 10px;
+	border: 1px solid rgba(255, 107, 0, 0.45);
+	background: rgba(255, 107, 0, 0.12);
+	color: var(--fixora-primary);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 107, 0, 0.2);
+	}
+}
+
+.fixora-mypage__request-waiting {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 10px;
+	background: rgba(245, 158, 11, 0.1);
+	border: 1px solid rgba(245, 158, 11, 0.28);
+	color: #f59e0b;
+	font-size: 13px;
+	font-weight: 600;
 }

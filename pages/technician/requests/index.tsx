@@ -24,6 +24,7 @@ import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { GET_INCOMING_REQUESTS } from '../../../apollo/user/profile';
 import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
 import { userVar } from '../../../apollo/store';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -132,8 +133,9 @@ const IncomingRequests: NextPage = () => {
 			await acceptBooking({ variables: { bookingId } });
 			await refetch();
 			setSelectedId(null);
+			await sweetTopSmallSuccessAlert(t('requests.acceptedToast'), 1400);
 		} catch (err) {
-			console.error('acceptBooking error', err);
+			await sweetErrorHandling(err);
 		}
 	};
 

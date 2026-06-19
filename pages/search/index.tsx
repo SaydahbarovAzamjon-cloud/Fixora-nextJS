@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Script from 'next/script';
 import { NextPage } from 'next';
@@ -18,7 +18,6 @@ import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
 import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
-import { T } from '../../libs/types/common';
 import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
@@ -49,8 +48,6 @@ const SearchPage: NextPage = () => {
 	const router = useRouter();
 	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
 	const [locationLabel, setLocationLabel] = useState('');
-	const [technicians, setTechnicians] = useState<TechnicianSummary[]>([]);
-	const [total, setTotal] = useState<number>(0);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const user = useReactiveVar(userVar);
 
@@ -107,11 +104,13 @@ const SearchPage: NextPage = () => {
 		fetchPolicy: 'network-only',
 		variables: { input: searchFilter },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setTechnicians(data?.getTechnicians?.list ?? []);
-			setTotal(data?.getTechnicians?.metaCounter?.[0]?.total ?? 0);
-		},
 	});
+
+	const technicians = useMemo(
+		() => (data?.getTechnicians?.list ?? []) as TechnicianSummary[],
+		[data],
+	);
+	const total = data?.getTechnicians?.metaCounter?.[0]?.total ?? 0;
 
 	useEffect(() => {
 		if (!router.query.input) return;

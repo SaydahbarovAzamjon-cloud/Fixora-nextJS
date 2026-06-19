@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Stack } from '@mui/material';
 import { useLazyQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
@@ -21,15 +22,11 @@ import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import { HERO_REPAIR_SEARCH } from '../../../apollo/user/hero';
 import { FixoraButton } from '../ui';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
-import TechnicianCard from './TechnicianCard';
-import { TechnicianSummary } from '../../types/fixora/fixora';
+import type { HeroRecommendation } from './HeroRecommendedCarousel';
 
-interface HeroRecommendation {
-	technicianId: string;
-	score: number;
-	matchReason: string;
-	technician: TechnicianSummary;
-}
+const HeroRecommendedCarousel = dynamic(() => import('./HeroRecommendedCarousel'), {
+	ssr: false,
+});
 
 const CATEGORY_CHIPS = [
 	{ key: 'iphone', Icon: PhoneIphoneIcon },
@@ -89,7 +86,7 @@ const HeroRepairSearch = () => {
 		if (problemText.trim().length >= 3) {
 			runSearch(problemText);
 		} else {
-			router.push('/agent');
+			router.push('/search');
 		}
 	};
 
@@ -206,14 +203,7 @@ const HeroRepairSearch = () => {
 					<div className="fixora-hero__results">
 						<h2>{t('hero.recommendedTechnicians')}</h2>
 						<p className="fixora-hero__hint">{t('hero.selectTechnicianHint')}</p>
-						<div className="fixora-hero__cards">
-							{recommendations.map((rec) => (
-								<div className="fixora-hero__card" key={rec.technicianId}>
-									<TechnicianCard technician={rec.technician} />
-									<small className="fixora-hero__card-reason">{rec.matchReason}</small>
-								</div>
-							))}
-						</div>
+						<HeroRecommendedCarousel recommendations={recommendations} />
 					</div>
 				)}
 			</div>

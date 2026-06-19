@@ -101,7 +101,7 @@ Yangi UI element qo‘shganda:
 | ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
 |----|------------|---------------|------------|------------------|--------|------|
 | GAP-050 | **Apple OAuth** | Apple provider to‘liq config + `loginWithOAuth(APPLE)` | AUTH-02 mockup/schema | "Coming Soon" badge | `PARTIAL` | `libs/components/auth/SocialAuthRow.tsx` |
-| GAP-051 | **Real payment gateway** | KakaoPay production API (hozir mock) | Production to‘lov | Mock `initiatePayment` → `confirmPayment` (PAY-05) | `MOCK` | DECISIONS BIZ-03, `FRONTEND_API.md` |
+| GAP-051 | **Real payment gateway** | KakaoPay production API (hozir mock) | Production to‘lov | Frontend deposit UI wired (`DepositPaymentCard`, `useDepositPayment`); backend mock `initiatePayment` → `confirmPayment` (PAY-05) | `MOCK` | `apollo/user/payment.ts`, `libs/components/booking/DepositPaymentCard.tsx`, DECISIONS BIZ-03 |
 
 ---
 
@@ -130,6 +130,7 @@ Yangi UI element qo‘shganda:
 | GAP-082 | **Visibility** (Public / Techs Only) | `articleVisibility` enum yoki `ArticleInput` field | Mockup visibility toggle | UI state only | `MISSING` | `ArticleSettingsPanel.tsx` |
 | GAP-083 | **Featured Article** | `isFeatured: Boolean` on Article | Mockup featured switch | UI state only; `localStorage` workaround | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `ArticleSettingsPanel.tsx` |
 | GAP-084 | **Allow Comments** / **Schedule Publication** | `allowComments`, `scheduledPublishAt` | Mockup article settings | Schedule blocks publish with toast; comments UI-only + `localStorage` | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `useWriteArticleForm.ts`, `ArticleSettingsPanel.tsx` |
+| GAP-085 | **Save / bookmark article** | `saveArticle` yoki `bookmarkTargetArticle` mutation | Profile + community save icon | `localStorage` (`fixora_saved_articles`) | `MISSING` | `libs/utils/savedArticles.ts`, `ProfileArticleCard.tsx` |
 
 ---
 

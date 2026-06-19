@@ -10,7 +10,7 @@ export function isAdminUser(user: AuthUser): boolean {
 	return user?.memberType === 'ADMIN' || user?.userType === 'ADMIN';
 }
 
-/** Default destination after login/signup, or when a logged-in user hits `/`. */
+/** Default destination after login/signup — not used to block `/` for logged-in users. */
 export function getPostAuthRoute(user: AuthUser, referrer?: string | null): string {
 	if (isAdminUser(user)) return '/_admin';
 	if (isTechnicianUser(user)) return '/technician/dashboard';

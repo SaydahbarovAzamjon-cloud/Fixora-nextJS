@@ -6,9 +6,9 @@
 |-------|-------|
 | **Last updated** | 2026-06-19 |
 | **Last agent** | Cursor |
-| **Last session** | **Technician Settings 1:1** — `/technician/settings`: 8-section internal nav (Figma), Profile/Account/Security/Availability wired to `getUser`/`updateUser`/`imageUploader`; Notifications/Payment/Preferences/2FA/Delete → GAP empty states. `docs/BACKEND_SETTINGS.md` GAP-090…096. |
-| **Last session (prev)** | **My Articles dashboard (P3-13)** — `/technician/articles` + Write Article edit mode. |
-| **Next agent should start with** | `PM-01` — Mobile foundation OR FIXORAB GAP-090…096 for settings backend |
+| **Last session** | **Technician profile articles** — like (`likeTargetArticle`), save (localStorage GAP-085), card → `/community/[id]`; `shopName` in Settings; `GetUser` network-only; audit doc `docs/TECHNICIAN_PROFILE_PAGE.md`. |
+| **Last session (prev)** | Unified technician public profile + deposit payment UI. |
+| **Next agent should start with** | `P3-08b` — Booking detail + final payment OR `PM-01` mobile foundation |
 
 ---
 
@@ -89,7 +89,7 @@ Full checklist: `TASK_BOARD.md`
 
 | Item | Notes |
 |------|-------|
-| KakaoPay sandbox | Needed before payment UI (P3-06) |
+| KakaoPay sandbox | Production gateway only — **deposit UI wired** to mock `initiatePayment`/`confirmPayment` (P3-06b) |
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
 | Apollo still on legacy nestar ops | P3-13 — migrate to `FRONTEND_API.md` names |
 | Admin mockup | None — build incrementally (P3-15) |

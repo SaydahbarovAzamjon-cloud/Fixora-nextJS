@@ -40,10 +40,11 @@ const MyPage: NextPage = () => {
 
 	const profile = userData?.getUser;
 
-	const { data: bookingsData } = useQuery(GET_MY_BOOKINGS, {
+	const { data: bookingsData, refetch: refetchBookings } = useQuery(GET_MY_BOOKINGS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50, search: {} } },
 		fetchPolicy: 'network-only',
+		pollInterval: 20000,
 	});
 
 	const bookings: Booking[] = bookingsData?.getMyBookings?.list ?? [];
@@ -88,7 +89,7 @@ const MyPage: NextPage = () => {
 				</div>
 
 				<div className="fixora-mypage__content">
-					{tab === 'requests' && <RequestsTab bookings={bookings} />}
+					{tab === 'requests' && <RequestsTab bookings={bookings} onRefetch={() => refetchBookings()} />}
 					{tab === 'following' && <FollowingTab />}
 					{tab === 'stories' && <RepairStoriesTab />}
 					{tab === 'settings' && profile?._id && (

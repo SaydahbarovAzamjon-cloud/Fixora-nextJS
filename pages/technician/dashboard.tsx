@@ -25,7 +25,7 @@ import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import AddRounded from '@mui/icons-material/AddRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
+import { GET_INCOMING_REQUESTS, GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
 import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
@@ -33,12 +33,17 @@ import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetA
 import { formatKrw, formatKrwCompact } from '../../libs/utils/formatCurrency';
 import {
 	buildDashboardMonthSeries,
+	buildDashboardMonthSeriesFromPayments,
 	buildDashboardWeekSeries,
+	buildDashboardWeekSeriesFromPayments,
 	buildDashboardYearSeries,
+	buildDashboardYearSeriesFromPayments,
 	customerName,
 	deviceServiceLabel,
+	hasRealPayments,
 	hasSeriesData,
 	parsePrice,
+	sumCompletedPaymentEarnings,
 } from '../../libs/utils/technicianMetrics';
 
 type Period = 'Week' | 'Month' | 'Year';
@@ -159,6 +164,13 @@ const TechnicianDashboard: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
+	const { data: paymentsData } = useQuery(GET_MY_PAYMENTS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 200, search: {} } },
+		fetchPolicy: 'network-only',
+		pollInterval: 30000,
+	});
+
 	const { data: userData, refetch: refetchUser } = useQuery(GET_USER, {
 		skip: !user?._id,
 		variables: { userId: user?._id },
@@ -202,19 +214,31 @@ const TechnicianDashboard: NextPage = () => {
 
 	const incomingRequests = useMemo(() => incomingRequestsData?.getIncomingRequests?.list ?? [], [incomingRequestsData]);
 	const bookings = useMemo(() => technicianBookingsData?.getTechnicianBookings?.list ?? [], [technicianBookingsData]);
+	const payments = useMemo(() => paymentsData?.getMyPayments?.list ?? [], [paymentsData]);
 	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
+	const usePaymentData = hasRealPayments(payments);
 
 	const activeJobs = useMemo(() => bookings.filter((b: any) => ['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus)), [bookings]);
 	const completedBookings = useMemo(() => bookings.filter((b: any) => b?.bookingStatus === 'COMPLETED'), [bookings]);
 
 	const earnings = useMemo(() => {
+		if (usePaymentData) return sumCompletedPaymentEarnings(payments).toFixed(2);
 		return completedBookings.reduce((sum: number, b: any) => sum + parsePrice(b), 0).toFixed(2);
-	}, [completedBookings]);
+	}, [completedBookings, payments, usePaymentData]);
 
-	const weekData = useMemo(() => buildDashboardWeekSeries(completedBookings), [completedBookings]);
-	const monthData = useMemo(() => buildDashboardMonthSeries(completedBookings), [completedBookings]);
-	const yearData = useMemo(() => buildDashboardYearSeries(completedBookings), [completedBookings]);
+	const weekData = useMemo(
+		() => (usePaymentData ? buildDashboardWeekSeriesFromPayments(payments) : buildDashboardWeekSeries(completedBookings)),
+		[completedBookings, payments, usePaymentData],
+	);
+	const monthData = useMemo(
+		() => (usePaymentData ? buildDashboardMonthSeriesFromPayments(payments) : buildDashboardMonthSeries(completedBookings)),
+		[completedBookings, payments, usePaymentData],
+	);
+	const yearData = useMemo(
+		() => (usePaymentData ? buildDashboardYearSeriesFromPayments(payments) : buildDashboardYearSeries(completedBookings)),
+		[completedBookings, payments, usePaymentData],
+	);
 
 	// Default to the smallest period that actually has earnings, so the line is never falsely empty
 	const activePeriod: Period =

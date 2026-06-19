@@ -16,6 +16,7 @@ export const GET_MY_BOOKINGS = gql`
 				problemDescription
 				estimatedPrice
 				finalPrice
+				isPaid
 				deviceId
 				technicianId
 				userId
@@ -200,6 +201,11 @@ export const GET_MY_ARTICLES = gql`
 				articleViews
 				articleComments
 				createdAt
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
 			}
 			metaCounter {
 				total

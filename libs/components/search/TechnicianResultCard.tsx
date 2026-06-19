@@ -14,6 +14,11 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { TechnicianSummary } from '../../types/fixora/fixora';
 import { userVar } from '../../../apollo/store';
 import { formatKrwNumber } from '../../utils/formatCurrency';
+import {
+	getTechnicianDisplayName,
+	getTechnicianOwnerSubtitle,
+} from '../../utils/technicianProfileDisplay';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
 
 interface TechnicianResultCardProps {
 	technician: TechnicianSummary;
@@ -25,6 +30,8 @@ interface TechnicianResultCardProps {
 }
 
 const BADGE_TAGS = ['topRated', 'greatReviews', 'fastResponder', 'affordable'] as const;
+
+const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
 const getBadgeTag = (technician: TechnicianSummary): (typeof BADGE_TAGS)[number] => {
 	if ((technician.averageRating ?? 0) >= 4.8) return 'topRated';
@@ -41,9 +48,8 @@ const getDistance = (id: string): number => {
 const TechnicianResultCard = ({ technician, view, favorited, following, onToggleFavorite, onToggleFollow }: TechnicianResultCardProps) => {
 	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
-	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
-	const ownerName = technician.userFullName || technician.userNickname;
-	const showOwnerName = !!technician.shopName && !!ownerName && ownerName !== displayName;
+	const displayName = getTechnicianDisplayName(technician);
+	const ownerSubtitle = getTechnicianOwnerSubtitle(technician);
 	const fromPrice = technician.services?.length
 		? Math.min(...technician.services.map((service) => service.basePrice))
 		: null;
@@ -53,6 +59,7 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 	const badgeTag = getBadgeTag(technician);
 	const distance = getDistance(technician._id);
 	const isSelf = !!user?._id && user._id === technician._id;
+	const avatarSrc = resolveProfileImageUrl(technician.userProfileImage);
 
 	const favoriteClickHandler = (e: MouseEvent) => {
 		e.preventDefault();
@@ -88,7 +95,16 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 
 			<div className="fixora-result-card__body">
 				<div className="fixora-result-card__avatar-wrap">
-					<img className="fixora-result-card__avatar" src={technician.userProfileImage || '/img/profile/defaultUser.svg'} alt="" />
+					<img
+						className="fixora-result-card__avatar"
+						src={avatarSrc}
+						alt=""
+						onError={(e) => {
+							if (!e.currentTarget.src.endsWith('defaultUser.svg')) {
+								e.currentTarget.src = DEFAULT_AVATAR;
+							}
+						}}
+					/>
 					<span
 						className={`fixora-result-card__status-dot${
 							technician.isOnline ? ' fixora-result-card__status-dot--online' : ''
@@ -104,7 +120,7 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 						)}
 					</div>
 
-					{showOwnerName && <span className="fixora-result-card__owner">{ownerName}</span>}
+					{ownerSubtitle && <span className="fixora-result-card__owner">{ownerSubtitle}</span>}
 
 					<span className="fixora-result-card__rating">
 						<StarIcon fontSize="inherit" />

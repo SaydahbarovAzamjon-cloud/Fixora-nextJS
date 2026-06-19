@@ -14,6 +14,7 @@ export interface TechnicianSettingsUser {
 	userEmail?: string | null;
 	userFullName?: string | null;
 	userNickname?: string | null;
+	shopName?: string | null;
 	userPhoneNumber?: string | null;
 	userLocation?: string | null;
 	userBio?: string | null;
@@ -28,6 +29,7 @@ export interface TechnicianSettingsUser {
 }
 
 export interface ProfileFormState {
+	shopName: string;
 	fullName: string;
 	email: string;
 	phone: string;
@@ -72,13 +74,16 @@ export function useTechnicianSettings(userId?: string) {
 		errorPolicy: 'all',
 	});
 
-	const [updateUser, { loading: saving }] = useMutation(UPDATE_TECHNICIAN_SETTINGS);
+	const [updateUser, { loading: saving }] = useMutation(UPDATE_TECHNICIAN_SETTINGS, {
+		refetchQueries: ['GetTechnicians'],
+	});
 
 	const graphqlUser: TechnicianSettingsUser | null = data?.getUser ?? null;
 	const user: TechnicianSettingsUser | null = graphqlUser ?? settingsUserFromAuth(authUser);
 	const offline = !!error && !graphqlUser && !!user;
 
 	const [profileForm, setProfileForm] = useState<ProfileFormState>({
+		shopName: '',
 		fullName: '',
 		email: '',
 		phone: '',
@@ -98,6 +103,7 @@ export function useTechnicianSettings(userId?: string) {
 
 	const hydrateFormFromUser = useCallback((next: TechnicianSettingsUser) => {
 		setProfileForm({
+			shopName: next.shopName ?? '',
 			fullName: next.userFullName ?? '',
 			email: next.userEmail ?? '',
 			phone: next.userPhoneNumber ?? '',
@@ -216,6 +222,7 @@ export function useTechnicianSettings(userId?: string) {
 						...(input.userFullName !== undefined
 							? { userFullName: String(input.userFullName) }
 							: {}),
+						...(input.shopName !== undefined ? { shopName: String(input.shopName) } : {}),
 						...(input.userNickname !== undefined
 							? { userNickname: String(input.userNickname) }
 							: {}),
@@ -232,6 +239,7 @@ export function useTechnicianSettings(userId?: string) {
 						...(input.userFullName !== undefined
 							? { userFullName: String(input.userFullName) }
 							: {}),
+						...(input.shopName !== undefined ? { shopName: String(input.shopName) } : {}),
 						...(input.userPhoneNumber !== undefined
 							? { userPhoneNumber: String(input.userPhoneNumber) }
 							: {}),
@@ -272,6 +280,7 @@ export function useTechnicianSettings(userId?: string) {
 				profileForm.email.trim().toLowerCase() !== user.userEmail.trim().toLowerCase();
 
 			const input: Record<string, unknown> = {
+				shopName: profileForm.shopName.trim() || null,
 				userFullName: profileForm.fullName.trim(),
 				userPhoneNumber: profileForm.phone.trim(),
 				userLocation: profileForm.location.trim(),

@@ -17,15 +17,18 @@ import { GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/p
 import { userVar } from '../../../apollo/store';
 import { buildKrwTicks, DEMO_KRW, formatKrw, formatKrwCompact } from '../../../libs/utils/formatCurrency';
 import {
-	buildDailyEarningsSeries,
+	buildDailyEarningsSeriesWithPayments,
 	buildMonthlyPayouts,
 	buildTransactions,
 	EarningsRange,
 	hasRealBookings,
+	hasRealPayments,
 	percentChange,
 	sumCompletedEarnings,
+	sumCompletedPaymentEarnings,
 	sumPendingAmount,
 	sumThisMonthEarnings,
+	sumThisMonthPaymentEarnings,
 	TxStatus,
 	withFallback,
 } from '../../../libs/utils/technicianMetrics';
@@ -129,16 +132,22 @@ const Earnings: NextPage = () => {
 
 	const bookings = useMemo(() => bookingsData?.getTechnicianBookings?.list ?? [], [bookingsData]);
 	const payments = useMemo(() => paymentsData?.getMyPayments?.list ?? [], [paymentsData]);
-	const useReal = hasRealBookings(bookings);
+	const useReal = hasRealBookings(bookings) || hasRealPayments(payments);
 
-	const totalEarnings = useMemo(() => sumCompletedEarnings(bookings), [bookings]);
-	const monthlyEarnings = useMemo(() => sumThisMonthEarnings(bookings), [bookings]);
+	const totalEarnings = useMemo(() => {
+		if (hasRealPayments(payments)) return sumCompletedPaymentEarnings(payments);
+		return sumCompletedEarnings(bookings);
+	}, [bookings, payments]);
+	const monthlyEarnings = useMemo(() => {
+		if (hasRealPayments(payments)) return sumThisMonthPaymentEarnings(payments);
+		return sumThisMonthEarnings(bookings);
+	}, [bookings, payments]);
 	const pendingAmount = useMemo(() => sumPendingAmount(bookings, payments), [bookings, payments]);
 
 	const dailySeries = useMemo(() => {
-		const real = buildDailyEarningsSeries(bookings, range);
+		const real = buildDailyEarningsSeriesWithPayments(bookings, payments, range);
 		return withFallback(real, DEMO_DAILY, useReal);
-	}, [bookings, range, useReal]);
+	}, [bookings, payments, range, useReal]);
 
 	const monthlySeries = useMemo(() => {
 		const real = buildMonthlyPayouts(bookings, payments);
@@ -175,9 +184,9 @@ const Earnings: NextPage = () => {
 		return pct ? `${pct} vs last week` : '+18% vs last week';
 	}, [bookings, periodEarned, useReal]);
 
-	const totalEarnedLabel = useReal && totalEarnings > 0 ? formatKrw(totalEarnings) : formatKrw(DEMO_KRW.totalEarned);
-	const monthLabel = useReal && monthlyEarnings > 0 ? formatKrw(monthlyEarnings) : formatKrw(DEMO_KRW.thisMonth);
-	const pendingLabel = useReal && pendingAmount > 0 ? formatKrw(pendingAmount) : formatKrw(DEMO_KRW.pending);
+	const totalEarnedLabel = useReal ? formatKrw(totalEarnings) : formatKrw(DEMO_KRW.totalEarned);
+	const monthLabel = useReal ? formatKrw(monthlyEarnings) : formatKrw(DEMO_KRW.thisMonth);
+	const pendingLabel = useReal ? formatKrw(pendingAmount) : formatKrw(DEMO_KRW.pending);
 	const periodTotalLabel = useReal && periodEarned > 0 ? formatKrw(periodEarned) : formatKrw(DEMO_KRW.weeklyTotal);
 	const monthlyTotalLabel = useReal && monthlyTotal > 0 ? formatKrw(monthlyTotal) : formatKrw(DEMO_KRW.monthlyPayoutsTotal);
 

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HourglassTopOutlinedIcon from '@mui/icons-material/HourglassTopOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { userVar } from '../../../apollo/store';
 import { CREATE_BOOKING, CREATE_DEVICE } from '../../../apollo/user/mutation';
@@ -39,7 +39,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [submitting, setSubmitting] = useState(false);
-	const [success, setSuccess] = useState(false);
+	const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
 
 	const { data: devicesData, loading: devicesLoading } = useQuery(GET_MY_DEVICES, {
 		skip: !isLoggedIn,
@@ -77,9 +77,12 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 			if (!deviceIssue.trim()) next.deviceIssue = t('booking.validation.deviceIssue');
 		}
 		if (!problemTitle.trim()) next.problemTitle = t('booking.validation.problemTitle');
+		if (!estimatedPrice.trim() || Number(estimatedPrice) <= 0) {
+			next.estimatedPrice = t('booking.validation.estimatedPrice');
+		}
 		setErrors(next);
 		return Object.keys(next).length === 0;
-	}, [isNewDevice, deviceCategory, deviceModel, deviceIssue, problemTitle, t]);
+	}, [isNewDevice, deviceCategory, deviceModel, deviceIssue, problemTitle, estimatedPrice, t]);
 
 	const handleSubmit = useCallback(async () => {
 		if (!isLoggedIn) return;
@@ -106,7 +109,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 				deviceId = result.data?.createDevice?._id;
 			}
 
-			await createBooking({
+			const bookingResult = await createBooking({
 				variables: {
 					input: {
 						deviceId,
@@ -119,7 +122,9 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 				},
 			});
 
-			setSuccess(true);
+			const bookingId = bookingResult.data?.createBooking?._id as string | undefined;
+			if (!bookingId) throw new Error(t('booking.errors.generic'));
+			setCreatedBookingId(bookingId);
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? t('booking.errors.generic'));
 		} finally {
@@ -157,18 +162,23 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 		);
 	}
 
-	if (success) {
+	if (createdBookingId) {
 		return (
-			<FixoraGlassCard className="fixora-booking__card fixora-booking__success">
-				<CheckCircleOutlineIcon className="fixora-booking__success-icon" />
-				<h2 className="fixora-booking__heading">{t('booking.success.title')}</h2>
-				<p className="fixora-booking__text">{t('booking.success.message')}</p>
+			<FixoraGlassCard className="fixora-booking__card fixora-booking__success fixora-booking__waiting">
+				<HourglassTopOutlinedIcon className="fixora-booking__success-icon fixora-booking__waiting-icon" />
+				<h2 className="fixora-booking__heading">{t('booking.waitingApproval.title')}</h2>
+				<p className="fixora-booking__text">{t('booking.waitingApproval.message')}</p>
+				{technicianName && (
+					<p className="fixora-booking__text fixora-booking__text--muted">
+						{t('payment.awaitingApproval.technician', { name: technicianName })}
+					</p>
+				)}
 				<div className="fixora-booking__success-actions">
-					<Link href={`/technicians/${technicianId}`} className="fixora-tech-profile__book-btn">
-						{t('booking.success.backToProfile')}
+					<Link href="/mypage?tab=requests" className="fixora-tech-profile__book-btn">
+						{t('payment.viewRequests')}
 					</Link>
-					<Link href="/search" className="fixora-booking__link">
-						{t('booking.success.backToSearch')}
+					<Link href={`/technicians/${technicianId}`} className="fixora-booking__link">
+						{t('booking.success.backToProfile')}
 					</Link>
 				</div>
 			</FixoraGlassCard>
@@ -306,6 +316,8 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 						placeholder={t('booking.details.estimatedPricePlaceholder')}
 						value={estimatedPrice}
 						onChange={(e) => setEstimatedPrice(e.target.value)}
+						error={!!errors.estimatedPrice}
+						helperText={errors.estimatedPrice}
 					/>
 					<div className="fixora-input fixora-booking__textarea">
 						<label className="fixora-input__label" htmlFor="problemDescription">

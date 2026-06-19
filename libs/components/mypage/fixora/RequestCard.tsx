@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
+import HourglassTopOutlinedIcon from '@mui/icons-material/HourglassTopOutlined';
 import { GET_DEVICE, GET_USER } from '../../../../apollo/user/query';
 import { Booking } from '../../../types/fixora/fixora';
+import DepositPaymentCard from '../../booking/DepositPaymentCard';
 
 export interface RequestCardProps {
 	booking: Booking;
+	onPaymentComplete?: () => void;
 }
 
-const RequestCard = ({ booking }: RequestCardProps) => {
+const RequestCard = ({ booking, onPaymentComplete }: RequestCardProps) => {
 	const { t } = useTranslation('common');
+	const [showPayment, setShowPayment] = useState(false);
+	const [paidLocally, setPaidLocally] = useState(false);
 
 	const { data: deviceData } = useQuery(GET_DEVICE, {
 		variables: { deviceId: booking.deviceId },
@@ -26,6 +31,10 @@ const RequestCard = ({ booking }: RequestCardProps) => {
 	const technicianName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
 
 	const title = device ? `${t(`booking.device.categories.${device.deviceCategory}`)} ${device.deviceModel}` : booking.problemTitle;
+
+	const depositPaid = paidLocally || !!booking.isPaid;
+	const awaitingApproval = booking.bookingStatus === 'PENDING' && !depositPaid;
+	const needsDeposit = booking.bookingStatus === 'ACCEPTED' && !depositPaid;
 
 	return (
 		<div className="fixora-mypage__request">
@@ -53,6 +62,42 @@ const RequestCard = ({ booking }: RequestCardProps) => {
 					<dt>{t('mypage.requestTechnician')}</dt>
 					<dd>{technicianName}</dd>
 				</div>
+			</div>
+
+			<div className="fixora-mypage__request-payment">
+				{depositPaid ? (
+					<div className="fixora-deposit-payment__badge-wrap fixora-deposit-payment__badge-wrap--compact">
+						<span className="fixora-deposit-payment__badge fixora-deposit-payment__badge--paid">{t('payment.alreadyPaid')}</span>
+					</div>
+				) : awaitingApproval ? (
+					<div className="fixora-mypage__request-waiting">
+						<HourglassTopOutlinedIcon fontSize="small" />
+						<span>{t('payment.awaitingApproval.short')}</span>
+					</div>
+				) : needsDeposit ? (
+					<>
+						<span className="fixora-deposit-payment__badge fixora-deposit-payment__badge--pending">{t('payment.depositDue')}</span>
+						{!showPayment ? (
+							<button type="button" className="fixora-mypage__request-pay-btn" onClick={() => setShowPayment(true)}>
+								{t('payment.payDeposit')}
+							</button>
+						) : (
+							<DepositPaymentCard
+								bookingId={booking._id}
+								problemTitle={booking.problemTitle}
+								technicianName={technicianName}
+								estimatedPrice={booking.estimatedPrice}
+								bookingStatus={booking.bookingStatus}
+								compact
+								onPaid={() => {
+									setPaidLocally(true);
+									setShowPayment(false);
+									onPaymentComplete?.();
+								}}
+							/>
+						)}
+					</>
+				) : null}
 			</div>
 		</div>
 	);

@@ -7,6 +7,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import { ArticleSummary } from '../../types/fixora/fixora';
 import { resolveArticleImageUrl } from '../../utils/articleImage';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
 
 interface TechTipCardProps {
 	article: ArticleSummary;
@@ -16,6 +17,8 @@ interface TechTipCardProps {
 
 const formatCount = (value: number): string =>
 	value >= 1000 ? `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k` : `${value}`;
+
+const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
 const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 	const { t } = useTranslation('common');
@@ -74,7 +77,15 @@ const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 
 			{author && (
 				<div className="fixora-tip-card__author">
-					<img src={author.userProfileImage || '/img/profile/defaultUser.svg'} alt="" />
+					<img
+						src={resolveProfileImageUrl(author.userProfileImage)}
+						alt=""
+						onError={(e) => {
+							if (!e.currentTarget.src.endsWith('defaultUser.svg')) {
+								e.currentTarget.src = DEFAULT_AVATAR;
+							}
+						}}
+					/>
 					<div>
 						<span>{author.userNickname || author.userFullName}</span>
 						{author.specialty && <small>{author.specialty}</small>}

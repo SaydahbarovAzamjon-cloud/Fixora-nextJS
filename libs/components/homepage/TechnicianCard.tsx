@@ -5,10 +5,17 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import { TechnicianSummary } from '../../types/fixora/fixora';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
+import {
+	getTechnicianDisplayName,
+	getTechnicianOwnerSubtitleLabel,
+} from '../../utils/technicianProfileDisplay';
 
 interface TechnicianCardProps {
 	technician: TechnicianSummary;
 }
+
+const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
 const BADGE_KEY: Record<string, string> = {
 	NEW: 'homepage.badge.new',
@@ -20,22 +27,28 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 
-	const displayName = technician.shopName || technician.userNickname || technician.userFullName;
-	const ownerName = technician.userFullName || technician.userNickname;
-	const showOwnerName = !!technician.shopName && !!ownerName && ownerName !== displayName;
+	const displayName = getTechnicianDisplayName(technician);
+	const ownerLabel = getTechnicianOwnerSubtitleLabel(technician);
 	const badgeKey = BADGE_KEY[technician.badgeLevel ?? ''] ?? null;
+	const avatarSrc = resolveProfileImageUrl(technician.userProfileImage);
+	const locationLabel = technician.userLocation?.trim() || t('homepage.technicians.locationUnknown');
 
 	return (
 		<button
 			type="button"
 			className="fixora-tech-card"
-			onClick={() => router.push(`/agent/detail?id=${technician._id}`)}
+			onClick={() => router.push(`/technicians/${technician._id}`)}
 		>
 			<div className="fixora-tech-card__top">
 				<img
 					className="fixora-tech-card__avatar"
-					src={technician.userProfileImage || '/img/profile/defaultUser.svg'}
+					src={avatarSrc}
 					alt=""
+					onError={(e) => {
+						if (!e.currentTarget.src.endsWith('defaultUser.svg')) {
+							e.currentTarget.src = DEFAULT_AVATAR;
+						}
+					}}
 				/>
 				<div className="fixora-tech-card__identity">
 					<span
@@ -46,7 +59,9 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 						{technician.isOnline ? t('homepage.technicians.online') : t('homepage.technicians.offline')}
 					</span>
 					<strong className="fixora-tech-card__name">{displayName}</strong>
-					{showOwnerName && <span className="fixora-tech-card__owner">{ownerName}</span>}
+					<span className={`fixora-tech-card__owner${ownerLabel ? '' : ' fixora-tech-card__owner--empty'}`}>
+						{ownerLabel ?? '\u00A0'}
+					</span>
 					<span className="fixora-tech-card__rating">
 						<StarIcon fontSize="inherit" />
 						{technician.averageRating?.toFixed(1) ?? '—'}
@@ -55,15 +70,19 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 				</div>
 			</div>
 
-			{technician.specialty && <p className="fixora-tech-card__specialty">{technician.specialty}</p>}
+			<p className="fixora-tech-card__specialty">
+				{technician.specialty?.trim() || t('homepage.technicians.defaultSpecialty')}
+			</p>
 
 			<div className="fixora-tech-card__meta">
-				{technician.userLocation && (
-					<span className="fixora-tech-card__meta-row">
-						<LocationOnOutlinedIcon fontSize="inherit" />
-						{technician.userLocation}
-					</span>
-				)}
+				<span
+					className={`fixora-tech-card__meta-row fixora-tech-card__meta-row--location${
+						technician.userLocation?.trim() ? '' : ' fixora-tech-card__meta-row--muted'
+					}`}
+				>
+					<LocationOnOutlinedIcon fontSize="inherit" />
+					{locationLabel}
+				</span>
 				<span className="fixora-tech-card__meta-row">
 					{t('homepage.technicians.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
 				</span>

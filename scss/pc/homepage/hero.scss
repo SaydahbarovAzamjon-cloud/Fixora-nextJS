@@ -92,7 +92,8 @@
 		position: relative;
 		width: 100%;
 		padding: 130px 20px 48px;
-		overflow: hidden;
+		overflow-x: clip;
+		overflow-y: visible;
 
 		/* ----- decorative cinematic scene (background only) ----- */
 
@@ -665,9 +666,18 @@
 		}
 
 		&__results {
+			/* Break out of narrow hero copy column so technician cards use full viewport width */
+			width: 100vw;
+			max-width: 100vw;
+			margin-left: calc(50% - 50vw);
+			margin-right: calc(50% - 50vw);
+			padding: 0 clamp(16px, 3vw, 40px);
+			box-sizing: border-box;
 			display: flex;
 			flex-direction: column;
 			gap: 12px;
+			align-self: stretch;
+			text-align: center;
 
 			h2 {
 				margin: 0;
@@ -682,34 +692,60 @@
 			color: var(--fixora-text-muted);
 		}
 
-		&__cards {
+		&__cards-wrap {
+			position: relative;
 			display: flex;
 			flex-direction: row;
-			flex-wrap: nowrap;
+			align-items: center;
 			gap: 12px;
-			align-items: stretch;
-			overflow-x: auto;
-			padding-bottom: 4px;
-			scrollbar-width: none;
+			width: 100%;
+			max-width: 100%;
+		}
 
-			&::-webkit-scrollbar {
-				display: none;
+		&__swiper {
+			flex: 1;
+			min-width: 0;
+			width: 100%;
+			overflow: hidden;
+			padding: 8px 0 !important;
+
+			.swiper-wrapper {
+				align-items: stretch;
 			}
+		}
+
+		&__slide {
+			height: auto !important;
+			display: flex;
+			box-sizing: border-box;
 		}
 
 		&__card {
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
-			flex: 0 0 260px;
-			width: 260px;
+			width: 100%;
+			min-width: 0;
+			align-items: stretch;
+
+			.fixora-tech-card {
+				flex: 1;
+				min-height: 300px;
+				width: 100%;
+			}
 		}
 
 		&__card-reason {
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			min-height: 2.6em;
 			padding: 0 4px;
 			font-size: 11px;
 			color: var(--fixora-text-muted);
 			line-height: 1.3;
+			text-align: center;
 		}
 	}
 

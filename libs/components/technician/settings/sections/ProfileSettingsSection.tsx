@@ -119,6 +119,13 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 			</div>
 
 			<div className="fts-grid fts-grid--2">
+				<SettingsField label={t('settings.profile.shopName')}>
+					<input
+						className="fts-input"
+						value={form.shopName}
+						onChange={(e) => onChange({ shopName: e.target.value })}
+					/>
+				</SettingsField>
 				<SettingsField label={t('settings.profile.fullName')}>
 					<input
 						className="fts-input"

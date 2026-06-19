@@ -92,6 +92,7 @@
     "decline": "거절",
     "issueDescription": "문제 설명",
     "declineConfirm": "이 요청을 거절하시겠습니까?",
+    "acceptedToast": "요청이 수락되었습니다 — 고객이 보증금을 결제할 수 있습니다.",
     "device": "기기",
     "general": "일반"
   },
@@ -279,6 +280,7 @@
       "replacePhoto": "교체",
       "removePhoto": "삭제",
       "fullName": "이름",
+      "shopName": "상호 / 매장명",
       "location": "위치",
       "email": "이메일",
       "phone": "전화번호",

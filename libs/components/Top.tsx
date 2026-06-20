@@ -19,6 +19,7 @@ import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink } from '../utils/notifications';
 import NotificationDropdown from './notifications/NotificationDropdown';
+import NavSearchInput from './nav/NavSearchInput';
 
 const LANGS = ['en', 'kr'] as const;
 
@@ -141,8 +142,14 @@ const Top = () => {
 				{t('nav.home')}
 			</Link>
 			<Link
-				href={'/agent'}
-				className={`fixora-nav__link ${isActive('/agent') ? 'fixora-nav__link--active' : ''}`}
+				href={'/technicians'}
+				className={`fixora-nav__link ${isActive('/technicians') ? 'fixora-nav__link--active' : ''}`}
+			>
+				{t('nav.technicians')}
+			</Link>
+			<Link
+				href={'/search'}
+				className={`fixora-nav__link ${isActive('/search') ? 'fixora-nav__link--active' : ''}`}
 			>
 				{t('nav.services')}
 			</Link>
@@ -186,6 +193,7 @@ const Top = () => {
 				<Link href={'/'} onClick={goHome} className="fixora-nav__logo-link">
 					<FixoraLogo size="md" className="fixora-nav__logo" />
 				</Link>
+				<NavSearchInput compact />
 				<div className="fixora-nav__links">{navLinks}</div>
 				{user?._id && (
 					<button
@@ -219,6 +227,8 @@ const Top = () => {
 					<Box component={'div'} className={'fixora-nav__links'}>
 						{navLinks}
 					</Box>
+
+					<NavSearchInput />
 
 					<Box component={'div'} className={'fixora-nav__actions'}>
 						{langToggle}
@@ -270,7 +280,7 @@ const Top = () => {
 								<Link href={'/login'} className={'fixora-nav__login'}>
 									{t('nav.login')}
 								</Link>
-								<Link href={'/agent'} className={'fixora-nav__cta'}>
+								<Link href={'/search'} className={'fixora-nav__cta'}>
 									{t('nav.findTechnician')}
 								</Link>
 							</>

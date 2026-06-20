@@ -14,6 +14,10 @@ a {
 	}
 }
 
+.fixora-tip-card__read-more {
+	white-space: nowrap;
+}
+
 button {
 	text-transform: none;
 	box-shadow: none;
@@ -79,7 +83,8 @@ hr {
 
 	.container {
 		position: relative;
-		width: 1300px;
+		width: 1200px;
+		max-width: calc(100% - 40px);
 		margin: 0 auto;
 		display: flex;
 	}

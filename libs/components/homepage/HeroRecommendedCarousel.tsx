@@ -51,6 +51,7 @@ const HeroRecommendedCarousel = ({ recommendations }: HeroRecommendedCarouselPro
 				slidesPerGroup={1}
 				speed={450}
 				watchOverflow
+				preventClicksPropagation={false}
 				navigation={{
 					prevEl: prevRef.current,
 					nextEl: nextRef.current,

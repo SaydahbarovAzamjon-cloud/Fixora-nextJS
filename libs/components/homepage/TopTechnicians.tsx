@@ -54,7 +54,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 			<Stack className="container">
 				<Box component="div" className="fixora-home-section__head">
 					<h2>{t('homepage.technicians.title')}</h2>
-					<Link href="/search" className="fixora-home-section__view-all">
+					<Link href="/technicians" className="fixora-home-section__view-all">
 						{t('homepage.viewAll')} <EastIcon fontSize="inherit" />
 					</Link>
 				</Box>
@@ -66,6 +66,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 						centeredSlides
 						spaceBetween={16}
 						modules={[Autoplay]}
+						preventClicksPropagation={false}
 					>
 						{slides}
 					</Swiper>
@@ -79,6 +80,7 @@ const TopTechnicians = ({ initialInput = DEFAULT_INPUT }: TopTechniciansProps) =
 							slidesPerView={4}
 							spaceBetween={20}
 							modules={[Autoplay, Navigation]}
+							preventClicksPropagation={false}
 							navigation={{
 								nextEl: '.swiper-technicians-next',
 								prevEl: '.swiper-technicians-prev',

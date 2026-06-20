@@ -87,12 +87,13 @@ Yangi UI element qo‘shganda:
 
 ---
 
-### Search & discovery — `/search`, `/technicians/[id]`
+### Search & discovery — `/search`, `/technicians`, `/technicians/[id]`
 
 | ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
 |----|------------|---------------|------------|------------------|--------|------|
 | GAP-040 | Search filters to‘liq ishlashi | `getTechnicians` filter implementation audit | P3-05 search sahifasi | Ba’zi filterlar backendda tasdiqlanmagan | `PARTIAL` | [`backend-search-gaps-prompt.md`](backend-search-gaps-prompt.md) |
 | GAP-041 | **ON_SITE** booking | `BookingType.ON_SITE` flow + technician on-site dispatch | Mockupda "Coming Soon" | UI faqat badge; MVP `SHOP_VISIT` (BIZ-01) | `MISSING` | Booking UI, DECISIONS BIZ-01 |
+| GAP-097 | **Platform technician stats** (`/technicians`) | `getTechnicianPlatformStats` yoki `TISearch.createdAtFrom` / `createdAtTo` | Oylik signup, o‘sish trendi, aniq “joined this month” KPI | `metaCounter` + 100 ta recent sample client-side count (approximate) | `WORKAROUND` | `libs/components/technicians/TechniciansPageStats.tsx`, `pages/technicians/index.tsx` |
 
 ---
 

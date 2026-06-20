@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-19 |
+| **Last updated** | 2026-06-21 |
 | **Last agent** | Cursor |
-| **Last session** | **Technician profile articles** — like (`likeTargetArticle`), save (localStorage GAP-085), card → `/community/[id]`; `shopName` in Settings; `GetUser` network-only; audit doc `docs/TECHNICIAN_PROFILE_PAGE.md`. |
-| **Last session (prev)** | Unified technician public profile + deposit payment UI. |
+| **Last session** | **Navbar + followers restore** — Technicians nav link; nav search → `getTechnicians` via `/search?input=`; followers on cards when DB count > 0; profile followers = max(list query, `getUser.followersCount`). |
+| **Last session (prev)** | Homepage navigation + `/technicians` listing page. |
 | **Next agent should start with** | `P3-08b` — Booking detail + final payment OR `PM-01` mobile foundation |
 
 ---
@@ -25,7 +25,8 @@
 | GraphQL contract sync | ✅ `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql` in `docs/` |
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
-| Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — `scss/pc/homepage/fixora-home.scss` |
+| Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — cards link to profile/article; View all → `/technicians` + `/community` |
+| Technicians directory | ✅ `/technicians` — stats KPIs, top/new carousels, search/filter grid (`TechniciansPageStats`, GAP-097 workaround) |
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/mypage` (profile header + Requests/Following/Repair Stories/Settings tabs) + `/notifications` (Today/Earlier, mark all read, navbar badge), `scss/pc/mypage/fixora-mypage.scss`, `scss/pc/notifications/notifications.scss` |
 | Technician Dashboard (P3-13) | ✅ `/technician/dashboard` — quick actions functional (New Quote/Mark Available/View Schedule/Export Report); Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, device-only — no backend schedule model) merged with bookings (DECISIONS UI-11) |

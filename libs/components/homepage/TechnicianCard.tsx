@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
@@ -25,20 +25,16 @@ const BADGE_KEY: Record<string, string> = {
 
 const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 	const { t } = useTranslation('common');
-	const router = useRouter();
 
 	const displayName = getTechnicianDisplayName(technician);
 	const ownerLabel = getTechnicianOwnerSubtitleLabel(technician);
 	const badgeKey = BADGE_KEY[technician.badgeLevel ?? ''] ?? null;
 	const avatarSrc = resolveProfileImageUrl(technician.userProfileImage);
 	const locationLabel = technician.userLocation?.trim() || t('homepage.technicians.locationUnknown');
+	const followersCount = technician.followersCount ?? 0;
 
 	return (
-		<button
-			type="button"
-			className="fixora-tech-card"
-			onClick={() => router.push(`/technicians/${technician._id}`)}
-		>
+		<Link href={`/technicians/${technician._id}`} className="fixora-tech-card">
 			<div className="fixora-tech-card__top">
 				<img
 					className="fixora-tech-card__avatar"
@@ -86,14 +82,16 @@ const TechnicianCard = ({ technician }: TechnicianCardProps) => {
 				<span className="fixora-tech-card__meta-row">
 					{t('homepage.technicians.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
 				</span>
-				<span className="fixora-tech-card__meta-row">
-					<GroupOutlinedIcon fontSize="inherit" />
-					{t('homepage.technicians.followers', { count: technician.followersCount ?? 0 })}
-				</span>
+				{followersCount > 0 && (
+					<span className="fixora-tech-card__meta-row">
+						<GroupOutlinedIcon fontSize="inherit" />
+						{t('homepage.technicians.followers', { count: followersCount })}
+					</span>
+				)}
 			</div>
 
 			{badgeKey && <span className="fixora-tech-card__badge">{t(badgeKey)}</span>}
-		</button>
+		</Link>
 	);
 };
 

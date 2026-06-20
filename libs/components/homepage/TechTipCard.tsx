@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
@@ -22,6 +23,7 @@ const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
 const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 	const { t } = useTranslation('common');
+	const router = useRouter();
 	const detailHref = `/community/${article._id}`;
 	const author = article.authorData;
 	const coverUrl = resolveArticleImageUrl(article.articleImage);
@@ -42,13 +44,13 @@ const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 				<ChatBubbleOutlineIcon fontSize="inherit" />
 				{formatCount(article.articleComments)}
 			</span>
-			{linkable ? (
-				<span className="fixora-tip-card__read-more">{t('homepage.tips.readMore')}</span>
-			) : (
-				<Link href={detailHref} className="fixora-tip-card__read-more">
-					{t('homepage.tips.readMore')}
-				</Link>
-			)}
+			<Link
+				href={detailHref}
+				className="fixora-tip-card__read-more"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{t('homepage.tips.readMore')}
+			</Link>
 		</div>
 	);
 
@@ -99,9 +101,20 @@ const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 
 	if (linkable) {
 		return (
-			<Link href={detailHref} className="fixora-tip-card fixora-tip-card--linkable">
+			<div
+				role="link"
+				tabIndex={0}
+				className="fixora-tip-card fixora-tip-card--linkable"
+				onClick={() => router.push(detailHref)}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						router.push(detailHref);
+					}
+				}}
+			>
 				{body}
-			</Link>
+			</div>
 		);
 	}
 

@@ -14,6 +14,7 @@
 @import '/scss/pc/agent/detail.scss';
 
 @import '/scss/pc/search/search.scss';
+@import '/scss/pc/technicians/technicians-list.scss';
 @import '/scss/pc/technician-profile/profile.scss';
 @import '/scss/pc/booking/booking.scss';
 @import '/scss/pc/messages/messages.scss';
@@ -99,6 +100,10 @@ body::-webkit-scrollbar {
 					flex-direction: row;
 					align-items: center;
 					justify-content: space-between;
+					gap: 12px;
+					width: 100%;
+					max-width: calc(100% - 40px);
+
 					.logo-box {
 						overflow: visible;
 						flex-shrink: 0;

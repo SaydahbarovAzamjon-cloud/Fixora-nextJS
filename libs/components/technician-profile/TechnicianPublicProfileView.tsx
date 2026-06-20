@@ -151,7 +151,9 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 		fetchPolicy: 'cache-and-network',
 	});
 	const followerList: T[] = (followersData as T)?.getUserFollowers?.list ?? [];
-	const followersTotal: number = (followersData as T)?.getUserFollowers?.metaCounter?.[0]?.total ?? followerList.length;
+	const followersFromList =
+		(followersData as T)?.getUserFollowers?.metaCounter?.[0]?.total ?? followerList.length;
+	const followersTotal = Math.max(followersFromList, profile?.followersCount ?? 0);
 
 	const { data: storiesData, refetch: refetchStories } = useQuery(GET_TECHNICIAN_STORIES, {
 		variables: { input: { technicianId: technicianId ?? '', limit: 20 } },

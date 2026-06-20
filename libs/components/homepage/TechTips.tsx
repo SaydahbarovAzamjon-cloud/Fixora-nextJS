@@ -26,7 +26,7 @@ const TechTips = ({ initialInput = DEFAULT_INPUT }: TechTipsProps) => {
 	const [articles, setArticles] = useState<ArticleSummary[]>([]);
 
 	useQuery(GET_ARTICLES, {
-		fetchPolicy: 'cache-and-network',
+		fetchPolicy: 'network-only',
 		variables: { input: initialInput },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
@@ -47,7 +47,7 @@ const TechTips = ({ initialInput = DEFAULT_INPUT }: TechTipsProps) => {
 				</Box>
 				<Box component="div" className="fixora-home-tips__grid">
 					{articles.map((article) => (
-						<TechTipCard article={article} key={article._id} />
+						<TechTipCard article={article} key={article._id} linkable />
 					))}
 				</Box>
 			</Stack>

@@ -1,0 +1,171 @@
+/** Technicians directory — browse all + stats — /technicians */
+
+.fixora-tech-list-page {
+	background: transparent;
+	padding: 100px 0 60px;
+
+	.container {
+		width: 1200px;
+		max-width: calc(100% - 40px);
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 28px;
+	}
+
+	&__header {
+		text-align: center;
+
+		h1 {
+			margin: 0 0 10px;
+			font-size: clamp(28px, 4vw, 36px);
+			font-weight: 800;
+			color: var(--fixora-text-primary);
+		}
+
+		p {
+			margin: 0;
+			font-size: 15px;
+			color: var(--fixora-text-muted);
+			max-width: 560px;
+			margin-inline: auto;
+		}
+	}
+}
+
+.fixora-tech-list-stats {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+
+	&__card {
+		@include fixora-home-card-surface;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 14px;
+		padding: 18px 20px;
+		border-radius: 14px;
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		flex-shrink: 0;
+		font-size: 22px;
+
+		&--online {
+			background: rgba(34, 197, 94, 0.12);
+			color: var(--fixora-success);
+		}
+
+		&--total {
+			background: rgba(255, 107, 0, 0.12);
+			color: var(--fixora-primary);
+		}
+
+		&--rating {
+			background: rgba(250, 204, 21, 0.12);
+			color: #facc15;
+		}
+
+		&--new {
+			background: rgba(96, 165, 250, 0.12);
+			color: #60a5fa;
+		}
+	}
+
+	&__text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+
+		strong {
+			font-size: 22px;
+			font-weight: 800;
+			line-height: 1.1;
+			color: var(--fixora-text-primary);
+		}
+
+		span {
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--fixora-text-muted);
+			line-height: 1.3;
+		}
+	}
+}
+
+.fixora-tech-list-section {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&__head {
+		h2 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 700;
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	&__carousel {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__swiper {
+		flex: 1;
+		min-width: 0;
+		padding: 4px 0 8px !important;
+	}
+
+	&__slide {
+		height: auto !important;
+		display: flex;
+	}
+
+	&__arrow.swiper-button-lock {
+		display: none;
+	}
+
+	&--new {
+		margin-top: 8px;
+		padding-top: 28px;
+		border-top: 1px solid var(--fixora-border-subtle);
+	}
+}
+
+@media (max-width: 992px) {
+	.fixora-tech-list-stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 639px) {
+	.fixora-tech-list-page {
+		padding-top: 88px;
+
+		.container {
+			gap: 22px;
+		}
+	}
+
+	.fixora-tech-list-stats {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-tech-list-section__carousel {
+		.fixora-tech-list-section__arrow {
+			display: none;
+		}
+	}
+}

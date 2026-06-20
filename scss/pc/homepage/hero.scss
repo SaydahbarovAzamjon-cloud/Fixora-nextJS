@@ -90,9 +90,12 @@
 #mobile-wrap {
 	.fixora-hero {
 		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		width: 100%;
 		padding: 130px 20px 48px;
-		overflow-x: clip;
+		overflow-x: hidden;
 		overflow-y: visible;
 
 		/* ----- decorative cinematic scene (background only) ----- */
@@ -100,7 +103,7 @@
 		&__scene {
 			position: absolute;
 			inset: 0;
-			pointer-events: none;
+			overflow: hidden;
 			z-index: 0;
 
 			/* workshop silhouettes in the far corners */
@@ -666,17 +669,16 @@
 		}
 
 		&__results {
-			/* Break out of narrow hero copy column so technician cards use full viewport width */
-			width: 100vw;
-			max-width: 100vw;
-			margin-left: calc(50% - 50vw);
-			margin-right: calc(50% - 50vw);
+			position: relative;
+			z-index: 10;
+			width: 100%;
+			max-width: 1200px;
+			margin-top: 24px;
 			padding: 0 clamp(16px, 3vw, 40px);
 			box-sizing: border-box;
 			display: flex;
 			flex-direction: column;
 			gap: 12px;
-			align-self: stretch;
 			text-align: center;
 
 			h2 {
@@ -700,12 +702,18 @@
 			gap: 12px;
 			width: 100%;
 			max-width: 100%;
+			overflow: hidden;
+
+			.fixora-hero__arrow.swiper-button-lock {
+				display: none;
+			}
 		}
 
 		&__swiper {
 			flex: 1;
 			min-width: 0;
 			width: 100%;
+			max-width: 100%;
 			overflow: hidden;
 			padding: 8px 0 !important;
 
@@ -718,6 +726,7 @@
 			height: auto !important;
 			display: flex;
 			box-sizing: border-box;
+			flex-shrink: 0;
 		}
 
 		&__card {

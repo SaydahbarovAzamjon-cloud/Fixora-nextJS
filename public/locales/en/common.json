@@ -54,6 +54,8 @@
   "hero.trust.payments": "Secure payments.",
   "hero.recommendedTechnicians": "Recommended Technicians",
   "hero.selectTechnicianHint": "Select a technician to view profile and book repair",
+  "hero.recommended.prev": "Previous recommended technicians",
+  "hero.recommended.next": "Next recommended technicians",
   "homepage.viewAll": "View all",
   "homepage.technicians.title": "Top rated technicians near you",
   "homepage.technicians.online": "Online",

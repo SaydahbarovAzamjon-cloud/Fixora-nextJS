@@ -198,15 +198,15 @@ const HeroRepairSearch = () => {
 						))}
 					</div>
 				)}
-
-				{recommendations.length > 0 && (
-					<div className="fixora-hero__results">
-						<h2>{t('hero.recommendedTechnicians')}</h2>
-						<p className="fixora-hero__hint">{t('hero.selectTechnicianHint')}</p>
-						<HeroRecommendedCarousel recommendations={recommendations} />
-					</div>
-				)}
 			</div>
+
+			{recommendations.length > 0 && (
+				<div className="fixora-hero__results">
+					<h2>{t('hero.recommendedTechnicians')}</h2>
+					<p className="fixora-hero__hint">{t('hero.selectTechnicianHint')}</p>
+					<HeroRecommendedCarousel recommendations={recommendations} />
+				</div>
+			)}
 		</Stack>
 	);
 };

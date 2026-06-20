@@ -54,6 +54,8 @@
   "hero.trust.payments": "안전한 결제.",
   "hero.recommendedTechnicians": "추천 기술자",
   "hero.selectTechnicianHint": "기술자를 선택하여 프로필을 보고 예약하세요",
+  "hero.recommended.prev": "이전 추천 기술자",
+  "hero.recommended.next": "다음 추천 기술자",
   "homepage.viewAll": "전체 보기",
   "homepage.technicians.title": "내 주변 최고 평점 기술자",
   "homepage.technicians.online": "온라인",

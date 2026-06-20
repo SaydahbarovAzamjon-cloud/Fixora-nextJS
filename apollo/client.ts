@@ -7,6 +7,7 @@ import { onError } from '@apollo/client/link/error';
 import { getJwtToken } from '../libs/auth';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
+import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
 import { socketVar } from './store';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -38,15 +39,21 @@ class LoggingWebSocket {
 		socketVar(this.socket)
 
 		this.socket.onopen = () => {
-			console.log('WebSocket connection!');
+			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
+				console.debug('WebSocket connection!');
+			}
 		};
 
 		this.socket.onmessage = (msg) => {
-			console.log('WebSocket message:', msg.data);
+			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
+				console.debug('WebSocket message:', msg.data);
+			}
 		};
 
 		this.socket.onerror = (error) => {
-			console.log('WebSocket, error:', error);
+			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
+				console.debug('WebSocket error:', error);
+			}
 		};
 	}
 
@@ -68,7 +75,9 @@ function  createIsomorphicLink() {
 					...getHeaders(),
 				},
 			}));
-			console.warn('requesting.. ', operation);
+			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
+				console.debug('[Apollo]', operation.operationName);
+			}
 			return forward(operation);
 		});
 
@@ -93,13 +102,23 @@ function  createIsomorphicLink() {
 const errorLink = onError(({ graphQLErrors, networkError, response }) => {
 		if (graphQLErrors) {
 			graphQLErrors.map(({ message, locations, path }) => {
-				console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
 				const isAuthMutation =
 					path?.[0] === 'login' ||
 					path?.[0] === 'signup' ||
 					path?.[0] === 'loginWithOAuth' ||
 					path?.[0] === 'completeOAuthSignup';
-				if (!message.includes('input') && !isAuthMutation) sweetErrorAlert(message);
+				const isRoleError = isRoleRestrictedError(message);
+				const isAuthError = isMissingTokenError(message);
+
+				if (isRoleError || isAuthError) {
+					console.debug(`[GraphQL auth]: ${message}`);
+				} else {
+					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+				}
+
+				if (!message.includes('input') && !isAuthMutation && !isRoleError && !isAuthError) {
+					sweetErrorAlert(message);
+				}
 			});
 		}
 

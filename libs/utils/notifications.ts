@@ -76,7 +76,9 @@ export const getNotificationText = (notification: Notification, t: (key: string)
 export const getNotificationLink = (notification: Notification): string | null => {
 	switch (notification.referenceType) {
 		case 'BOOKING':
-			return notification.referenceId ? `/messages?bookingId=${notification.referenceId}` : '/messages';
+			return notification.referenceId
+				? `/mypage/bookings/${notification.referenceId}`
+				: '/mypage?tab=requests';
 		case 'MESSAGE':
 			return '/messages';
 		case 'ARTICLE':

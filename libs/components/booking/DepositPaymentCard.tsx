@@ -135,7 +135,10 @@ const DepositPaymentCard: React.FC<DepositPaymentCardProps> = ({
 				<p className="fixora-deposit-payment__text">{t('payment.success.message')}</p>
 				{showSuccessLinks && (
 					<div className="fixora-deposit-payment__actions">
-						<Link href="/mypage?tab=requests" className="fixora-tech-profile__book-btn">
+						<Link href={`/mypage/bookings/${bookingId}`} className="fixora-tech-profile__book-btn">
+							{t('booking.detail.viewDetail')}
+						</Link>
+						<Link href="/mypage?tab=requests" className="fixora-booking__link">
 							{t('payment.viewRequests')}
 						</Link>
 						{technicianId && (

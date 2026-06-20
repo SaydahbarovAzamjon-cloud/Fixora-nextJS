@@ -4,11 +4,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-21 |
+| **Last updated** | 2026-06-20 |
 | **Last agent** | Cursor |
-| **Last session** | **Navbar + followers restore** — Technicians nav link; nav search → `getTechnicians` via `/search?input=`; followers on cards when DB count > 0; profile followers = max(list query, `getUser.followersCount`). |
-| **Last session (prev)** | Homepage navigation + `/technicians` listing page. |
-| **Next agent should start with** | `P3-08b` — Booking detail + final payment OR `PM-01` mobile foundation |
+| **Last session** | **P3-08b Booking detail** — `/mypage/bookings/[id]`: detail view, deposit + final mock payment, cancelBooking, createReview; wired Messages/My Page/notifications/BookingForm. |
+| **Last session (prev)** | Navbar + followers restore; homepage navigation. |
+| **Next agent should start with** | `P3-07b` — Messages WebSocket OR `P3-14` ON_SITE badge OR `PM-01` mobile |
 
 ---
 
@@ -97,7 +97,7 @@ Full checklist: `TASK_BOARD.md`
 | Light theme mockup | None — Phase 5 (P4-05+) |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 | Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
-| "View Request" in Messages | Links to `/mypage` — no dedicated booking detail view yet |
+| "View Request" in Messages | Links to `/mypage/bookings/[id]` — booking detail page (P3-08b ✅) |
 | Dashboard schedule persistence | **No backend schedule/appointment model** (only `User.workingHours`). Today's Schedule "Add" items live in **localStorage** (`fixora_tech_schedule_<userId>`) — device-only. Wire to a real model when the backend adds one (DECISIONS UI-11) |
 | Story image upload | Uses **multipart axios** to `REACT_APP_API_GRAPHQL_URL` with `apollo-require-preflight` (same pattern as `AddNewProperty.tsx`) — not `apollo-upload-client`. Story viewer/playback (tapping a ring to view) is **not** built yet — only display covers + create (DECISIONS UI-10) |
 | Legacy `/mypage` components | `libs/components/mypage/*` (MyProperties, MyFavorites, MyArticles, WriteArticle, etc.) left in place but no longer imported by `/mypage` — still referenced by `/member` and `/_admin`; do not delete without checking |

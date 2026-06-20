@@ -74,6 +74,8 @@ This document is the **single integration reference** for FixoraF. Do not contra
 |-----------|------|--------------|
 | `createBooking` | Bearer | USER — requires `deviceId`, `technicianId`, `bookingType: SHOP_VISIT` |
 | `getMyBookings` | Bearer | USER |
+| `getBooking` | Bearer | USER — single booking detail |
+| `getBookingReview` | Bearer | USER — review for COMPLETED booking |
 | `getTechnicianBookings` | Bearer | TECHNICIAN |
 | `getIncomingRequests` | Bearer | TECHNICIAN — PENDING |
 | `acceptBooking` / `rejectBooking` | Bearer | TECHNICIAN (APPROVED) |
@@ -81,6 +83,7 @@ This document is the **single integration reference** for FixoraF. Do not contra
 | `addProgressUpdate` | Bearer | TECHNICIAN — IN_PROGRESS only |
 | `completeBooking` | Bearer | TECHNICIAN |
 | `cancelBooking` | Bearer | USER — cancellable statuses only |
+| `createReview` | Bearer | USER — COMPLETED booking, 1 per booking |
 | `updateBooking` | Bearer | USER — PENDING only |
 
 **Statuses:** `PENDING`, `ACCEPTED`, `REJECTED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`  
@@ -258,7 +261,7 @@ Pre-booking chat: `bookingId` nullable on messages.
 | Search | `getTechnicians` |
 | Technician profile | `getUser` |
 | Booking flow | `createDevice`, `createBooking`, `initiatePayment`, `confirmPayment` |
-| My Page | `getMyDevices`, `getMyBookings`, `getUserFollowings` |
+| My Page | `getMyDevices`, `getMyBookings`, `getUserFollowings`, `getBooking`, `getBookingReview`, `getBookingPayments` |
 | Messages | `getMyConversations`, `getMessages`, `sendMessage` |
 | Community | `getArticles`, `getArticle`, `getComments`, `createComment` |
 | Stories | `imagesUploader(target:"story")` → `createStory`; `getStoriesCarousel`, `getTechnicianStories`, `incrementStoryView` |

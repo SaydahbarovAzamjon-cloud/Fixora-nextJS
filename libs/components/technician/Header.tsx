@@ -10,6 +10,7 @@ import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
+import { logOut } from '../../auth';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 import LanguageToggle from '../common/LanguageToggle';
 
@@ -54,9 +55,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 	const avatarSrc = profileDraft ?? user?.memberImage;
 
 	const handleLogout = () => {
-		localStorage.removeItem('accessToken');
-		localStorage.removeItem('refreshToken');
-		router.push('/login');
+		logOut();
 	};
 
 	const submitSearch = () => {

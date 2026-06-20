@@ -208,6 +208,12 @@ export interface Payment {
 	createdAt?: string;
 }
 
+export interface ProgressUpdate {
+	step: string;
+	note?: string;
+	timestamp: string;
+}
+
 export interface Booking {
 	_id: string;
 	bookingStatus: BookingStatus;
@@ -222,6 +228,32 @@ export interface Booking {
 	technicianId: string;
 	userId: string;
 	createdAt: string;
+	completedAt?: string;
+	cancelledAt?: string;
+	progressUpdates?: ProgressUpdate[];
+	deviceData?: Device;
+}
+
+export interface BookingReview {
+	_id: string;
+	bookingId: string;
+	technicianId: string;
+	userId: string;
+	reviewContent?: string;
+	repairQuality: number;
+	repairSpeed: number;
+	communication: number;
+	reviewImages?: string[];
+	createdAt: string;
+}
+
+export interface CreateReviewInput {
+	bookingId: string;
+	communication: number;
+	repairQuality: number;
+	repairSpeed: number;
+	reviewContent?: string;
+	reviewImages?: string[];
 }
 
 export interface BookingInput {

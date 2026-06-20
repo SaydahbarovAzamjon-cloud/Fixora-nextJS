@@ -83,7 +83,7 @@ const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelPr
 				)}
 			</dl>
 
-			<Link href="/mypage" className="fixora-messages__details-cta">
+			<Link href={`/mypage/bookings/${booking._id}`} className="fixora-messages__details-cta">
 				<FixoraButton fullWidth>{t('messages.requestDetails.viewRequest')}</FixoraButton>
 			</Link>
 		</div>

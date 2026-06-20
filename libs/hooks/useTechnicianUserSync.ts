@@ -18,7 +18,7 @@ export function useTechnicianUserSync() {
 
 	const { data } = useQuery(GET_USER, {
 		variables: { userId: userId! },
-		skip: !userId,
+		skip: !userId || !getJwtToken(),
 		fetchPolicy: 'cache-and-network',
 	});
 

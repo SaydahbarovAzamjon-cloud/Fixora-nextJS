@@ -3,6 +3,8 @@ import { userVar } from '../../apollo/store';
 import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS } from '../../apollo/user/profile';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { GET_NOTIFICATIONS } from '../../apollo/user/notification';
+import { getJwtToken } from '../auth';
+import { isTechnicianUser } from '../utils/userRole';
 
 export interface TechnicianBadges {
 	requests: number;
@@ -18,7 +20,7 @@ export interface TechnicianBadges {
  */
 const useTechnicianBadges = (): TechnicianBadges => {
 	const user = useReactiveVar(userVar);
-	const skip = !user?._id;
+	const skip = !user?._id || !isTechnicianUser(user) || !getJwtToken();
 
 	const { data: requestsData } = useQuery(GET_INCOMING_REQUESTS, {
 		skip,

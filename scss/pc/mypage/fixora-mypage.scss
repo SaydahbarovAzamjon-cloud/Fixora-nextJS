@@ -162,9 +162,33 @@
 	border-radius: 14px;
 	padding: 16px;
 	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__request-main {
+	display: flex;
 	align-items: center;
 	gap: 16px;
-	box-sizing: border-box;
+	text-decoration: none;
+	color: inherit;
+	flex-wrap: wrap;
+
+	&:hover .fixora-mypage__request-view {
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-mypage__request-view {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--fixora-text-secondary);
+	white-space: nowrap;
 }
 
 .fixora-mypage__request-image {

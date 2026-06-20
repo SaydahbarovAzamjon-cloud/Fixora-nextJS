@@ -1,14 +1,10 @@
 import { CustomJwtPayload } from '../types/customJwtPayload';
+import { getUserRole, isAdminUser, isTechnicianUser } from './userRole';
 
 type AuthUser = Partial<CustomJwtPayload> | null | undefined;
 
-export function isTechnicianUser(user: AuthUser): boolean {
-	return user?.memberType === 'TECHNICIAN' || user?.userType === 'TECHNICIAN';
-}
-
-export function isAdminUser(user: AuthUser): boolean {
-	return user?.memberType === 'ADMIN' || user?.userType === 'ADMIN';
-}
+export { isTechnicianUser, isAdminUser, getUserRole, isCustomerUser, isRoleRestrictedError, isMissingTokenError } from './userRole';
+export type { FixoraUserRole } from './userRole';
 
 /** Default destination after login/signup — not used to block `/` for logged-in users. */
 export function getPostAuthRoute(user: AuthUser, referrer?: string | null): string {

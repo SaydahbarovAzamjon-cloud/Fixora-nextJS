@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import HourglassTopOutlinedIcon from '@mui/icons-material/HourglassTopOutlined';
+import EastIcon from '@mui/icons-material/East';
 import { GET_DEVICE, GET_USER } from '../../../../apollo/user/query';
 import { Booking } from '../../../types/fixora/fixora';
 import DepositPaymentCard from '../../booking/DepositPaymentCard';
@@ -38,31 +40,36 @@ const RequestCard = ({ booking, onPaymentComplete }: RequestCardProps) => {
 
 	return (
 		<div className="fixora-mypage__request">
-			{device?.deviceImage && <img className="fixora-mypage__request-image" src={device.deviceImage} alt="" />}
-			<div className="fixora-mypage__request-info">
-				<strong>{title}</strong>
-				<span>{booking.problemTitle}</span>
-			</div>
-			<div className="fixora-mypage__request-meta">
-				<div>
-					<dt>{t('mypage.requestStatus')}</dt>
-					<dd>
-						<span className={`fixora-messages__status fixora-messages__status--${booking.bookingStatus.toLowerCase()}`}>
-							{t(`booking.status.${booking.bookingStatus}`)}
-						</span>
-					</dd>
+			<Link href={`/mypage/bookings/${booking._id}`} className="fixora-mypage__request-main">
+				{device?.deviceImage && <img className="fixora-mypage__request-image" src={device.deviceImage} alt="" />}
+				<div className="fixora-mypage__request-info">
+					<strong>{title}</strong>
+					<span>{booking.problemTitle}</span>
 				</div>
-				<div>
-					<dt>{t('mypage.requestDate')}</dt>
-					<dd>
-						{booking.bookingDate ? <Moment format="MMM D, YYYY">{booking.bookingDate}</Moment> : <Moment format="MMM D, YYYY">{booking.createdAt}</Moment>}
-					</dd>
+				<div className="fixora-mypage__request-meta">
+					<div>
+						<dt>{t('mypage.requestStatus')}</dt>
+						<dd>
+							<span className={`fixora-messages__status fixora-messages__status--${booking.bookingStatus.toLowerCase()}`}>
+								{t(`booking.status.${booking.bookingStatus}`)}
+							</span>
+						</dd>
+					</div>
+					<div>
+						<dt>{t('mypage.requestDate')}</dt>
+						<dd>
+							{booking.bookingDate ? <Moment format="MMM D, YYYY">{booking.bookingDate}</Moment> : <Moment format="MMM D, YYYY">{booking.createdAt}</Moment>}
+						</dd>
+					</div>
+					<div>
+						<dt>{t('mypage.requestTechnician')}</dt>
+						<dd>{technicianName}</dd>
+					</div>
 				</div>
-				<div>
-					<dt>{t('mypage.requestTechnician')}</dt>
-					<dd>{technicianName}</dd>
-				</div>
-			</div>
+				<span className="fixora-mypage__request-view">
+					{t('booking.detail.viewDetail')} <EastIcon fontSize="inherit" />
+				</span>
+			</Link>
 
 			<div className="fixora-mypage__request-payment">
 				{depositPaid ? (

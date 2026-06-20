@@ -174,7 +174,10 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 					</p>
 				)}
 				<div className="fixora-booking__success-actions">
-					<Link href="/mypage?tab=requests" className="fixora-tech-profile__book-btn">
+					<Link href={`/mypage/bookings/${createdBookingId}`} className="fixora-tech-profile__book-btn">
+						{t('booking.detail.viewDetail')}
+					</Link>
+					<Link href="/mypage?tab=requests" className="fixora-booking__link">
 						{t('payment.viewRequests')}
 					</Link>
 					<Link href={`/technicians/${technicianId}`} className="fixora-booking__link">

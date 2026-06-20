@@ -797,9 +797,42 @@ export const GET_BOOKING = gql`
 			problemDescription
 			estimatedPrice
 			finalPrice
+			isPaid
 			deviceId
 			technicianId
 			userId
+			createdAt
+			completedAt
+			cancelledAt
+			progressUpdates {
+				step
+				note
+				timestamp
+			}
+			deviceData {
+				_id
+				deviceBrand
+				deviceCategory
+				deviceModel
+				deviceIssue
+				deviceImage
+			}
+		}
+	}
+`;
+
+export const GET_BOOKING_REVIEW = gql`
+	query GetBookingReview($bookingId: String!) {
+		getBookingReview(bookingId: $bookingId) {
+			_id
+			bookingId
+			technicianId
+			userId
+			reviewContent
+			repairQuality
+			repairSpeed
+			communication
+			reviewImages
 			createdAt
 		}
 	}

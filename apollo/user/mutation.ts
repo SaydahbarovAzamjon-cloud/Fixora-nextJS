@@ -387,3 +387,28 @@ export const REJECT_BOOKING = gql`
 		}
 	}
 `;
+
+export const CANCEL_BOOKING = gql`
+	mutation CancelBooking($bookingId: String!) {
+		cancelBooking(bookingId: $bookingId) {
+			_id
+			bookingStatus
+			cancelledAt
+		}
+	}
+`;
+
+export const CREATE_REVIEW = gql`
+	mutation CreateReview($input: CreateReviewInput!) {
+		createReview(input: $input) {
+			_id
+			bookingId
+			technicianId
+			reviewContent
+			repairQuality
+			repairSpeed
+			communication
+			createdAt
+		}
+	}
+`;

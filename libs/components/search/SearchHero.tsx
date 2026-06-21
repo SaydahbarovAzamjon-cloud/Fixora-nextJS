@@ -18,6 +18,17 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 	const { t } = useTranslation('common');
 	const [searchText, setSearchText] = useState(searchFilter.search.text ?? '');
 
+	const handleSearchInputChange = (value: string) => {
+		setSearchText(value);
+		if (!value.trim()) {
+			setSearchFilter({
+				...searchFilter,
+				page: 1,
+				search: { ...searchFilter.search, text: undefined },
+			});
+		}
+	};
+
 	const submitSearchText = () => {
 		setSearchFilter({ ...searchFilter, page: 1, search: { ...searchFilter.search, text: searchText || undefined } });
 	};
@@ -47,7 +58,7 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 							type="text"
 							placeholder={t('search.hero.searchPlaceholder')}
 							value={searchText}
-							onChange={(e) => setSearchText(e.target.value)}
+							onChange={(e) => handleSearchInputChange(e.target.value)}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter') submitSearchText();
 							}}

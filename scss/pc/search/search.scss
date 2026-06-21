@@ -149,6 +149,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 12px;
+		position: relative;
+		z-index: 1;
 	}
 
 	&__searchbar {
@@ -243,9 +245,11 @@
 
 	&__popular {
 		display: flex;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 6px;
+		row-gap: 6px;
+		max-width: 100%;
 		font-size: 11.5px;
 		color: var(--fixora-text-secondary);
 

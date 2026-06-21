@@ -12,6 +12,8 @@ import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
 import { fixoraCustomerSignup, validateRegisterInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { userVar } from '../../../apollo/store';
+import { getPostAuthRoute } from '../../utils/postAuthRoute';
 
 const RegisterForm = () => {
 	const { t } = useTranslation('auth');
@@ -34,8 +36,8 @@ const RegisterForm = () => {
 		setLoading(true);
 		try {
 			await fixoraCustomerSignup(fullName, email, password);
-			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : '/mypage';
-			await router.push(referrer);
+			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
+			await router.push(getPostAuthRoute(userVar(), referrer));
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Sign up failed');
 		} finally {

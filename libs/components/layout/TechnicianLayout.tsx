@@ -4,7 +4,8 @@ import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { useTechnicianUserSync } from '../../hooks/useTechnicianUserSync';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
-import { getJwtToken } from '../../auth';
+import { getJwtToken, updateUserInfo } from '../../auth';
+import { isTechnicianUser } from '../../utils/userRole';
 import Chat from '../Chat';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
@@ -46,7 +47,7 @@ const withTechnicianLayout = (Component: any) => {
 				router.replace(`/login?referrer=${encodeURIComponent(router.asPath)}`).then();
 				return;
 			}
-			if (user?._id && user?.memberType !== 'TECHNICIAN') {
+			if (user?._id && !isTechnicianUser(user)) {
 				router.replace('/').then();
 			}
 		}, [user, router.asPath]);
@@ -72,7 +73,7 @@ const withTechnicianLayout = (Component: any) => {
 						<title>Fixora - Technician Dashboard</title>
 						<meta name={'title'} content={`Fixora - Technician Dashboard`} />
 					</Head>
-					<Stack id="pc-wrap" className="fixora-technician-layout">
+					<Stack id="pc-wrap-technician" className="fixora-technician-layout">
 						<div className="fixora-technician-container">
 							<TechnicianSidebar />
 							<div className="fixora-technician-main-wrapper">

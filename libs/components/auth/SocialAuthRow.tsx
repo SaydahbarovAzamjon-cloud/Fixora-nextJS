@@ -7,6 +7,8 @@ import { fixoraOAuthLogin } from '../../auth/fixoraAuth';
 import { requestGoogleAuthCode } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import { userVar } from '../../../apollo/store';
+import { resolveAuthUser } from '../../utils/authSession';
 import { getPostAuthRoute } from '../../utils/postAuthRoute';
 
 const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
@@ -21,7 +23,7 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 				await router.push('/register/role?oauth=1');
 				return;
 			}
-			await router.push(getPostAuthRoute({ userType, memberType: userType }));
+			await router.push(getPostAuthRoute(resolveAuthUser() ?? { userType, memberType: userType }));
 		},
 		[router],
 	);

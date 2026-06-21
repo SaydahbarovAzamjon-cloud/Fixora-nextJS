@@ -15,7 +15,7 @@ interface UserProfileLinkProps {
 const UserProfileLink = ({ userId, userType, className = '', stopPropagation = true, children }: UserProfileLinkProps) => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const href = getUserProfileHref(userId, user?._id, userType);
+	const href = getUserProfileHref(userId, user?._id, userType, user?.userType ?? user?.memberType);
 
 	if (!userId || !href) {
 		return <>{children}</>;

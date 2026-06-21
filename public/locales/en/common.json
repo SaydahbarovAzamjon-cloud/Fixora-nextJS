@@ -28,6 +28,7 @@
   "nav.searchPlaceholder": "Search technicians, devices…",
   "nav.searchSubmit": "Search",
   "nav.myPage": "My Page",
+  "nav.dashboard": "Dashboard",
   "nav.login": "Log in",
   "nav.findTechnician": "Find Technician",
   "nav.logout": "Logout",

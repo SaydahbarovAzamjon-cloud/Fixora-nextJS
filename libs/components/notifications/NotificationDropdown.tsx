@@ -9,9 +9,15 @@ export interface NotificationDropdownProps {
 	notifications: Notification[];
 	onItemClick: (notification: Notification) => void;
 	onViewAll: () => void;
+	viewAllHref?: string;
 }
 
-const NotificationDropdown = ({ notifications, onItemClick, onViewAll }: NotificationDropdownProps) => {
+const NotificationDropdown = ({
+	notifications,
+	onItemClick,
+	onViewAll,
+	viewAllHref = '/notifications',
+}: NotificationDropdownProps) => {
 	const { t } = useTranslation('common');
 
 	return (
@@ -51,7 +57,7 @@ const NotificationDropdown = ({ notifications, onItemClick, onViewAll }: Notific
 				)}
 			</div>
 
-			<Link href="/notifications" className="fixora-notif-dropdown__view-all" onClick={onViewAll}>
+			<Link href={viewAllHref} className="fixora-notif-dropdown__view-all" onClick={onViewAll}>
 				{t('notifications.viewAll')}
 			</Link>
 		</div>

@@ -11,6 +11,7 @@ import SocialAuthRow from './SocialAuthRow';
 import { fixoraLogin, validateLoginInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
+import { resolveAuthUser } from '../../utils/authSession';
 import { getPostAuthRoute } from '../../utils/postAuthRoute';
 
 const LoginForm = () => {
@@ -32,9 +33,8 @@ const LoginForm = () => {
 		setLoading(true);
 		try {
 			await fixoraLogin(email, password);
-			const user = userVar();
 			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
-			await router.push(getPostAuthRoute(user, referrer));
+			await router.push(getPostAuthRoute(resolveAuthUser() ?? userVar(), referrer));
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Login failed');
 		} finally {

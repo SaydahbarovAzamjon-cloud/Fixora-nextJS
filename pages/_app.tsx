@@ -6,6 +6,7 @@ import { fixoraDark } from '../scss/MaterialTheme';
 import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
+import AppShell from '../libs/components/layout/AppShell';
 
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
@@ -20,7 +21,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<Component {...pageProps} />
+				<AppShell Component={Component} pageProps={pageProps} />
 			</ThemeProvider>
 		</ApolloProvider>
 	);

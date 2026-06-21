@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { NextPage } from 'next';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -14,7 +13,7 @@ import SettingsTab from '../../libs/components/mypage/fixora/SettingsTab';
 import { GET_USER } from '../../apollo/user/query';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { userVar } from '../../apollo/store';
-import { isCustomerUser, isTechnicianUser } from '../../libs/utils/userRole';
+import { isCustomerUser } from '../../libs/utils/userRole';
 import { Booking } from '../../libs/types/fixora/fixora';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -31,7 +30,6 @@ const MyPage: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const isCustomer = isCustomerUser(user);
-	const isTechnician = isTechnicianUser(user);
 
 	const tab = (router.query.tab as Tab) ?? 'requests';
 
@@ -69,16 +67,6 @@ const MyPage: NextPage = () => {
 	return (
 		<div className="fixora-mypage-page">
 			<div className="container fixora-mypage">
-				{isTechnician ? (
-					<div className="fixora-mypage__role-notice">
-						<h1>{t('mypage.technicianRedirect.title')}</h1>
-						<p>{t('mypage.technicianRedirect.message')}</p>
-						<Link href="/technician/dashboard" className="fixora-tech-profile__book-btn">
-							{t('mypage.technicianRedirect.cta')}
-						</Link>
-					</div>
-				) : (
-					<>
 				<ProfileHeader
 					name={profile?.userFullName || profile?.userNickname || ''}
 					email={profile?.userEmail}
@@ -116,8 +104,6 @@ const MyPage: NextPage = () => {
 						/>
 					)}
 				</div>
-					</>
-				)}
 			</div>
 		</div>
 	);

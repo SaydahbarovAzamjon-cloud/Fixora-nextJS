@@ -203,6 +203,10 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	};
 
 	const viewLiveProfileHandler = () => {
+		if (isOwner) {
+			router.push('/technician/profile');
+			return;
+		}
 		if (technicianId) window.open(`/technicians/${technicianId}`, '_blank', 'noopener,noreferrer');
 	};
 

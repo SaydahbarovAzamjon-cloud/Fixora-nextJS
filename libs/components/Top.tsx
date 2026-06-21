@@ -14,6 +14,7 @@ import { Logout } from '@mui/icons-material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { resolveProfileImageUrl } from '../utils/profileImage';
+import { isTechnicianUser } from '../utils/userRole';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
@@ -26,6 +27,7 @@ const LANGS = ['en', 'kr'] as const;
 const Top = () => {
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
+	const isTechnician = isTechnicianUser(user);
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const [lang, setLang] = useState<string>('en');
@@ -136,11 +138,15 @@ const Top = () => {
 		if (link) router.push(link);
 	};
 
+	const homeHref = isTechnician ? '/technician/dashboard' : '/';
+
 	const navLinks = (
 		<>
-			<Link href={'/'} className={`fixora-nav__link ${isActive('/') ? 'fixora-nav__link--active' : ''}`}>
-				{t('nav.home')}
-			</Link>
+			{!isTechnician && (
+				<Link href={'/'} className={`fixora-nav__link ${isActive('/') ? 'fixora-nav__link--active' : ''}`}>
+					{t('nav.home')}
+				</Link>
+			)}
 			<Link
 				href={'/technicians'}
 				className={`fixora-nav__link ${isActive('/technicians') ? 'fixora-nav__link--active' : ''}`}
@@ -160,12 +166,21 @@ const Top = () => {
 				{t('nav.community')}
 			</Link>
 			{user?._id && (
-				<Link
-					href={'/mypage'}
-					className={`fixora-nav__link ${isActive('/mypage') ? 'fixora-nav__link--active' : ''}`}
-				>
-					{t('nav.myPage')}
-				</Link>
+				isTechnician ? (
+					<Link
+						href={'/technician/dashboard'}
+						className={`fixora-nav__link ${isActive('/technician') ? 'fixora-nav__link--active' : ''}`}
+					>
+						{t('nav.dashboard')}
+					</Link>
+				) : (
+					<Link
+						href={'/mypage'}
+						className={`fixora-nav__link ${isActive('/mypage') ? 'fixora-nav__link--active' : ''}`}
+					>
+						{t('nav.myPage')}
+					</Link>
+				)
 			)}
 		</>
 	);
@@ -190,7 +205,7 @@ const Top = () => {
 	if (device == 'mobile') {
 		return (
 			<Stack className={'top fixora-nav--mobile'}>
-				<Link href={'/'} onClick={goHome} className="fixora-nav__logo-link">
+				<Link href={homeHref} onClick={goHome} className="fixora-nav__logo-link">
 					<FixoraLogo size="md" className="fixora-nav__logo" />
 				</Link>
 				<NavSearchInput compact />
@@ -219,7 +234,7 @@ const Top = () => {
 			<Stack className={`navbar-main ${colorChange ? 'transparent' : ''}`}>
 				<Stack className={'container'}>
 					<Box component={'div'} className={'logo-box'}>
-						<Link href={'/'} onClick={goHome} className="fixora-nav__logo-link">
+						<Link href={homeHref} onClick={goHome} className="fixora-nav__logo-link">
 							<FixoraLogo size="md" className="fixora-nav__logo" />
 						</Link>
 					</Box>
@@ -235,7 +250,7 @@ const Top = () => {
 
 						{user?._id ? (
 							<>
-								<Link href={'/messages'} className={'fixora-nav__icon-link'}>
+								<Link href={isTechnician ? '/technician/messages' : '/messages'} className={'fixora-nav__icon-link'}>
 									<ChatBubbleOutlineIcon className={'fixora-nav__bell'} />
 									{unreadMessages > 0 && <span className={'fixora-nav__badge'}>{unreadMessages}</span>}
 								</Link>
@@ -253,6 +268,7 @@ const Top = () => {
 											notifications={recentNotifications}
 											onItemClick={handleNotificationClick}
 											onViewAll={() => setNotifOpen(false)}
+											viewAllHref={isTechnician ? '/technician/notifications' : '/notifications'}
 										/>
 									)}
 								</div>

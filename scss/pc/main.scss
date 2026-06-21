@@ -71,7 +71,8 @@ body::-webkit-scrollbar {
 	display: none; /* for Chrome, Safari, and Opera */
 }
 
-#pc-wrap {
+#pc-wrap,
+.pc-wrap {
 	#top {
 		.navbar {
 			.navbar-main {

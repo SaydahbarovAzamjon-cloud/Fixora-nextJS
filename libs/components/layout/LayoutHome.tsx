@@ -50,7 +50,7 @@ const withLayoutMain = (Component: any) => {
 						<title>Fixora</title>
 						<meta name={'title'} content={`Fixora`} />
 					</Head>
-					<Stack id="pc-wrap">
+					<Stack id="pc-wrap-home" className="pc-wrap">
 						<Stack id={'top'}>
 							<Top />
 						</Stack>

@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { NextPage } from 'next';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -9,7 +8,7 @@ import withLayoutFull from '../../../libs/components/layout/LayoutFull';
 import BookingDetailView from '../../../libs/components/booking/BookingDetailView';
 import { GET_BOOKING, GET_BOOKING_REVIEW } from '../../../apollo/user/query';
 import { userVar } from '../../../apollo/store';
-import { isCustomerUser, isTechnicianUser } from '../../../libs/utils/userRole';
+import { isCustomerUser } from '../../../libs/utils/userRole';
 import type { Booking, BookingReview } from '../../../libs/types/fixora/fixora';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -23,7 +22,6 @@ const BookingDetailPage: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const isCustomer = isCustomerUser(user);
-	const isTechnician = isTechnicianUser(user);
 	const bookingId = router.query.id as string | undefined;
 
 	useEffect(() => {
@@ -52,24 +50,8 @@ const BookingDetailPage: NextPage = () => {
 		refetchReview();
 	};
 
-	if (!user?._id) {
+	if (!user?._id || !isCustomer) {
 		return null;
-	}
-
-	if (isTechnician) {
-		return (
-			<div className="fixora-booking-detail-page">
-				<div className="container">
-					<div className="fixora-mypage__role-notice">
-						<h1>{t('mypage.technicianRedirect.title')}</h1>
-						<p>{t('mypage.technicianRedirect.message')}</p>
-						<Link href="/technician/dashboard" className="fixora-tech-profile__book-btn">
-							{t('mypage.technicianRedirect.cta')}
-						</Link>
-					</div>
-				</div>
-			</div>
-		);
 	}
 
 	return (

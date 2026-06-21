@@ -392,7 +392,7 @@
 		padding: 10px 14px;
 		border-radius: 10px;
 		border: 1px solid var(--fixora-border-subtle);
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--fixora-surface-elevated);
 
 		.fixora-input__control {
 			width: 100%;
@@ -437,8 +437,8 @@
 	height: 88px;
 	border-radius: 14px;
 	object-fit: cover;
-	border: 2px solid rgba(255, 107, 0, 0.55);
-	box-shadow: 0 0 24px rgba(255, 107, 0, 0.15);
+	border: 2px solid rgba(115, 12, 30, 0.55);
+	box-shadow: 0 0 24px rgba(115, 12, 30, 0.15);
 }
 
 .fixora-mypage__avatar-camera {
@@ -475,7 +475,7 @@
 	padding: 6px 12px;
 	border-radius: 8px;
 	border: 1px solid var(--fixora-border-subtle);
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--fixora-surface-elevated);
 	color: var(--fixora-text-primary);
 	font-size: 12px;
 	font-weight: 600;
@@ -540,8 +540,8 @@
 	}
 
 	&--rating {
-		background: rgba(255, 107, 0, 0.08);
-		border: 1px solid rgba(255, 107, 0, 0.35);
+		background: rgba(115, 12, 30, 0.08);
+		border: 1px solid rgba(115, 12, 30, 0.35);
 
 		strong,
 		span {
@@ -743,7 +743,7 @@
 	}
 
 	&--ghost {
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--fixora-surface-elevated);
 		border: 1px solid var(--fixora-border-subtle);
 		color: var(--fixora-text-secondary);
 	}
@@ -934,8 +934,8 @@
 	gap: 6px;
 	padding: 8px 14px;
 	border-radius: 999px;
-	border: 1px solid rgba(255, 107, 0, 0.5);
-	background: rgba(255, 107, 0, 0.08);
+	border: 1px solid rgba(115, 12, 30, 0.5);
+	background: rgba(115, 12, 30, 0.08);
 	color: var(--fixora-primary);
 	font-size: 12px;
 	font-weight: 700;
@@ -1049,7 +1049,7 @@
 	width: 36px;
 	height: 36px;
 	border-radius: 10px;
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--fixora-surface-elevated);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;

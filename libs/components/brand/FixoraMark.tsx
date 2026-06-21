@@ -22,11 +22,11 @@ const FixoraMark = ({ size = 40, className }: FixoraMarkProps) => {
 		>
 			<defs>
 				<linearGradient id={gradId} x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
-					<stop stopColor="#FF8533" />
-					<stop offset="1" stopColor="#E55A00" />
+					<stop stopColor="#8E1428" />
+					<stop offset="1" stopColor="#480415" />
 				</linearGradient>
 				<filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-					<feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="#FF6B00" floodOpacity="0.45" />
+					<feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="#730C1E" floodOpacity="0.45" />
 				</filter>
 			</defs>
 			<rect

@@ -149,7 +149,7 @@
 			width: 86%;
 			height: 110%;
 			border-radius: 50%;
-			background: radial-gradient(ellipse, rgba(255, 120, 30, 0.16) 0%, rgba(255, 107, 0, 0.07) 45%, transparent 70%);
+			background: radial-gradient(ellipse, rgba(115, 12, 30, 0.16) 0%, rgba(115, 12, 30, 0.07) 45%, transparent 70%);
 			filter: blur(30px);
 			animation: fixora-hero-glow-pulse 4s ease-in-out infinite;
 		}
@@ -171,8 +171,8 @@
 			width: 5px;
 			height: 5px;
 			border-radius: 50%;
-			background: #ff8a3c;
-			box-shadow: 0 0 10px 3px rgba(255, 107, 0, 0.55);
+			background: #9a2a3a;
+			box-shadow: 0 0 10px 3px rgba(115, 12, 30, 0.55);
 			filter: blur(0.5px);
 			opacity: 0;
 			animation: fixora-hero-particle-drift 7s ease-in-out infinite;
@@ -250,8 +250,8 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			color: rgba(255, 138, 60, 0.55);
-			filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.35));
+			color: rgba(154, 42, 58, 0.55);
+			filter: drop-shadow(0 0 12px rgba(115, 12, 30, 0.35));
 			opacity: 0.55;
 			animation: fixora-hero-device-roam 12s ease-in-out infinite;
 			will-change: transform;
@@ -448,7 +448,7 @@
 			padding: 8px 8px 8px 18px;
 			border-radius: 999px;
 			border: none;
-			background: var(--fixora-surface);
+			background: var(--fixora-card-gradient);
 
 			&::before {
 				content: '';
@@ -458,11 +458,11 @@
 				padding: 1.5px;
 				background: linear-gradient(
 					90deg,
-					#ff6b00,
-					#ffc48a,
-					#ff8533,
-					rgba(255, 107, 0, 0.35),
-					#ff6b00
+					#730c1e,
+					#a85a6a,
+					#8e1428,
+					rgba(115, 12, 30, 0.35),
+					#730c1e
 				);
 				background-size: 300% 100%;
 				animation: fixora-ai-border-flow 3.5s linear infinite;
@@ -537,7 +537,7 @@
 			padding: 10px 18px;
 			border-radius: 10px;
 			border: 1px solid var(--fixora-border-subtle);
-			background: var(--fixora-surface);
+			background: var(--fixora-card-gradient);
 			color: var(--fixora-text-primary);
 			font-family: $font;
 			font-size: 13px;
@@ -572,22 +572,22 @@
 			border-radius: 14px;
 			background: linear-gradient(
 				90deg,
-				#ff6b00,
-				#ffd4a8,
-				#ff8533,
-				rgba(255, 107, 0, 0.4),
-				#ff6b00
+				#730c1e,
+				#c48a94,
+				#8e1428,
+				rgba(115, 12, 30, 0.4),
+				#730c1e
 			);
 			background-size: 300% 100%;
 			animation: fixora-ai-border-flow 2.8s linear infinite;
-			box-shadow: 0 0 22px rgba(255, 107, 0, 0.28);
+			box-shadow: 0 0 22px rgba(115, 12, 30, 0.28);
 
 			&::after {
 				content: '';
 				position: absolute;
 				inset: -8px;
 				border-radius: 18px;
-				background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.4) 0%, transparent 72%);
+				background: radial-gradient(ellipse at center, rgba(115, 12, 30, 0.4) 0%, transparent 72%);
 				animation: fixora-ai-glow-pulse 2.4s ease-in-out infinite;
 				z-index: -1;
 				pointer-events: none;
@@ -661,12 +661,12 @@
 			border-radius: 999px;
 			font-size: 12px;
 			font-weight: 600;
-			background: rgba(255, 107, 0, 0.15);
+			background: rgba(115, 12, 30, 0.15);
 			border: 1px solid var(--fixora-border-subtle);
 			color: var(--fixora-primary);
 
 			&--muted {
-				background: var(--fixora-surface);
+				background: var(--fixora-card-gradient);
 				color: var(--fixora-text-secondary);
 			}
 		}

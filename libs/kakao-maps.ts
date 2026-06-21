@@ -216,7 +216,7 @@ export function createUserMarkerImage(kakao: NonNullable<Window['kakao']>): Kaka
 }
 
 export function createTechnicianMarkerImage(kakao: NonNullable<Window['kakao']>): KakaoMarkerImage {
-	const src = markerDataUri(dotMarkerSvg('#FF6B00', '#FF6B00'));
+	const src = markerDataUri(dotMarkerSvg('#730C1E', '#730C1E'));
 	const size = new kakao.maps.Size(18, 18);
 	const offset = new kakao.maps.Point(9, 9);
 	return new kakao.maps.MarkerImage(src, size, { offset });

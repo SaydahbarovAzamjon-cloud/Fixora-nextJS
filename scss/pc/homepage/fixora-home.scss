@@ -69,15 +69,16 @@
 	height: 36px;
 	border-radius: 50%;
 	border: 1px solid var(--fixora-border-subtle);
-	background: var(--fixora-surface);
+	background: var(--fixora-card-gradient);
 	color: var(--fixora-primary);
 	cursor: pointer;
 	transition: all 0.2s ease;
 	z-index: 2;
 
 	&:hover {
-		background: var(--fixora-primary);
+		background: var(--fixora-card-gradient-hover);
 		color: #fff;
+		border-color: var(--fixora-primary);
 	}
 
 	&.swiper-button-disabled {
@@ -91,7 +92,7 @@
 .fixora-home-technicians {
 	.container {
 		background: var(--fixora-glass-bg);
-		border: 1px solid var(--fixora-border-subtle);
+		border: 1px solid var(--fixora-border);
 		border-radius: 18px;
 		padding: 24px;
 	}
@@ -179,7 +180,7 @@
 		flex-shrink: 0;
 		border-radius: 50%;
 		object-fit: cover;
-		background: var(--fixora-surface-elevated);
+		background: var(--fixora-card-gradient);
 	}
 
 	&__identity {
@@ -313,7 +314,7 @@
 		padding: 4px 10px;
 		border-radius: 6px;
 		border: 1px solid var(--fixora-border);
-		background: rgba(255, 107, 0, 0.12);
+		background: rgba(115, 12, 30, 0.12);
 		font-size: 11px;
 		font-weight: 700;
 		color: var(--fixora-primary);
@@ -372,7 +373,7 @@
 		width: 22px;
 		height: 22px;
 		border-radius: 50%;
-		background: var(--fixora-surface-elevated);
+		background: var(--fixora-card-gradient);
 		border: 1px solid var(--fixora-border-subtle);
 		font-size: 11px;
 		font-weight: 700;
@@ -388,6 +389,7 @@
 		height: 64px;
 		border-radius: 50%;
 		border: 1.5px solid var(--fixora-primary);
+		background: var(--fixora-card-gradient);
 		color: var(--fixora-primary);
 
 		svg {
@@ -421,7 +423,7 @@
 .fixora-home-tips {
 	.container {
 		background: var(--fixora-glass-bg);
-		border: 1px solid var(--fixora-border-subtle);
+		border: 1px solid var(--fixora-border);
 		border-radius: 18px;
 		padding: 24px;
 	}
@@ -453,11 +455,12 @@
 	padding: 18px;
 	border-radius: 14px;
 	border: 1px solid var(--fixora-border-subtle);
-	background: var(--fixora-surface);
-	transition: border-color 0.2s ease;
+	background: var(--fixora-card-gradient);
+	transition: border-color 0.2s ease, background 0.2s ease;
 
 	&:hover {
 		border-color: var(--fixora-primary);
+		background: var(--fixora-card-gradient-hover);
 	}
 
 	&__body {
@@ -490,7 +493,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #1a1a1a;
+		background: var(--fixora-card-gradient);
 	}
 
 	&:hover &__thumb-img,
@@ -626,7 +629,7 @@
 			background: var(--fixora-primary-hover);
 			outline: none;
 			border: none;
-			box-shadow: 0 0 12px rgba(255, 107, 0, 0.35);
+			box-shadow: 0 0 12px rgba(115, 12, 30, 0.35);
 			color: #fff;
 		}
 	}
@@ -744,15 +747,15 @@
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
-		border: 1px solid rgba(255, 107, 0, 0.55);
-		background: rgba(255, 107, 0, 0.06);
+		border: 1px solid var(--fixora-border);
+		background: var(--fixora-card-gradient);
 		color: var(--fixora-primary);
 		cursor: pointer;
 		transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 		padding: 0;
 
 		&:hover {
-			background: rgba(255, 107, 0, 0.16);
+			background: var(--fixora-card-gradient-hover);
 			border-color: var(--fixora-primary);
 		}
 
@@ -785,7 +788,7 @@
 			height: 8px;
 			margin: 0 !important;
 			border-radius: 50%;
-			background: #3d3d3d;
+			background: rgba(115, 12, 30, 0.35);
 			opacity: 1;
 			transition: background 0.3s ease, transform 0.3s ease;
 		}
@@ -793,7 +796,7 @@
 		.swiper-pagination-bullet-active {
 			width: 24px;
 			border-radius: 4px;
-			background: #ff6b00;
+			background: var(--fixora-primary);
 		}
 	}
 }
@@ -813,7 +816,7 @@
 
 	.swiper-slide-active & {
 		box-shadow:
-			0 0 32px rgba(255, 107, 0, 0.3),
+			0 0 32px rgba(115, 12, 30, 0.3),
 			0 18px 44px rgba(0, 0, 0, 0.48);
 	}
 
@@ -823,7 +826,7 @@
 		height: 28px;
 		margin-bottom: 4px;
 		font-size: 28px !important;
-		color: #ff6b00;
+		color: var(--fixora-primary);
 	}
 
 	&__text {
@@ -863,7 +866,7 @@
 		height: 32px;
 		border-radius: 50%;
 		object-fit: cover;
-		border: 1px solid rgba(255, 107, 0, 0.3);
+		border: 1px solid rgba(115, 12, 30, 0.3);
 	}
 
 	&__name {
@@ -886,7 +889,7 @@
 
 		svg {
 			font-size: 15px;
-			color: #ff6b00;
+			color: var(--fixora-primary);
 		}
 	}
 }
@@ -953,9 +956,12 @@
 	padding: 0 4px 0 12px;
 	border-radius: 999px;
 	border: 1px solid var(--fixora-border-subtle);
-	background: var(--fixora-surface);
+	background: var(--fixora-card-gradient);
 	box-sizing: border-box;
 	gap: 6px;
+	position: relative;
+	overflow: hidden;
+	color-scheme: dark;
 
 	&--compact {
 		flex: 1;
@@ -974,6 +980,7 @@
 	&-input {
 		flex: 1;
 		min-width: 0;
+		width: 100%;
 		border: none;
 		outline: none;
 		background: transparent;
@@ -983,6 +990,26 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		appearance: none;
+		color-scheme: dark;
+
+		&::-webkit-search-cancel-button,
+		&::-webkit-search-decoration,
+		&::-webkit-search-results-button,
+		&::-webkit-search-results-decoration {
+			display: none;
+			-webkit-appearance: none;
+			appearance: none;
+		}
+
+		&::-ms-clear,
+		&::-ms-reveal {
+			display: none !important;
+			width: 0 !important;
+			height: 0 !important;
+			opacity: 0 !important;
+			pointer-events: none !important;
+		}
 
 		&::placeholder {
 			color: var(--fixora-text-muted);
@@ -1173,6 +1200,9 @@
 	justify-content: center;
 	gap: 10px;
 	padding: 12px 16px;
+	background: var(--fixora-navbar-bg);
+	border-bottom: 1px solid var(--fixora-border);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 
 	.fixora-nav__links {
 		flex-basis: 100%;

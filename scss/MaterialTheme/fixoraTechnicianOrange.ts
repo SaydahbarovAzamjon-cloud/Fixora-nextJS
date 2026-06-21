@@ -2,29 +2,29 @@ import shadow from './shadow';
 import typography from './typography';
 
 /**
- * FIXORA DARK THEME (MVP default) — premium burgundy customer palette
+ * Technician portal — preserves original orange MUI theme (excluded from burgundy migration).
  */
-export const fixoraDark = {
+export const fixoraTechnicianOrange = {
 	palette: {
 		mode: 'dark' as const,
 		primary: {
-			main: '#730C1E',
-			light: '#8E1428',
-			dark: '#480415',
+			main: '#FF6B00',
+			light: '#FF8533',
+			dark: '#E55A00',
 			contrastText: '#FFFFFF',
 		},
 		secondary: {
-			main: '#BDBDBD',
+			main: '#A0A0A0',
 			contrastText: '#FFFFFF',
 		},
 		background: {
-			default: '#140F17',
-			paper: '#241414',
+			default: '#0D0D0D',
+			paper: '#1A1A1A',
 		},
 		text: {
-			primary: '#F5F5F5',
-			secondary: '#BDBDBD',
-			disabled: '#8A8A8A',
+			primary: '#FFFFFF',
+			secondary: '#A0A0A0',
+			disabled: '#6B6B6B',
 		},
 		error: {
 			main: '#FF4D4F',
@@ -32,7 +32,7 @@ export const fixoraDark = {
 		success: {
 			main: '#52C41A',
 		},
-		divider: 'rgba(115, 12, 30, 0.25)',
+		divider: 'rgba(255, 107, 0, 0.2)',
 	},
 	components: {
 		MuiCssBaseline: {
@@ -41,8 +41,8 @@ export const fixoraDark = {
 					height: '100%',
 				},
 				body: {
-					backgroundColor: '#140F17',
-					color: '#F5F5F5',
+					backgroundColor: '#0D0D0D',
+					color: '#FFFFFF',
 					height: '100%',
 					minHeight: '100%',
 				},
@@ -61,10 +61,10 @@ export const fixoraDark = {
 		MuiLink: {
 			styleOverrides: {
 				root: {
-					color: '#BDBDBD',
+					color: '#A0A0A0',
 					textDecoration: 'none',
 					'&:hover': {
-						color: '#8E1428',
+						color: '#FF8533',
 					},
 				},
 			},
@@ -72,7 +72,7 @@ export const fixoraDark = {
 		MuiDivider: {
 			styleOverrides: {
 				root: {
-					borderColor: 'rgba(115, 12, 30, 0.25)',
+					borderColor: 'rgba(255, 107, 0, 0.2)',
 				},
 			},
 		},
@@ -86,9 +86,9 @@ export const fixoraDark = {
 					fontWeight: 600,
 				},
 				containedPrimary: {
-					background: 'linear-gradient(135deg, #730C1E 0%, #480415 100%)',
+					background: 'linear-gradient(135deg, #FF6B00 0%, #E55A00 100%)',
 					'&:hover': {
-						background: 'linear-gradient(135deg, #8E1428 0%, #730C1E 100%)',
+						background: 'linear-gradient(135deg, #FF8533 0%, #FF6B00 100%)',
 						boxShadow: 'none',
 					},
 				},
@@ -99,23 +99,23 @@ export const fixoraDark = {
 				root: {
 					height: '48px',
 					width: '100%',
-					backgroundColor: '#241414',
+					backgroundColor: '#1A1A1A',
 					borderRadius: '12px',
 					'& fieldset': {
-						borderColor: 'rgba(115, 12, 30, 0.35)',
+						borderColor: 'rgba(255, 107, 0, 0.3)',
 					},
 					'&:hover fieldset': {
-						borderColor: 'rgba(115, 12, 30, 0.5)',
+						borderColor: 'rgba(255, 107, 0, 0.45)',
 					},
 					'&.Mui-focused fieldset': {
-						borderColor: '#730C1E',
-						boxShadow: '0 0 0 3px rgba(115, 12, 30, 0.18)',
+						borderColor: '#FF6B00',
+						boxShadow: '0 0 0 3px rgba(255, 107, 0, 0.15)',
 					},
 				},
 				input: {
-					color: '#F5F5F5',
+					color: '#FFFFFF',
 					'&::placeholder': {
-						color: '#8A8A8A',
+						color: '#6B6B6B',
 						opacity: 1,
 					},
 				},
@@ -124,9 +124,9 @@ export const fixoraDark = {
 		MuiInputLabel: {
 			styleOverrides: {
 				root: {
-					color: '#BDBDBD',
+					color: '#A0A0A0',
 					'&.Mui-focused': {
-						color: '#730C1E',
+						color: '#FF6B00',
 					},
 				},
 			},
@@ -136,7 +136,7 @@ export const fixoraDark = {
 				root: {
 					margin: '5px 0 0 2px',
 					lineHeight: '1.2',
-					color: '#BDBDBD',
+					color: '#A0A0A0',
 				},
 			},
 		},
@@ -144,16 +144,16 @@ export const fixoraDark = {
 			styleOverrides: {
 				root: {
 					backgroundImage: 'none',
-					backgroundColor: '#241414',
+					backgroundColor: '#1A1A1A',
 				},
 			},
 		},
 		MuiCheckbox: {
 			styleOverrides: {
 				root: {
-					color: '#8A8A8A',
+					color: '#6B6B6B',
 					'&.Mui-checked': {
-						color: '#730C1E',
+						color: '#FF6B00',
 					},
 				},
 			},
@@ -161,16 +161,16 @@ export const fixoraDark = {
 		MuiChip: {
 			styleOverrides: {
 				root: {
-					border: '1px solid rgba(115, 12, 30, 0.35)',
-					color: '#F5F5F5',
-					backgroundColor: '#2C1818',
+					border: '1px solid rgba(255, 107, 0, 0.35)',
+					color: '#FFFFFF',
+					backgroundColor: '#242424',
 				},
 			},
 		},
 		MuiIconButton: {
 			styleOverrides: {
 				root: {
-					color: '#BDBDBD',
+					color: '#A0A0A0',
 				},
 			},
 		},

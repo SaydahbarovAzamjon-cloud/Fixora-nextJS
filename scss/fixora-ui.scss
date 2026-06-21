@@ -89,11 +89,19 @@
 }
 
 .fixora-glass-card {
-	background: var(--fixora-glass-bg);
-	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-card-gradient);
+	border: 1px solid var(--fixora-border);
 	border-radius: 16px;
 	box-shadow: var(--fixora-glow);
 	padding: 32px;
+	transition:
+		background 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+
+	&:hover {
+		background: var(--fixora-card-gradient-hover);
+	}
 
 	@media (max-width: 768px) {
 		padding: 24px;
@@ -119,13 +127,13 @@
 		height: 48px;
 		padding: 0 16px;
 		background: var(--fixora-surface);
-		border: 1px solid rgba(255, 107, 0, 0.3);
+		border: 1px solid var(--fixora-border-subtle);
 		border-radius: 12px;
 		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
 		&:focus-within {
 			border-color: var(--fixora-primary);
-			box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
 		}
 
 		&--error {
@@ -222,7 +230,7 @@
 
 	&:hover:not(:disabled) {
 		border-color: rgba(255, 255, 255, 0.3);
-		background: var(--fixora-surface-elevated);
+		background: var(--fixora-surface-hover);
 	}
 
 	&:disabled {

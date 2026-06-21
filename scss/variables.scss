@@ -7,29 +7,33 @@ $font: 'Poppins', sans-serif;
 $font-technician: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
 :root {
-	/* Dark theme (MVP active) */
-	--fixora-primary: #ff6b00;
-	--fixora-primary-hover: #ff8533;
-	--fixora-primary-dark: #e55a00;
-	--fixora-bg: #0d0d0e;
-	/* shared premium page backdrop — sampled from docs/design/customer/customer-pages-full.png:
-	   near-black base (rgb(14,14,15)) with soft warm amber haze (~rgb(48,18,9)) drifting in from the sides */
+	/* Dark theme — premium burgundy (MVP customer default) */
+	--fixora-primary: #730c1e;
+	--fixora-primary-hover: #8e1428;
+	--fixora-primary-dark: #480415;
+	--fixora-bg: #140f17;
 	--fixora-bg-ambient:
-		radial-gradient(140% 100% at 0% 45%, rgba(255, 107, 0, 0.12) 0%, transparent 52%),
-		radial-gradient(120% 90% at 100% 55%, rgba(255, 107, 0, 0.08) 0%, transparent 52%),
-		radial-gradient(90% 70% at 50% 0%, rgba(255, 107, 0, 0.05) 0%, transparent 55%),
-		linear-gradient(180deg, #0e0e0f 0%, #0d0d0d 100%);
-	--fixora-surface: #1a1a1a;
-	--fixora-surface-elevated: #242424;
-	--fixora-border: rgba(255, 107, 0, 0.35);
-	--fixora-border-subtle: rgba(255, 107, 0, 0.25);
-	--fixora-text-primary: #ffffff;
-	--fixora-text-secondary: #a0a0a0;
-	--fixora-text-muted: #6b6b6b;
+		radial-gradient(140% 100% at 0% 45%, rgba(115, 12, 30, 0.14) 0%, transparent 52%),
+		radial-gradient(120% 90% at 100% 55%, rgba(72, 4, 21, 0.12) 0%, transparent 52%),
+		radial-gradient(90% 70% at 50% 0%, rgba(115, 12, 30, 0.08) 0%, transparent 55%),
+		linear-gradient(180deg, #140f17 0%, #210207 45%, #140f17 100%);
+	--fixora-surface: #241414;
+	--fixora-surface-elevated: #2a1518;
+	--fixora-surface-hover: #301014;
+	--fixora-card-gradient: linear-gradient(135deg, #2a0a12 0%, #480415 50%, #5a0818 100%);
+	--fixora-card-gradient-hover: linear-gradient(135deg, #301014 0%, #5a0818 50%, #6a0a1c 100%);
+	--fixora-glass-bg: linear-gradient(135deg, #2a1518 0%, #301014 50%, #3a1018 100%);
+	--fixora-navbar-bg: linear-gradient(180deg, rgba(20, 15, 23, 0.97) 0%, rgba(33, 2, 7, 0.94) 100%);
+	--fixora-footer-bg: linear-gradient(180deg, #1c080d 0%, #160c10 50%, #140f17 100%);
+	--fixora-border: rgba(115, 12, 30, 0.45);
+	--fixora-border-subtle: rgba(115, 12, 30, 0.35);
+	--fixora-text-primary: #f5f5f5;
+	--fixora-text-secondary: #bdbdbd;
+	--fixora-text-muted: #8a8a8a;
 	--fixora-error: #ff4d4f;
 	--fixora-success: #52c41a;
-	--fixora-glass-bg: rgba(26, 26, 26, 0.85);
-	--fixora-glow: 0 0 24px rgba(255, 107, 0, 0.15);
+	--fixora-glow: 0 0 24px rgba(115, 12, 30, 0.18);
+	--fixora-primary-soft: rgba(115, 12, 30, 0.12);
 
 	/* Light theme placeholders (Phase 4 — not active in MVP) */
 	--fixora-light-bg: #f5f5f7;

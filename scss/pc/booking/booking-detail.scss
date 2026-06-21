@@ -211,7 +211,7 @@
 			li {
 				padding: 12px;
 				border-radius: 10px;
-				background: rgba(255, 107, 0, 0.08);
+				background: rgba(115, 12, 30, 0.08);
 				border: 1px solid var(--fixora-border-subtle);
 
 				p {
@@ -250,7 +250,7 @@
 				gap: 4px;
 				padding: 14px;
 				border-radius: 10px;
-				background: rgba(255, 255, 255, 0.03);
+				background: var(--fixora-primary-soft);
 				border: 1px solid var(--fixora-border-subtle);
 
 				span {
@@ -327,7 +327,7 @@
 
 			&--active {
 				border-color: var(--fixora-primary);
-				background: rgba(255, 107, 0, 0.15);
+				background: rgba(115, 12, 30, 0.15);
 				color: var(--fixora-primary);
 			}
 		}

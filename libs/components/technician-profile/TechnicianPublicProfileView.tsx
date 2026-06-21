@@ -58,22 +58,24 @@ export interface TechnicianPublicProfileViewProps {
 const TAB_IDS = ['overview', 'services', 'portfolio', 'reviews'] as const;
 type TabId = (typeof TAB_IDS)[number];
 
+const ACCENT_PRIMARY = 'var(--fixora-primary)';
+
 const CREDENTIALS = [
-	{ color: '#FF6B00', verified: false, titleKey: 'technicianProfile.pp.cred.topTech', subKey: 'technicianProfile.pp.cred.topTechSub', icon: <EmojiEventsOutlined style={{ fontSize: 20 }} /> },
+	{ color: ACCENT_PRIMARY, verified: false, titleKey: 'technicianProfile.pp.cred.topTech', subKey: 'technicianProfile.pp.cred.topTechSub', icon: <EmojiEventsOutlined style={{ fontSize: 20 }} /> },
 	{ color: '#3B82F6', verified: true, titleKey: 'technicianProfile.pp.cred.verifiedPro', subKey: 'technicianProfile.pp.cred.verifiedProSub', icon: <VerifiedRounded style={{ fontSize: 20 }} /> },
-	{ color: '#FF6B00', verified: false, titleKey: 'technicianProfile.pp.cred.repairs', subKey: 'technicianProfile.pp.cred.repairsSub', icon: <BoltOutlined style={{ fontSize: 20 }} /> },
+	{ color: ACCENT_PRIMARY, verified: false, titleKey: 'technicianProfile.pp.cred.repairs', subKey: 'technicianProfile.pp.cred.repairsSub', icon: <BoltOutlined style={{ fontSize: 20 }} /> },
 	{ color: '#22C55E', verified: false, titleKey: 'technicianProfile.pp.cred.fiveStar', subKey: 'technicianProfile.pp.cred.fiveStarSub', icon: <StarRounded style={{ fontSize: 20 }} /> },
 	{ color: '#A855F7', verified: false, titleKey: 'technicianProfile.pp.cred.fastResponse', subKey: 'technicianProfile.pp.cred.fastResponseSub', icon: <AccessTimeOutlined style={{ fontSize: 19 }} /> },
 	{ color: '#3B82F6', verified: true, titleKey: 'technicianProfile.pp.cred.certified', subKey: 'technicianProfile.pp.cred.certifiedSub', icon: <GppGoodOutlined style={{ fontSize: 20 }} /> },
 ];
 
 const SPECIALIZATIONS = [
-	{ color: '#FF6B00', titleKey: 'technicianProfile.pp.spec.iphone', subKey: 'technicianProfile.pp.spec.iphoneSub', jobsKey: 'technicianProfile.pp.spec.iphoneJobs', icon: <SmartphoneOutlined style={{ fontSize: 20 }} /> },
+	{ color: ACCENT_PRIMARY, titleKey: 'technicianProfile.pp.spec.iphone', subKey: 'technicianProfile.pp.spec.iphoneSub', jobsKey: 'technicianProfile.pp.spec.iphoneJobs', icon: <SmartphoneOutlined style={{ fontSize: 20 }} /> },
 	{ color: '#C8C8C8', titleKey: 'technicianProfile.pp.spec.macbook', subKey: 'technicianProfile.pp.spec.macbookSub', jobsKey: 'technicianProfile.pp.spec.macbookJobs', icon: <LaptopMacOutlined style={{ fontSize: 20 }} /> },
-	{ color: '#FF6B00', titleKey: 'technicianProfile.pp.spec.ipad', subKey: 'technicianProfile.pp.spec.ipadSub', jobsKey: 'technicianProfile.pp.spec.ipadJobs', icon: <TabletMacOutlined style={{ fontSize: 20 }} /> },
+	{ color: ACCENT_PRIMARY, titleKey: 'technicianProfile.pp.spec.ipad', subKey: 'technicianProfile.pp.spec.ipadSub', jobsKey: 'technicianProfile.pp.spec.ipadJobs', icon: <TabletMacOutlined style={{ fontSize: 20 }} /> },
 ];
 
-const RATING_STARS = [5, 4, 3, 2, 1];
+const iconSoftBg = (color: string) => (color === ACCENT_PRIMARY ? 'var(--fixora-primary-soft)' : `${color}1f`);
 
 const Stars = ({ count }: { count: number }) => (
 	<>
@@ -474,7 +476,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 								<div className="fixora-pp-creds">
 									{CREDENTIALS.map((c) => (
 										<div key={c.titleKey} className="fixora-pp-cred">
-											<div className="fixora-pp-cred__icon" style={{ background: `${c.color}1f`, color: c.color }}>
+											<div className="fixora-pp-cred__icon" style={{ background: iconSoftBg(c.color), color: c.color }}>
 												{c.icon}
 											</div>
 											<div className="fixora-pp-cred__body">
@@ -496,7 +498,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 								<div className="fixora-pp-specs">
 									{SPECIALIZATIONS.map((s) => (
 										<div key={s.titleKey} className="fixora-pp-spec">
-											<div className="fixora-pp-spec__icon" style={{ background: `${s.color}1f`, color: s.color }}>
+											<div className="fixora-pp-spec__icon" style={{ background: iconSoftBg(s.color), color: s.color }}>
 												{s.icon}
 											</div>
 											<div className="fixora-pp-spec__body">

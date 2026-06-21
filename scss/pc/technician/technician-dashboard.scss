@@ -760,15 +760,18 @@ $border-orange: rgba(255, 107, 0, 0.2);
 /* Dashboard grid card spans (6-col grid):
    row 1 → Requests + Active Jobs equal (3 + 3)
    row 2 → Weekly Earnings wider + Schedule narrower (4 + 2) */
-.fixora-tech-card--span-half {
+.fixora-technician-layout .fixora-tech-card--span-half,
+.fixora-technician-mobile .fixora-tech-card--span-half {
 	grid-column: span 3;
 }
 
-.fixora-tech-card--span-wide {
+.fixora-technician-layout .fixora-tech-card--span-wide,
+.fixora-technician-mobile .fixora-tech-card--span-wide {
 	grid-column: span 4;
 }
 
-.fixora-tech-card--span-narrow {
+.fixora-technician-layout .fixora-tech-card--span-narrow,
+.fixora-technician-mobile .fixora-tech-card--span-narrow {
 	grid-column: span 2;
 }
 
@@ -933,9 +936,10 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	}
 }
 
-/* ============ CARD ============ */
+/* ============ CARD (technician dashboard only — do not override customer .fixora-tech-card links) ============ */
 
-.fixora-tech-card {
+.fixora-technician-layout .fixora-tech-card,
+.fixora-technician-mobile .fixora-tech-card {
 	background: $bg-card;
 	border: 1px solid $border-subtle;
 	border-radius: 14px;
@@ -1552,9 +1556,12 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		}
 	}
 
-	.fixora-tech-card--span-half,
-	.fixora-tech-card--span-wide,
-	.fixora-tech-card--span-narrow {
+	.fixora-technician-layout .fixora-tech-card--span-half,
+	.fixora-technician-mobile .fixora-tech-card--span-half,
+	.fixora-technician-layout .fixora-tech-card--span-wide,
+	.fixora-technician-mobile .fixora-tech-card--span-wide,
+	.fixora-technician-layout .fixora-tech-card--span-narrow,
+	.fixora-technician-mobile .fixora-tech-card--span-narrow {
 		grid-column: auto;
 	}
 

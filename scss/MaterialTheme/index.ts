@@ -3,6 +3,7 @@ import shadow from './shadow';
 import typography from './typography';
 
 export { fixoraDark } from './fixoraDark';
+export { fixoraTechnicianOrange } from './fixoraTechnicianOrange';
 
 /**
  * LIGHT THEME (DEFAULT)

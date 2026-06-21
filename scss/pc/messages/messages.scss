@@ -70,7 +70,7 @@
 	padding: 8px 12px;
 	margin-bottom: 12px;
 	border-radius: 10px;
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--fixora-surface-elevated);
 	border: 1px solid var(--fixora-border-subtle);
 	color: var(--fixora-text-secondary);
 
@@ -108,11 +108,11 @@
 	transition: background-color 0.2s ease, border-color 0.2s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--fixora-surface-elevated);
 	}
 
 	&--active {
-		background: rgba(255, 107, 0, 0.08);
+		background: rgba(115, 12, 30, 0.08);
 		border-left-color: var(--fixora-primary);
 	}
 }
@@ -306,7 +306,7 @@
 	transition: background-color 0.2s ease, color 0.2s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: var(--fixora-surface-elevated);
 		color: var(--fixora-text-primary);
 	}
 }
@@ -354,7 +354,7 @@
 	position: relative;
 	padding: 10px 28px 10px 14px;
 	border-radius: 14px 14px 14px 4px;
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--fixora-surface-elevated);
 	color: var(--fixora-text-primary);
 
 	p {
@@ -428,7 +428,7 @@
 		padding: 10px 14px;
 		border-radius: 20px;
 		border: 1px solid var(--fixora-border-subtle);
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--fixora-surface-elevated);
 		color: var(--fixora-text-primary);
 		font-size: 13px;
 		outline: none;
@@ -448,13 +448,13 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--fixora-surface-elevated);
 	color: var(--fixora-text-secondary);
 	cursor: pointer;
 	transition: background-color 0.2s ease, color 0.2s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.08);
+		background: var(--fixora-surface-hover);
 		color: var(--fixora-text-primary);
 	}
 }
@@ -562,7 +562,7 @@
 	font-size: 11px;
 	font-weight: 700;
 	text-transform: capitalize;
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--fixora-surface-hover);
 	color: var(--fixora-text-secondary);
 
 	&--pending {
@@ -572,7 +572,7 @@
 
 	&--accepted,
 	&--in_progress {
-		background: rgba(255, 107, 0, 0.15);
+		background: rgba(115, 12, 30, 0.15);
 		color: var(--fixora-primary);
 	}
 

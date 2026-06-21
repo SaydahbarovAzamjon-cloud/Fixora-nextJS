@@ -76,7 +76,7 @@
 	&--active {
 		border-color: var(--fixora-primary);
 		color: var(--fixora-primary);
-		background: rgba(255, 107, 0, 0.08);
+		background: rgba(115, 12, 30, 0.08);
 	}
 }
 
@@ -173,11 +173,11 @@
 			padding: 1.5px;
 			background: linear-gradient(
 				90deg,
-				#ff6b00,
-				#ffc48a,
-				#ff8533,
-				rgba(255, 107, 0, 0.35),
-				#ff6b00
+				var(--fixora-primary),
+				#a85a6a,
+				#8e1428,
+				rgba(115, 12, 30, 0.35),
+				var(--fixora-primary)
 			);
 			background-size: 300% 100%;
 			animation: fixora-ai-border-flow 3.5s linear infinite;
@@ -278,12 +278,12 @@
 		left: 50%;
 		width: 224px;
 		height: 100px;
-		border: 1.5px solid rgba(255, 107, 0, 0.45);
+		border: 1.5px solid rgba(115, 12, 30, 0.45);
 		border-radius: 50%;
 		transform: translate(-50%, -50%) rotate(-16deg);
 		box-shadow:
-			0 0 24px rgba(255, 107, 0, 0.15),
-			inset 0 0 24px rgba(255, 107, 0, 0.1);
+			0 0 24px rgba(115, 12, 30, 0.15),
+			inset 0 0 24px rgba(115, 12, 30, 0.1);
 	}
 
 	&__spark {
@@ -292,7 +292,7 @@
 		height: 8px;
 		border-radius: 50%;
 		background: var(--fixora-primary);
-		box-shadow: 0 0 14px 5px rgba(255, 107, 0, 0.65);
+		box-shadow: 0 0 14px 5px rgba(115, 12, 30, 0.65);
 
 		&--1 {
 			left: 22px;
@@ -316,8 +316,8 @@
 		height: 42px;
 		border-radius: 12px;
 		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(255, 107, 0, 0.25);
-		color: rgba(255, 107, 0, 0.65);
+		border: 1px solid rgba(115, 12, 30, 0.25);
+		color: rgba(115, 12, 30, 0.65);
 		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 		backdrop-filter: blur(2px);
 
@@ -360,7 +360,7 @@
 		border: 2px solid #3c3c42;
 		box-shadow:
 			0 14px 34px rgba(0, 0, 0, 0.55),
-			0 0 28px rgba(255, 107, 0, 0.18);
+			0 0 28px rgba(115, 12, 30, 0.18);
 		transform: rotate(12deg);
 		display: flex;
 		align-items: center;
@@ -383,7 +383,7 @@
 			width: 52px;
 			height: 52px;
 			object-fit: contain;
-			filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.45));
+			filter: drop-shadow(0 0 10px rgba(115, 12, 30, 0.45));
 		}
 	}
 }
@@ -428,11 +428,12 @@
 	&:hover {
 		border-color: var(--fixora-primary);
 		color: var(--fixora-text-primary);
+		background-color: var(--fixora-surface-hover);
 	}
 
 	&--active {
 		border-color: var(--fixora-primary);
-		background: rgba(255, 107, 0, 0.1);
+		background: rgba(115, 12, 30, 0.1);
 		color: var(--fixora-primary);
 	}
 }
@@ -469,9 +470,9 @@
 
 		&--fallback {
 			background-image:
-				linear-gradient(rgba(255, 107, 0, 0.08) 1px, transparent 1px),
-				linear-gradient(90deg, rgba(255, 107, 0, 0.08) 1px, transparent 1px),
-				linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(0, 0, 0, 0));
+				linear-gradient(rgba(115, 12, 30, 0.08) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(115, 12, 30, 0.08) 1px, transparent 1px),
+				linear-gradient(135deg, rgba(115, 12, 30, 0.2), rgba(0, 0, 0, 0));
 			background-size: 24px 24px, 24px 24px, 100% 100%;
 		}
 	}
@@ -526,7 +527,7 @@
 		height: 10px;
 		border-radius: 50%;
 		background: var(--fixora-primary);
-		box-shadow: 0 0 10px rgba(255, 107, 0, 0.55);
+		box-shadow: 0 0 10px rgba(115, 12, 30, 0.55);
 		transform: translate(-50%, -50%);
 
 		&::after {
@@ -534,7 +535,7 @@
 			position: absolute;
 			inset: -4px;
 			border-radius: 50%;
-			border: 2px solid rgba(255, 107, 0, 0.35);
+			border: 2px solid rgba(115, 12, 30, 0.35);
 		}
 	}
 
@@ -578,7 +579,7 @@
 
 		&:hover:not(:disabled) {
 			border-color: var(--fixora-primary);
-			background: rgba(255, 107, 0, 0.08);
+			background: rgba(115, 12, 30, 0.08);
 		}
 
 		&:disabled {
@@ -894,7 +895,7 @@
 		padding: 0 12px;
 		border-radius: 999px;
 		border: 1px solid var(--fixora-primary);
-		background: rgba(255, 107, 0, 0.12);
+		background: rgba(115, 12, 30, 0.12);
 		color: var(--fixora-primary);
 		font-family: $font;
 		font-size: 12px;
@@ -1036,7 +1037,7 @@
 		padding: 3px 10px;
 		border-radius: 6px;
 		border: 1px solid var(--fixora-border);
-		background: rgba(255, 107, 0, 0.12);
+		background: rgba(115, 12, 30, 0.12);
 		font-size: 11px;
 		font-weight: 700;
 		color: var(--fixora-primary);
@@ -1060,9 +1061,9 @@
 		}
 
 		&--affordable {
-			background: rgba(255, 107, 0, 0.12);
+			background: rgba(115, 12, 30, 0.12);
 			color: var(--fixora-primary);
-			border-color: rgba(255, 107, 0, 0.3);
+			border-color: rgba(115, 12, 30, 0.3);
 		}
 	}
 
@@ -1227,7 +1228,7 @@
 		}
 
 		&--orange {
-			background: rgba(255, 107, 0, 0.14);
+			background: rgba(115, 12, 30, 0.14);
 			color: var(--fixora-primary);
 		}
 

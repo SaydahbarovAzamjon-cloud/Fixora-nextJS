@@ -107,7 +107,7 @@
 .fixora-member__review-card {
 	padding: 16px;
 	border-radius: 12px;
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--fixora-primary-soft);
 	border: 1px solid var(--fixora-border-subtle);
 }
 
@@ -168,7 +168,7 @@
 	transition: border-color 0.15s ease;
 
 	&:hover {
-		border-color: rgba(255, 107, 0, 0.4);
+		border-color: rgba(115, 12, 30, 0.4);
 	}
 
 	img {

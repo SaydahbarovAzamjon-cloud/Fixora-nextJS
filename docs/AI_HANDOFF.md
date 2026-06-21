@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-06-21 |
 | **Last agent** | Cursor |
-| **Last session** | **Client My Page owner view** — `/client/my-page` with 6 tabs (Active Requests, Repair History, Saved Technicians, Following, My Reviews, Settings), pixel-perfect header + tab UI, real API via `getMyBookings`, `getMyReviews`, `getUserFollowings`, `getMyPayments`; `/mypage` redirects; GAP-098 for saved technicians list. |
-| **Last session (prev)** | Public client profile at `/technician/client/[clientId]`. |
+| **Last session** | **Burgundy theme migration** — customer-facing app (`:root` tokens, MUI `fixoraDark`, shared card mixin, customer SCSS sweep) migrated from orange to premium burgundy-red; technician portal excluded via `fixora-technician-theme-preserve.scss` + nested `fixoraTechnicianOrange` ThemeProvider in `TechnicianLayout`. Homepage structure unchanged — colors only. |
+| **Last session (prev)** | **Client My Page owner view** — `/client/my-page` with 6 tabs, real API, GAP-098 for saved technicians. |
 | **Next agent should start with** | FIXORAB: GAP-098 `getUserLikedTechnicians` OR GAP-062 WS notifications OR `PM-01` mobile foundation |
 
 ---
@@ -20,7 +20,7 @@
 | Decisions | ✅ Locked — `DECISIONS.md` |
 | Agent handoff (Cursor + Codex) | ✅ This file + `TASK_BOARD.md` |
 | Design mockups | ✅ Uploaded — `docs/design/README.md` |
-| Fixora UI migration | 🔄 In progress — auth UI done; homepage + customer pages still legacy |
+| Fixora UI migration | 🔄 In progress — burgundy customer theme shipped; auth UI done; technician portal stays orange |
 | Backend API (FIXORAB / FixoraB) | ✅ MVP ready — `http://localhost:2000/graphql`; see `FRONTEND_API.md` |
 | GraphQL contract sync | ✅ `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql` in `docs/` |
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |

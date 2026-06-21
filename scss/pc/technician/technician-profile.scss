@@ -365,7 +365,7 @@
 	}
 
 	.fixora-tip-card {
-		background: #111111;
+		background: var(--fixora-surface-elevated);
 		border-color: rgba(255, 255, 255, 0.07);
 
 		&:hover {
@@ -393,8 +393,8 @@
 	display: flex;
 	align-items: flex-start;
 	gap: 28px;
-	background: radial-gradient(900px 240px at 12% -10%, rgba(255, 107, 0, 0.12), transparent 60%), #0E0E0E;
-	border: 1px solid rgba(255, 107, 0, 0.12);
+	background: radial-gradient(900px 240px at 12% -10%, rgba(255, 107, 0, 0.12), transparent 60%), var(--fixora-surface);
+	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 20px;
 	padding: 28px 32px;
 
@@ -433,7 +433,7 @@
 		height: 18px;
 		border-radius: 50%;
 		background: #22C55E;
-		border: 3px solid #0E0E0E;
+		border: 3px solid var(--fixora-surface);
 		box-shadow: 0 0 8px #22C55E;
 	}
 
@@ -566,7 +566,7 @@
 
 /* -------- Repair Stories -------- */
 .fixora-pp-stories-card {
-	background: #0E0E0E;
+	background: var(--fixora-surface);
 	border: 1px solid rgba(255, 255, 255, 0.07);
 	border-radius: 20px;
 	padding: 22px 26px;
@@ -641,7 +641,7 @@
 		height: 64px;
 		border-radius: 50%;
 		border: 2px solid;
-		background: #141414;
+		background: var(--fixora-surface-elevated);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -666,7 +666,7 @@
 		width: 12px;
 		height: 12px;
 		border-radius: 50%;
-		border: 2px solid #0E0E0E;
+		border: 2px solid var(--fixora-surface);
 	}
 
 	&__label {
@@ -724,10 +724,15 @@
 
 /* -------- Panel -------- */
 .fixora-pp-panel {
-	background: #0E0E0E;
-	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: var(--fixora-surface);
+	border: 1px solid var(--fixora-border);
 	border-radius: 16px;
 	padding: 28px 30px;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+
+	&:hover {
+		background-color: var(--fixora-surface-hover);
+	}
 
 	&__title {
 		color: #F0F0F0;
@@ -761,7 +766,7 @@
 	padding: 44px 24px;
 	border: 1px dashed rgba(255, 255, 255, 0.1);
 	border-radius: 14px;
-	background: rgba(255, 255, 255, 0.02);
+	background: var(--fixora-primary-soft);
 
 	&__icon {
 		width: 56px;
@@ -875,7 +880,7 @@
 .fixora-story-modal {
 	width: 100%;
 	max-width: 480px;
-	background: #121212;
+	background: var(--fixora-surface-elevated);
 	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 20px;
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
@@ -1189,7 +1194,7 @@
 
 .fixora-pp-service {
 	position: relative;
-	background: #0E0E0E;
+	background: var(--fixora-surface);
 	border: 1px solid rgba(255, 255, 255, 0.07);
 	border-radius: 16px;
 	padding: 22px 24px;
@@ -1285,7 +1290,7 @@
 }
 
 .fixora-pp-port {
-	background: #0E0E0E;
+	background: var(--fixora-surface);
 	border: 1px solid rgba(255, 255, 255, 0.07);
 	border-radius: 16px;
 	overflow: hidden;
@@ -1297,7 +1302,7 @@
 
 	&__media {
 		height: 170px;
-		background: linear-gradient(160deg, #1A1A1A, #131313);
+		background: linear-gradient(160deg, var(--fixora-surface-elevated), var(--fixora-surface));
 		display: flex;
 		align-items: center;
 		justify-content: center;

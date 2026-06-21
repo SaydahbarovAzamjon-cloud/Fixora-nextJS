@@ -6,7 +6,7 @@
 |-------|-------|
 | **Last updated** | 2026-06-21 |
 | **Last agent** | Cursor |
-| **Last session** | **Public client profile** — `/client/[clientId]` renders read-only Client My Page inside technician layout; technician-side client links route there; uses real visible bookings/following/reviews and documents GAP-063 for full public client data. |
+| **Last session** | **Public client profile** — `/technician/client/[clientId]` reuses the shared Client My Page view (`ClientMyPageView`) in read-only mode inside the technician shell; technician-side client links route there; uses real visible bookings/following/reviews and documents GAP-063 for full public client data. |
 | **Last session (prev)** | Navbar + followers restore; homepage navigation. |
 | **Next agent should start with** | FIXORAB: GAP-063 public client profile data OR GAP-062 WS notifications OR `P3-14` ON_SITE badge |
 
@@ -30,7 +30,7 @@
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/mypage` (profile header + Requests/Following/Repair Stories/Settings tabs) + `/notifications` (Today/Earlier, mark all read, navbar badge), `scss/pc/mypage/fixora-mypage.scss`, `scss/pc/notifications/notifications.scss` |
 | Technician Dashboard (P3-13) | ✅ `/technician/dashboard` — quick actions functional (New Quote/Mark Available/View Schedule/Export Report); Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, device-only — no backend schedule model) merged with bookings (DECISIONS UI-11) |
-| Public Client Profile | ✅ `/client/[clientId]` — technician-viewed, read-only My Page reuse; repair history from technician-visible bookings, following via `getUserFollowings`, reviews via visible completed booking reviews; saved/full history needs GAP-063 |
+| Public Client Profile | ✅ `/technician/client/[clientId]` — technician-viewed, read-only My Page reuse inside technician shell; repair history from technician-visible bookings, following via `getUserFollowings`, reviews via visible completed booking reviews; saved/full history needs GAP-063 |
 | Public Profile live data (P3-13) | ✅ `/technician/profile` — header, About, My Articles, Services, Portfolio, Reviews, Followers, **Repair Stories (display + create)** all wired to live API; functional Message/View-Live/Follow buttons; empty states; stats → 0 when DB empty (DECISIONS UI-07…UI-10) |
 
 ---

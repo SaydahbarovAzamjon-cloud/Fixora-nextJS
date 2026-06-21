@@ -14,7 +14,7 @@ const TechnicianClientProfile: NextPage = () => {
 
 	useEffect(() => {
 		if (!router.isReady || !clientId) return;
-		router.replace(`/client/${clientId}`).then();
+		router.replace(`/technician/client/${clientId}`).then();
 	}, [router, router.isReady, clientId]);
 
 	return null;

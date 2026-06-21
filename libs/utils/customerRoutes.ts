@@ -1,6 +1,6 @@
 export const TECHNICIAN_PORTAL_HOME = '/technician/dashboard';
 
-const TECHNICIAN_ALLOWED_ROUTE_PREFIXES = ['/technician', '/client', '/login', '/register', '/account'] as const;
+const TECHNICIAN_ALLOWED_ROUTE_PREFIXES = ['/technician', '/login', '/register', '/account'] as const;
 
 /** Customer-only routes — technicians are redirected to the technician portal. */
 export function isCustomerOnlyRoute(pathname: string): boolean {

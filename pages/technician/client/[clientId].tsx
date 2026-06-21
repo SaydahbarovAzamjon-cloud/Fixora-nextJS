@@ -3,20 +3,12 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
-import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
-import { technicianPageProps } from '../../libs/i18n/technicianPageProps';
-import ProfileHeader from '../../libs/components/mypage/fixora/ProfileHeader';
-import FollowingTab from '../../libs/components/mypage/fixora/FollowingTab';
-import {
-	ClientRepairHistoryTab,
-	ClientReviewsTab,
-	ClientSavedTechniciansTab,
-} from '../../libs/components/mypage/fixora/PublicClientTabs';
-import { GET_USER } from '../../apollo/user/query';
-import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS, GET_USER_FOLLOWINGS } from '../../apollo/user/profile';
-import { Booking } from '../../libs/types/fixora/fixora';
-import { formatKrw } from '../../libs/utils/formatCurrency';
-import { dateLocale } from '../../libs/utils/i18nLocale';
+import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
+import ClientMyPageView, { ClientMyPageTab } from '../../../libs/components/mypage/fixora/ClientMyPageView';
+import { GET_USER } from '../../../apollo/user/query';
+import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS, GET_USER_FOLLOWINGS } from '../../../apollo/user/profile';
+import { Booking } from '../../../libs/types/fixora/fixora';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -33,13 +25,7 @@ const uniqueBookings = (bookings: Booking[]) => {
 	return Array.from(map.values());
 };
 
-const formatMemberSince = (createdAt: string | undefined, locale: string | undefined, t: (key: string, options?: any) => string) => {
-	if (!createdAt) return '';
-	const label = new Intl.DateTimeFormat(dateLocale(locale), { month: 'long', year: 'numeric' }).format(new Date(createdAt));
-	return t('clientProfile.memberSince', { date: label });
-};
-
-const PublicClientProfile: NextPage = () => {
+const TechnicianClientProfile: NextPage = () => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const clientId = router.query.clientId as string | undefined;
@@ -90,7 +76,6 @@ const PublicClientProfile: NextPage = () => {
 		[completedBookings],
 	);
 	const followingCount = followingData?.getUserFollowings?.metaCounter?.[0]?.total ?? profile?.followingCount ?? 0;
-	const displayName = profileMatchesRoute ? profile?.userFullName || profile?.userNickname || '' : '';
 
 	useEffect(() => {
 		if (!router.isReady || !clientId || !profileMatchesRoute) return;
@@ -101,13 +86,13 @@ const PublicClientProfile: NextPage = () => {
 
 	const selectTab = (next: Tab) => {
 		if (!clientId) return;
-		router.push(`/client/${clientId}?tab=${next}`, undefined, { shallow: true });
+		router.push(`/technician/client/${clientId}?tab=${next}`, undefined, { shallow: true });
 	};
 
 	if (!router.isReady || !clientId || clientLoading || !profileMatchesRoute || profile?.userType === 'TECHNICIAN') {
 		return (
-			<div className="fixora-tech-client-page">
-				<div className="fixora-tech-client fixora-mypage">
+			<div className="fixora-mypage-page">
+				<div className="container fixora-mypage">
 					<p className="fixora-mypage__empty">{t('common.loading', 'Loading...')}</p>
 				</div>
 			</div>
@@ -115,54 +100,17 @@ const PublicClientProfile: NextPage = () => {
 	}
 
 	return (
-		<div className="fixora-tech-client-page">
-			<div className="fixora-tech-client fixora-mypage">
-				<ProfileHeader
-					name={displayName}
-					image={profile.userProfileImage}
-					requestsCount={completedBookings.length}
-					followingCount={followingCount}
-					storiesCount={0}
-					readOnly
-					memberSince={formatMemberSince(profile.createdAt, router.locale, t)}
-					location={profile.userLocation}
-					stats={[
-						{ value: completedBookings.length, label: t('clientProfile.stats.repairs') },
-						{ value: profile.reviewCount ?? '—', label: t('clientProfile.stats.reviews') },
-						{ value: followingCount, label: t('clientProfile.stats.following') },
-						{ value: '—', label: t('clientProfile.stats.saved') },
-						{
-							value: profile.averageRating ? `${profile.averageRating.toFixed(1)}★` : '—',
-							label: t('clientProfile.stats.averageRating'),
-						},
-						{ value: formatKrw(totalSpent), label: t('clientProfile.stats.totalSpent') },
-					]}
-				/>
-
-				<div className="fixora-mypage__tabs">
-					{TABS.map((item) => (
-						<button
-							key={item}
-							type="button"
-							className={`fixora-mypage__tab ${tab === item ? 'fixora-mypage__tab--active' : ''}`}
-							onClick={() => selectTab(item)}
-						>
-							{t(`clientProfile.tabs.${item}`)}
-						</button>
-					))}
-				</div>
-
-				<div className="fixora-mypage__content">
-					{tab === 'repairHistory' && (
-						<ClientRepairHistoryTab bookings={visibleBookings} />
-					)}
-					{tab === 'savedTechnicians' && <ClientSavedTechniciansTab />}
-					{tab === 'following' && <FollowingTab userId={clientId} readOnly />}
-					{tab === 'reviews' && <ClientReviewsTab bookings={visibleBookings} />}
-				</div>
-			</div>
-		</div>
+		<ClientMyPageView
+			mode="public"
+			profile={profile}
+			activeTab={tab as ClientMyPageTab}
+			bookings={visibleBookings}
+			followingCount={followingCount}
+			totalSpent={totalSpent}
+			clientId={clientId}
+			onSelectTab={(next) => selectTab(next as Tab)}
+		/>
 	);
 };
 
-export default withTechnicianLayout(PublicClientProfile);
+export default withTechnicianLayout(TechnicianClientProfile);

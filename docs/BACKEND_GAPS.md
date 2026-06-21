@@ -142,6 +142,16 @@ Yangi UI element qo‘shganda:
 
 ---
 
+### Messages — `/messages`
+
+| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
+|----|------------|---------------|------------|------------------|--------|------|
+| GAP-087 | **Image message upload** | `uploadMessageImage` → CDN URL yoki `Message.attachmentUrl` | Base64 `messageContent` katta payload, cheklovlarga duch keladi | `FileReader` → base64 → `sendMessage(messageType: IMAGE)` | `WORKAROUND` | `libs/components/messages/ChatThread.tsx`, `pages/messages/index.tsx` |
+| GAP-088 | **Conversation device summary** | `getMyConversations` → `deviceLabel` yoki `deviceModel` maydoni | Chat list footer mockup device nomi | Har bir `bookingId` uchun alohida `getBooking` cache (`pages/messages/index.tsx`) | `WORKAROUND` | `pages/messages/index.tsx`, `ConversationList.tsx` |
+| GAP-089 | **Peer thread message merge** | `getMessages` should return all messages for `peerId` regardless of `bookingId` | Customer thread empty when only `peerId` search used | `usePeerMessages` merges fetches per `peerId` + each `bookingId` (`libs/hooks/usePeerMessages.ts`) | `WORKAROUND` | `libs/hooks/usePeerMessages.ts`, `pages/messages/index.tsx` |
+
+---
+
 ### Technician Settings (`/technician/settings`)
 
 | ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |

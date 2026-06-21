@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
 import SearchIcon from '@mui/icons-material/Search';
-import { Conversation } from '../../types/fixora/fixora';
+import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
+import { Booking, Conversation } from '../../types/fixora/fixora';
+import { formatConversationTime, formatMessagePreview } from '../../utils/messageHelpers';
+import { deviceLabel } from '../mypage/fixora/myPageHelpers';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 import UserProfileLink from '../common/UserProfileLink';
 
 interface ConversationListProps {
 	conversations: Conversation[];
 	selectedPeerId?: string | null;
+	bookingMeta?: Record<string, Booking>;
 	onSelect: (conversation: Conversation) => void;
 }
 
-const ConversationList = ({ conversations, selectedPeerId, onSelect }: ConversationListProps) => {
+const ConversationList = ({ conversations, selectedPeerId, bookingMeta = {}, onSelect }: ConversationListProps) => {
 	const { t } = useTranslation('common');
 	const [search, setSearch] = useState('');
 
@@ -44,7 +47,12 @@ const ConversationList = ({ conversations, selectedPeerId, onSelect }: Conversat
 					const displayName = peer?.shopName || peer?.userFullName || peer?.userNickname || '';
 					const peerId = conversation.peerId || peer?._id;
 					const isActive = conversation.peerId === selectedPeerId;
-					const lastMessage = conversation.lastMessage?.messageContent ?? '';
+					const preview = formatMessagePreview(conversation.lastMessage, t);
+					const booking = conversation.bookingId ? bookingMeta[conversation.bookingId] : undefined;
+					const deviceText =
+						booking && conversation.bookingId
+							? deviceLabel(booking, t)
+							: '';
 
 					return (
 						<div
@@ -60,20 +68,31 @@ const ConversationList = ({ conversations, selectedPeerId, onSelect }: Conversat
 
 							<button type="button" className="fixora-messages__conversation-select" onClick={() => onSelect(conversation)}>
 								<span className="fixora-messages__conversation-body">
-									<span className="fixora-messages__conversation-row">
-										<UserProfileLink userId={peerId} userType={peer?.userType} className="fixora-messages__profile-link fixora-messages__profile-link--name">
-											<strong>{displayName}</strong>
-										</UserProfileLink>
-										<Moment fromNow ago className="fixora-messages__time">
-											{conversation.updatedAt}
-										</Moment>
+									<span className="fixora-messages__conversation-row fixora-messages__conversation-row--header">
+										<span className="fixora-messages__conversation-name-wrap">
+											<strong className="fixora-messages__conversation-name">{displayName}</strong>
+											{peer?.isVerified && (
+												<VerifiedOutlinedIcon className="fixora-messages__verified-icon" fontSize="inherit" />
+											)}
+										</span>
+										<span className="fixora-messages__time">{formatConversationTime(conversation.updatedAt)}</span>
 									</span>
-									<span className="fixora-messages__conversation-row">
-										<span className="fixora-messages__preview">{lastMessage}</span>
-										{conversation.unreadCount > 0 && (
-											<span className="fixora-messages__unread">{conversation.unreadCount}</span>
-										)}
-									</span>
+									<span className="fixora-messages__preview">{preview}</span>
+									{(conversation.bookingStatus || deviceText || conversation.unreadCount > 0) && (
+										<span className="fixora-messages__conversation-row fixora-messages__conversation-row--footer">
+											<span className="fixora-messages__conversation-footer-left">
+												{conversation.bookingStatus && (
+													<span className={`fixora-messages__status fixora-messages__status--${conversation.bookingStatus.toLowerCase()}`}>
+														{t(`booking.status.${conversation.bookingStatus}`)}
+													</span>
+												)}
+												{deviceText && <span className="fixora-messages__conversation-device">{deviceText}</span>}
+											</span>
+											{conversation.unreadCount > 0 && (
+												<span className="fixora-messages__unread">{conversation.unreadCount}</span>
+											)}
+										</span>
+									)}
 								</span>
 							</button>
 						</div>

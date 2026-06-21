@@ -288,7 +288,13 @@ export interface ConversationPeer {
 	shopName?: string;
 	userProfileImage?: string;
 	isOnline?: boolean;
+	isVerified?: boolean;
 	userType?: string;
+	userLocation?: string;
+	specialty?: string;
+	averageRating?: number;
+	reviewCount?: number;
+	verificationStatus?: string;
 }
 
 export interface Conversation {

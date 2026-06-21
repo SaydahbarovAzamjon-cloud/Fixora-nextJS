@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
 import SendIcon from '@mui/icons-material/Send';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
+import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 import { ConversationPeer, Message } from '../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 import UserProfileLink from '../common/UserProfileLink';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
+
+export interface SendMessagePayload {
+	text?: string;
+	imageFile?: File;
+}
 
 interface ChatThreadProps {
 	peer?: ConversationPeer | null;
@@ -19,25 +25,73 @@ interface ChatThreadProps {
 	messages: Message[];
 	currentUserId?: string;
 	currentUserImage?: string;
-	onSend: (text: string) => void | Promise<void>;
+	onSend: (payload: SendMessagePayload) => void | Promise<void>;
 	sending?: boolean;
+	contextBar?: React.ReactNode;
 }
 
-const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, onSend, sending }: ChatThreadProps) => {
+const EMOJIS = [
+	'😀', '😁', '😂', '🤣', '😊', '😍', '🥰', '😘', '😎', '🤔', '😅', '😭',
+	'😤', '🤩', '😢', '😡', '🥳', '🤗', '😴', '🫶', '👍', '👎', '👏', '🙏',
+	'🤝', '✌️', '🤞', '💪', '👋', '🙌', '👌', '🫡', '❤️', '🔥', '⭐', '✅',
+	'❌', '💯', '🎉', '🚀', '💡', '🔧', '📱', '⚡', '🎁', '💬', '📸', '🛠️',
+];
+
+const formatTime = (dateStr?: string | null) => {
+	if (!dateStr) return '';
+	return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+};
+
+const ChatThread = ({
+	peer,
+	peerId,
+	messages,
+	currentUserId,
+	currentUserImage,
+	onSend,
+	sending,
+	contextBar,
+}: ChatThreadProps) => {
 	const { t } = useTranslation('common');
 	const authUser = useReactiveVar(userVar);
 	const [text, setText] = useState('');
-	const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
+	const [showEmoji, setShowEmoji] = useState(false);
+	const [imgPreview, setImgPreview] = useState<{ file: File; url: string } | null>(null);
 	const bottomRef = useRef<HTMLDivElement>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const emojiRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ block: 'end' });
-	}, [messages.length]);
+	}, [messages.length, imgPreview]);
 
-	const submit = () => {
+	useEffect(() => {
+		return () => {
+			if (imgPreview?.url) URL.revokeObjectURL(imgPreview.url);
+		};
+	}, [imgPreview?.url]);
+
+	useEffect(() => {
+		const handler = (e: MouseEvent) => {
+			if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+				setShowEmoji(false);
+			}
+		};
+		if (showEmoji) document.addEventListener('mousedown', handler);
+		return () => document.removeEventListener('mousedown', handler);
+	}, [showEmoji]);
+
+	const submit = async () => {
+		if (imgPreview) {
+			await onSend({ imageFile: imgPreview.file });
+			URL.revokeObjectURL(imgPreview.url);
+			setImgPreview(null);
+			return;
+		}
 		const trimmed = text.trim();
 		if (!trimmed) return;
-		onSend(trimmed);
+		await onSend({ text: trimmed });
 		setText('');
 	};
 
@@ -48,20 +102,35 @@ const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, o
 		}
 	};
 
-	const toggleLike = (messageId: string) => {
-		setLikedMessages((prev) => {
-			const next = new Set(prev);
-			if (next.has(messageId)) {
-				next.delete(messageId);
-			} else {
-				next.add(messageId);
-			}
-			return next;
-		});
+	const insertEmoji = (emoji: string) => {
+		const input = inputRef.current;
+		if (!input) {
+			setText((prev) => `${prev}${emoji}`);
+			setShowEmoji(false);
+			return;
+		}
+		const start = input.selectionStart ?? text.length;
+		const end = input.selectionEnd ?? text.length;
+		const next = text.slice(0, start) + emoji + text.slice(end);
+		setText(next);
+		setShowEmoji(false);
+		setTimeout(() => {
+			input.selectionStart = input.selectionEnd = start + emoji.length;
+			input.focus();
+		}, 0);
 	};
 
-	const addEmoji = () => {
-		setText((prev) => `${prev}🙂`);
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const url = URL.createObjectURL(file);
+		setImgPreview({ file, url });
+		e.target.value = '';
+	};
+
+	const removePreview = () => {
+		if (imgPreview?.url) URL.revokeObjectURL(imgPreview.url);
+		setImgPreview(null);
 	};
 
 	if (!peer) {
@@ -75,6 +144,7 @@ const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, o
 
 	const displayName = peer.shopName || peer.userFullName || peer.userNickname || '';
 	const resolvedPeerId = peerId || peer._id;
+	const canSend = Boolean(text.trim() || imgPreview);
 
 	return (
 		<div className="fixora-messages__thread">
@@ -98,10 +168,15 @@ const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, o
 				</button>
 			</div>
 
+			{contextBar}
+
 			<div className="fixora-messages__thread-body">
+				{messages.length === 0 && (
+					<p className="fixora-messages__thread-empty">{t('messages.noMessages')}</p>
+				)}
 				{messages.map((message) => {
 					const isMine = message.senderId === currentUserId;
-					const isLiked = likedMessages.has(message._id);
+					const isImage = message.messageType === 'IMAGE';
 					const avatarSrc = isMine ? resolveProfileImageUrl(currentUserImage) : resolveProfileImageUrl(peer.userProfileImage);
 					const avatarUserId = isMine ? currentUserId : resolvedPeerId;
 					return (
@@ -118,20 +193,22 @@ const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, o
 								<img className="fixora-messages__bubble-avatar" src={avatarSrc} alt="" />
 							</UserProfileLink>
 							<div className="fixora-messages__bubble-group">
-								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''}`}>
-									<p>{message.messageContent}</p>
-									<button
-										type="button"
-										className={`fixora-messages__like ${isLiked ? 'fixora-messages__like--active' : ''}`}
-										onClick={() => toggleLike(message._id)}
-										aria-label={t('messages.like')}
-									>
-										{isLiked ? <FavoriteIcon fontSize="inherit" /> : <FavoriteBorderIcon fontSize="inherit" />}
-									</button>
+								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''} ${isImage ? 'fixora-messages__bubble--image' : ''}`}>
+									{isImage ? (
+										<img src={message.messageContent} alt="" className="fixora-messages__bubble-img" />
+									) : (
+										<p>{message.messageContent}</p>
+									)}
 								</div>
-								<Moment format="HH:mm" className="fixora-messages__bubble-time">
-									{message.createdAt}
-								</Moment>
+								<div className="fixora-messages__bubble-meta">
+									<span>{formatTime(message.createdAt)}</span>
+									{isMine &&
+										(message.isRead ? (
+											<DoneAllRoundedIcon className="fixora-messages__read-icon fixora-messages__read-icon--read" fontSize="inherit" />
+										) : (
+											<DoneRoundedIcon className="fixora-messages__read-icon" fontSize="inherit" />
+										))}
+								</div>
 							</div>
 						</div>
 					);
@@ -139,26 +216,62 @@ const ChatThread = ({ peer, peerId, messages, currentUserId, currentUserImage, o
 				<div ref={bottomRef} />
 			</div>
 
-			<div className="fixora-messages__thread-input">
-				<input
-					type="text"
-					placeholder={t('messages.typePlaceholder')}
-					value={text}
-					onChange={(e) => setText(e.target.value)}
-					onKeyDown={onKeyDown}
-				/>
-				<button type="button" className="fixora-messages__icon-btn" onClick={addEmoji} aria-label={t('messages.emoji')}>
-					<EmojiEmotionsIcon fontSize="small" />
-				</button>
-				<button
-					type="button"
-					className="fixora-messages__send"
-					onClick={submit}
-					disabled={!text.trim() || sending}
-					aria-label={t('messages.send')}
-				>
-					<SendIcon fontSize="small" />
-				</button>
+			{imgPreview && (
+				<div className="fixora-messages__img-preview">
+					<img src={imgPreview.url} alt="" />
+					<button type="button" className="fixora-messages__img-preview-remove" onClick={removePreview} aria-label={t('messages.removeImage')}>
+						<CloseRoundedIcon fontSize="small" />
+					</button>
+				</div>
+			)}
+
+			<div className="fixora-messages__composer-wrap">
+				{showEmoji && (
+					<div className="fixora-messages__emoji-picker" ref={emojiRef}>
+						{EMOJIS.map((emoji) => (
+							<button key={emoji} type="button" className="fixora-messages__emoji-btn" onClick={() => insertEmoji(emoji)}>
+								{emoji}
+							</button>
+						))}
+					</div>
+				)}
+
+				<div className="fixora-messages__thread-input">
+					<input ref={fileInputRef} type="file" accept="image/*" className="fixora-messages__file-input" onChange={handleFileChange} />
+					<button
+						type="button"
+						className="fixora-messages__icon-btn"
+						onClick={() => fileInputRef.current?.click()}
+						aria-label={t('messages.attachImage')}
+					>
+						<AttachFileOutlinedIcon fontSize="small" />
+					</button>
+					<input
+						ref={inputRef}
+						type="text"
+						placeholder={t('messages.typePlaceholder')}
+						value={text}
+						onChange={(e) => setText(e.target.value)}
+						onKeyDown={onKeyDown}
+					/>
+					<button
+						type="button"
+						className={`fixora-messages__icon-btn ${showEmoji ? 'fixora-messages__icon-btn--active' : ''}`}
+						onClick={() => setShowEmoji((prev) => !prev)}
+						aria-label={t('messages.emoji')}
+					>
+						<EmojiEmotionsIcon fontSize="small" />
+					</button>
+					<button
+						type="button"
+						className="fixora-messages__send"
+						onClick={submit}
+						disabled={!canSend || sending}
+						aria-label={t('messages.send')}
+					>
+						<SendIcon fontSize="small" />
+					</button>
+				</div>
 			</div>
 		</div>
 	);

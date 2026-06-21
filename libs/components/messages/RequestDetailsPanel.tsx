@@ -2,16 +2,24 @@ import React from 'react';
 import Link from 'next/link';
 import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
-import { Booking, Device } from '../../types/fixora/fixora';
+import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import { Booking, ConversationPeer, Device } from '../../types/fixora/fixora';
+import { bookingRefId } from '../../utils/messageHelpers';
+import { formatKrw } from '../../utils/formatCurrency';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
+import UserProfileLink from '../common/UserProfileLink';
 import { FixoraButton } from '../ui';
 
 interface RequestDetailsPanelProps {
 	booking?: Booking | null;
 	device?: Device | null;
+	technician?: ConversationPeer | null;
 	loading?: boolean;
 }
 
-const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelProps) => {
+const RequestDetailsPanel = ({ booking, device, technician, loading }: RequestDetailsPanelProps) => {
 	const { t } = useTranslation('common');
 
 	if (loading) {
@@ -33,10 +41,50 @@ const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelPr
 	}
 
 	const price = booking.finalPrice ?? booking.estimatedPrice;
+	const techName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
 
 	return (
 		<div className="fixora-messages__details">
 			<h2 className="fixora-messages__details-title">{t('messages.requestDetails.title')}</h2>
+
+			{technician && (
+				<div className="fixora-messages__details-tech">
+					<UserProfileLink userId={technician._id} userType={technician.userType} className="fixora-messages__profile-link">
+						<img
+							className="fixora-messages__details-tech-avatar"
+							src={resolveProfileImageUrl(technician.userProfileImage)}
+							alt=""
+						/>
+					</UserProfileLink>
+					<div className="fixora-messages__details-tech-info">
+						<div className="fixora-messages__details-tech-name">
+							<UserProfileLink userId={technician._id} userType={technician.userType} className="fixora-messages__profile-link fixora-messages__profile-link--name">
+								<strong>{techName}</strong>
+							</UserProfileLink>
+							{technician.isVerified && <VerifiedOutlinedIcon className="fixora-messages__verified-icon" fontSize="inherit" />}
+						</div>
+						{technician.specialty && <span className="fixora-messages__details-tech-specialty">{technician.specialty}</span>}
+						{technician.averageRating != null && (
+							<span className="fixora-messages__details-tech-rating">
+								<StarRoundedIcon fontSize="inherit" />
+								{technician.averageRating.toFixed(1)}
+								{technician.reviewCount != null && ` (${technician.reviewCount})`}
+							</span>
+						)}
+						{technician.userLocation && (
+							<span className="fixora-messages__details-tech-location">
+								<LocationOnOutlinedIcon fontSize="inherit" />
+								{technician.userLocation}
+							</span>
+						)}
+					</div>
+				</div>
+			)}
+
+			<div className="fixora-messages__details-ref">
+				<dt>{t('messages.requestDetails.reference')}</dt>
+				<dd>{bookingRefId(booking._id)}</dd>
+			</div>
 
 			<div className="fixora-messages__details-device">
 				{device?.deviceImage && <img src={device.deviceImage} alt="" />}
@@ -47,6 +95,13 @@ const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelPr
 					<span>{booking.problemTitle}</span>
 				</div>
 			</div>
+
+			{booking.problemDescription && (
+				<div className="fixora-messages__details-problem">
+					<dt>{t('messages.requestDetails.problem')}</dt>
+					<dd>{booking.problemDescription}</dd>
+				</div>
+			)}
 
 			<dl className="fixora-messages__details-list">
 				<div>
@@ -78,7 +133,7 @@ const RequestDetailsPanel = ({ booking, device, loading }: RequestDetailsPanelPr
 				{price != null && (
 					<div>
 						<dt>{t('messages.requestDetails.price')}</dt>
-						<dd>${price}</dd>
+						<dd>{formatKrw(price)}</dd>
 					</div>
 				)}
 			</dl>

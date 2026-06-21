@@ -1,19 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useApolloClient, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import ConversationList from '../../libs/components/messages/ConversationList';
-import ChatThread from '../../libs/components/messages/ChatThread';
+import ChatThread, { SendMessagePayload } from '../../libs/components/messages/ChatThread';
+import ChatBookingContextBar from '../../libs/components/messages/ChatBookingContextBar';
 import RequestDetailsPanel from '../../libs/components/messages/RequestDetailsPanel';
-import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../apollo/user/message';
+import { GET_MY_CONVERSATIONS, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../apollo/user/message';
 import { GET_USER, GET_BOOKING, GET_DEVICE } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
-import { Conversation, Message } from '../../libs/types/fixora/fixora';
+import { Booking, Conversation, ConversationPeer } from '../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
 import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
+import usePeerMessages from '../../libs/hooks/usePeerMessages';
+import { dedupeConversationsByPeer } from '../../libs/utils/messageHelpers';
+import { fileToDataUrl } from '../../libs/utils/compressMessageImage';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -22,14 +25,16 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 });
 
 const MessagesPage: NextPage = () => {
-	const { t } = useTranslation('common');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const apolloClient = useApolloClient();
 
 	const queryPeerId = router.query.peerId as string | undefined;
 	const queryBookingId = router.query.bookingId as string | undefined;
 
 	const [selected, setSelected] = useState<{ peerId: string; bookingId?: string | null } | null>(null);
+	const [bookingMeta, setBookingMeta] = useState<Record<string, Booking>>({});
+	const fetchedBookingIds = useRef(new Set<string>());
 	const conversationsPollMs = useRealtimePollInterval(30000);
 	const messagesPollMs = useRealtimePollInterval(15000);
 
@@ -41,34 +46,27 @@ const MessagesPage: NextPage = () => {
 		pollInterval: conversationsPollMs,
 	});
 
-	const conversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
+	const rawConversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
+	const conversations = useMemo(() => dedupeConversationsByPeer(rawConversations), [rawConversations]);
+
+	const activeConversation = useMemo(
+		() => conversations.find((c) => c.peerId === selected?.peerId) ?? null,
+		[conversations, selected?.peerId],
+	);
+
+	const activeBookingId = activeConversation?.bookingId ?? selected?.bookingId ?? null;
 
 	const { data: peerData } = useQuery(GET_USER, {
-		skip: !selected?.peerId || conversations.some((c) => c.peerId === selected?.peerId),
+		skip: !selected?.peerId,
 		variables: { userId: selected?.peerId },
 		fetchPolicy: 'network-only',
 	});
 
-	const { data: messagesData, refetch: refetchMessages } = useQuery(GET_MESSAGES, {
-		skip: !selected?.peerId,
-		variables: {
-			input: {
-				page: 1,
-				limit: 100,
-				sort: 'createdAt',
-				direction: 'ASC',
-				search: { peerId: selected?.peerId, bookingId: selected?.bookingId || undefined },
-			},
-		},
-		fetchPolicy: 'network-only',
-		pollInterval: messagesPollMs,
-	});
-
-	const messages: Message[] = messagesData?.getMessages?.list ?? [];
+	const { messages, refetchMessages } = usePeerMessages(selected?.peerId, rawConversations, messagesPollMs);
 
 	const { data: bookingData, loading: bookingLoading } = useQuery(GET_BOOKING, {
-		skip: !selected?.bookingId,
-		variables: { bookingId: selected?.bookingId },
+		skip: !activeBookingId,
+		variables: { bookingId: activeBookingId },
 		fetchPolicy: 'network-only',
 	});
 
@@ -80,10 +78,46 @@ const MessagesPage: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const device = deviceData?.getDevice ?? null;
+	const device = deviceData?.getDevice ?? booking?.deviceData ?? null;
 
 	const [sendMessage, { loading: sending }] = useMutation(SEND_MESSAGE);
 	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ);
+
+	/** Cache booking summaries for conversation list device labels */
+	useEffect(() => {
+		const ids = [...new Set(conversations.map((c) => c.bookingId).filter(Boolean))] as string[];
+		const missing = ids.filter((id) => !fetchedBookingIds.current.has(id));
+		if (!missing.length) return;
+
+		let cancelled = false;
+		missing.forEach((id) => fetchedBookingIds.current.add(id));
+
+		Promise.all(
+			missing.map((bookingId) =>
+				apolloClient
+					.query<{ getBooking: Booking }>({
+						query: GET_BOOKING,
+						variables: { bookingId },
+						fetchPolicy: 'cache-first',
+					})
+					.then((res) => ({ bookingId, booking: res.data?.getBooking }))
+					.catch(() => null),
+			),
+		).then((results) => {
+			if (cancelled) return;
+			const next: Record<string, Booking> = {};
+			results.forEach((entry) => {
+				if (entry?.booking) next[entry.bookingId] = entry.booking;
+			});
+			if (Object.keys(next).length) {
+				setBookingMeta((prev) => ({ ...prev, ...next }));
+			}
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [conversations, apolloClient]);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -107,48 +141,67 @@ const MessagesPage: NextPage = () => {
 		const conversation = conversations.find((c) => c.peerId === selected.peerId);
 		if (conversation && conversation.unreadCount > 0) {
 			markMessagesAsRead({
-				variables: { input: { peerId: selected.peerId, bookingId: selected.bookingId || undefined } },
+				variables: { input: { peerId: selected.peerId } },
 			})
 				.then(() => refetchConversations())
 				.catch(() => undefined);
 		}
-	}, [selected?.peerId, selected?.bookingId, conversations]);
+	}, [selected?.peerId, conversations]);
 
 	/** HANDLERS **/
 	const selectConversation = (conversation: Conversation) => {
 		setSelected({ peerId: conversation.peerId, bookingId: conversation.bookingId ?? null });
 	};
 
-	const sendHandler = async (text: string) => {
+	const sendHandler = async ({ text, imageFile }: SendMessagePayload) => {
 		if (!selected?.peerId) return;
-		try {
+
+		const send = async (messageContent: string, messageType: 'TEXT' | 'IMAGE') => {
 			await sendMessage({
 				variables: {
 					input: {
 						receiverId: selected.peerId,
-						bookingId: selected.bookingId || undefined,
-						messageContent: text,
-						messageType: 'TEXT',
+						bookingId: activeBookingId || undefined,
+						messageContent,
+						messageType,
 					},
 				},
 			});
 			await refetchMessages();
 			await refetchConversations();
+		};
+
+		try {
+			if (imageFile) {
+				const base64 = await fileToDataUrl(imageFile);
+				await send(base64, 'IMAGE');
+				return;
+			}
+			if (text?.trim()) {
+				await send(text.trim(), 'TEXT');
+			}
 		} catch (err: any) {
 			await sweetErrorHandling(err);
 		}
 	};
 
-	const activePeer = useMemo(() => {
+	const activePeer = useMemo((): ConversationPeer | null => {
+		const fromUser = peerData?.getUser;
+		if (fromUser) return { ...fromUser };
 		const fromConversation = conversations.find((c) => c.peerId === selected?.peerId)?.peer;
-		if (fromConversation) return fromConversation;
-		return peerData?.getUser ? { ...peerData.getUser } : null;
+		if (fromConversation) return { ...fromConversation };
+		return null;
 	}, [conversations, selected?.peerId, peerData]);
 
 	return (
 		<div className="fixora-messages-page">
 			<div className="container fixora-messages">
-				<ConversationList conversations={conversations} selectedPeerId={selected?.peerId} onSelect={selectConversation} />
+				<ConversationList
+					conversations={conversations}
+					selectedPeerId={selected?.peerId}
+					bookingMeta={bookingMeta}
+					onSelect={selectConversation}
+				/>
 
 				<ChatThread
 					peer={activePeer}
@@ -158,9 +211,15 @@ const MessagesPage: NextPage = () => {
 					currentUserImage={user?.memberImage}
 					onSend={sendHandler}
 					sending={sending}
+					contextBar={booking ? <ChatBookingContextBar booking={booking} device={device} /> : undefined}
 				/>
 
-				<RequestDetailsPanel booking={booking} device={device} loading={selected?.bookingId ? bookingLoading : false} />
+				<RequestDetailsPanel
+					booking={booking}
+					device={device}
+					technician={activePeer}
+					loading={activeBookingId ? bookingLoading : false}
+				/>
 			</div>
 		</div>
 	);

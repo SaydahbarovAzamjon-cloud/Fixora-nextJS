@@ -10,11 +10,32 @@ export interface ProfileHeaderProps {
 	requestsCount: number;
 	followingCount: number;
 	storiesCount: number;
-	onEditProfile: () => void;
+	onEditProfile?: () => void;
+	readOnly?: boolean;
+	memberSince?: string;
+	location?: string;
+	stats?: { label: string; value: React.ReactNode }[];
 }
 
-const ProfileHeader = ({ name, email, image, requestsCount, followingCount, storiesCount, onEditProfile }: ProfileHeaderProps) => {
+const ProfileHeader = ({
+	name,
+	email,
+	image,
+	requestsCount,
+	followingCount,
+	storiesCount,
+	onEditProfile,
+	readOnly = false,
+	memberSince,
+	location,
+	stats,
+}: ProfileHeaderProps) => {
 	const { t } = useTranslation('common');
+	const displayStats = stats ?? [
+		{ value: requestsCount, label: t('mypage.requests') },
+		{ value: followingCount, label: t('mypage.following') },
+		{ value: storiesCount, label: t('mypage.stories') },
+	];
 
 	return (
 		<div className="fixora-mypage__header">
@@ -23,25 +44,23 @@ const ProfileHeader = ({ name, email, image, requestsCount, followingCount, stor
 				<div className="fixora-mypage__identity-info">
 					<strong className="fixora-mypage__name">{name}</strong>
 					{email && <span className="fixora-mypage__email">{email}</span>}
-					<FixoraButton variant="outline" className="fixora-mypage__edit-btn" onClick={onEditProfile}>
-						{t('mypage.editProfile')}
-					</FixoraButton>
+					{memberSince && <span className="fixora-mypage__email">{memberSince}</span>}
+					{location && <span className="fixora-mypage__email">{location}</span>}
+					{!readOnly && onEditProfile && (
+						<FixoraButton variant="outline" className="fixora-mypage__edit-btn" onClick={onEditProfile}>
+							{t('mypage.editProfile')}
+						</FixoraButton>
+					)}
 				</div>
 			</div>
 
 			<div className="fixora-mypage__stats">
-				<div className="fixora-mypage__stat">
-					<strong>{requestsCount}</strong>
-					<span>{t('mypage.requests')}</span>
-				</div>
-				<div className="fixora-mypage__stat">
-					<strong>{followingCount}</strong>
-					<span>{t('mypage.following')}</span>
-				</div>
-				<div className="fixora-mypage__stat">
-					<strong>{storiesCount}</strong>
-					<span>{t('mypage.stories')}</span>
-				</div>
+				{displayStats.map((stat) => (
+					<div className="fixora-mypage__stat" key={String(stat.label)}>
+						<strong>{stat.value}</strong>
+						<span>{stat.label}</span>
+					</div>
+				))}
 			</div>
 		</div>
 	);

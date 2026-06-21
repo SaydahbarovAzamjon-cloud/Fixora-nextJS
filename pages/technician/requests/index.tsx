@@ -25,6 +25,7 @@ import { GET_INCOMING_REQUESTS } from '../../../apollo/user/profile';
 import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
 import { userVar } from '../../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
+import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -201,7 +202,9 @@ const IncomingRequests: NextPage = () => {
 										</div>
 										<div className="fixora-request-card__info">
 											<div className="fixora-request-card__title-row">
-												<span className="fixora-request-card__name">{t('requests.customer')}</span>
+												<UserProfileLink userId={req.userId} userType={req.customerData?.userType ?? 'USER'} className="fixora-request-card__name">
+													<span>{req.customerData?.userFullName || req.customerData?.userNickname || t('requests.customer')}</span>
+												</UserProfileLink>
 												<span className="fixora-request-card__dot">•</span>
 												<span className="fixora-request-card__id">{reqCode(req._id)}</span>
 											</div>
@@ -267,10 +270,13 @@ const IncomingRequests: NextPage = () => {
 									<div className="fixora-requests-detail__grid">
 										<div className="fixora-requests-detail__card">
 											<div className="fixora-requests-detail__card-label">Client</div>
+											<UserProfileLink userId={displayedBooking.userId} userType={displayedBooking.customerData?.userType ?? 'USER'}>
 											<div className="fixora-requests-detail__entity">
 												<div className="fixora-requests-detail__avatar">C</div>
 												<div>
-													<div className="fixora-requests-detail__entity-name">{t('requests.customer')}</div>
+													<div className="fixora-requests-detail__entity-name">
+														{displayedBooking.customerData?.userFullName || displayedBooking.customerData?.userNickname || t('requests.customer')}
+													</div>
 													<div className="fixora-requests-detail__rating">
 														<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} />
 														<span className="fixora-requests-detail__rating-val">Client</span>
@@ -278,6 +284,7 @@ const IncomingRequests: NextPage = () => {
 													</div>
 												</div>
 											</div>
+											</UserProfileLink>
 											<div className="fixora-requests-detail__loc">
 												<LocationOnOutlined style={{ fontSize: 15 }} />
 												<span>Booking {reqCode(displayedBooking._id)}</span>

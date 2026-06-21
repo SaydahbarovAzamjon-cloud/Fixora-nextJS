@@ -80,7 +80,7 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		color: '#F59E0B',
 		icon: <StarRounded style={ICON_SX} />,
 		filter: 'reviews',
-		action: () => ({ label: 'View Review', link: '/technician/profile' }),
+		action: (n) => ({ label: 'View Review', link: n.userId ? `/client/${n.userId}` : '/technician/profile' }),
 	},
 	follow: {
 		gradient: 'linear-gradient(135deg, #35A8FF 0%, #3FE5FF 100%)',
@@ -90,7 +90,7 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		// The follower's id is stored on the notification (userId === referenceId === followerId).
 		action: (n) => {
 			const followerId = n.referenceId || n.userId;
-			return { label: 'View Profile', link: followerId ? `/member?memberId=${followerId}` : '/technician/profile' };
+			return { label: 'View Profile', link: followerId ? `/client/${followerId}` : '/technician/profile' };
 		},
 	},
 	like: {
@@ -101,7 +101,7 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		action: (n) =>
 			n.referenceType === 'ARTICLE'
 				? { label: 'View Article', link: n.referenceId ? `/community/${n.referenceId}` : '/community' }
-				: { label: 'View Profile', link: '/technician/profile' },
+				: { label: 'View Profile', link: n.userId ? `/client/${n.userId}` : '/technician/profile' },
 	},
 	comment: {
 		gradient: 'linear-gradient(135deg, #7B2CFF 0%, #D500F9 100%)',

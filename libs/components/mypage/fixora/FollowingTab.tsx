@@ -11,14 +11,20 @@ import { resolveProfileImageUrl } from '../../../utils/profileImage';
 import { FixoraButton } from '../../ui';
 import { sweetErrorHandling } from '../../../sweetAlert';
 
-const FollowingTab = () => {
+interface FollowingTabProps {
+	userId?: string;
+	readOnly?: boolean;
+}
+
+const FollowingTab = ({ userId, readOnly = false }: FollowingTabProps) => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const followerId = userId ?? user?._id;
 
 	const { data, refetch } = useQuery(GET_USER_FOLLOWINGS, {
-		skip: !user?._id,
-		variables: { input: { page: 1, limit: 50, search: { followerId: user?._id } } },
+		skip: !followerId,
+		variables: { input: { page: 1, limit: 50, search: { followerId } } },
 		fetchPolicy: 'network-only',
 	});
 
@@ -51,7 +57,7 @@ const FollowingTab = () => {
 						<button
 							type="button"
 							className="fixora-mypage__following-info"
-							onClick={() => router.push(`/agent/detail?id=${technician._id}`)}
+							onClick={() => router.push(`/technicians/${technician._id}`)}
 						>
 							<img className="fixora-mypage__following-avatar" src={resolveProfileImageUrl(technician.userProfileImage)} alt="" />
 							<div>
@@ -63,9 +69,11 @@ const FollowingTab = () => {
 								</span>
 							</div>
 						</button>
-						<FixoraButton variant="outline" onClick={() => unfollow(technician._id)}>
-							{t('mypage.unfollow')}
-						</FixoraButton>
+						{!readOnly && (
+							<FixoraButton variant="outline" onClick={() => unfollow(technician._id)}>
+								{t('mypage.unfollow')}
+							</FixoraButton>
+						)}
 					</div>
 				);
 			})}

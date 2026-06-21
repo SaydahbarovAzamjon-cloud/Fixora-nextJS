@@ -622,6 +622,7 @@ export const GET_USER = gql`
 			userArticles
 			userEmail
 			userPhoneNumber
+			createdAt
 			meFollowed {
 				followingId
 				followerId

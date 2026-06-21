@@ -24,6 +24,7 @@ import { COMPLETE_BOOKING, GET_TECHNICIAN_BOOKINGS, UPDATE_BOOKING_STATUS } from
 import { GET_BOOKING_PAYMENTS } from '../../../apollo/user/payment';
 import { userVar } from '../../../apollo/store';
 import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
+import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 import {
 	getJobStage,
 	getJobStageInfo,
@@ -212,7 +213,9 @@ const ActiveJobs: NextPage = () => {
 											<DeviceGlyph type={job.aiClassification?.deviceType} />
 										</div>
 										<div className="fixora-job-card__head">
-											<div className="fixora-job-card__name">{job.customerData?.userFullName || job.customerData?.userNickname || 'Unknown'}</div>
+											<UserProfileLink userId={job.userId || job.customerData?._id} userType="USER" className="fixora-job-card__name">
+												<span>{job.customerData?.userFullName || job.customerData?.userNickname || 'Unknown'}</span>
+											</UserProfileLink>
 											<div className="fixora-job-card__device">{deviceLabel(job.aiClassification?.deviceType)}</div>
 										</div>
 										<span className="fixora-job-card__status" style={{ color: info.color, background: info.bg }}>
@@ -281,7 +284,9 @@ const ActiveJobs: NextPage = () => {
 											</div>
 											<div>
 												<div className="fixora-jobs-infocard__label">{t('jobs.client')}</div>
-												<div className="fixora-jobs-infocard__value">{displayedJob.customerData?.userFullName || displayedJob.customerData?.userNickname || t('jobs.unknown')}</div>
+												<UserProfileLink userId={displayedJob.userId || displayedJob.customerData?._id} userType="USER" className="fixora-jobs-infocard__value">
+													<span>{displayedJob.customerData?.userFullName || displayedJob.customerData?.userNickname || t('jobs.unknown')}</span>
+												</UserProfileLink>
 												<div className="fixora-jobs-infocard__sub">{t('jobs.verifiedCustomer')}</div>
 											</div>
 										</div>

@@ -324,7 +324,7 @@ const Messages: NextPage = () => {
 										key={conv.peerId}
 									className={`fixora-msg-conv ${conv.peerId === selected?.peerId ? 'fixora-msg-conv--active' : ''}`}
 								>
-									<UserProfileLink userId={peerId} userType={conv.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link">
+									<UserProfileLink userId={peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link">
 										<div className="fixora-msg-conv__avatar-wrap">
 											<Avatar image={conv.peer?.userProfileImage} name={name} className="fixora-msg-conv__avatar" />
 											{conv.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
@@ -337,7 +337,7 @@ const Messages: NextPage = () => {
 									>
 										<div className="fixora-msg-conv__body">
 											<div className="fixora-msg-conv__row">
-												<UserProfileLink userId={peerId} userType={conv.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
+												<UserProfileLink userId={peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
 													<span className="fixora-msg-conv__name">{name}</span>
 												</UserProfileLink>
 												<span className="fixora-msg-conv__meta">
@@ -361,14 +361,14 @@ const Messages: NextPage = () => {
 				{activeConversation ? (
 					<>
 						<div className="fixora-msg-chat__header">
-							<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link">
+							<UserProfileLink userId={activeConversation.peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link">
 								<div className="fixora-msg-conv__avatar-wrap">
 									<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-chat__avatar" />
 									{activeConversation.peer?.isOnline && <span className="fixora-msg-conv__dot" />}
 								</div>
 							</UserProfileLink>
 							<div className="fixora-msg-chat__head-info">
-								<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
+								<UserProfileLink userId={activeConversation.peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link fixora-msg-conv__profile-link--name">
 									<div className="fixora-msg-chat__name">{activeName}</div>
 								</UserProfileLink>
 								<div className="fixora-msg-chat__status">
@@ -404,7 +404,7 @@ const Messages: NextPage = () => {
 								return (
 									<div key={m._id} className={`fixora-msg-row fixora-msg-row--${dir}`}>
 										{dir === 'in' && (
-											<UserProfileLink userId={activeConversation.peerId} userType={activeConversation.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link" stopPropagation={false}>
+											<UserProfileLink userId={activeConversation.peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link" stopPropagation={false}>
 												<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-row__avatar" />
 											</UserProfileLink>
 										)}

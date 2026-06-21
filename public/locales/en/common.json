@@ -572,6 +572,7 @@
   "community.empty": "No articles in this category yet",
   "community.loginToPost": "Please log in to create a post",
   "community.loginToLike": "Please log in to like a post",
+  "community.like": "Like",
   "community.createArticle": "Create Article",
   "community.loadingArticle": "Loading article...",
   "community.loginToLikeShort": "Please log in to like",

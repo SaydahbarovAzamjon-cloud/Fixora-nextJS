@@ -256,7 +256,7 @@
 
 		svg {
 			font-size: 15px;
-			color: var(--fixora-primary);
+			color: #fff;
 		}
 
 		em {
@@ -301,7 +301,7 @@
 			flex-shrink: 0;
 			margin-top: 1px;
 			font-size: 15px;
-			color: var(--fixora-primary);
+			color: #fff;
 		}
 
 		&--muted {
@@ -313,11 +313,11 @@
 		margin-top: auto;
 		padding: 4px 10px;
 		border-radius: 6px;
-		border: 1px solid var(--fixora-border);
-		background: rgba(115, 12, 30, 0.12);
+		border: 1px solid #fff;
+		background: rgba(255, 255, 255, 0.08);
 		font-size: 11px;
 		font-weight: 700;
-		color: var(--fixora-primary);
+		color: #fff;
 	}
 }
 

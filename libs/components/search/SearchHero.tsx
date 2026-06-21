@@ -6,6 +6,7 @@ import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
+import { FixoraMark } from '../brand';
 
 interface SearchHeroProps {
 	searchFilter: TechniciansInquiry;
@@ -85,7 +86,7 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 						<BatteryAlertIcon fontSize="small" />
 					</span>
 					<div className="fixora-search-hero__phone">
-						<img src="/img/logo/logo-icon.png" alt="" />
+						<FixoraMark size={32} />
 					</div>
 				</div>
 			</div>

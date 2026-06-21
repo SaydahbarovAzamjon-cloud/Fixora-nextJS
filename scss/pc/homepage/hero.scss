@@ -559,8 +559,12 @@
 			&:hover {
 				@include fixora-home-card-surface;
 				border-color: var(--fixora-primary);
-				color: var(--fixora-primary);
+				color: #fff;
 				transform: scale(1.05);
+
+				svg {
+					color: #fff;
+				}
 			}
 		}
 

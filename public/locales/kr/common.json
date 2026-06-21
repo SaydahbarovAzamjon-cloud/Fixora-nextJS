@@ -572,6 +572,7 @@
   "community.empty": "이 카테고리에 게시글이 없습니다",
   "community.loginToPost": "게시글을 작성하려면 로그인하세요",
   "community.loginToLike": "좋아요를 누르려면 로그인하세요",
+  "community.like": "좋아요",
   "community.createArticle": "게시글 작성",
   "community.loadingArticle": "게시글 불러오는 중...",
   "community.loginToLikeShort": "좋아요를 누르려면 로그인하세요",

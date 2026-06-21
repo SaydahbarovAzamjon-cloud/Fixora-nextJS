@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
@@ -14,6 +15,8 @@ interface TechTipCardProps {
 	article: ArticleSummary;
 	/** When true, entire card navigates to article (public profile). */
 	linkable?: boolean;
+	onLike?: (articleId: string) => void;
+	likePending?: boolean;
 }
 
 const formatCount = (value: number): string =>
@@ -21,7 +24,7 @@ const formatCount = (value: number): string =>
 
 const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
-const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
+const TechTipCard = ({ article, linkable = false, onLike, likePending = false }: TechTipCardProps) => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const detailHref = `/community/${article._id}`;
@@ -29,13 +32,36 @@ const TechTipCard = ({ article, linkable = false }: TechTipCardProps) => {
 	const coverUrl = resolveArticleImageUrl(article.articleImage);
 	const [imgFailed, setImgFailed] = useState(false);
 	const showCover = !!coverUrl && !imgFailed;
+	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
+
+	const handleLike = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onLike?.(article._id);
+		},
+		[article._id, onLike],
+	);
 
 	const footer = (
 		<div className="fixora-tip-card__footer">
-			<span className="fixora-tip-card__stat fixora-tip-card__stat--likes">
-				<FavoriteBorderIcon fontSize="inherit" />
+			<button
+				type="button"
+				className={[
+					'fixora-tip-card__stat',
+					'fixora-tip-card__stat--likes',
+					'fixora-tip-card__stat--btn',
+					isLiked ? 'fixora-tip-card__stat--likes--active' : '',
+				]
+					.filter(Boolean)
+					.join(' ')}
+				onClick={handleLike}
+				disabled={likePending || !onLike}
+				aria-label={t('community.like')}
+			>
+				{isLiked ? <FavoriteIcon fontSize="inherit" /> : <FavoriteBorderIcon fontSize="inherit" />}
 				{formatCount(article.articleLikes)}
-			</span>
+			</button>
 			<span className="fixora-tip-card__stat">
 				<RemoveRedEyeOutlinedIcon fontSize="inherit" />
 				{formatCount(article.articleViews)}

@@ -94,6 +94,8 @@ Yangi UI element qo‘shganda:
 | GAP-040 | Search filters to‘liq ishlashi | `getTechnicians` filter implementation audit | P3-05 search sahifasi | Ba’zi filterlar backendda tasdiqlanmagan | `PARTIAL` | [`backend-search-gaps-prompt.md`](backend-search-gaps-prompt.md) |
 | GAP-041 | **ON_SITE** booking | `BookingType.ON_SITE` flow + technician on-site dispatch | Mockupda "Coming Soon" | UI faqat badge; MVP `SHOP_VISIT` (BIZ-01) | `MISSING` | Booking UI, DECISIONS BIZ-01 |
 | GAP-097 | **Platform technician stats** (`/technicians`) | `getTechnicianPlatformStats` yoki `TISearch.createdAtFrom` / `createdAtTo` | Oylik signup, o‘sish trendi, aniq “joined this month” KPI | `metaCounter` + 100 ta recent sample client-side count (approximate) | `WORKAROUND` | `libs/components/technicians/TechniciansPageStats.tsx`, `pages/technicians/index.tsx` |
+| GAP-100 | **Trending technicians row** (`/technicians`) | `getTechnicianTrending` yoki growth metrics (`reviewGrowth`, `bookingGrowth`, `profileViews`) | Discovery “Trending” carousel haqiqiy momentum bo‘yicha | Client composite: `reviewCount×3 + completedJobs×2 + rating×15 + followers + online` | `WORKAROUND` | `libs/utils/technicianDiscoverySections.ts`, `pages/technicians/index.tsx` |
+| GAP-099 | **Fast responders row** (`/technicians`) | `User.avgResponseMinutes` (GAP-030) | Discovery “Fast Responders” carousel | Client proxy: `online×100 + rating×20 + min(jobs,50)` | `WORKAROUND` | `libs/utils/technicianDiscoverySections.ts` |
 
 ---
 

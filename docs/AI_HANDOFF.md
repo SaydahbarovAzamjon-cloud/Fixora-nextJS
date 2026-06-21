@@ -6,7 +6,7 @@
 |-------|-------|
 | **Last updated** | 2026-06-21 |
 | **Last agent** | Cursor |
-| **Last session** | GAP-098 localStorage workaround (Saved Technicians tab); removed legacy Chat widget from layouts; cleanup `nul`/dev scripts gitignore. **Backend gaps deferred per user.** |
+| **Last session** | `/technicians` discovery redesign — 6 Swiper carousels (`TechnicianCard` + optional Follow), `useTechniciansDiscovery` + `technicianDiscoverySections.ts`; removed search/map clone from technicians page. GAP-100/099 documented for trending/fast-responder proxies. |
 | **Next agent should start with** | User-driven UI changes — **backend gaps deferred**; PM-01+ when user approves mobile |
 
 ---
@@ -25,7 +25,7 @@
 | OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — cards link to profile/article; View all → `/technicians` + `/community` |
-| Technicians directory | ✅ `/technicians` — stats KPIs, top/new carousels, search/filter grid (`TechniciansPageStats`, GAP-097 workaround) |
+| Technicians directory | ✅ `/technicians` — discovery page: 6 category carousels (Trending, Top Rated, Most Reviewed, Fast Responders, New, Verified) + stats KPIs; Home `TechnicianCard` 1:1 with optional Follow; no map/search UI |
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/client/my-page` owner 6-tab dashboard + `/mypage` redirect + `/notifications` — mockup screenshots 2026-06-21 |
 | Technician Dashboard (P3-13) | ✅ `/technician/dashboard` — quick actions functional (New Quote/Mark Available/View Schedule/Export Report); Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, device-only — no backend schedule model) merged with bookings (DECISIONS UI-11) |

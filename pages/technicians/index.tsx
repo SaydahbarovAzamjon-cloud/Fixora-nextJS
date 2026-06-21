@@ -1,33 +1,30 @@
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useMemo } from 'react';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { Stack, Pagination } from '@mui/material';
+import { useMutation, useReactiveVar } from '@apollo/client';
+import { Stack } from '@mui/material';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
-import SearchHero from '../../libs/components/search/SearchHero';
-import SearchCategoryRow from '../../libs/components/search/SearchCategoryRow';
-import SearchFilters from '../../libs/components/search/SearchFilters';
-import SearchResultsHeader from '../../libs/components/search/SearchResultsHeader';
-import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
+import TechniciansDiscoveryCarousel from '../../libs/components/technicians/TechniciansDiscoveryCarousel';
 import TechniciansPageStats from '../../libs/components/technicians/TechniciansPageStats';
-import { GET_TECHNICIANS } from '../../apollo/user/query';
-import { LIKE_TARGET_USER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
-import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
-import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
+import { SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
-import { sortTechniciansList } from '../../libs/utils/sortTechnicians';
+import { useTechniciansDiscovery } from '../../libs/hooks/useTechniciansDiscovery';
+import {
+	DISCOVERY_SECTION_IDS,
+	DiscoverySectionId,
+} from '../../libs/utils/technicianDiscoverySections';
 
-const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
-const SearchMapExpandedSection = dynamic(
-	() => import('../../libs/components/search/SearchMapExpandedSection'),
-	{ ssr: false },
-);
+const SECTION_TITLE_KEYS: Record<DiscoverySectionId, string> = {
+	trending: 'technicians.sections.trending',
+	topRated: 'technicians.sections.topRated',
+	mostReviewed: 'technicians.sections.mostReviewed',
+	fastResponders: 'technicians.sections.fastResponders',
+	newTechnicians: 'technicians.sections.newTechnicians',
+	verified: 'technicians.sections.verified',
+};
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -35,57 +32,13 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	},
 });
 
-const DEFAULT_INPUT: TechniciansInquiry = {
-	page: 1,
-	limit: 10,
-	sort: 'averageRating',
-	direction: 'DESC',
-	search: { isOnline: null },
-};
-
 const TechniciansListPage: NextPage = () => {
 	const { t } = useTranslation('common');
-	const router = useRouter();
-	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
-	const [locationLabel, setLocationLabel] = useState('');
-	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-	const [mapExpanded, setMapExpanded] = useState(false);
-	const [selectedMapTechnicianId, setSelectedMapTechnicianId] = useState<string | null>(null);
 	const user = useReactiveVar(userVar);
+	const { sections, loading, error, refetch } = useTechniciansDiscovery();
 
-	const [likeTargetUser] = useMutation(LIKE_TARGET_USER);
 	const [subscribe] = useMutation(SUBSCRIBE);
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
-
-	const locationChangeHandler = ({ label, lat, lng }: { label: string; lat: number; lng: number }) => {
-		setLocationLabel(label);
-		setSearchFilter((prev) => ({
-			...prev,
-			page: 1,
-			search: {
-				...prev.search,
-				isOnline: prev.search.isOnline ?? null,
-				latitude: lat,
-				longitude: lng,
-				radiusKm: prev.search.radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
-			},
-		}));
-	};
-
-	const toggleFavoriteHandler = async (id: string) => {
-		try {
-			if (!id) return;
-			if (!user?._id) throw new Error(Messages.error2);
-			const { data } = await likeTargetUser({ variables: { userId: id } });
-			if (user._id) {
-				const myFavorite = !!data?.likeTargetUser?.meLiked?.[0]?.myFavorite;
-				setSavedTechnicianLiked(user._id, id, myFavorite);
-			}
-			await refetch({ input: searchFilter });
-		} catch (err: any) {
-			await sweetErrorHandling(err);
-		}
-	};
 
 	const toggleFollowHandler = async (id: string, isFollowing: boolean) => {
 		try {
@@ -97,121 +50,53 @@ const TechniciansListPage: NextPage = () => {
 				await subscribe({ variables: { input: id } });
 				await sweetTopSmallSuccessAlert('Followed!', 800);
 			}
-			await refetch({ input: searchFilter });
-		} catch (err: any) {
+			await refetch();
+		} catch (err: unknown) {
 			await sweetErrorHandling(err);
 		}
 	};
 
-	const { data, refetch } = useQuery(GET_TECHNICIANS, {
-		fetchPolicy: 'network-only',
-		variables: { input: searchFilter },
-		notifyOnNetworkStatusChange: true,
-	});
-
-	const technicians = useMemo(() => {
-		const list = (data?.getTechnicians?.list ?? []) as TechnicianSummary[];
-		return sortTechniciansList(list, searchFilter);
-	}, [data, searchFilter]);
-	const total = data?.getTechnicians?.metaCounter?.[0]?.total ?? 0;
-
-	useEffect(() => {
-		if (!router.query.input) return;
-		try {
-			const parsed = JSON.parse(router.query.input as string) as TechniciansInquiry;
-			setSearchFilter({
-				...parsed,
-				search: {
-					isOnline: null,
-					...parsed.search,
-				},
-			});
-		} catch {
-			// ignore malformed query
+	const carouselSections = useMemo(() => {
+		if (loading && sections.length === 0) {
+			return DISCOVERY_SECTION_IDS.map((id) => ({
+				id,
+				titleKey: SECTION_TITLE_KEYS[id],
+				technicians: [],
+			}));
 		}
-	}, [router.query.input]);
-
-	useEffect(() => {
-		if (!router.isReady) return;
-		router.replace(`/technicians?input=${JSON.stringify(searchFilter)}`, undefined, { shallow: true });
-		refetch({ input: searchFilter });
-	}, [searchFilter]);
-
-	const paginationChangeHandler = (_: ChangeEvent<unknown>, value: number) => {
-		setSearchFilter({ ...searchFilter, page: value });
-	};
+		return sections;
+	}, [loading, sections]);
 
 	return (
 		<Stack className="fixora-tech-list-page">
 			<Stack className="container">
-				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
-				<SearchCategoryRow searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+				<header className="fixora-tech-list-page__intro">
+					<h1>{t('technicians.page.title')}</h1>
+					<p>{t('technicians.page.subtitle')}</p>
+				</header>
 
-				{mapExpanded && (
-					<SearchMapExpandedSection
-						searchFilter={searchFilter}
-						locationLabel={locationLabel || t('search.location.placeholder')}
-						selectedTechnicianId={selectedMapTechnicianId}
-						onSelectTechnician={setSelectedMapTechnicianId}
-						onLocationChange={locationChangeHandler}
-						onCollapse={() => setMapExpanded(false)}
-					/>
+				{error && (
+					<div className="fixora-tech-list-page__error" role="alert">
+						{t('technicians.page.loadError')}
+					</div>
 				)}
 
-				<Stack className={`fixora-search__layout${mapExpanded ? ' fixora-search__layout--map-expanded' : ''}`}>
-					<Stack className="fixora-search__sidebar">
-						<LocationCard
-							locationLabel={locationLabel || t('search.location.placeholder')}
-							searchFilter={searchFilter}
-							onLocationChange={locationChangeHandler}
-							selectedTechnicianId={selectedMapTechnicianId}
-							onSelectTechnician={setSelectedMapTechnicianId}
-							onExpandMap={() => setMapExpanded(true)}
-							mapExpanded={mapExpanded}
+				<div className="fixora-tech-list-page__sections">
+					{carouselSections.map((section) => (
+						<TechniciansDiscoveryCarousel
+							key={section.id}
+							titleKey={section.titleKey}
+							technicians={section.technicians}
+							loading={loading}
+							currentUserId={user?._id}
+							onToggleFollow={toggleFollowHandler}
 						/>
-						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
-					</Stack>
+					))}
+				</div>
 
-					<Stack className="fixora-search__results">
-						<SearchResultsHeader
-							total={total}
-							searchFilter={searchFilter}
-							setSearchFilter={setSearchFilter}
-							viewMode={viewMode}
-							setViewMode={setViewMode}
-						/>
-
-						{technicians.length === 0 ? (
-							<div className="fixora-search__no-results">{t('search.results.noResults')}</div>
-						) : (
-							<Stack className={`fixora-search__results-list fixora-search__results-list--${viewMode}`}>
-								{technicians.map((technician) => (
-									<TechnicianResultCard
-										key={technician._id}
-										technician={technician}
-										view={viewMode}
-										favorited={!!technician.meLiked?.[0]?.myFavorite}
-										following={!!technician.meFollowed?.[0]?.myFollowing}
-										onToggleFavorite={toggleFavoriteHandler}
-										onToggleFollow={toggleFollowHandler}
-									/>
-								))}
-							</Stack>
-						)}
-
-						{technicians.length !== 0 && Math.ceil(total / searchFilter.limit) > 1 && (
-							<Stack className="fixora-search__pagination">
-								<Pagination
-									page={searchFilter.page}
-									count={Math.ceil(total / searchFilter.limit)}
-									onChange={paginationChangeHandler}
-									shape="circular"
-									color="primary"
-								/>
-							</Stack>
-						)}
-					</Stack>
-				</Stack>
+				{!loading && sections.length === 0 && !error && (
+					<div className="fixora-tech-list-page__empty">{t('technicians.page.empty')}</div>
+				)}
 
 				<div className="fixora-tech-list-page__stats-bottom">
 					<TechniciansPageStats />

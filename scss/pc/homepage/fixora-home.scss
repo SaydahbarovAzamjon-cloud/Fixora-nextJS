@@ -146,6 +146,7 @@
 .fixora-tech-card {
 	@include fixora-home-card-surface;
 	box-sizing: border-box; /* global reset forces content-box; without this, height: 100% + padding overflows the slide and the badge gets clipped */
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -159,6 +160,7 @@
 	font-family: inherit;
 	text-decoration: none;
 	color: inherit;
+	overflow: hidden;
 	transition: border-color 0.2s ease, transform 0.2s ease;
 
 	&:hover {
@@ -290,16 +292,18 @@
 	}
 
 	&__meta-row {
-		display: inline-flex;
-		align-items: flex-start;
+		display: flex;
+		align-items: center;
 		gap: 6px;
+		min-height: 20px;
 		font-size: 12.5px;
 		color: var(--fixora-text-muted);
 		line-height: 1.35;
 
 		svg {
 			flex-shrink: 0;
-			margin-top: 1px;
+			width: 15px;
+			height: 15px;
 			font-size: 15px;
 			color: #fff;
 		}
@@ -309,15 +313,71 @@
 		}
 	}
 
-	&__badge {
+	&__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		width: 100%;
 		margin-top: auto;
+		flex-shrink: 0;
+		min-height: 30px;
+	}
+
+	&__footer-spacer {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__follow {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		height: 28px;
+		padding: 0 10px;
+		border-radius: 999px;
+		border: 1px solid var(--fixora-primary);
+		background: rgba(115, 12, 30, 0.12);
+		color: var(--fixora-primary);
+		font-family: inherit;
+		font-size: 11px;
+		font-weight: 700;
+		cursor: pointer;
+		white-space: nowrap;
+		flex-shrink: 0;
+		transition: background 0.2s ease, color 0.2s ease;
+
+		svg {
+			font-size: 14px;
+		}
+
+		&:hover {
+			background: var(--fixora-primary);
+			color: #fff;
+		}
+
+		&--active {
+			background: var(--fixora-primary);
+			color: #fff;
+
+			&:hover {
+				background: var(--fixora-primary-hover);
+			}
+		}
+	}
+
+	&__badge {
+		margin-top: 0;
 		padding: 4px 10px;
 		border-radius: 6px;
-		border: 1px solid #fff;
+		border: 1px solid rgba(255, 255, 255, 0.55);
 		background: rgba(255, 255, 255, 0.08);
 		font-size: 11px;
 		font-weight: 700;
 		color: #fff;
+		letter-spacing: 0.02em;
+		flex-shrink: 0;
 	}
 }
 

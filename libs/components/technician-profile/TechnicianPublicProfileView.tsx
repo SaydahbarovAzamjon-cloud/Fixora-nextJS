@@ -59,7 +59,10 @@ export interface TechnicianPublicProfileViewProps {
 const TAB_IDS = ['overview', 'services', 'portfolio', 'reviews'] as const;
 type TabId = (typeof TAB_IDS)[number];
 
+const RATING_STARS = [5, 4, 3, 2, 1] as const;
+
 const ACCENT_PRIMARY = 'var(--fixora-primary)';
+const ACCENT_STAR = 'var(--fixora-primary-hover)';
 
 const CREDENTIALS = [
 	{ color: ACCENT_PRIMARY, verified: false, titleKey: 'technicianProfile.pp.cred.topTech', subKey: 'technicianProfile.pp.cred.topTechSub', icon: <EmojiEventsOutlined style={{ fontSize: 20 }} /> },
@@ -81,7 +84,7 @@ const iconSoftBg = (color: string) => (color === ACCENT_PRIMARY ? 'var(--fixora-
 const Stars = ({ count }: { count: number }) => (
 	<>
 		{Array.from({ length: 5 }).map((_, i) => (
-			<StarRounded key={i} style={{ fontSize: 14, color: i < count ? '#F59E0B' : '#3A3A3A' }} />
+			<StarRounded key={i} style={{ fontSize: 14, color: i < count ? ACCENT_STAR : '#3A3A3A' }} />
 		))}
 	</>
 );
@@ -317,7 +320,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 						<div className="fixora-pp-stats">
 							<div className="fixora-pp-stat">
 								<div className="fixora-pp-stat__label">
-									<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} /> {t('technicianProfile.pp.stat.rating')}
+									<StarRounded style={{ fontSize: 15, color: ACCENT_STAR }} /> {t('technicianProfile.pp.stat.rating')}
 								</div>
 								<div className="fixora-pp-stat__value">
 									{rating}<span className="fixora-pp-stat__unit">/5.0</span>
@@ -588,7 +591,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 										const pct = reviewsTotal > 0 ? Math.round((count / reviewsTotal) * 100) : 0;
 										return (
 											<div key={star} className="fixora-pp-rbar">
-												<span className="fixora-pp-rbar__star">{star} <StarRounded style={{ fontSize: 12, color: '#F59E0B' }} /></span>
+												<span className="fixora-pp-rbar__star">{star} <StarRounded style={{ fontSize: 12, color: ACCENT_STAR }} /></span>
 												<span className="fixora-pp-rbar__track">
 													<span className="fixora-pp-rbar__fill" style={{ width: `${pct}%` }} />
 												</span>

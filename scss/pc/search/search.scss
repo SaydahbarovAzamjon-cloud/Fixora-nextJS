@@ -1696,6 +1696,8 @@
 	&--list {
 		flex-direction: row;
 		align-items: center;
+		overflow: hidden;
+		min-width: 0;
 	}
 
 	&--grid {
@@ -1953,6 +1955,35 @@
 		font-size: 13.5px;
 		font-weight: 600;
 		color: var(--fixora-text-secondary);
+		max-width: 100%;
+	}
+
+	&--list &__specialty {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		word-break: break-word;
+	}
+
+	&--list &__name {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&--list &__owner {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&--list &__location {
+		flex-wrap: wrap;
+		row-gap: 4px;
+		max-width: 100%;
 	}
 
 	&--grid &__specialty {
@@ -2051,6 +2082,9 @@
 .fixora-search__pagination {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	width: 100%;
+	align-self: stretch;
 	margin-top: 24px;
 
 	.MuiPaginationItem-root {

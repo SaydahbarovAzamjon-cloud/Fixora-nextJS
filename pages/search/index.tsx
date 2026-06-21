@@ -21,6 +21,7 @@ import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
+import { sortTechniciansList } from '../../libs/utils/sortTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
 const SearchMapExpandedSection = dynamic(
@@ -112,10 +113,10 @@ const SearchPage: NextPage = () => {
 		notifyOnNetworkStatusChange: true,
 	});
 
-	const technicians = useMemo(
-		() => (data?.getTechnicians?.list ?? []) as TechnicianSummary[],
-		[data],
-	);
+	const technicians = useMemo(() => {
+		const list = (data?.getTechnicians?.list ?? []) as TechnicianSummary[];
+		return sortTechniciansList(list, searchFilter);
+	}, [data, searchFilter]);
 	const total = data?.getTechnicians?.metaCounter?.[0]?.total ?? 0;
 
 	useEffect(() => {

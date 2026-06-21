@@ -27,11 +27,14 @@ const SearchResultsHeader = ({ total, searchFilter, setSearchFilter, viewMode, s
 	const sortCloseHandler = () => setSortAnchor(null);
 
 	const sortSelectHandler = (sort: string, direction: 'ASC' | 'DESC') => {
-		setSearchFilter({ ...searchFilter, sort, direction });
+		setSearchFilter({ ...searchFilter, page: 1, sort, direction });
 		setSortAnchor(null);
 	};
 
-	const activeSort = SORT_OPTIONS.find((option) => option.sort === searchFilter.sort) ?? SORT_OPTIONS[0];
+	const activeSort =
+		SORT_OPTIONS.find(
+			(option) => option.sort === searchFilter.sort && option.direction === searchFilter.direction,
+		) ?? SORT_OPTIONS[0];
 
 	return (
 		<div className="fixora-search__results-header">

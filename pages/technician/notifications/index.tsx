@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
-import { gql, useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
 import Inventory2Rounded from '@mui/icons-material/Inventory2Rounded';
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
@@ -17,7 +17,7 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
-import { GET_MY_PAYMENTS } from '../../../apollo/user/profile';
+import { GET_MY_PAYMENTS, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
 import { formatKrw } from '../../../libs/utils/formatCurrency';
@@ -25,27 +25,6 @@ import { formatKrw } from '../../../libs/utils/formatCurrency';
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
 });
-
-// Lightweight followers query — the shared GET_MEMBER_FOLLOWERS asks for legacy
-// member* fields that don't exist on the Fixora `User` type, so we request only
-// the User fields we actually need here.
-const GET_FOLLOWERS_FOR_NOTIF = gql`
-	query GetFollowersForNotif($input: FollowInquiry!) {
-		getMemberFollowers(input: $input) {
-			list {
-				_id
-				followerId
-				createdAt
-				followerData {
-					_id
-					userNickname
-					userFullName
-					userProfileImage
-				}
-			}
-		}
-	}
-`;
 
 type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert';
 type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'alerts';
@@ -215,7 +194,7 @@ const Notifications: NextPage = () => {
 	// after that feature shipped, so older followers never appear in the feed. We
 	// pull the technician's full followers list and surface every follower (old and
 	// new) as a follow notification — this is the source of truth for "who followed".
-	const { data: followersData } = useQuery(GET_FOLLOWERS_FOR_NOTIF, {
+	const { data: followersData } = useQuery(GET_USER_FOLLOWERS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: { followingId: user?._id } } },
 		fetchPolicy: 'network-only',
@@ -242,7 +221,7 @@ const Notifications: NextPage = () => {
 
 	// Turn each follower relationship into a synthetic follow notification.
 	const followNotifications = useMemo(() => {
-		const list = followersData?.getMemberFollowers?.list ?? [];
+		const list = followersData?.getUserFollowers?.list ?? [];
 		return list.map((f: any) => {
 			const fd = f.followerData ?? {};
 			const followerId = fd._id || f.followerId;

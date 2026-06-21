@@ -15,12 +15,13 @@ import SearchResultsHeader from '../../libs/components/search/SearchResultsHeade
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
 import SearchTrustBar from '../../libs/components/search/SearchTrustBar';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
-import { LIKE_TARGET_MEMBER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
+import { LIKE_TARGET_USER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
 import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
 import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
 
@@ -52,7 +53,7 @@ const SearchPage: NextPage = () => {
 	const user = useReactiveVar(userVar);
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const [likeTargetUser] = useMutation(LIKE_TARGET_USER);
 	const [subscribe] = useMutation(SUBSCRIBE);
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 
@@ -76,7 +77,11 @@ const SearchPage: NextPage = () => {
 			if (!id) return;
 			if (!user?._id) throw new Error(Messages.error2);
 
-			await likeTargetMember({ variables: { input: id } });
+			const { data } = await likeTargetUser({ variables: { userId: id } });
+			if (user._id) {
+				const myFavorite = !!data?.likeTargetUser?.meLiked?.[0]?.myFavorite;
+				setSavedTechnicianLiked(user._id, id, myFavorite);
+			}
 			await refetch({ input: searchFilter });
 		} catch (err: any) {
 			await sweetErrorHandling(err);

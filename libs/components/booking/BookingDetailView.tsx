@@ -16,6 +16,7 @@ import CancelBookingButton from './CancelBookingButton';
 import BookingReviewSection from './BookingReviewSection';
 import { FixoraButton } from '../ui';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
+import { getBookingTypeLabelKey } from '../../utils/bookingServiceType';
 
 const TIMELINE_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'] as const;
 
@@ -102,7 +103,7 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 						</div>
 						<div>
 							<dt>{t('booking.detail.serviceType')}</dt>
-							<dd>{t('booking.details.typeShopVisit')}</dd>
+							<dd>{t(getBookingTypeLabelKey(booking.bookingType))}</dd>
 						</div>
 						{booking.bookingDate && (
 							<div>

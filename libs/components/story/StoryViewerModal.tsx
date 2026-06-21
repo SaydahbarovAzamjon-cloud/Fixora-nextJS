@@ -7,6 +7,7 @@ import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded';
 import RemoveRedEyeOutlined from '@mui/icons-material/RemoveRedEyeOutlined';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 import { INCREMENT_STORY_VIEW } from '../../../apollo/user/story';
 import { Story } from '../../types/fixora/fixora';
 import { sortedStoryImages, storyImageUrl } from './storyImageUrl';
@@ -37,21 +38,26 @@ const initialsOf = (value: string): string => {
 	return ((parts[0]?.[0] || '?') + (parts[1]?.[0] || parts[0]?.[1] || '')).toUpperCase();
 };
 
-const formatStoryTime = (value?: string): string => {
+const formatStoryTime = (
+	value: string | undefined,
+	t: (key: string, opts?: Record<string, unknown>) => string,
+	locale?: string,
+): string => {
 	if (!value) return '';
 	const date = new Date(value);
 	if (Number.isNaN(date.getTime())) return '';
 	const diffMs = Date.now() - date.getTime();
 	const mins = Math.floor(diffMs / 60000);
-	if (mins < 1) return 'Just now';
-	if (mins < 60) return `${mins}m ago`;
+	if (mins < 1) return t('story.viewer.justNow');
+	if (mins < 60) return t('story.viewer.minutesAgo', { count: mins });
 	const hrs = Math.floor(mins / 60);
-	if (hrs < 24) return `${hrs}h ago`;
-	return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+	if (hrs < 24) return t('story.viewer.hoursAgo', { count: hrs });
+	return date.toLocaleDateString(locale ?? 'en', { month: 'short', day: 'numeric' });
 };
 
 const StoryViewerModal = ({ stories, initialIndex, owner, mode, onClose, onStorySeen }: StoryViewerModalProps) => {
 	const { t } = useTranslation('common');
+	const router = useRouter();
 	const [storyIndex, setStoryIndex] = useState(initialIndex);
 	const [frameIndex, setFrameIndex] = useState(0);
 	const [paused, setPaused] = useState(false);
@@ -205,7 +211,7 @@ const StoryViewerModal = ({ stories, initialIndex, owner, mode, onClose, onStory
 					</div>
 					<div className="fixora-story-viewer__meta">
 						<div className="fixora-story-viewer__name">{owner.name}</div>
-						<div className="fixora-story-viewer__time">{formatStoryTime(story.createdAt)}</div>
+						<div className="fixora-story-viewer__time">{formatStoryTime(story.createdAt, t, router.locale)}</div>
 					</div>
 					{showViewCount && (
 						<div className="fixora-story-viewer__views" title={t('story.viewer.viewCount')}>
@@ -227,7 +233,9 @@ const StoryViewerModal = ({ stories, initialIndex, owner, mode, onClose, onStory
 					{story.caption && <p className="fixora-story-viewer__caption">{story.caption}</p>}
 				</div>
 
-				<StoryViewerFooter receiverId={owner.id} storyId={story._id} />
+				{mode === 'interactive' && (
+					<StoryViewerFooter receiverId={owner.id} storyId={story._id} />
+				)}
 
 				<button type="button" className="fixora-story-viewer__tap fixora-story-viewer__tap--prev" onClick={goPrevFrame} aria-hidden="true" tabIndex={-1} />
 				<button type="button" className="fixora-story-viewer__tap fixora-story-viewer__tap--next" onClick={goNextFrame} aria-hidden="true" tabIndex={-1} />

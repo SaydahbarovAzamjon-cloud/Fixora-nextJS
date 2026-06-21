@@ -9,6 +9,7 @@ import { userVar } from '../../../apollo/store';
 import { CREATE_BOOKING, CREATE_DEVICE } from '../../../apollo/user/mutation';
 import { GET_MY_DEVICES } from '../../../apollo/user/query';
 import { FixoraButton, FixoraGlassCard, FixoraInput, FixoraSelect } from '../ui';
+import BookingServiceTypeOptions from './BookingServiceTypeOptions';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import type { Device, DeviceCategory } from '../../types/fixora/fixora';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
@@ -340,16 +341,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 					</div>
 				</div>
 
-				<div className="fixora-booking__type-options">
-					<div className="fixora-booking__type-option fixora-booking__type-option--active">
-						<strong>{t('booking.details.typeShopVisit')}</strong>
-						<span>{t('booking.details.typeShopVisitDesc')}</span>
-					</div>
-					<div className="fixora-booking__type-option fixora-booking__type-option--disabled">
-						<strong>{t('booking.details.typeOnSite')}</strong>
-						<span>{t('booking.details.comingSoon')}</span>
-					</div>
-				</div>
+				<BookingServiceTypeOptions />
 			</FixoraGlassCard>
 
 			<FixoraButton variant="primary" fullWidth disabled={submitting} onClick={handleSubmit}>

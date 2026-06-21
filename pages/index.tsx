@@ -6,6 +6,7 @@ import TopTechnicians from '../libs/components/homepage/TopTechnicians';
 import HowItWorks from '../libs/components/homepage/HowItWorks';
 import TechTips from '../libs/components/homepage/TechTips';
 import Testimonials from '../libs/components/homepage/Testimonials';
+import HomepageStoriesCarousel from '../libs/components/homepage/HomepageStoriesCarousel';
 
 export const getStaticProps = async ({ locale }: any) => {
 	const translations = await serverSideTranslations(locale ?? 'en', ['common']);
@@ -19,6 +20,7 @@ export const getStaticProps = async ({ locale }: any) => {
 const Home: NextPage = () => {
 	return (
 		<Stack className={'home-page'}>
+			<HomepageStoriesCarousel />
 			<TopTechnicians />
 			<HowItWorks />
 			<TechTips />

@@ -5,7 +5,6 @@ import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
 import { getJwtToken, updateUserInfo } from '../../auth';
-import Chat from '../Chat';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -59,8 +58,6 @@ const withLayoutFull = (Component: any) => {
 						<Stack id={'main'}>
 							<Component {...props} />
 						</Stack>
-
-						<Chat />
 
 						<Stack id={'footer'}>
 							<Footer />

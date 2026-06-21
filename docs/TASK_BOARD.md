@@ -45,6 +45,7 @@
 | P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + `createDevice`/`createBooking` |
 | P3-06b | Deposit payment UI (KakaoPay mock) | ✅ Done | `DepositPaymentCard`, `useDepositPayment`, booking post-step + My Page Pay Deposit — `initiatePayment`/`confirmPayment` (PAY-05) |
 | P3-07 | Messages UI | ✅ Done | `/messages` — chat list + thread + request details, mockup `customer-pages-full.png` §6 |
+| P3-07b | Messages WebSocket (realtime) | ✅ Done | Dedicated auth WS in `fixoraWebSocket.ts`; `FixoraWebSocketBridge` refetch; adaptive `useRealtimePollInterval` (0 when connected, fallback when offline). Backend emit still GAP-062. |
 | P3-08 | My Page + Notifications | ✅ Done | `/client/my-page` (6-tab owner view) + `/mypage` redirect + `/notifications` — real API; GAP-098 saved technicians |
 | P3-08b | Booking detail + final payment | ✅ Done | `/mypage/bookings/[id]` — detail view, deposit + final mock payment, cancel, review; wired from Messages/My Page/notifications |
 | P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens incl. Settings 1:1 (`libs/components/technician/settings/`); Profile/Account/Security/Availability GraphQL; GAP-090…096 in BACKEND_SETTINGS.md |
@@ -84,10 +85,10 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P3-11 | Rename UI copy: Property → Device | ⬜ Todo | Labels, routes, components |
-| P3-12 | Rename UI copy: Agent → Technician | ⬜ Todo | Labels, routes, components |
-| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | FIXORAB MVP ready — `docs/FRONTEND_API.md`, `docs/schema.gql` synced. **Public Profile (`/technician/profile`) fully wired:** header/About/My Articles + Services/Portfolio/Reviews/Followers + **Repair Stories (display + create)**; functional buttons; stats→0 when empty (DECISIONS UI-07…UI-10). **Dashboard (`/technician/dashboard`):** quick actions functional; Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, no backend model) merged with bookings (UI-11). **Technician bugfix 2026-06-21:** `/technician/jobs` complete flow wired to real booking/payment APIs; `/technician/messages` grouped one chat per client; payment notifications use `getMyPayments` fallback + local dismiss persistence (GAP-061). **Public client profile:** `/technician/client/[clientId]` reuses shared Client My Page view in read-only mode inside technician shell; full public history/saved data needs GAP-063. |
-| P3-14 | ON_SITE "Coming Soon" UI | ⬜ Todo | Badge only — no flow |
+| P3-11 | Rename UI copy: Property → Device | ✅ Done | Legacy `common.json` keys retargeted; MVP routes already Fixora-branded |
+| P3-12 | Rename UI copy: Agent → Technician | ✅ Done | Same i18n pass (`Agents` → Technicians, etc.) |
+| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | MVP: `likeTargetUser` on search/technicians; `getUserFollowers` on tech notifications; duplicate Apollo WS removed. Legacy routes unchanged. |
+| P3-14 | ON_SITE "Coming Soon" UI | ✅ Done | `BookingServiceTypeOptions` on profile + booking form; ON_SITE disabled badge (BIZ-01) |
 | P3-15 | Admin UI (incremental) | ⬜ Todo | No mockup — see `docs/design/admin/README.md` |
 | P3-15a | Admin shell (light, Fixora orange) | ⬜ Todo | Adapt `LayoutAdmin` — part of P3-15 |
 | P3-15b | Technician verification queue | ⬜ Todo | After P3-09 — required for onboarding flow |
@@ -118,8 +119,8 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** `P3-07b` — Messages WebSocket OR `P3-14` — ON_SITE badge OR `PM-01` — Mobile foundation
+**Next task:** **GAP-098** saved technicians (FixoraB) OR **P3-15** admin incremental OR desktop QA pass
 
-**Then:** Mobile phase `PM-01` → `PM-12` (after Phase 2 complete) OR Phase 4 migrations `P3-11`/`P3-12`
+**Desktop gap checklist (Phase 2):** P3-14 ✅ · P3-07b ✅ · Story viewer ✅ · P3-11/12 ✅ · P3-13 partial ✅ · GAP-098/GAP-063 blocked on backend · **PM-01+ deferred** until user approves mobile phase
 
 See `AI_HANDOFF.md` for last agent and session notes.

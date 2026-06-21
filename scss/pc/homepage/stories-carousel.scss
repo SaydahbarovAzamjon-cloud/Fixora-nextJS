@@ -1,0 +1,51 @@
+.fixora-home-stories {
+	padding: 28px 0 8px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 18px;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 18px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__live {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		font-size: 13px;
+		font-weight: 600;
+		color: #22c55e;
+	}
+
+	&__live-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #22c55e;
+		box-shadow: 0 0 6px #22c55e;
+	}
+
+	&__row {
+		display: flex;
+		gap: 20px;
+		overflow-x: auto;
+		padding-bottom: 8px;
+		scrollbar-width: thin;
+
+		&::-webkit-scrollbar {
+			height: 6px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.12);
+			border-radius: 999px;
+		}
+	}
+}

@@ -24,8 +24,11 @@ export const userVar = makeVar<CustomJwtPayload>({
 	memberBlocks: 0,
 });
 
-// @ts-ignore
-export const socketVar = makeVar<WebSocket>();
+// @ts-ignore — legacy Nestar chat socket; Fixora realtime uses fixoraWebSocket.ts
+export const socketVar = makeVar<WebSocket | null>(null);
+
+/** True when Fixora auth WebSocket is open (see libs/utils/fixoraWebSocket.ts). */
+export const fixoraWsConnectedVar = makeVar(false);
 
 /** Temporary blob URL for profile photo preview before Save (settings). */
 export const profileImageDraftVar = makeVar<string | null>(null);

@@ -316,4 +316,4 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 
 ---
 
-**Implementation complete.** Story viewer/playback (tap ring to view slides) is **not** built yet — display covers + create only (see `AI_HANDOFF.md` blockers).
+**Implementation complete.** Story viewer/playback: tap ring on **technician profile** (`RepairStoriesRow`) or **homepage carousel** (`HomepageStoriesCarousel` + `getStoriesCarousel`) → `StoryViewerModal` with auto-advance, reactions, and reply (interactive mode only).

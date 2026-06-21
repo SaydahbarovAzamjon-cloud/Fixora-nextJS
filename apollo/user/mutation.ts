@@ -90,6 +90,23 @@ export const UPDATE_MEMBER = gql`
 	}
 `;
 
+export const LIKE_TARGET_USER = gql`
+	mutation LikeTargetUser($userId: String!) {
+		likeTargetUser(userId: $userId) {
+			_id
+			userType
+			userNickname
+			userFullName
+			userProfileImage
+			meLiked {
+				memberId
+				likeRefId
+				myFavorite
+			}
+		}
+	}
+`;
+
 export const LIKE_TARGET_MEMBER = gql`
 	mutation LikeTargetMember($input: String!) {
 		likeTargetMember(memberId: $input) {

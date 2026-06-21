@@ -29,6 +29,7 @@ interface UseClientMyPageStatsInput {
 	bookingsTotal?: number;
 	reviewsTotal?: number;
 	followingCount?: number;
+	savedCount?: number;
 }
 
 export const useClientMyPageStats = ({
@@ -38,6 +39,7 @@ export const useClientMyPageStats = ({
 	bookingsTotal,
 	reviewsTotal,
 	followingCount = 0,
+	savedCount = 0,
 }: UseClientMyPageStatsInput): ClientMyPageStats => {
 	return useMemo(() => {
 		const completed = bookings.filter((booking) => booking.bookingStatus === 'COMPLETED');
@@ -60,10 +62,10 @@ export const useClientMyPageStats = ({
 			completedCount: completed.length,
 			reviewsCount: reviewsTotal ?? reviews.length,
 			followingCount,
-			savedCount: 0,
+			savedCount,
 			avgRatingGiven,
 			totalSpent,
 			uniqueDevicesRepaired: deviceIds.size,
 		};
-	}, [bookings, reviews, payments, bookingsTotal, reviewsTotal, followingCount]);
+	}, [bookings, reviews, payments, bookingsTotal, reviewsTotal, followingCount, savedCount]);
 };

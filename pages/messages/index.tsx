@@ -13,6 +13,7 @@ import { GET_USER, GET_BOOKING, GET_DEVICE } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
 import { Conversation, Message } from '../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
+import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -29,12 +30,15 @@ const MessagesPage: NextPage = () => {
 	const queryBookingId = router.query.bookingId as string | undefined;
 
 	const [selected, setSelected] = useState<{ peerId: string; bookingId?: string | null } | null>(null);
+	const conversationsPollMs = useRealtimePollInterval(30000);
+	const messagesPollMs = useRealtimePollInterval(15000);
 
 	/** APOLLO REQUESTS **/
 	const { data: conversationsData, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50 } },
 		fetchPolicy: 'network-only',
+		pollInterval: conversationsPollMs,
 	});
 
 	const conversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
@@ -57,7 +61,7 @@ const MessagesPage: NextPage = () => {
 			},
 		},
 		fetchPolicy: 'network-only',
-		pollInterval: 5000,
+		pollInterval: messagesPollMs,
 	});
 
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];

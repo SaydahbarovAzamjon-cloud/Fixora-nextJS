@@ -17,6 +17,7 @@ import { userVar } from '../../../apollo/store';
 import { isCustomerUser } from '../../../libs/utils/userRole';
 import { Booking, BookingReview, Payment } from '../../../libs/types/fixora/fixora';
 import { useClientMyPageStats } from '../../../libs/hooks/useClientMyPageStats';
+import { useSavedTechnicianCount } from '../../../libs/hooks/useSavedTechnicianCount';
 import {
 	OwnerMyPageTab,
 	ownerMyPageHref,
@@ -81,6 +82,7 @@ const ClientMyPage: NextPage = () => {
 	const payments: Payment[] = paymentsData?.getMyPayments?.list ?? [];
 	const followingCount =
 		followingData?.getUserFollowings?.metaCounter?.[0]?.total ?? profile?.followingCount ?? 0;
+	const savedCount = useSavedTechnicianCount(user?._id);
 
 	const stats = useClientMyPageStats({
 		bookings,
@@ -89,6 +91,7 @@ const ClientMyPage: NextPage = () => {
 		bookingsTotal: bookingsData?.getMyBookings?.metaCounter?.[0]?.total,
 		reviewsTotal: reviewsData?.getMyReviews?.metaCounter?.[0]?.total,
 		followingCount,
+		savedCount,
 	});
 
 	useEffect(() => {

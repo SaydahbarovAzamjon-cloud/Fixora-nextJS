@@ -22,6 +22,7 @@ import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink } from '../utils/notifications';
 import NotificationDropdown from './notifications/NotificationDropdown';
 import NavSearchInput from './nav/NavSearchInput';
+import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 
 const LANGS = ['en', 'kr'] as const;
 
@@ -37,26 +38,27 @@ const Top = () => {
 	const logoutOpen = Boolean(logoutAnchor);
 	const [notifOpen, setNotifOpen] = useState(false);
 	const notifRef = useRef<HTMLDivElement>(null);
+	const navPollMs = useRealtimePollInterval(30000);
 
 	const { data: notificationsData, refetch: refetchNotifications } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC' } },
 		fetchPolicy: 'network-only',
-		pollInterval: 30000,
+		pollInterval: navPollMs,
 	});
 
 	const { data: unreadCountData, refetch: refetchUnreadCount } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50, search: { isRead: false } } },
 		fetchPolicy: 'network-only',
-		pollInterval: 30000,
+		pollInterval: navPollMs,
 	});
 
 	const { data: conversationsData } = useQuery(GET_MY_CONVERSATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50 } },
 		fetchPolicy: 'network-only',
-		pollInterval: 30000,
+		pollInterval: navPollMs,
 	});
 
 	// Messages have their own icon + badge, so they're excluded from the notification bell.

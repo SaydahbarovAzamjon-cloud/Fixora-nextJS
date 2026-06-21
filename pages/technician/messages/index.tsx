@@ -22,6 +22,7 @@ import { Conversation, Message } from '../../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
 import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
+import useRealtimePollInterval from '../../../libs/hooks/useRealtimePollInterval';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -94,13 +95,15 @@ const Messages: NextPage = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const emojiRef = useRef<HTMLDivElement>(null);
+	const conversationsPollMs = useRealtimePollInterval(30000);
+	const messagesPollMs = useRealtimePollInterval(15000);
 
 	/** APOLLO **/
 	const { data: conversationsData, loading: convsLoading, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 50 } },
 		fetchPolicy: 'network-only',
-		pollInterval: 15000,
+		pollInterval: conversationsPollMs,
 	});
 
 	const rawConversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
@@ -140,7 +143,7 @@ const Messages: NextPage = () => {
 			},
 		},
 		fetchPolicy: 'network-only',
-		pollInterval: 5000,
+		pollInterval: messagesPollMs,
 	});
 
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];

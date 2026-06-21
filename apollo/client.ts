@@ -1,15 +1,11 @@
 import { useMemo } from 'react';
-import { ApolloClient, ApolloLink, InMemoryCache, split, from, NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, ApolloLink, InMemoryCache, from, NormalizedCacheObject } from '@apollo/client';
 import createUploadLink from 'apollo-upload-client/public/createUploadLink.js';
-import { WebSocketLink } from '@apollo/client/link/ws';
-import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { getJwtToken } from '../libs/auth';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
 import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
-import { dispatchFixoraWsMessage } from '../libs/utils/fixoraWebSocket';
-import { socketVar } from './store';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 function getHeaders() {
@@ -31,46 +27,7 @@ const tokenRefreshLink = new TokenRefreshLink({
 	},
 });
 
-// Custom WebSocket client
-class LoggingWebSocket {
-	private socket: WebSocket;
-
-	constructor(url: string) {
-		this.socket = new WebSocket(`${url}?token=${getJwtToken()}`);
-		socketVar(this.socket)
-
-		this.socket.onopen = () => {
-			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
-				console.debug('WebSocket connection!');
-			}
-		};
-
-		this.socket.onmessage = (msg) => {
-			if (typeof msg.data === 'string') {
-				dispatchFixoraWsMessage(msg.data);
-			}
-			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
-				console.debug('WebSocket message:', msg.data);
-			}
-		};
-
-		this.socket.onerror = (error) => {
-			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
-				console.debug('WebSocket error:', error);
-			}
-		};
-	}
-
-	send(data: string | Blob | BufferSource) {
-		this.socket.send(data);
-	}
-
-	close() {
-		this.socket.close();
-	}
-}
-
-function  createIsomorphicLink() {
+function createIsomorphicLink() {
 	if (typeof window !== 'undefined') {
 		const authLink = new ApolloLink((operation, forward) => {
 			operation.setContext(({ headers = {} }) => ({
@@ -86,24 +43,11 @@ function  createIsomorphicLink() {
 		});
 
 		// @ts-ignore
-		const link = new createUploadLink({
+		const httpLink = new createUploadLink({
 			uri: process.env.REACT_APP_API_GRAPHQL_URL,
 		});
 
-		/* WEBSOCKET SUBSCRIPTION LINK */
-		const wsLink = new WebSocketLink({
-			uri: process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007',
-			options: {
-				reconnect: false,
-				timeout: 30000,
-				connectionParams: () => {
-					return { headers: getHeaders() };
-				},
-			},
-			webSocketImpl: LoggingWebSocket
-		});
-
-const errorLink = onError(({ graphQLErrors, networkError, response }) => {
+		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
 		if (graphQLErrors) {
 			graphQLErrors.map(({ message, locations, path }) => {
 				const isAuthMutation =
@@ -130,18 +74,10 @@ const errorLink = onError(({ graphQLErrors, networkError, response }) => {
 	// @ts-ignore
 	if (networkError?.statusCode === 401) {
 	}
-});
+		});
 
-		const splitLink = split(
-			({ query }) => {
-				const definition = getMainDefinition(query);
-				return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
-			},
-			wsLink,
-			authLink.concat(link),
-		);
-
-		return from([errorLink, tokenRefreshLink, splitLink]);
+		// Realtime push uses libs/utils/fixoraWebSocket.ts (FixoraWebSocketBridge) — not Apollo subscriptions.
+		return from([errorLink, tokenRefreshLink, authLink.concat(httpLink)]);
 	}
 }
 

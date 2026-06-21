@@ -34,6 +34,7 @@ import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
 import { LIKE_TARGET_ARTICLE } from '../../../apollo/user/article';
 import ProfileArticleCard from './ProfileArticleCard';
 import RepairStoriesRow from '../story/RepairStoriesRow';
+import BookingServiceTypeOptions from '../booking/BookingServiceTypeOptions';
 import { Article, Story, TechnicianProfile, TechnicianReview } from '../../types/fixora/fixora';
 import { T } from '../../types/common';
 import { Messages } from '../../config';
@@ -380,6 +381,8 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 						)}
 					</div>
 				</div>
+
+				{!isOwner && variant === 'visitor' && <BookingServiceTypeOptions variant="inline" />}
 
 				<RepairStoriesRow
 					stories={stories}

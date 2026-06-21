@@ -17,6 +17,9 @@
 
 # misc
 .DS_Store
+/nul
+scripts/*.png
+scripts/inspect-*.mjs
 *.pem
 
 # debug

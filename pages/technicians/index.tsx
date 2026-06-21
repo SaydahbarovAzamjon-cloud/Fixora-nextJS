@@ -23,6 +23,10 @@ import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetA
 import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
+const SearchMapExpandedSection = dynamic(
+	() => import('../../libs/components/search/SearchMapExpandedSection'),
+	{ ssr: false },
+);
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -44,6 +48,8 @@ const TechniciansListPage: NextPage = () => {
 	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
 	const [locationLabel, setLocationLabel] = useState('');
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+	const [mapExpanded, setMapExpanded] = useState(false);
+	const [selectedMapTechnicianId, setSelectedMapTechnicianId] = useState<string | null>(null);
 	const user = useReactiveVar(userVar);
 
 	const [likeTargetUser] = useMutation(LIKE_TARGET_USER);
@@ -140,12 +146,27 @@ const TechniciansListPage: NextPage = () => {
 				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 				<SearchCategoryRow searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
-				<Stack className="fixora-search__layout">
+				{mapExpanded && (
+					<SearchMapExpandedSection
+						searchFilter={searchFilter}
+						locationLabel={locationLabel || t('search.location.placeholder')}
+						selectedTechnicianId={selectedMapTechnicianId}
+						onSelectTechnician={setSelectedMapTechnicianId}
+						onLocationChange={locationChangeHandler}
+						onCollapse={() => setMapExpanded(false)}
+					/>
+				)}
+
+				<Stack className={`fixora-search__layout${mapExpanded ? ' fixora-search__layout--map-expanded' : ''}`}>
 					<Stack className="fixora-search__sidebar">
 						<LocationCard
 							locationLabel={locationLabel || t('search.location.placeholder')}
 							searchFilter={searchFilter}
 							onLocationChange={locationChangeHandler}
+							selectedTechnicianId={selectedMapTechnicianId}
+							onSelectTechnician={setSelectedMapTechnicianId}
+							onExpandMap={() => setMapExpanded(true)}
+							mapExpanded={mapExpanded}
 						/>
 						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 					</Stack>

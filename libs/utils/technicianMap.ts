@@ -1,5 +1,5 @@
 import type { MapPoint } from '../kakao-maps';
-import type { TechnicianSummary } from '../types/fixora/fixora';
+import type { TechnicianSummary, TechniciansInquiry } from '../types/fixora/fixora';
 
 export interface PlottableTechnician extends TechnicianSummary {
 	shopLatitude: number;
@@ -35,4 +35,22 @@ export function formatDistanceKm(km: number): string {
 
 export function technicianDisplayName(tech: TechnicianSummary): string {
 	return tech.userNickname || tech.userFullName || tech.shopName || 'Technician';
+}
+
+/** Map pins: show all matching technicians — not only those inside the GPS radius filter. */
+export function getMapTechniciansQueryInput(
+	searchFilter: TechniciansInquiry,
+	limit: number,
+): TechniciansInquiry {
+	return {
+		...searchFilter,
+		page: 1,
+		limit,
+		search: {
+			...searchFilter.search,
+			latitude: undefined,
+			longitude: undefined,
+			radiusKm: undefined,
+		},
+	};
 }

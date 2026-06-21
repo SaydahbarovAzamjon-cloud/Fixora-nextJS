@@ -43,6 +43,9 @@ export interface KakaoMap {
 	getLevel: () => number;
 	setLevel: (level: number) => void;
 	relayout: () => void;
+	getProjection?: () => {
+		containerPointFromCoords: (latlng: KakaoLatLng) => { x?: number; y?: number; getX?: () => number; getY?: () => number };
+	};
 }
 
 export interface KakaoLatLngBounds {
@@ -67,6 +70,11 @@ export interface KakaoMarkerClusterer {
 	clear: () => void;
 	addMarkers: (markers: KakaoMarker[]) => void;
 	setMap: (map: KakaoMap | null) => void;
+}
+
+export interface KakaoPolyline {
+	setMap: (map: KakaoMap | null) => void;
+	setPath: (path: KakaoLatLng[] | KakaoLatLng) => void;
 }
 
 interface KakaoClusterStyle {
@@ -140,6 +148,15 @@ declare global {
 					xAnchor?: number;
 					zIndex?: number;
 				}) => KakaoCustomOverlay;
+				Polyline: new (options: {
+					map?: KakaoMap | null;
+					path: KakaoLatLng[] | KakaoLatLng;
+					strokeWeight?: number;
+					strokeColor?: string;
+					strokeOpacity?: number;
+					strokeStyle?: string;
+					zIndex?: number;
+				}) => KakaoPolyline;
 				MarkerClusterer: new (options: {
 					map: KakaoMap;
 					markers?: KakaoMarker[];
@@ -338,10 +355,18 @@ export function bindMapIdleListener(
 	}
 }
 
+function meMarkerSvg(): string {
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+		<circle cx="18" cy="18" r="15" fill="#4DA3FF" stroke="rgba(255,255,255,0.9)" stroke-width="2"/>
+		<circle cx="18" cy="18" r="11" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+		<text x="18" y="22" text-anchor="middle" fill="#ffffff" font-family="Arial,sans-serif" font-size="10" font-weight="700">ME</text>
+	</svg>`;
+}
+
 export function createUserMarkerImage(kakao: NonNullable<Window['kakao']>): KakaoMarkerImage {
-	const src = markerDataUri(dotMarkerSvg('#4DA3FF', '#4DA3FF'));
-	const size = new kakao.maps.Size(18, 18);
-	const offset = new kakao.maps.Point(9, 9);
+	const src = markerDataUri(meMarkerSvg());
+	const size = new kakao.maps.Size(36, 36);
+	const offset = new kakao.maps.Point(18, 18);
 	return new kakao.maps.MarkerImage(src, size, { offset });
 }
 
@@ -388,6 +413,64 @@ export function createTechnicianClusterStyles(): KakaoClusterStyle[] {
 	];
 }
 
+export function createMapHoverPreviewOverlay(
+	kakao: NonNullable<Window['kakao']>,
+	position: KakaoLatLng,
+	html: string,
+): KakaoCustomOverlay {
+	return new kakao.maps.CustomOverlay({
+		position,
+		content: html,
+		yAnchor: 2.65,
+		xAnchor: 0.5,
+		zIndex: 7,
+	});
+}
+
+export function createMapMarkerPopoverOverlay(
+	kakao: NonNullable<Window['kakao']>,
+	position: KakaoLatLng,
+	html: string,
+): KakaoCustomOverlay {
+	return new kakao.maps.CustomOverlay({
+		position,
+		content: html,
+		yAnchor: 2.35,
+		xAnchor: 0.5,
+		zIndex: 5,
+	});
+}
+
+export function drawRoutePolyline(
+	kakao: NonNullable<Window['kakao']>,
+	map: KakaoMap,
+	points: MapPoint[],
+): KakaoPolyline {
+	const path = points.map((point) => new kakao.maps.LatLng(point.lat, point.lng));
+	return new kakao.maps.Polyline({
+		map,
+		path,
+		strokeWeight: 5,
+		strokeColor: '#730C1E',
+		strokeOpacity: 0.85,
+		strokeStyle: 'solid',
+		zIndex: 2,
+	});
+}
+
+export function fitMapToRoute(
+	kakao: NonNullable<Window['kakao']>,
+	map: KakaoMap,
+	points: MapPoint[],
+	options?: { minLevel?: number; maxLevel?: number },
+): void {
+	fitMapToPoints(kakao, map, points, {
+		minLevel: options?.minLevel ?? 3,
+		maxLevel: options?.maxLevel ?? 12,
+		singlePointLevel: 7,
+	});
+}
+
 export function createTechnicianMarkerClusterer(
 	kakao: NonNullable<Window['kakao']>,
 	map: KakaoMap,
@@ -403,6 +486,32 @@ export function createTechnicianMarkerClusterer(
 		minClusterSize: 2,
 		styles: createTechnicianClusterStyles(),
 	});
+}
+
+/** Prefer clusterer; fall back to direct markers if SDK library is unavailable. */
+export function attachTechnicianMarkers(
+	kakao: NonNullable<Window['kakao']>,
+	map: KakaoMap,
+	markers: KakaoMarker[],
+): KakaoMarkerClusterer | null {
+	if (!markers.length) return null;
+
+	try {
+		if (typeof kakao.maps.MarkerClusterer === 'function') {
+			return createTechnicianMarkerClusterer(kakao, map, markers);
+		}
+	} catch (err) {
+		logKakaoMapError('attachTechnicianMarkers.clusterer', err);
+	}
+
+	markers.forEach((marker) => {
+		try {
+			marker.setMap(map);
+		} catch (err) {
+			logKakaoMapError('attachTechnicianMarkers.marker', err);
+		}
+	});
+	return null;
 }
 
 export function createMapTooltipOverlay(

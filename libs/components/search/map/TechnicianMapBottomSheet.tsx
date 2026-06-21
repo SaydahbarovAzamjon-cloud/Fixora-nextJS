@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import TechnicianMapPreviewCard from './TechnicianMapPreviewCard';
+import TechnicianMapProfilePanel from './TechnicianMapProfilePanel';
 import { TechnicianSummary } from '../../../types/fixora/fixora';
+import type { MapRouteInfo } from '../../../utils/technicianMapRoute';
 
 export interface TechnicianMapBottomSheetProps {
 	open: boolean;
 	technician: TechnicianSummary | null;
 	distanceKm?: number | null;
 	onClose: () => void;
+	expandedProfile?: boolean;
+	routeInfo?: MapRouteInfo | null;
+	routeLoading?: boolean;
+	routeActive?: boolean;
+	routeError?: string | null;
+	onShowRoute?: () => void;
+	onClearRoute?: () => void;
 }
 
 const TechnicianMapBottomSheet = ({
@@ -14,6 +23,13 @@ const TechnicianMapBottomSheet = ({
 	technician,
 	distanceKm,
 	onClose,
+	expandedProfile = false,
+	routeInfo,
+	routeLoading = false,
+	routeActive = false,
+	routeError = null,
+	onShowRoute,
+	onClearRoute,
 }: TechnicianMapBottomSheetProps) => {
 	const [mounted, setMounted] = useState(open);
 	const [visible, setVisible] = useState(false);
@@ -41,12 +57,27 @@ const TechnicianMapBottomSheet = ({
 			<button type="button" className="fixora-map-sheet__backdrop" onClick={onClose} aria-label="close" />
 			<div className="fixora-map-sheet__panel">
 				<div className="fixora-map-sheet__handle" aria-hidden="true" />
-				<TechnicianMapPreviewCard
-					technician={technician}
-					distanceKm={distanceKm}
-					onClose={onClose}
-					className="fixora-map-preview--sheet"
-				/>
+				{expandedProfile ? (
+					<TechnicianMapProfilePanel
+						technician={technician}
+						distanceKm={distanceKm}
+						routeInfo={routeInfo}
+						routeLoading={routeLoading}
+						routeActive={routeActive}
+						routeError={routeError}
+						onShowRoute={onShowRoute}
+						onClearRoute={onClearRoute}
+						onClose={onClose}
+						className="fixora-map-profile--sheet"
+					/>
+				) : (
+					<TechnicianMapPreviewCard
+						technician={technician}
+						distanceKm={distanceKm}
+						onClose={onClose}
+						className="fixora-map-preview--sheet"
+					/>
+				)}
 			</div>
 		</div>
 	);

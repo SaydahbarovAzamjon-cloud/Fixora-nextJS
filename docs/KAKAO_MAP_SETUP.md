@@ -9,6 +9,8 @@
 
 ```bash
 NEXT_PUBLIC_KAKAO_JS_KEY=<javascript-key>
+# Required for real road routing (Show Route) — REST API key from the same Kakao app
+KAKAO_REST_API_KEY=<rest-api-key>
 ```
 
 5. Restart dev server: `yarn dev`
@@ -26,6 +28,7 @@ NEXT_PUBLIC_KAKAO_JS_KEY=<javascript-key>
 | Static grid + dots (fallback) | Key missing, Map API disabled, or domain not whitelisted |
 | Map loads, label stuck | Geocoder needs `libraries=services` (already in `libs/kakao-maps.ts`) |
 | No technician pins | Backend must return `shopLatitude` / `shopLongitude` — run FIXORAB backfill |
+| Show Route fails / straight line | Add `KAKAO_REST_API_KEY` in `.env.local` and enable **Kakao Mobility** (Directions) for the app |
 | DevTools console `[KakaoMap] initMap` | Open Kakao Developers → **제품 설정** → enable **Kakao Map** (not only Login) |
 | Script loads but map blank | Add `http://localhost:3000` under **앱 설정 > 플랫폼 > Web** |
 

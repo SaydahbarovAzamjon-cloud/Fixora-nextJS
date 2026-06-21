@@ -445,6 +445,10 @@
 	flex-direction: row;
 	align-items: flex-start;
 	gap: 24px;
+
+	&--map-expanded {
+		margin-top: 4px;
+	}
 }
 
 .fixora-search__sidebar {
@@ -479,6 +483,11 @@
 		height: 200px;
 		background-color: var(--fixora-surface-elevated);
 		overflow: hidden;
+
+		&--expanded {
+			height: 100%;
+			min-height: 420px;
+		}
 
 		&--fallback {
 			background-image:
@@ -547,6 +556,50 @@
 		font-size: 12px;
 		font-weight: 600;
 		pointer-events: none;
+	}
+
+	&__map-expand {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		z-index: 10;
+		pointer-events: auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		border: 1px solid var(--fixora-border-subtle);
+		border-radius: 8px;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		cursor: pointer;
+		transition: background 0.2s ease, border-color 0.2s ease;
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.72);
+			border-color: rgba(255, 255, 255, 0.25);
+		}
+	}
+
+	&__map-placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 88px;
+		padding: 16px;
+		background: var(--fixora-surface-elevated);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+		p {
+			margin: 0;
+			font-family: $font;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--fixora-text-muted);
+			text-align: center;
+		}
 	}
 
 	&__dot {
@@ -618,6 +671,88 @@
 }
 
 /* ---------- technician map preview + bottom sheet ---------- */
+
+.fixora-map-hover-preview {
+	display: flex;
+	flex-direction: column;
+	min-width: 200px;
+	max-width: 260px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	background: var(--fixora-surface-card, rgba(22, 22, 24, 0.98));
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+	pointer-events: none;
+	animation: fixora-map-preview-in 0.18s ease-out;
+
+	&__header {
+		display: flex;
+		gap: 10px;
+		align-items: flex-start;
+	}
+
+	&__avatar {
+		width: 44px;
+		height: 44px;
+		flex-shrink: 0;
+		border-radius: 10px;
+		object-fit: cover;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+	}
+
+	&__titles {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+	}
+
+	&__name {
+		font-family: $font;
+		font-size: 13px;
+		font-weight: 700;
+		line-height: 1.3;
+		color: #fff;
+	}
+
+	&__shop {
+		margin: 0;
+		font-family: $font;
+		font-size: 11px;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.72);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__rating {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 2px;
+	}
+
+	&__rating-value {
+		font-family: $font;
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--fixora-primary-light, #e85d4a);
+		letter-spacing: 0.01em;
+
+		&::before {
+			content: '★ ';
+			color: var(--fixora-primary, #e85d4a);
+		}
+	}
+
+	&__reviews {
+		font-family: $font;
+		font-size: 11px;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.55);
+	}
+}
 
 .fixora-map-preview {
 	position: relative;
@@ -696,13 +831,19 @@
 		align-items: center;
 		gap: 4px;
 		font-family: $font;
-		font-size: 12px;
-		font-weight: 600;
-		color: #fff;
+		font-size: 13px;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.9);
 
 		svg {
+			font-size: 15px;
+			color: var(--fixora-primary, #e85d4a);
+		}
+
+		> span:not(.fixora-map-preview__reviews) {
 			font-size: 14px;
-			color: #ffb020;
+			font-weight: 800;
+			color: var(--fixora-primary-light, #e85d4a);
 		}
 	}
 
@@ -885,9 +1026,455 @@
 @media (prefers-reduced-motion: reduce) {
 	.fixora-search-location__preview-panel,
 	.fixora-map-sheet__panel,
-	.fixora-map-sheet__backdrop {
+	.fixora-map-sheet__backdrop,
+	.fixora-search-map-expanded {
 		animation: none;
 		transition: none;
+	}
+}
+
+/* ---------- expanded search map (60/40) ---------- */
+
+.fixora-search-map-expanded {
+	@include fixora-home-card-surface;
+	position: relative;
+	border-radius: 14px;
+	overflow: hidden;
+	margin-bottom: 20px;
+	animation: fixora-map-preview-in 0.28s ease-out;
+
+	&__toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 12px 16px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	&__location {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+		font-family: $font;
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--fixora-text-muted);
+
+		svg {
+			flex-shrink: 0;
+			color: var(--fixora-primary);
+		}
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__collapse {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		flex-shrink: 0;
+		padding: 8px 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		border-radius: 10px;
+		background: var(--fixora-surface);
+		color: var(--fixora-text-primary);
+		font-family: $font;
+		font-size: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: border-color 0.2s ease, background 0.2s ease;
+
+		&:hover {
+			border-color: var(--fixora-primary);
+			background: rgba(115, 12, 30, 0.08);
+		}
+	}
+
+	&__body {
+		display: flex;
+		min-height: 420px;
+	}
+
+	&__map-wrap {
+		flex: 0 0 60%;
+		min-width: 0;
+		position: relative;
+		border-right: 1px solid rgba(255, 255, 255, 0.08);
+
+		.fixora-search-location__map {
+			height: 100%;
+			min-height: 420px;
+		}
+	}
+
+	&__panel {
+		flex: 0 0 40%;
+		min-width: 0;
+		overflow: auto;
+	}
+
+	&__empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		min-height: 420px;
+		padding: 24px;
+
+		p {
+			margin: 0;
+			font-family: $font;
+			font-size: 13px;
+			line-height: 1.5;
+			font-weight: 500;
+			color: var(--fixora-text-muted);
+			text-align: center;
+		}
+	}
+}
+
+.fixora-map-marker-popover {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 180px;
+	max-width: 220px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: rgba(18, 18, 20, 0.96);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+	pointer-events: none;
+
+	&__avatar {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+
+		strong {
+			font-family: $font;
+			font-size: 12px;
+			font-weight: 700;
+			color: #fff;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__shop {
+		font-family: $font;
+		font-size: 11px;
+		color: rgba(255, 255, 255, 0.68);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__rating {
+		font-family: $font;
+		font-size: 11px;
+		font-weight: 700;
+		color: var(--fixora-primary-light, #e85d4a);
+	}
+}
+
+.fixora-map-avatar-marker {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	width: 72px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	pointer-events: auto;
+	transform: translateY(-4px);
+	transition: transform 0.18s ease;
+
+	&:hover {
+		transform: translateY(-6px);
+	}
+
+	&--selected {
+		.fixora-map-avatar-marker__img {
+			border-color: #fff;
+			box-shadow: 0 0 0 2px var(--fixora-primary), 0 8px 20px rgba(0, 0, 0, 0.35);
+		}
+
+		.fixora-map-avatar-marker__name {
+			color: #fff;
+			background: rgba(115, 12, 30, 0.92);
+		}
+	}
+
+	&__img {
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		object-fit: cover;
+		border: 2px solid rgba(255, 255, 255, 0.85);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+		background: #1a1a1c;
+	}
+
+	&__name {
+		max-width: 84px;
+		padding: 2px 6px;
+		border-radius: 6px;
+		font-family: $font;
+		font-size: 10px;
+		font-weight: 700;
+		line-height: 1.25;
+		text-align: center;
+		color: rgba(255, 255, 255, 0.92);
+		background: rgba(0, 0, 0, 0.62);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.fixora-map-profile {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	height: 100%;
+	padding: 20px;
+	background: var(--fixora-surface-card, rgba(22, 22, 24, 0.96));
+
+	&__close {
+		position: absolute;
+		top: 14px;
+		right: 14px;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		padding: 0;
+		border: none;
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.85);
+		cursor: pointer;
+	}
+
+	&__hero {
+		display: flex;
+		gap: 14px;
+		align-items: flex-start;
+		padding-right: 28px;
+	}
+
+	&__avatar {
+		width: 72px;
+		height: 72px;
+		border-radius: 14px;
+		object-fit: cover;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		flex-shrink: 0;
+	}
+
+	&__titles {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__name {
+		margin: 0;
+		font-family: $font;
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1.25;
+		color: #fff;
+	}
+
+	&__shop {
+		margin: 0;
+		font-family: $font;
+		font-size: 13px;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.72);
+	}
+
+	&__rating {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-family: $font;
+		font-size: 13px;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.9);
+
+		svg {
+			font-size: 16px;
+			color: var(--fixora-primary, #e85d4a);
+		}
+
+		> span:not(.fixora-map-profile__reviews) {
+			font-size: 16px;
+			font-weight: 800;
+			color: var(--fixora-primary-light, #e85d4a);
+		}
+	}
+
+	&__reviews {
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.55);
+	}
+
+	&__meta {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	&__distance {
+		margin: 0;
+		font-family: $font;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--fixora-primary-light, #e85d4a);
+	}
+
+	&__address {
+		display: flex;
+		align-items: flex-start;
+		gap: 6px;
+		margin: 0;
+		font-family: $font;
+		font-size: 12px;
+		line-height: 1.45;
+		color: rgba(255, 255, 255, 0.72);
+
+		svg {
+			flex-shrink: 0;
+			margin-top: 1px;
+			font-size: 15px;
+			color: rgba(255, 255, 255, 0.55);
+		}
+	}
+
+	&__bio {
+		margin: 0;
+		font-family: $font;
+		font-size: 12px;
+		line-height: 1.55;
+		color: rgba(255, 255, 255, 0.68);
+	}
+
+	&__route-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 12px;
+		border-radius: 10px;
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+
+		p {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin: 0;
+			font-family: $font;
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.72);
+
+			strong {
+				color: #fff;
+				font-weight: 600;
+			}
+		}
+	}
+
+	&__route-error {
+		margin: 0;
+		padding: 10px 12px;
+		border-radius: 10px;
+		font-family: $font;
+		font-size: 12px;
+		line-height: 1.45;
+		color: #ffb4a8;
+		background: rgba(115, 12, 30, 0.18);
+		border: 1px solid rgba(115, 12, 30, 0.35);
+	}
+
+	&__actions {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-top: auto;
+	}
+
+	&__route-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+	}
+
+	&--sheet {
+		padding-top: 8px;
+	}
+}
+
+@media (max-width: 1023px) {
+	.fixora-search-map-expanded__body {
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.fixora-search-map-expanded__map-wrap {
+		flex: none;
+		width: 100%;
+		border-right: none;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+		.fixora-search-location__map {
+			min-height: 320px;
+		}
+	}
+
+	.fixora-search-map-expanded__panel {
+		flex: none;
+		width: 100%;
+	}
+
+	.fixora-search-map-expanded__empty {
+		min-height: 200px;
+	}
+}
+
+@media (max-width: 639px) {
+	.fixora-search-map-expanded__collapse span {
+		display: none;
+	}
+
+	.fixora-search-map-expanded__map-wrap .fixora-search-location__map {
+		min-height: 280px;
 	}
 }
 

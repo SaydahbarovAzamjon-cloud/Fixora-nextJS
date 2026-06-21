@@ -132,12 +132,13 @@ Yangi UI element qo‘shganda:
 
 | ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
 |----|------------|---------------|------------|------------------|--------|------|
-| GAP-080 | **Repair category pills** (iPhone/MacBook/iPad/Watch) | `ArticleCategory` yoki `articleTags` kengaytmasi — device/repair turlari | Figma mockup repair pill'lar; schema faqat FREE/RECOMMEND/NEWS/HUMOR | UI repair label; API ga 4 pill → 4 enum mapping (workaround) | `WORKAROUND` | `libs/utils/articleCategoryMap.ts`, `pages/technician/write/` |
+| GAP-080 | **Repair category pills** (iPhone/MacBook/iPad/Watch) + **Community hub filters** (Repair Guides, Quick Tips, …) | `ArticleCategory` yoki `articleTags` kengaytmasi — device/repair turlari | Figma mockup repair pill'lar; schema faqat FREE/RECOMMEND/NEWS/HUMOR | UI repair label; API ga 4 pill → 4 enum mapping (workaround); Community `/community` 6 filter → 4 enum (`libs/utils/communityCategories.ts`) | `WORKAROUND` | `libs/utils/articleCategoryMap.ts`, `libs/utils/communityCategories.ts`, `pages/community/` |
 | GAP-081 | **SEO fields** (meta title, description, keywords) | `ArticleInput` yoki `ArticleSeo` nested input | Write Article SEO panel mockup | Form state + validation; `createArticle` ga yuborilmaydi | `MISSING` | `libs/components/technician/writeArticle/SeoSettingsPanel.tsx` |
 | GAP-082 | **Visibility** (Public / Techs Only) | `articleVisibility` enum yoki `ArticleInput` field | Mockup visibility toggle | UI state only | `MISSING` | `ArticleSettingsPanel.tsx` |
 | GAP-083 | **Featured Article** | `isFeatured: Boolean` on Article | Mockup featured switch | UI state only; `localStorage` workaround | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `ArticleSettingsPanel.tsx` |
 | GAP-084 | **Allow Comments** / **Schedule Publication** | `allowComments`, `scheduledPublishAt` | Mockup article settings | Schedule blocks publish with toast; comments UI-only + `localStorage` | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `useWriteArticleForm.ts`, `ArticleSettingsPanel.tsx` |
-| GAP-085 | **Save / bookmark article** | `saveArticle` yoki `bookmarkTargetArticle` mutation | Profile + community save icon | `localStorage` (`fixora_saved_articles`) | `MISSING` | `libs/utils/savedArticles.ts`, `ProfileArticleCard.tsx` |
+| GAP-085 | **Save / bookmark article** | `saveArticle` yoki `bookmarkTargetArticle` mutation | Profile + community save icon | `localStorage` (`fixora_saved_articles`); wired on `/community` feed + modal | `MISSING` | `libs/utils/savedArticles.ts`, `ProfileArticleCard.tsx`, `pages/community/` |
+| GAP-086 | **Increment article view** | `incrementArticleView(articleId)` mutation yoki `getArticle` read-side bump | Community modal + `/community/[id]` view count | `sessionStorage` dedupe + optimistic +1 (`libs/utils/articleViews.ts`) | `MISSING` | `libs/utils/articleViews.ts`, `ArticleDetailModal.tsx`, `pages/community/[id].tsx` |
 
 ---
 

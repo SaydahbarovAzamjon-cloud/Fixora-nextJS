@@ -1,0 +1,27 @@
+/** Toast UI Viewer wrappers — community modal + post detail */
+
+.fixora-tviewer {
+	width: 100%;
+
+	&__inner {
+		width: 100%;
+	}
+}
+
+.fixora-tviewer--light {
+	background: #fff;
+	margin-top: 30px;
+	border-radius: 10px;
+
+	.fixora-tviewer__inner {
+		padding: 40px;
+	}
+}
+
+.fixora-tviewer--dark {
+	background: transparent;
+
+	.fixora-tviewer__inner {
+		padding: 0;
+	}
+}

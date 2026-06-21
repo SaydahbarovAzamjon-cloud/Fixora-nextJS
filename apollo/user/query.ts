@@ -688,6 +688,7 @@ export const GET_ARTICLES = gql`
 				articleCategory
 				articleTitle
 				articleExcerpt
+				articleContent
 				articleImage
 				articleLikes
 				articleViews

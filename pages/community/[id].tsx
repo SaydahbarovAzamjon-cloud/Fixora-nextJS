@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -16,6 +16,7 @@ import { Article, Comment } from '../../libs/types/fixora/fixora';
 import PostHeader from '../../libs/components/community/fixora/PostHeader';
 import CommentSection from '../../libs/components/community/fixora/CommentSection';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
+import { recordArticleView } from '../../libs/utils/articleViews';
 
 const ToastViewerComponent = dynamic(() => import('../../libs/components/community/TViewer'), {
 	ssr: false,
@@ -30,6 +31,14 @@ const PostDetailPage: NextPage = () => {
 	const [commentsPage, setCommentsPage] = useState(1);
 	const [likePending, setLikePending] = useState(false);
 	const [submitCommentPending, setSubmitCommentPending] = useState(false);
+	const [viewBump, setViewBump] = useState(0);
+
+	useEffect(() => {
+		if (!article?._id) return;
+		if (recordArticleView(article._id)) {
+			setViewBump(1);
+		}
+	}, [article?._id]);
 
 	/** APOLLO REQUESTS **/
 	const { data: articleData, loading: articleLoading } = useQuery(GET_ARTICLE, {
@@ -186,17 +195,19 @@ const PostDetailPage: NextPage = () => {
 	}
 
 	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
+	const displayArticle = viewBump
+		? { ...article, articleViews: (article.articleViews ?? 0) + viewBump }
+		: article;
 
 	return (
 		<div className="fixora-post-detail-page">
 			<div className="fixora-post-detail">
-				{/* Post header */}
-				<PostHeader article={article} isLiked={isLiked} onLike={handleLike} likePending={likePending} />
+				<PostHeader article={displayArticle} isLiked={isLiked} onLike={handleLike} likePending={likePending} />
 
 				{/* Content */}
 				{article.articleContent && (
 					<div className="fixora-post-detail__content">
-						<ToastViewerComponent initialValue={article.articleContent} />
+						<ToastViewerComponent markdown={article.articleContent} dark />
 					</div>
 				)}
 

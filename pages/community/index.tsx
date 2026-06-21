@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useReactiveVar } from '@apollo/client';
 import Pagination from '@mui/material/Pagination';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
-import { GET_ARTICLES } from '../../apollo/user/query';
-import { LIKE_TARGET_ARTICLE } from '../../apollo/user/article';
 import { userVar } from '../../apollo/store';
-import { Article, ArticleCategory } from '../../libs/types/fixora/fixora';
 import { FixoraButton } from '../../libs/components/ui';
 import CategoryTabs from '../../libs/components/community/fixora/CategoryTabs';
-import ArticleCard from '../../libs/components/community/fixora/ArticleCard';
+import CommunitySearchInput from '../../libs/components/community/fixora/CommunitySearchInput';
+import FeaturedArticleCard from '../../libs/components/community/fixora/FeaturedArticleCard';
+import ArticleFeedCard from '../../libs/components/community/fixora/ArticleFeedCard';
+import ArticleDetailModal from '../../libs/components/community/fixora/ArticleDetailModal';
+import { COMMUNITY_PAGE_SIZE, useCommunityFeed } from '../../libs/hooks/useCommunityFeed';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -21,52 +22,31 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	},
 });
 
-const PAGE_SIZE = 6;
-
 const CommunityPage: NextPage = () => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const [category, setCategory] = useState<ArticleCategory>('FREE');
-	const [page, setPage] = useState(1);
-	const [articles, setArticles] = useState<Article[]>([]);
-	const [likePendingId, setLikePendingId] = useState<string | null>(null);
 
-	/** APOLLO REQUESTS **/
-	const { data, loading, refetch } = useQuery(GET_ARTICLES, {
-		variables: {
-			input: {
-				page,
-				limit: PAGE_SIZE,
-				sort: 'createdAt',
-				direction: 'DESC',
-				search: {
-					articleCategory: category,
-				},
-			},
-		},
-		fetchPolicy: 'cache-and-network',
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (result) => {
-			const list: Article[] = result?.getArticles?.list ?? [];
-			setArticles(list);
-		},
-	});
-
-	const total: number = data?.getArticles?.metaCounter?.[0]?.total ?? 0;
-
-	const [likeArticle] = useMutation(LIKE_TARGET_ARTICLE);
-
-	/** HANDLERS **/
-	const handleCategoryChange = (newCategory: ArticleCategory) => {
-		setCategory(newCategory);
-		setPage(1);
-	};
-
-	const handlePageChange = (event: any, value: number) => {
-		setPage(value);
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-	};
+	const {
+		categoryFilter,
+		searchInput,
+		setSearchInput,
+		page,
+		total,
+		loading,
+		feedArticles,
+		featuredArticle,
+		selectedArticleId,
+		likePendingId,
+		handleCategoryChange,
+		handlePageChange,
+		openModal,
+		closeModal,
+		bumpViewCount,
+		handleLike,
+		handleToggleSave,
+		isSaved,
+	} = useCommunityFeed({ userId: user?._id });
 
 	const handleNewPost = async () => {
 		if (!user?._id) {
@@ -76,77 +56,68 @@ const CommunityPage: NextPage = () => {
 		router.push('/community/write');
 	};
 
-	const handleLike = async (articleId: string) => {
-		if (!user?._id) {
-			await sweetErrorHandling(new Error(t('community.loginToLike')));
-			return;
-		}
-
-		setLikePendingId(articleId);
-		try {
-			await likeArticle({
-				variables: { input: articleId },
-				refetchQueries: [
-					{
-						query: GET_ARTICLES,
-						variables: {
-							input: {
-								page,
-								limit: PAGE_SIZE,
-								sort: 'createdAt',
-								direction: 'DESC',
-								search: { articleCategory: category },
-							},
-						},
-					},
-				],
-			});
-		} catch (err: any) {
-			await sweetErrorHandling(err);
-		} finally {
-			setLikePendingId(null);
-		}
-	};
-
 	return (
 		<div className="fixora-community-page">
 			<div className="fixora-community">
-				{/* Header */}
 				<div className="fixora-community__header">
-					<h1 className="fixora-community__title">{t('community.title')}</h1>
+					<div className="fixora-community__header-text">
+						<h1 className="fixora-community__title">{t('community.title')}</h1>
+						<p className="fixora-community__subtitle">{t('community.subtitle')}</p>
+					</div>
 					<FixoraButton variant="primary" onClick={handleNewPost}>
 						{t('community.newPost')}
 					</FixoraButton>
 				</div>
 
-				{/* Category Tabs */}
-				<CategoryTabs value={category} onChange={handleCategoryChange} />
+				<CommunitySearchInput
+					value={searchInput}
+					onChange={setSearchInput}
+					placeholder={t('community.searchPlaceholder')}
+				/>
 
-				{/* Feed */}
-				{loading && articles.length === 0 ? (
+				<CategoryTabs value={categoryFilter} onChange={handleCategoryChange} />
+
+				{loading && !featuredArticle && feedArticles.length === 0 ? (
 					<div className="fixora-community__loading">{t('community.loading')}</div>
-				) : articles.length === 0 ? (
+				) : !featuredArticle && feedArticles.length === 0 ? (
 					<div className="fixora-community__empty">
 						<p>{t('community.empty')}</p>
 					</div>
 				) : (
-					<div className="fixora-community__feed">
-						{articles.map((article) => (
-							<ArticleCard
-								key={article._id}
-								article={article}
+					<>
+						{featuredArticle && (
+							<FeaturedArticleCard
+								article={featuredArticle}
+								onOpen={openModal}
 								onLike={handleLike}
-								likePending={likePendingId === article._id}
+								onToggleSave={handleToggleSave}
+								isSaved={isSaved(featuredArticle._id)}
+								likePending={likePendingId === featuredArticle._id}
 							/>
-						))}
-					</div>
+						)}
+
+						{feedArticles.length > 0 && (
+							<div className="fixora-community__feed-list">
+								{feedArticles.map((article) => (
+									<ArticleFeedCard
+										key={article._id}
+										article={article}
+										onOpen={openModal}
+										onLike={handleLike}
+										onToggleSave={handleToggleSave}
+										isSaved={isSaved(article._id)}
+										likePending={likePendingId === article._id}
+									/>
+								))}
+							</div>
+						)}
+					</>
 				)}
 
-				{/* Pagination */}
-				{total > PAGE_SIZE && (
+				{total > COMMUNITY_PAGE_SIZE && (
 					<div className="fixora-community__pagination">
 						<Pagination
-							count={Math.ceil(total / PAGE_SIZE)}
+							count={Math.ceil(total / COMMUNITY_PAGE_SIZE)}
 							page={page}
 							onChange={handlePageChange}
 							color="primary"
@@ -154,6 +125,16 @@ const CommunityPage: NextPage = () => {
 					</div>
 				)}
 			</div>
+
+			<ArticleDetailModal
+				articleId={selectedArticleId}
+				open={!!selectedArticleId}
+				onClose={closeModal}
+				userId={user?._id}
+				isSaved={isSaved}
+				onToggleSave={handleToggleSave}
+				onViewRecorded={bumpViewCount}
+			/>
 		</div>
 	);
 };

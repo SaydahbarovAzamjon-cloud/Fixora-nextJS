@@ -1,26 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Viewer } from '@toast-ui/react-editor';
-import { Box, Stack, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 
-const TViewer = (props: any) => {
+interface TViewerProps {
+	markdown?: string;
+	/** Dark Fixora theme — no white paper background */
+	dark?: boolean;
+}
+
+const TViewer = ({ markdown, dark = false }: TViewerProps) => {
 	const [editorLoaded, setEditorLoaded] = useState(false);
 
-	/** LIFECYCLES **/
 	useEffect(() => {
-		if (props.markdown) {
-			setEditorLoaded(true);
-		} else {
-			setEditorLoaded(false);
-		}
-	}, [props.markdown]);
+		setEditorLoaded(!!markdown);
+	}, [markdown]);
+
+	const wrapperClass = dark
+		? 'fixora-tviewer fixora-tviewer--dark'
+		: 'fixora-tviewer fixora-tviewer--light';
 
 	return (
-		<Stack sx={{ background: 'white', mt: '30px', borderRadius: '10px' }}>
-			<Box component={'div'} sx={{ m: '40px' }}>
+		<div className={wrapperClass}>
+			<Box component="div" className="fixora-tviewer__inner">
 				{editorLoaded ? (
 					<Viewer
-						initialValue={props.markdown}
+						initialValue={markdown}
 						customHTMLRenderer={{
 							htmlBlock: {
 								iframe(node: any) {
@@ -53,10 +58,10 @@ const TViewer = (props: any) => {
 						}}
 					/>
 				) : (
-					<CircularProgress /> 
+					<CircularProgress size={28} sx={{ color: 'var(--fixora-primary)' }} />
 				)}
 			</Box>
-		</Stack>
+		</div>
 	);
 };
 

@@ -52,11 +52,17 @@
 
 .fixora-post-detail__author {
 	display: flex;
-	gap: 12px;
 	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 	padding: 16px 0;
 	border-bottom: 1px solid var(--fixora-border-subtle);
 	margin-bottom: 20px;
+}
+
+.fixora-post-detail__author-link {
+	flex: 1;
+	min-width: 0;
 }
 
 .fixora-post-detail__author__avatar {

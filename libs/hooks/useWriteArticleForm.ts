@@ -8,6 +8,7 @@ import {
 	REPAIR_TO_ARTICLE_CATEGORY,
 	RepairCategoryId,
 } from '../utils/articleCategoryMap';
+import { estimateReadMinutes } from '../utils/articleReadTime';
 import { isLegacyArticleTemplate } from '../utils/articleContentTemplate';
 import {
 	getArticleLocalSettings,
@@ -61,10 +62,7 @@ export function stripMarkdownExcerpt(text: string, max = 140): string {
 	return stripped.length > max ? `${stripped.slice(0, max)}…` : stripped;
 }
 
-export function estimateReadMinutes(text: string): number {
-	const words = text.split(/\s+/).filter(Boolean).length;
-	return Math.max(1, Math.round(words / 200));
-}
+export { estimateReadMinutes } from '../utils/articleReadTime';
 
 export function countWords(text: string): number {
 	return text.split(/\s+/).filter(Boolean).length;

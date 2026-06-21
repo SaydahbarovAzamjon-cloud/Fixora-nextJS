@@ -141,17 +141,15 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		transition: background 0.15s ease;
 
 		&:hover {
-			background: rgba(115, 12, 30, 0.08);
+			background: rgba(255, 107, 0, 0.08);
 
-			.fixora-technician-sidebar__logo-img .fixora-logo__image,
-			.fixora-technician-sidebar__logo-img .fixora-logo__mark {
-				filter: drop-shadow(0 0 12px rgba(115, 12, 30, 0.45));
+			.fixora-technician-sidebar__logo-img .fixora-logo__image {
+				filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.45));
 			}
 		}
 	}
 
-	&__logo-img .fixora-logo__image,
-	&__logo-img .fixora-logo__mark {
+	&__logo-img .fixora-logo__image {
 		max-height: 64px;
 		width: auto;
 		transition: filter 0.3s ease;

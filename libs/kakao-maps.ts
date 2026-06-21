@@ -3,6 +3,23 @@ const KAKAO_MAPS_SCRIPT_ID = 'kakao-maps-sdk-script';
 export const SEOUL_CENTER = { lat: 37.5665, lng: 126.978 };
 export const DEFAULT_GEO_SEARCH_RADIUS_KM = 10;
 
+/** Kakao Maps tile coverage is Korea-only — coords outside this box show a blank map. */
+const KOREA_BOUNDS = {
+	minLat: 33.0,
+	maxLat: 38.9,
+	minLng: 124.5,
+	maxLng: 132.1,
+};
+
+export function isWithinKorea(lat: number, lng: number): boolean {
+	return (
+		lat >= KOREA_BOUNDS.minLat &&
+		lat <= KOREA_BOUNDS.maxLat &&
+		lng >= KOREA_BOUNDS.minLng &&
+		lng <= KOREA_BOUNDS.maxLng
+	);
+}
+
 interface KakaoLatLng {
 	getLat: () => number;
 	getLng: () => number;
@@ -36,6 +53,33 @@ export interface KakaoLatLngBounds {
 export interface KakaoMarker {
 	setMap: (map: KakaoMap | null) => void;
 	setPosition: (latlng: KakaoLatLng) => void;
+	setImage: (image: KakaoMarkerImage) => void;
+	setZIndex: (zIndex: number) => void;
+}
+
+export interface KakaoCustomOverlay {
+	setMap: (map: KakaoMap | null) => void;
+	setPosition: (latlng: KakaoLatLng) => void;
+	setContent: (content: string | HTMLElement) => void;
+}
+
+export interface KakaoMarkerClusterer {
+	clear: () => void;
+	addMarkers: (markers: KakaoMarker[]) => void;
+	setMap: (map: KakaoMap | null) => void;
+}
+
+interface KakaoClusterStyle {
+	width: string;
+	height: string;
+	background: string;
+	borderRadius: string;
+	color: string;
+	textAlign: string;
+	fontWeight: string;
+	lineHeight: string;
+	border?: string;
+	boxShadow?: string;
 }
 
 interface KakaoGeocodeResult {
@@ -78,21 +122,53 @@ declare global {
 						scrollwheel?: boolean;
 						disableDoubleClick?: boolean;
 						disableDoubleClickZoom?: boolean;
+						mapTypeId?: number;
 					},
 				) => KakaoMap;
 				Marker: new (options: {
-					map: KakaoMap;
+					map?: KakaoMap | null;
 					position: KakaoLatLng;
 					image?: KakaoMarkerImage;
 					opacity?: number;
+					zIndex?: number;
 				}) => KakaoMarker;
+				CustomOverlay: new (options: {
+					map?: KakaoMap | null;
+					position: KakaoLatLng;
+					content: string | HTMLElement;
+					yAnchor?: number;
+					xAnchor?: number;
+					zIndex?: number;
+				}) => KakaoCustomOverlay;
+				MarkerClusterer: new (options: {
+					map: KakaoMap;
+					markers?: KakaoMarker[];
+					averageCenter?: boolean;
+					minLevel?: number;
+					disableClickZoom?: boolean;
+					gridSize?: number;
+					minClusterSize?: number;
+					styles?: KakaoClusterStyle[];
+				}) => KakaoMarkerClusterer;
 				MarkerImage: new (
 					src: string,
 					size: KakaoSize,
 					options?: { offset?: KakaoPoint },
 				) => KakaoMarkerImage;
+				MapTypeId: {
+					ROADMAP: number;
+				};
 				event: {
-					addListener: (target: KakaoMap, type: string, handler: () => void) => void;
+					addListener: (
+						target: KakaoMap | KakaoMarker | KakaoMarkerClusterer,
+						type: string,
+						handler: (evt?: unknown) => void,
+					) => void;
+					removeListener: (
+						target: KakaoMap | KakaoMarker | KakaoMarkerClusterer,
+						type: string,
+						handler: (evt?: unknown) => void,
+					) => void;
 				};
 				services: {
 					Status: { OK: string };
@@ -114,6 +190,15 @@ function dotMarkerSvg(fill: string, glow: string): string {
 		<circle cx="9" cy="9" r="7" fill="${fill}" opacity="0.35"/>
 		<circle cx="9" cy="9" r="4" fill="${fill}"/>
 		<circle cx="9" cy="9" r="6" fill="none" stroke="${glow}" stroke-width="1.5" opacity="0.55"/>
+	</svg>`;
+}
+
+function pinMarkerSvg(fill: string, stroke: string, inner: string, scale = 1): string {
+	const w = Math.round(32 * scale);
+	const h = Math.round(40 * scale);
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 32 40">
+		<path d="M16 0C9.37 0 4 5.37 4 12c0 9 12 28 12 28s12-19 12-28C28 5.37 22.63 0 16 0z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+		<circle cx="16" cy="12" r="5" fill="${inner}"/>
 	</svg>`;
 }
 
@@ -144,24 +229,55 @@ export function relayoutKakaoMap(map: KakaoMap): void {
 	}
 }
 
-export function waitForNonZeroSize(element: HTMLElement, timeoutMs = 5000): Promise<void> {
-	if (element.offsetWidth > 0 && element.offsetHeight > 0) {
+/** Kakao tiles often need repeated relayout after the container gains layout (sidebar mount). */
+export function scheduleMapRelayout(map: KakaoMap): void {
+	relayoutKakaoMap(map);
+	if (typeof window === 'undefined') return;
+
+	window.requestAnimationFrame(() => {
+		relayoutKakaoMap(map);
+		window.requestAnimationFrame(() => relayoutKakaoMap(map));
+	});
+
+	[100, 300, 600].forEach((delay) => {
+		window.setTimeout(() => relayoutKakaoMap(map), delay);
+	});
+}
+
+export function waitForNonZeroSize(element: HTMLElement, timeoutMs = 8000): Promise<void> {
+	const hasSize = (el: HTMLElement) => el.offsetWidth > 0 && el.offsetHeight > 0;
+
+	if (hasSize(element)) {
+		return Promise.resolve();
+	}
+
+	const parent = element.parentElement;
+	if (parent && hasSize(parent)) {
 		return Promise.resolve();
 	}
 
 	return new Promise((resolve, reject) => {
-		const observer = new ResizeObserver(() => {
-			if (element.offsetWidth > 0 && element.offsetHeight > 0) {
+		const targets = [element, parent].filter(Boolean) as HTMLElement[];
+
+		const tryResolve = () => {
+			if (hasSize(element) || (parent && hasSize(parent))) {
 				observer.disconnect();
 				resolve();
+				return true;
 			}
+			return false;
+		};
+
+		const observer = new ResizeObserver(() => {
+			tryResolve();
 		});
 
-		observer.observe(element);
+		targets.forEach((el) => observer.observe(el));
 
 		window.setTimeout(() => {
 			observer.disconnect();
-			if (element.offsetWidth > 0 && element.offsetHeight > 0) resolve();
+			if (tryResolve()) return;
+			if (hasSize(element) || (parent && hasSize(parent))) resolve();
 			else reject(new Error('Map container has zero size'));
 		}, timeoutMs);
 	});
@@ -195,14 +311,28 @@ export function pointToOverlayPercent(
 	return { top: `${Math.min(92, Math.max(8, top))}%`, left: `${Math.min(92, Math.max(8, left))}%` };
 }
 
+export function destroyKakaoMap(marker: KakaoMarker | null, container: HTMLElement | null): void {
+	try {
+		marker?.setMap(null);
+	} catch (err) {
+		logKakaoMapError('destroyMarker', err);
+	}
+
+	if (container) {
+		// Kakao Map has no public destroy(); clear the node so the next init gets a clean container.
+		container.replaceChildren();
+	}
+}
+
 export function bindMapIdleListener(
 	kakao: NonNullable<Window['kakao']>,
 	map: KakaoMap,
-	onIdle: () => void,
+	onTilesLoaded: () => void,
 ): void {
 	try {
-		kakao.maps.event.addListener(map, 'idle', onIdle);
-		kakao.maps.event.addListener(map, 'tilesloaded', onIdle);
+		kakao.maps.event.addListener(map, 'tilesloaded', onTilesLoaded);
+		// Relayout when map settles; do not treat idle as "tiles visible"
+		kakao.maps.event.addListener(map, 'idle', () => scheduleMapRelayout(map));
 	} catch (err) {
 		logKakaoMapError('bindMapIdleListener', err);
 	}
@@ -216,10 +346,98 @@ export function createUserMarkerImage(kakao: NonNullable<Window['kakao']>): Kaka
 }
 
 export function createTechnicianMarkerImage(kakao: NonNullable<Window['kakao']>): KakaoMarkerImage {
-	const src = markerDataUri(dotMarkerSvg('#730C1E', '#730C1E'));
-	const size = new kakao.maps.Size(18, 18);
-	const offset = new kakao.maps.Point(9, 9);
+	const src = markerDataUri(pinMarkerSvg('#730C1E', 'rgba(255,255,255,0.35)', '#ffffff'));
+	const size = new kakao.maps.Size(32, 40);
+	const offset = new kakao.maps.Point(16, 40);
 	return new kakao.maps.MarkerImage(src, size, { offset });
+}
+
+export function createTechnicianMarkerImageSelected(kakao: NonNullable<Window['kakao']>): KakaoMarkerImage {
+	const src = markerDataUri(pinMarkerSvg('#ffffff', '#730C1E', '#730C1E', 1.15));
+	const size = new kakao.maps.Size(36, 46);
+	const offset = new kakao.maps.Point(18, 46);
+	return new kakao.maps.MarkerImage(src, size, { offset });
+}
+
+export function createTechnicianClusterStyles(): KakaoClusterStyle[] {
+	return [
+		{
+			width: '44px',
+			height: '44px',
+			background: 'rgba(115, 12, 30, 0.92)',
+			borderRadius: '22px',
+			color: '#ffffff',
+			textAlign: 'center',
+			fontWeight: '700',
+			lineHeight: '44px',
+			border: '2px solid rgba(255, 255, 255, 0.35)',
+			boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)',
+		},
+		{
+			width: '52px',
+			height: '52px',
+			background: 'rgba(115, 12, 30, 0.95)',
+			borderRadius: '26px',
+			color: '#ffffff',
+			textAlign: 'center',
+			fontWeight: '700',
+			lineHeight: '52px',
+			border: '2px solid rgba(255, 255, 255, 0.4)',
+			boxShadow: '0 6px 18px rgba(0, 0, 0, 0.4)',
+		},
+	];
+}
+
+export function createTechnicianMarkerClusterer(
+	kakao: NonNullable<Window['kakao']>,
+	map: KakaoMap,
+	markers: KakaoMarker[],
+): KakaoMarkerClusterer {
+	return new kakao.maps.MarkerClusterer({
+		map,
+		markers,
+		averageCenter: true,
+		minLevel: 4,
+		disableClickZoom: false,
+		gridSize: 64,
+		minClusterSize: 2,
+		styles: createTechnicianClusterStyles(),
+	});
+}
+
+export function createMapTooltipOverlay(
+	kakao: NonNullable<Window['kakao']>,
+	position: KakaoLatLng,
+	html: string,
+): KakaoCustomOverlay {
+	return new kakao.maps.CustomOverlay({
+		position,
+		content: html,
+		yAnchor: 2.2,
+		xAnchor: 0.5,
+		zIndex: 4,
+	});
+}
+
+export function fitMapToTechnicians(
+	kakao: NonNullable<Window['kakao']>,
+	map: KakaoMap,
+	technicianPoints: MapPoint[],
+	options?: { includeUser?: MapPoint; minLevel?: number; maxLevel?: number; singlePointLevel?: number },
+): void {
+	const { includeUser, minLevel = 4, maxLevel = 11, singlePointLevel = 7 } = options ?? {};
+	const points = includeUser ? [includeUser, ...technicianPoints] : technicianPoints;
+
+	if (!points.length) return;
+
+	if (technicianPoints.length === 1 && !includeUser) {
+		const point = technicianPoints[0];
+		map.setCenter(new kakao.maps.LatLng(point.lat, point.lng));
+		map.setLevel(singlePointLevel);
+		return;
+	}
+
+	fitMapToPoints(kakao, map, points, { minLevel, maxLevel, singlePointLevel });
 }
 
 export function fitMapToPoints(
@@ -299,12 +517,27 @@ export function loadKakaoMapsSdk(): Promise<NonNullable<Window['kakao']>> {
 		return waitForMapsApi();
 	}
 
+	const needsClustererReload = (): boolean => {
+		const existing =
+			(document.getElementById(KAKAO_MAPS_SCRIPT_ID) as HTMLScriptElement | null) ??
+			(document.querySelector('script[src*="dapi.kakao.com/v2/maps/sdk.js"]') as HTMLScriptElement | null);
+		return !!existing && !existing.src.includes('clusterer');
+	};
+
+	if (needsClustererReload()) {
+		document.getElementById(KAKAO_MAPS_SCRIPT_ID)?.remove();
+		document.querySelectorAll('script[src*="dapi.kakao.com/v2/maps/sdk.js"]').forEach((node) => node.remove());
+		delete window.kakao;
+	}
+
 	return new Promise((resolve, reject) => {
 		const boot = () => {
 			waitForMapsApi().then(resolve).catch(reject);
 		};
 
-		const existing = document.getElementById(KAKAO_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
+		const existing =
+			(document.getElementById(KAKAO_MAPS_SCRIPT_ID) as HTMLScriptElement | null) ??
+			(document.querySelector('script[src*="dapi.kakao.com/v2/maps/sdk.js"]') as HTMLScriptElement | null);
 		if (existing) {
 			boot();
 			return;
@@ -312,7 +545,7 @@ export function loadKakaoMapsSdk(): Promise<NonNullable<Window['kakao']>> {
 
 		const script = document.createElement('script');
 		script.id = KAKAO_MAPS_SCRIPT_ID;
-		script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${jsKey}&autoload=false&libraries=services`;
+		script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${jsKey}&autoload=false&libraries=services,clusterer`;
 		script.async = true;
 		script.onload = boot;
 		script.onerror = () => reject(new Error('Kakao Maps script failed — check Kakao Console Map API + domain whitelist'));
@@ -329,19 +562,29 @@ export function formatKakaoAddress(result: KakaoGeocodeResult[]): string {
 	return [city, district].filter(Boolean).join(', ');
 }
 
+export function formatCoordLabel(lat: number, lng: number): string {
+	return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
+
 export function reverseGeocode(kakao: NonNullable<Window['kakao']>, lat: number, lng: number): Promise<string> {
-	const geocodePromise = new Promise<string>((resolve, reject) => {
-		const geocoder = new kakao.maps.services.Geocoder();
-		geocoder.coord2Address(lng, lat, (result, status) => {
-			if (status !== kakao.maps.services.Status.OK || !result?.length) {
-				reject(new Error('Geocode failed'));
-				return;
-			}
-			resolve(formatKakaoAddress(result));
-		});
+	const geocodePromise = new Promise<string>((resolve) => {
+		try {
+			const geocoder = new kakao.maps.services.Geocoder();
+			geocoder.coord2Address(lng, lat, (result, status) => {
+				if (status !== kakao.maps.services.Status.OK || !result?.length) {
+					// Expected when coords are outside Korea or Geocoder has no match — not a hard error.
+					resolve('');
+					return;
+				}
+				resolve(formatKakaoAddress(result));
+			});
+		} catch (err) {
+			logKakaoMapError('reverseGeocode', err);
+			resolve('');
+		}
 	});
 
-	return withTimeout(geocodePromise, 6000, 'Reverse geocode');
+	return withTimeout(geocodePromise, 6000, 'Reverse geocode').catch(() => '');
 }
 
 export function getCurrentPosition(): Promise<GeolocationPosition> {

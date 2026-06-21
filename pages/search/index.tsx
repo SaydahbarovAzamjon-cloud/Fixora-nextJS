@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Script from 'next/script';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -24,10 +23,6 @@ import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetA
 import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
-
-const KAKAO_MAPS_SDK_SRC = process.env.NEXT_PUBLIC_KAKAO_JS_KEY
-	? `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&autoload=false&libraries=services`
-	: '';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -144,9 +139,6 @@ const SearchPage: NextPage = () => {
 
 	return (
 		<Stack className="fixora-search-page">
-			{KAKAO_MAPS_SDK_SRC ? (
-				<Script id="fixora-kakao-maps-sdk" src={KAKAO_MAPS_SDK_SRC} strategy="afterInteractive" />
-			) : null}
 			<Stack className="container">
 				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
@@ -156,7 +148,7 @@ const SearchPage: NextPage = () => {
 					<Stack className="fixora-search__sidebar">
 						<LocationCard
 							locationLabel={locationLabel || t('search.location.placeholder')}
-							technicians={technicians}
+							searchFilter={searchFilter}
 							onLocationChange={locationChangeHandler}
 						/>
 						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />

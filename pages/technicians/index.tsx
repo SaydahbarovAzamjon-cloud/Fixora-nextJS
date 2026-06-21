@@ -1,6 +1,5 @@
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Script from 'next/script';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -14,8 +13,6 @@ import SearchFilters from '../../libs/components/search/SearchFilters';
 import SearchResultsHeader from '../../libs/components/search/SearchResultsHeader';
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
 import TechniciansPageStats from '../../libs/components/technicians/TechniciansPageStats';
-import TechniciansTopSection from '../../libs/components/technicians/TechniciansTopSection';
-import TechniciansNewSection from '../../libs/components/technicians/TechniciansNewSection';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { LIKE_TARGET_USER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
@@ -26,10 +23,6 @@ import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetA
 import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
-
-const KAKAO_MAPS_SDK_SRC = process.env.NEXT_PUBLIC_KAKAO_JS_KEY
-	? `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&autoload=false&libraries=services`
-	: '';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -143,18 +136,7 @@ const TechniciansListPage: NextPage = () => {
 
 	return (
 		<Stack className="fixora-tech-list-page">
-			{KAKAO_MAPS_SDK_SRC ? (
-				<Script id="fixora-kakao-maps-sdk-tech-list" src={KAKAO_MAPS_SDK_SRC} strategy="afterInteractive" />
-			) : null}
 			<Stack className="container">
-				<header className="fixora-tech-list-page__header">
-					<h1>{t('technicians.page.title')}</h1>
-					<p>{t('technicians.page.subtitle')}</p>
-				</header>
-
-				<TechniciansPageStats />
-				<TechniciansTopSection />
-
 				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 				<SearchCategoryRow searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
@@ -162,7 +144,7 @@ const TechniciansListPage: NextPage = () => {
 					<Stack className="fixora-search__sidebar">
 						<LocationCard
 							locationLabel={locationLabel || t('search.location.placeholder')}
-							technicians={technicians}
+							searchFilter={searchFilter}
 							onLocationChange={locationChangeHandler}
 						/>
 						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
@@ -209,7 +191,9 @@ const TechniciansListPage: NextPage = () => {
 					</Stack>
 				</Stack>
 
-				<TechniciansNewSection />
+				<div className="fixora-tech-list-page__stats-bottom">
+					<TechniciansPageStats />
+				</div>
 			</Stack>
 		</Stack>
 	);

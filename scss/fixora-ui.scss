@@ -83,14 +83,8 @@
 		width: 100%;
 	}
 
-	&--mark &__image,
-	&--mark &__mark {
+	&--mark &__image {
 		max-height: 52px;
-	}
-
-	&__mark {
-		display: block;
-		flex-shrink: 0;
 	}
 }
 

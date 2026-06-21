@@ -40,7 +40,8 @@ const AppShell = ({ Component, pageProps }: AppShellProps) => {
 		return null;
 	}
 
-	return <Component key={`${layoutScope}:${router.asPath}`} {...pageProps} />;
+	// Remount on route path change only — not query/hash (geo search updates ?input= and must not destroy Kakao map).
+	return <Component key={`${layoutScope}:${router.pathname}`} {...pageProps} />;
 };
 
 export default AppShell;

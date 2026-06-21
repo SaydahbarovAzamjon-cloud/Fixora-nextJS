@@ -1,8 +1,8 @@
 <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="favicon-grad" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8E1428"/>
-      <stop offset="1" stop-color="#480415"/>
+      <stop stop-color="#FF8533"/>
+      <stop offset="1" stop-color="#E55A00"/>
     </linearGradient>
   </defs>
   <rect width="40" height="40" rx="11" fill="url(#favicon-grad)"/>

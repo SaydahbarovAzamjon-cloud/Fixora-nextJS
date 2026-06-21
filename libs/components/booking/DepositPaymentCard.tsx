@@ -9,6 +9,7 @@ import { useDepositPayment, isDepositPaid } from '../../hooks/useDepositPayment'
 import { formatKrw } from '../../utils/formatCurrency';
 import { sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import type { BookingStatus, Payment, PaymentMethod } from '../../types/fixora/fixora';
+import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
 
 export interface DepositPaymentCardProps {
 	bookingId: string;
@@ -138,7 +139,7 @@ const DepositPaymentCard: React.FC<DepositPaymentCardProps> = ({
 						<Link href={`/mypage/bookings/${bookingId}`} className="fixora-tech-profile__book-btn">
 							{t('booking.detail.viewDetail')}
 						</Link>
-						<Link href="/mypage?tab=requests" className="fixora-booking__link">
+						<Link href={ownerMyPageHref('activeRequests')} className="fixora-booking__link">
 							{t('payment.viewRequests')}
 						</Link>
 						{technicianId && (

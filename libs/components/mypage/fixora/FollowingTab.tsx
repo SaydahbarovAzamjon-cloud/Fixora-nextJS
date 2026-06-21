@@ -2,19 +2,30 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
-import StarIcon from '@mui/icons-material/Star';
+import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { GET_USER_FOLLOWINGS } from '../../../../apollo/user/profile';
 import { UNSUBSCRIBE } from '../../../../apollo/user/mutation';
 import { userVar } from '../../../../apollo/store';
-import { Following } from '../../../types/fixora/fixora';
+import { Following, BadgeLevel } from '../../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../../utils/profileImage';
-import { FixoraButton } from '../../ui';
 import { sweetErrorHandling } from '../../../sweetAlert';
 
 interface FollowingTabProps {
 	userId?: string;
 	readOnly?: boolean;
 }
+
+const badgeLabelKey = (level?: BadgeLevel) => {
+	switch (level) {
+		case 'PREMIUM_PRO':
+			return 'mypage.badge.premiumPro';
+		case 'VERIFIED':
+			return 'mypage.badge.verified';
+		default:
+			return 'mypage.badge.new';
+	}
+};
 
 const FollowingTab = ({ userId, readOnly = false }: FollowingTabProps) => {
 	const { t } = useTranslation('common');
@@ -42,41 +53,63 @@ const FollowingTab = ({ userId, readOnly = false }: FollowingTabProps) => {
 	};
 
 	if (!followings.length) {
-		return <p className="fixora-mypage__empty">{t('mypage.noFollowing')}</p>;
+		return (
+			<div className="fixora-mypage__panel">
+				<h2 className="fixora-mypage__panel-title">{t('mypage.tabs.following')}</h2>
+				<p className="fixora-mypage__empty">{t('mypage.noFollowing')}</p>
+			</div>
+		);
 	}
 
 	return (
-		<div className="fixora-mypage__following-list">
-			{followings.map((following) => {
-				const technician = following.followingData;
-				if (!technician) return null;
-				const displayName = technician.shopName || technician.userFullName || technician.userNickname || '';
+		<div className="fixora-mypage__panel">
+			<h2 className="fixora-mypage__panel-title">{t('mypage.tabs.following')}</h2>
+			<div className="fixora-mypage__following-list">
+				{followings.map((following) => {
+					const technician = following.followingData;
+					if (!technician) return null;
+					const displayName = technician.shopName || technician.userFullName || technician.userNickname || '';
+					const articles = technician.userArticles ?? 0;
+					const rating = technician.averageRating?.toFixed(2) ?? '—';
 
-				return (
-					<div key={following._id} className="fixora-mypage__following">
-						<button
-							type="button"
-							className="fixora-mypage__following-info"
-							onClick={() => router.push(`/technicians/${technician._id}`)}
-						>
-							<img className="fixora-mypage__following-avatar" src={resolveProfileImageUrl(technician.userProfileImage)} alt="" />
-							<div>
-								<strong>{displayName}</strong>
-								{technician.specialty && <span>{technician.specialty}</span>}
-								<span className="fixora-mypage__following-rating">
-									<StarIcon fontSize="inherit" />
-									{technician.averageRating?.toFixed(1) ?? '—'} ({technician.reviewCount ?? 0})
-								</span>
-							</div>
-						</button>
-						{!readOnly && (
-							<FixoraButton variant="outline" onClick={() => unfollow(technician._id)}>
-								{t('mypage.unfollow')}
-							</FixoraButton>
-						)}
-					</div>
-				);
-			})}
+					return (
+						<article key={following._id} className="fixora-mypage__following-card">
+							<button
+								type="button"
+								className="fixora-mypage__following-card-main"
+								onClick={() => router.push(`/technicians/${technician._id}`)}
+							>
+								<img
+									className="fixora-mypage__following-avatar"
+									src={resolveProfileImageUrl(technician.userProfileImage)}
+									alt=""
+								/>
+								<div className="fixora-mypage__following-card-info">
+									<strong>
+										{displayName}
+										{(technician.badgeLevel === 'PREMIUM_PRO' || technician.badgeLevel === 'VERIFIED') && (
+											<WorkspacePremiumOutlinedIcon className="fixora-mypage__following-award" fontSize="inherit" />
+										)}
+									</strong>
+									<span>
+										{t(badgeLabelKey(technician.badgeLevel))} · {t('mypage.followingArticles', { count: articles })} · ★{rating}
+									</span>
+								</div>
+							</button>
+							{!readOnly ? (
+								<button
+									type="button"
+									className="fixora-mypage__following-pill"
+									onClick={() => unfollow(technician._id)}
+								>
+									<HowToRegIcon fontSize="inherit" />
+									{t('mypage.followingLabel')}
+								</button>
+							) : null}
+						</article>
+					);
+				})}
+			</div>
 		</div>
 	);
 };

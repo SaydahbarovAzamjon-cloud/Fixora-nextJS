@@ -45,7 +45,7 @@
 | P3-06 | Booking flow UI | ✅ Done | `/technicians/[id]/book` — device picker + `createDevice`/`createBooking` |
 | P3-06b | Deposit payment UI (KakaoPay mock) | ✅ Done | `DepositPaymentCard`, `useDepositPayment`, booking post-step + My Page Pay Deposit — `initiatePayment`/`confirmPayment` (PAY-05) |
 | P3-07 | Messages UI | ✅ Done | `/messages` — chat list + thread + request details, mockup `customer-pages-full.png` §6 |
-| P3-08 | My Page + Notifications | ✅ Done | `/mypage` (profile + Requests/Following/Repair Stories/Settings tabs) + `/notifications` — mockup `customer-pages-full.png` §7–8 |
+| P3-08 | My Page + Notifications | ✅ Done | `/client/my-page` (6-tab owner view) + `/mypage` redirect + `/notifications` — real API; GAP-098 saved technicians |
 | P3-08b | Booking detail + final payment | ✅ Done | `/mypage/bookings/[id]` — detail view, deposit + final mock payment, cancel, review; wired from Messages/My Page/notifications |
 | P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens incl. Settings 1:1 (`libs/components/technician/settings/`); Profile/Account/Security/Availability GraphQL; GAP-090…096 in BACKEND_SETTINGS.md |
 | P3-10 | Community + Post Detail | ✅ Done | `/community` feed + `/community/[id]` detail + `/community/write`; 4 components; 6 GraphQL ops; route migration from `?id=` to `[id]` |

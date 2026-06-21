@@ -245,6 +245,7 @@ export interface BookingReview {
 	communication: number;
 	reviewImages?: string[];
 	createdAt: string;
+	deviceData?: Device;
 }
 
 export interface CreateReviewInput {
@@ -374,6 +375,8 @@ export interface FollowedTechnician {
 	averageRating: number;
 	reviewCount: number;
 	isOnline: boolean;
+	badgeLevel?: BadgeLevel;
+	userArticles?: number;
 }
 
 export interface Following {

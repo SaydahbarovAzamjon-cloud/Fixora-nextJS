@@ -8,6 +8,7 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import { Notification } from '../types/fixora/fixora';
+import { ownerMyPageHref } from './clientMyPageRoute';
 
 /**
  * The product spec only recognizes these 9 notification categories
@@ -78,13 +79,13 @@ export const getNotificationLink = (notification: Notification): string | null =
 		case 'BOOKING':
 			return notification.referenceId
 				? `/mypage/bookings/${notification.referenceId}`
-				: '/mypage?tab=requests';
+				: ownerMyPageHref('activeRequests');
 		case 'MESSAGE':
 			return '/messages';
 		case 'ARTICLE':
 			return notification.referenceId ? `/community/${notification.referenceId}` : '/community';
 		case 'REVIEW':
-			return '/mypage';
+			return ownerMyPageHref('activeRequests');
 		default:
 			return null;
 	}

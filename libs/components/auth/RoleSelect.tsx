@@ -52,7 +52,7 @@ const RoleSelect = () => {
 			if (userType === 'TECHNICIAN') {
 				await router.push('/register/technician/id');
 			} else {
-				await router.push('/mypage');
+				await router.push('/');
 			}
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Signup failed');

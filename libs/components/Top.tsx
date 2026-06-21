@@ -15,6 +15,7 @@ import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 import { isTechnicianUser } from '../utils/userRole';
+import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
@@ -175,8 +176,8 @@ const Top = () => {
 					</Link>
 				) : (
 					<Link
-						href={'/mypage'}
-						className={`fixora-nav__link ${isActive('/mypage') ? 'fixora-nav__link--active' : ''}`}
+						href={CLIENT_MY_PAGE}
+						className={`fixora-nav__link ${isClientMyPageRoute(router.pathname) ? 'fixora-nav__link--active' : ''}`}
 					>
 						{t('nav.myPage')}
 					</Link>

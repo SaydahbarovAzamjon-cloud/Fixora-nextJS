@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { CLIENT_MY_PAGE } from '../../utils/clientMyPageRoute';
 
 interface CommunityCardProps {
 	boardArticle: BoardArticle;
@@ -42,7 +43,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 	};
 
 	const goMemberPage = (id: string) => {
-		if (id === user?._id) router.push('/mypage');
+		if (id === user?._id) router.push(CLIENT_MY_PAGE);
 		else router.push(`/member?memberId=${id}`);
 	};
 

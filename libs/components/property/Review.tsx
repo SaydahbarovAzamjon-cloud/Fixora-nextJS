@@ -7,6 +7,7 @@ import Moment from 'react-moment';
 import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
+import { CLIENT_MY_PAGE } from '../../utils/clientMyPageRoute';
 
 interface ReviewProps {
 	comment: Comment;
@@ -24,7 +25,7 @@ const Review = (props: ReviewProps) => {
 
 	/** HANDLERS **/
 	const goMemberPage = (id: string) => {
-		if (id === user?._id) router.push('/mypage');
+		if (id === user?._id) router.push(CLIENT_MY_PAGE);
 		else router.push(`/member?memberId=${id}`);
 	};
 	if (device === 'mobile') {

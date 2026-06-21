@@ -12,5 +12,5 @@ export function getPostAuthRoute(user: AuthUser, referrer?: string | null): stri
 	if (isAdminUser(user)) return '/_admin';
 	if (isTechnicianUser(user)) return TECHNICIAN_PORTAL_HOME;
 	if (referrer && referrer !== '/' && !isCustomerOnlyRoute(referrer.split('?')[0])) return referrer;
-	return '/mypage';
+	return '/';
 }

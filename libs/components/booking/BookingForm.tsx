@@ -11,6 +11,7 @@ import { GET_MY_DEVICES } from '../../../apollo/user/query';
 import { FixoraButton, FixoraGlassCard, FixoraInput, FixoraSelect } from '../ui';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import type { Device, DeviceCategory } from '../../types/fixora/fixora';
+import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
 
 interface BookingFormProps {
 	technicianId: string;
@@ -177,7 +178,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 					<Link href={`/mypage/bookings/${createdBookingId}`} className="fixora-tech-profile__book-btn">
 						{t('booking.detail.viewDetail')}
 					</Link>
-					<Link href="/mypage?tab=requests" className="fixora-booking__link">
+					<Link href={ownerMyPageHref('activeRequests')} className="fixora-booking__link">
 						{t('payment.viewRequests')}
 					</Link>
 					<Link href={`/technicians/${technicianId}`} className="fixora-booking__link">

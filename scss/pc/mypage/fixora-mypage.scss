@@ -113,6 +113,13 @@
 	cursor: pointer;
 	border-bottom: 2px solid transparent;
 	transition: color 0.2s ease, border-color 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	svg {
+		font-size: 16px;
+	}
 
 	&:hover {
 		color: var(--fixora-text-primary);
@@ -397,5 +404,704 @@
 			font-family: inherit;
 			resize: vertical;
 		}
+	}
+}
+
+/** Owner header **/
+
+.fixora-mypage__header--owner {
+	padding: 28px;
+}
+
+.fixora-mypage__header-main {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	width: 100%;
+}
+
+.fixora-mypage__identity--owner {
+	align-items: flex-start;
+	flex: 1;
+	min-width: 0;
+}
+
+.fixora-mypage__avatar-wrap {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__avatar-square {
+	width: 88px;
+	height: 88px;
+	border-radius: 14px;
+	object-fit: cover;
+	border: 2px solid rgba(255, 107, 0, 0.55);
+	box-shadow: 0 0 24px rgba(255, 107, 0, 0.15);
+}
+
+.fixora-mypage__avatar-camera {
+	position: absolute;
+	right: -4px;
+	bottom: -4px;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: none;
+	background: var(--fixora-primary);
+	color: #fff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+.fixora-mypage__name-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.fixora-mypage__header--owner .fixora-mypage__name {
+	font-size: 24px;
+}
+
+.fixora-mypage__edit-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--fixora-text-primary);
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.fixora-mypage__meta {
+	font-size: 13px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__inline-stats {
+	display: flex;
+	gap: 28px;
+	margin-top: 8px;
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+
+		strong {
+			font-size: 18px;
+			font-weight: 700;
+			color: var(--fixora-text-primary);
+		}
+
+		span {
+			font-size: 12px;
+			color: var(--fixora-text-secondary);
+		}
+	}
+}
+
+.fixora-mypage__summary-cards {
+	display: flex;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__summary-card {
+	min-width: 120px;
+	padding: 16px 20px;
+	border-radius: 12px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	box-sizing: border-box;
+
+	strong {
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	span {
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	&--rating {
+		background: rgba(255, 107, 0, 0.08);
+		border: 1px solid rgba(255, 107, 0, 0.35);
+
+		strong,
+		span {
+			color: var(--fixora-primary);
+		}
+	}
+
+	&--spent {
+		background: rgba(34, 197, 94, 0.08);
+		border: 1px solid rgba(34, 197, 94, 0.35);
+
+		strong,
+		span {
+			color: #22c55e;
+		}
+	}
+}
+
+.fixora-mypage__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.fixora-mypage__panel-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.fixora-mypage__panel-title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__new-request-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 999px;
+	background: var(--fixora-primary);
+	color: #fff;
+	font-size: 13px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.fixora-mypage__active-sep {
+	color: var(--fixora-text-secondary);
+	font-weight: 400;
+}
+
+.fixora-mypage__active-service {
+	color: var(--fixora-text-secondary);
+	font-weight: 500;
+}
+
+.fixora-mypage__active-list {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.fixora-mypage__active-card {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__active-card-body {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 20px;
+	padding: 20px;
+}
+
+.fixora-mypage__active-card-left {
+	display: flex;
+	gap: 14px;
+	flex: 1;
+	min-width: 0;
+}
+
+.fixora-mypage__active-avatar-wrap {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__active-avatar {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.fixora-mypage__active-status-dot {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #f59e0b;
+	border: 2px solid #171717;
+
+	&--ready {
+		background: #22c55e;
+	}
+}
+
+.fixora-mypage__active-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+.fixora-mypage__active-title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__active-badge {
+	display: inline-flex;
+	align-items: center;
+	width: fit-content;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+
+	&--ready {
+		background: rgba(34, 197, 94, 0.15);
+		color: #22c55e;
+	}
+
+	&--awaitingAssessment {
+		background: rgba(245, 158, 11, 0.15);
+		color: #f59e0b;
+	}
+
+	&--inProgress,
+	&--inProgressWithNote {
+		background: rgba(249, 115, 22, 0.15);
+		color: #f97316;
+	}
+}
+
+.fixora-mypage__active-card-right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__active-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 2px;
+	font-size: 12px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__active-price {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__active-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.fixora-mypage__active-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 14px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 700;
+	text-decoration: none;
+	cursor: pointer;
+	border: none;
+
+	&--primary {
+		background: var(--fixora-primary);
+		color: #fff;
+	}
+
+	&--ghost {
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid var(--fixora-border-subtle);
+		color: var(--fixora-text-secondary);
+	}
+}
+
+.fixora-mypage__active-footer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	background: rgba(34, 197, 94, 0.08);
+	border-top: 1px solid rgba(34, 197, 94, 0.2);
+	color: #22c55e;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.fixora-mypage__history-kpis {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 12px;
+}
+
+.fixora-mypage__history-kpi {
+	@include fixora-home-card-surface;
+	border-radius: 12px;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	strong {
+		font-size: 22px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+	}
+
+	&--orange .fixora-mypage__history-kpi-icon {
+		color: var(--fixora-primary);
+	}
+
+	&--green .fixora-mypage__history-kpi-icon {
+		color: #22c55e;
+	}
+
+	&--blue .fixora-mypage__history-kpi-icon {
+		color: #3b82f6;
+	}
+}
+
+.fixora-mypage__history-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-mypage__history-row {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 16px 18px;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__history-avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__history-main {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.fixora-mypage__history-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__history-sub {
+	font-size: 12px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__history-side {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+	flex-shrink: 0;
+
+	strong {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+}
+
+.fixora-mypage__history-receipt {
+	padding: 6px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--fixora-border-subtle);
+	color: var(--fixora-text-secondary);
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.fixora-mypage__stars {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.fixora-mypage__star {
+	font-size: 14px;
+	color: var(--fixora-text-muted);
+
+	&--filled {
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-mypage__following-card {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.fixora-mypage__following-card-main {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+	flex: 1;
+	min-width: 0;
+}
+
+.fixora-mypage__following-card-info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+
+	strong {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 14px;
+		color: var(--fixora-text-primary);
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+	}
+}
+
+.fixora-mypage__following-award {
+	color: var(--fixora-primary);
+}
+
+.fixora-mypage__following-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 107, 0, 0.5);
+	background: rgba(255, 107, 0, 0.08);
+	color: var(--fixora-primary);
+	font-size: 12px;
+	font-weight: 700;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__review-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.fixora-mypage__review-card {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 18px;
+	box-sizing: border-box;
+}
+
+.fixora-mypage__review-head {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.fixora-mypage__review-avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.fixora-mypage__review-meta {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	strong {
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+}
+
+.fixora-mypage__review-device {
+	font-size: 12px;
+	color: var(--fixora-text-secondary);
+}
+
+.fixora-mypage__review-date {
+	font-size: 12px;
+	color: var(--fixora-text-secondary);
+	flex-shrink: 0;
+}
+
+.fixora-mypage__review-body {
+	margin: 14px 0 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-mypage__settings-menu {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.fixora-mypage__settings-group-label {
+	margin: 0 0 8px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--fixora-text-muted);
+}
+
+.fixora-mypage__settings-card {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	overflow: hidden;
+}
+
+.fixora-mypage__settings-row {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 16px 18px;
+	border: none;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&--danger strong {
+		color: #ef4444;
+	}
+}
+
+.fixora-mypage__settings-row-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.04);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--fixora-text-secondary);
+	flex-shrink: 0;
+}
+
+.fixora-mypage__settings-row-text {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+
+	strong {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--fixora-text-primary);
+	}
+
+	span {
+		font-size: 12px;
+		color: var(--fixora-text-secondary);
+	}
+}
+
+.fixora-mypage__settings-row-chevron {
+	color: var(--fixora-text-muted);
+}
+
+.fixora-mypage__settings-back {
+	align-self: flex-start;
+	border: none;
+	background: transparent;
+	color: var(--fixora-primary);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	margin-bottom: 8px;
+}
+
+.fixora-mypage__settings-gap {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+	padding: 24px;
+	text-align: center;
+	color: var(--fixora-text-secondary);
+	font-size: 13px;
+
+	span {
+		display: inline-block;
+		margin-top: 8px;
+		font-size: 11px;
+		color: var(--fixora-text-muted);
 	}
 }

@@ -11,6 +11,7 @@ import { userVar } from '../../apollo/store';
 import { FixoraButton } from '../../libs/components/ui';
 import { resolveProfileImageUrl } from '../../libs/utils/profileImage';
 import CustomerReviewsSection from '../../libs/components/member/CustomerReviewsSection';
+import { CLIENT_MY_PAGE } from '../../libs/utils/clientMyPageRoute';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -56,7 +57,7 @@ const MemberPage: NextPage = () => {
 			return;
 		}
 		if (user?._id && memberId === user._id) {
-			router.replace('/mypage').then();
+			router.replace(CLIENT_MY_PAGE).then();
 		}
 	}, [router.isReady, memberId, user?._id]);
 

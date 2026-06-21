@@ -15,6 +15,7 @@ import FinalPaymentCard from './FinalPaymentCard';
 import CancelBookingButton from './CancelBookingButton';
 import BookingReviewSection from './BookingReviewSection';
 import { FixoraButton } from '../ui';
+import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
 
 const TIMELINE_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'] as const;
 
@@ -69,7 +70,7 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 
 	return (
 		<div className="fixora-booking-detail">
-			<Link href="/mypage?tab=requests" className="fixora-booking-detail__back">
+			<Link href={ownerMyPageHref('activeRequests')} className="fixora-booking-detail__back">
 				<ArrowBackIcon fontSize="small" />
 				{t('booking.detail.back')}
 			</Link>

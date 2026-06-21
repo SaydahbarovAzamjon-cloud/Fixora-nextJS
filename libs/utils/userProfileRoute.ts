@@ -1,4 +1,5 @@
 import { isTechnicianUser } from './userRole';
+import { CLIENT_MY_PAGE } from './clientMyPageRoute';
 
 export function getUserProfileHref(
 	userId: string | null | undefined,
@@ -12,7 +13,7 @@ export function getUserProfileHref(
 	const viewerIsTechnician = isTechnicianUser({ userType: currentUserType, memberType: currentUserType });
 
 	if (isSelf && viewerIsTechnician) return '/technician/profile';
-	if (isSelf) return '/mypage';
+	if (isSelf) return CLIENT_MY_PAGE;
 	if (userType === 'TECHNICIAN') return `/technicians/${userId}`;
 	if (viewerIsTechnician) return `/technician/client/${userId}`;
 	return `/member?memberId=${userId}`;

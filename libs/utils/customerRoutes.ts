@@ -5,6 +5,7 @@ const TECHNICIAN_ALLOWED_ROUTE_PREFIXES = ['/technician', '/login', '/register',
 /** Customer-only routes — technicians are redirected to the technician portal. */
 export function isCustomerOnlyRoute(pathname: string): boolean {
 	if (pathname.startsWith('/mypage')) return true;
+	if (pathname.startsWith('/client/my-page')) return true;
 	if (pathname === '/messages') return true;
 	if (pathname === '/notifications') return true;
 	if (/^\/technicians\/[^/]+\/book$/.test(pathname)) return true;

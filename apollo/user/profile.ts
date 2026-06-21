@@ -21,6 +21,19 @@ export const GET_MY_BOOKINGS = gql`
 				technicianId
 				userId
 				createdAt
+				completedAt
+				progressUpdates {
+					step
+					note
+					timestamp
+				}
+				deviceData {
+					_id
+					deviceModel
+					deviceBrand
+					deviceCategory
+					deviceImage
+				}
 			}
 			metaCounter {
 				total
@@ -205,6 +218,8 @@ export const GET_USER_FOLLOWINGS = gql`
 					averageRating
 					reviewCount
 					isOnline
+					badgeLevel
+					userArticles
 				}
 			}
 			metaCounter {
@@ -286,6 +301,36 @@ export const GET_MY_PAYMENTS = gql`
 				paymentType
 				paidAt
 				createdAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *       MY REVIEWS       *
+ *************************/
+
+export const GET_MY_REVIEWS = gql`
+	query GetMyReviews($input: MyReviewsInquiry!) {
+		getMyReviews(input: $input) {
+			list {
+				_id
+				bookingId
+				technicianId
+				userId
+				reviewContent
+				repairQuality
+				repairSpeed
+				communication
+				createdAt
+				deviceData {
+					_id
+					deviceModel
+					deviceCategory
+				}
 			}
 			metaCounter {
 				total

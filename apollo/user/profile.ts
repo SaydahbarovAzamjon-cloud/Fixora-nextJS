@@ -46,6 +46,7 @@ export const GET_INCOMING_REQUESTS = gql`
 				problemDescription
 				estimatedPrice
 				finalPrice
+				isPaid
 				deviceId
 				technicianId
 				userId
@@ -91,6 +92,7 @@ export const GET_TECHNICIAN_BOOKINGS = gql`
 				problemDescription
 				estimatedPrice
 				finalPrice
+				isPaid
 				deviceId
 				technicianId
 				userId
@@ -122,6 +124,61 @@ export const GET_TECHNICIAN_BOOKINGS = gql`
 			metaCounter {
 				total
 			}
+		}
+	}
+`;
+
+const TECHNICIAN_BOOKING_FIELDS = `
+	_id
+	bookingStatus
+	bookingType
+	bookingDate
+	problemTitle
+	problemDescription
+	estimatedPrice
+	finalPrice
+	isPaid
+	deviceId
+	technicianId
+	userId
+	createdAt
+	completedAt
+	progressUpdates {
+		step
+		note
+		timestamp
+	}
+	aiClassification {
+		deviceType
+		issueCategory
+		repairComplexity
+	}
+	customerData {
+		_id
+		userNickname
+		userFullName
+		userProfileImage
+	}
+	deviceData {
+		_id
+		deviceModel
+		deviceBrand
+		deviceCategory
+	}
+`;
+
+export const UPDATE_BOOKING_STATUS = gql`
+	mutation UpdateBookingStatus($input: UpdateBookingStatusInput!) {
+		updateBookingStatus(input: $input) {
+			${TECHNICIAN_BOOKING_FIELDS}
+		}
+	}
+`;
+
+export const COMPLETE_BOOKING = gql`
+	mutation CompleteBooking($input: CompleteBookingInput!) {
+		completeBooking(input: $input) {
+			${TECHNICIAN_BOOKING_FIELDS}
 		}
 	}
 `;

@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
-import { useQuery, useReactiveVar } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import SmartphoneOutlined from '@mui/icons-material/SmartphoneOutlined';
 import TabletMacOutlined from '@mui/icons-material/TabletMacOutlined';
 import LaptopMacOutlined from '@mui/icons-material/LaptopMacOutlined';
@@ -19,8 +19,11 @@ import EastOutlined from '@mui/icons-material/EastOutlined';
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { formatKrw } from '../../../libs/utils/formatCurrency';
-import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
+import { SEND_MESSAGE } from '../../../apollo/user/message';
+import { COMPLETE_BOOKING, GET_TECHNICIAN_BOOKINGS, UPDATE_BOOKING_STATUS } from '../../../apollo/user/profile';
+import { GET_BOOKING_PAYMENTS } from '../../../apollo/user/payment';
 import { userVar } from '../../../apollo/store';
+import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 import {
 	getJobStage,
 	getJobStageInfo,
@@ -68,14 +71,19 @@ const ActiveJobs: NextPage = () => {
 	const user = useReactiveVar(userVar);
 	const [selectedJob, setSelectedJob] = useState<any>(null);
 	const [activeFilter, setActiveFilter] = useState<string>('all');
+	const [completingJobId, setCompletingJobId] = useState<string | null>(null);
 
 	const searchTerm = ((router.query.search as string) ?? '').trim().toLowerCase();
 
-	const { data: bookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
+	const { data: bookingsData, refetch: refetchBookings } = useQuery(GET_TECHNICIAN_BOOKINGS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
 	});
+	const [loadBookingPayments] = useLazyQuery(GET_BOOKING_PAYMENTS, { fetchPolicy: 'network-only' });
+	const [updateBookingStatus] = useMutation(UPDATE_BOOKING_STATUS);
+	const [completeBooking] = useMutation(COMPLETE_BOOKING);
+	const [sendMessage] = useMutation(SEND_MESSAGE);
 
 	const activeJobs = useMemo(
 		() =>
@@ -111,6 +119,61 @@ const ActiveJobs: NextPage = () => {
 		() => (selectedJob && filtered.find((j: any) => j._id === selectedJob._id)) || filtered[0] || null,
 		[filtered, selectedJob]
 	);
+
+	const handleMarkComplete = async (job: any) => {
+		if (!job?._id || completingJobId) return;
+		setCompletingJobId(job._id);
+		try {
+			const paymentsResult = await loadBookingPayments({ variables: { bookingId: job._id } });
+			const payments = paymentsResult.data?.getBookingPayments ?? [];
+			const depositPaid = !!job.isPaid || payments.some((p: any) => p.paymentType === 'DEPOSIT' && p.paymentStatus === 'COMPLETED');
+
+			if (!depositPaid) {
+				await sweetMixinErrorAlert(t('jobs.depositRequired'));
+				return;
+			}
+
+			if (job.bookingStatus === 'ACCEPTED') {
+				await updateBookingStatus({ variables: { input: { bookingId: job._id } } });
+			}
+
+			const finalPrice = parseFloat(job.finalPrice || job.estimatedPrice || '0');
+			await completeBooking({
+				variables: {
+					input: {
+						bookingId: job._id,
+						...(Number.isFinite(finalPrice) && finalPrice > 0 ? { finalPrice } : {}),
+					},
+				},
+			});
+
+			const customerId = job.userId || job.customerData?._id;
+			if (customerId) {
+				try {
+					await sendMessage({
+						variables: {
+							input: {
+								receiverId: customerId,
+								bookingId: job._id,
+								messageContent: t('jobs.completeMessageToClient'),
+								messageType: 'TEXT',
+							},
+						},
+					});
+				} catch {
+					// Non-blocking — repair is already marked complete.
+				}
+			}
+
+			await refetchBookings();
+			setSelectedJob(null);
+			await sweetTopSmallSuccessAlert(t('jobs.completeSuccess'), 1400);
+		} catch (err) {
+			await sweetErrorHandling(err);
+		} finally {
+			setCompletingJobId(null);
+		}
+	};
 
 	return (
 		<div className="fixora-jobs-page">
@@ -229,7 +292,7 @@ const ActiveJobs: NextPage = () => {
 											<div>
 												<div className="fixora-jobs-infocard__label">{t('jobs.price')}</div>
 												<div className="fixora-jobs-infocard__value fixora-jobs-infocard__value--price">{formatKrw(price)}</div>
-												<div className="fixora-jobs-infocard__sub">{t('jobs.pendingPayment')}</div>
+											<div className="fixora-jobs-infocard__sub">{displayedJob.isPaid ? t('jobs.depositPaid') : t('jobs.pendingPayment')}</div>
 											</div>
 										</div>
 										<div className="fixora-jobs-infocard">
@@ -279,8 +342,13 @@ const ActiveJobs: NextPage = () => {
 								</div>
 
 								<div className="fixora-jobs-actionbar">
-									<button className="fixora-jobs-btn fixora-jobs-btn--complete">
-										<EastOutlined style={{ fontSize: 18 }} /> {t('jobs.markComplete')}
+									<button
+										className="fixora-jobs-btn fixora-jobs-btn--complete"
+										disabled={!!completingJobId}
+										onClick={() => handleMarkComplete(displayedJob)}
+										type="button"
+									>
+										<EastOutlined style={{ fontSize: 18 }} /> {completingJobId === displayedJob._id ? t('jobs.completing') : t('jobs.markComplete')}
 									</button>
 									<button className="fixora-jobs-btn fixora-jobs-btn--more">
 										<MoreHorizOutlined style={{ fontSize: 20 }} />

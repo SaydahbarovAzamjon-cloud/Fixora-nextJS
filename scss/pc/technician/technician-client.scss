@@ -1,0 +1,16 @@
+.fixora-tech-client-page {
+	width: 100%;
+	padding: 24px 32px 48px;
+	box-sizing: border-box;
+}
+
+.fixora-tech-client {
+	width: 100%;
+	max-width: 960px;
+}
+
+@media (max-width: 900px) {
+	.fixora-tech-client-page {
+		padding: 18px;
+	}
+}

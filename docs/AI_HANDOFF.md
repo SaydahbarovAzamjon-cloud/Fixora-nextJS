@@ -4,11 +4,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-20 |
+| **Last updated** | 2026-06-21 |
 | **Last agent** | Cursor |
-| **Last session** | **P3-08b Booking detail** — `/mypage/bookings/[id]`: detail view, deposit + final mock payment, cancelBooking, createReview; wired Messages/My Page/notifications/BookingForm. |
+| **Last session** | **Technician bugfix + WS bridge** — real complete flow + client chat on complete; messages/notifications/client profile fixes; global `FixoraWebSocketBridge` refetches on `notificationReceived` / `messageReceived`. |
 | **Last session (prev)** | Navbar + followers restore; homepage navigation. |
-| **Next agent should start with** | `P3-07b` — Messages WebSocket OR `P3-14` ON_SITE badge OR `PM-01` mobile |
+| **Next agent should start with** | FIXORAB: GAP-062 (`completeBooking`/`confirmPayment` → Notification + WS emit) OR `P3-14` ON_SITE badge OR `PM-01` mobile |
 
 ---
 
@@ -96,11 +96,12 @@ Full checklist: `TASK_BOARD.md`
 | Admin mockup | None — build incrementally (P3-15) |
 | Light theme mockup | None — Phase 5 (P4-05+) |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
-| Messages real-time | `/messages` uses `pollInterval: 5000` on `getMessages`, not the raw WS `messageReceived` event (socket already used by legacy `Chat.tsx` widget) — revisit when `Chat.tsx` is removed/replaced |
+| Messages real-time | **WS bridge wired** (`FixoraWebSocketBridge` → Apollo refetch on `messageReceived` / `notificationReceived`). Pages still use pollInterval as fallback until FIXORAB emits events reliably (GAP-062). |
 | "View Request" in Messages | Links to `/mypage/bookings/[id]` — booking detail page (P3-08b ✅) |
 | Dashboard schedule persistence | **No backend schedule/appointment model** (only `User.workingHours`). Today's Schedule "Add" items live in **localStorage** (`fixora_tech_schedule_<userId>`) — device-only. Wire to a real model when the backend adds one (DECISIONS UI-11) |
 | Story image upload | Uses **multipart axios** to `REACT_APP_API_GRAPHQL_URL` with `apollo-require-preflight` (same pattern as `AddNewProperty.tsx`) — not `apollo-upload-client`. Story viewer/playback (tapping a ring to view) is **not** built yet — only display covers + create (DECISIONS UI-10) |
 | Legacy `/mypage` components | `libs/components/mypage/*` (MyProperties, MyFavorites, MyArticles, WriteArticle, etc.) left in place but no longer imported by `/mypage` — still referenced by `/member` and `/_admin`; do not delete without checking |
+| Notification delete | Backend has no `deleteNotification` / archive mutation. Technician notifications persist dismissed ids in localStorage per browser; cross-device delete needs GAP-061 backend work. |
 
 ---
 

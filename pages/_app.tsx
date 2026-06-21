@@ -7,6 +7,7 @@ import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
 import AppShell from '../libs/components/layout/AppShell';
+import FixoraWebSocketBridge from '../libs/components/FixoraWebSocketBridge';
 
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
@@ -21,6 +22,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
+				<FixoraWebSocketBridge />
 				<AppShell Component={Component} pageProps={pageProps} />
 			</ThemeProvider>
 		</ApolloProvider>

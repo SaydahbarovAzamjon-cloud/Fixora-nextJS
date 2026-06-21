@@ -111,6 +111,8 @@ Yangi UI element qo‘shganda:
 | ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
 |----|------------|---------------|------------|------------------|--------|------|
 | GAP-060 | **Follow notifications** (eski followerlar) | Tarixiy FOLLOW notification backfill yoki `getUserFollowers` notification feedda | Eski followlar uchun notification record yaratilmagan | `getUserFollowers` dan synthetic notification (workaround) | `WORKAROUND` | `pages/technician/notifications/index.tsx` |
+| GAP-061 | **Payment notification + delete persistence** | `PAYMENT` notification type yoki `confirmPayment` dan consistent BOOKING notification; `deleteNotification` / archive mutation | Technician deposit/final payment notificationlari va cross-device delete uchun contract kerak | `getMyPayments` dan synthetic payment cards; dismissed ids localStorage per technician/browser | `WORKAROUND` | `pages/technician/notifications/index.tsx` |
+| GAP-062 | **Booking complete + payment WS notifications** | `completeBooking` va `confirmPayment` ichida Notification yaratish + `notificationReceived` WS emit; ixtiyoriy system `sendMessage` | Mijoz/technician realtime yangilanishi backend yozuvsiz ishlamaydi | Frontend: `FixoraWebSocketBridge` refetch + technician `sendMessage` workaround on complete | `WORKAROUND` | `libs/components/FixoraWebSocketBridge.tsx`, `pages/technician/jobs/index.tsx` |
 
 ---
 

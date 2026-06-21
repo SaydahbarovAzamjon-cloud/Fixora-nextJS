@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -17,8 +17,10 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
+import { GET_MY_PAYMENTS } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
+import { formatKrw } from '../../../libs/utils/formatCurrency';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -135,7 +137,16 @@ const FILTER_KEYS: Record<FilterId, string> = {
 };
 
 const BOOKING_REQUEST_PATTERN = /request|requested|new booking/i;
-const PAYMENT_PATTERN = /payment|paid|payout|earnings/i;
+const PAYMENT_PATTERN = /payment|paid|payout|earnings|deposit|final|kakao|kakaopay|결제|입금|보증금|잔금/i;
+const FINAL_PAYMENT_PATTERN = /final|잔금/i;
+const DEPOSIT_PAYMENT_PATTERN = /deposit|보증금/i;
+
+const paymentKindFromText = (n: any): 'DEPOSIT' | 'FINAL' | 'ANY' => {
+	const text = `${n.notificationTitle ?? ''} ${n.notificationDescription ?? ''}`;
+	if (FINAL_PAYMENT_PATTERN.test(text)) return 'FINAL';
+	if (DEPOSIT_PAYMENT_PATTERN.test(text)) return 'DEPOSIT';
+	return 'ANY';
+};
 
 /** Derive the display category from real DB fields (notificationType + referenceType + text). */
 const detectCat = (n: any): NotifCat => {
@@ -190,6 +201,7 @@ const Notifications: NextPage = () => {
 	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 	const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+	const dismissedStorageKey = user?._id ? `fixora_tech_dismissed_notifications_${user._id}` : null;
 
 	const FILTERS: FilterId[] = ['all', 'requests', 'payments', 'reviews', 'likes', 'follows'];
 
@@ -208,9 +220,25 @@ const Notifications: NextPage = () => {
 		variables: { input: { page: 1, limit: 100, search: { followingId: user?._id } } },
 		fetchPolicy: 'network-only',
 	});
+	const { data: paymentsData } = useQuery(GET_MY_PAYMENTS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 100, search: {} } },
+		fetchPolicy: 'network-only',
+	});
 
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
+
+	useEffect(() => {
+		if (!dismissedStorageKey || typeof window === 'undefined') return;
+		try {
+			const raw = window.localStorage.getItem(dismissedStorageKey);
+			const ids = raw ? JSON.parse(raw) : [];
+			setDismissed(new Set(Array.isArray(ids) ? ids : []));
+		} catch {
+			setDismissed(new Set());
+		}
+	}, [dismissedStorageKey]);
 
 	// Turn each follower relationship into a synthetic follow notification.
 	const followNotifications = useMemo(() => {
@@ -234,17 +262,64 @@ const Notifications: NextPage = () => {
 		});
 	}, [followersData, user]);
 
-	// Real notifications (minus chat messages, which live in the Messages screen,
-	// and real FOLLOW rows — the followers list above already covers those so we
-	// avoid duplicates), merged with the derived follow notifications and sorted.
-	const notifications = useMemo(() => {
-		const real = (data?.getNotifications?.list ?? []).filter(
-			(n: any) => n.notificationType !== 'MESSAGE' && n.notificationType !== 'FOLLOW'
+	const realNotifications = useMemo(
+		() =>
+			(data?.getNotifications?.list ?? []).filter(
+				(n: any) => n.notificationType !== 'MESSAGE' && n.notificationType !== 'FOLLOW',
+			),
+		[data],
+	);
+
+	const paymentNotifications = useMemo(() => {
+		const payments = paymentsData?.getMyPayments?.list ?? [];
+		const realPaymentKeys = new Set(
+			realNotifications
+				.filter((n: any) => detectCat(n) === 'payment' && n.referenceId)
+				.map((n: any) => `${n.referenceId}-${paymentKindFromText(n)}`),
 		);
-		return [...real, ...followNotifications]
+
+		return payments
+			.filter((p: any) => p.paymentType && (p.paymentStatus === 'COMPLETED' || p.paymentStatus === 'PENDING'))
+			.filter((p: any) => {
+				const exact = `${p.bookingId}-${p.paymentType}`;
+				const any = `${p.bookingId}-ANY`;
+				return !realPaymentKeys.has(exact) && !realPaymentKeys.has(any);
+			})
+			.map((p: any) => {
+				const typeLabel = p.paymentType === 'DEPOSIT'
+					? t('notifications.paymentTypeDeposit')
+					: t('notifications.paymentTypeFinal');
+				const statusLabel = p.paymentStatus === 'COMPLETED'
+					? t('notifications.paymentStatusCompleted')
+					: t('notifications.paymentStatusPending');
+				return {
+					_id: `payment-${p._id}`,
+					userId: null,
+					receiverId: user?._id,
+					notificationType: 'BOOKING',
+					notificationTitle: p.paymentType === 'DEPOSIT'
+						? t('notifications.depositPaymentTitle')
+						: t('notifications.finalPaymentTitle'),
+					notificationDescription: t('notifications.paymentDescription', {
+						type: typeLabel,
+						status: statusLabel,
+						amount: formatKrw(p.paymentAmount || 0),
+					}),
+					referenceId: p.bookingId,
+					referenceType: 'BOOKING',
+					isRead: true,
+					createdAt: p.paidAt || p.createdAt,
+				};
+			});
+	}, [paymentsData, realNotifications, t, user?._id]);
+
+	// Real notifications (minus chat messages and real FOLLOW rows), merged with
+	// derived follow/payment notifications and sorted.
+	const notifications = useMemo(() => {
+		return [...realNotifications, ...followNotifications, ...paymentNotifications]
 			.filter((n: any) => !dismissed.has(n._id))
 			.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-	}, [data, followNotifications, dismissed]);
+	}, [realNotifications, followNotifications, paymentNotifications, dismissed]);
 
 	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
 
@@ -275,9 +350,15 @@ const Notifications: NextPage = () => {
 	};
 
 	// Backend has no deleteNotification mutation (see docs/schema.gql), so this
-	// dismisses the card locally for the session. Wire a mutation here once it exists.
+	// persists a local dismiss per technician/browser. Wire a mutation once it exists.
 	const handleDelete = (id: string) => {
-		setDismissed((prev) => new Set(prev).add(id));
+		setDismissed((prev) => {
+			const next = new Set(prev).add(id);
+			if (dismissedStorageKey && typeof window !== 'undefined') {
+				window.localStorage.setItem(dismissedStorageKey, JSON.stringify(Array.from(next)));
+			}
+			return next;
+		});
 	};
 
 	const renderCard = (n: any) => {

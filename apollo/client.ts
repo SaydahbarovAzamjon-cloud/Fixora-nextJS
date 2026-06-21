@@ -8,6 +8,7 @@ import { getJwtToken } from '../libs/auth';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
 import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
+import { dispatchFixoraWsMessage } from '../libs/utils/fixoraWebSocket';
 import { socketVar } from './store';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -45,6 +46,9 @@ class LoggingWebSocket {
 		};
 
 		this.socket.onmessage = (msg) => {
+			if (typeof msg.data === 'string') {
+				dispatchFixoraWsMessage(msg.data);
+			}
 			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
 				console.debug('WebSocket message:', msg.data);
 			}

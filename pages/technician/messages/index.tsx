@@ -17,7 +17,6 @@ import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../../apollo/user/message';
-import { GET_BOOKING, GET_DEVICE } from '../../../apollo/user/query';
 import { userVar } from '../../../apollo/store';
 import { Conversation, Message } from '../../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
@@ -104,7 +103,27 @@ const Messages: NextPage = () => {
 		pollInterval: 15000,
 	});
 
-	const conversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
+	const rawConversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
+	const conversations: Conversation[] = useMemo(() => {
+		const grouped = new Map<string, Conversation>();
+		rawConversations.forEach((conv) => {
+			const existing = grouped.get(conv.peerId);
+			if (!existing) {
+				grouped.set(conv.peerId, { ...conv });
+				return;
+			}
+			const existingTime = new Date(existing.updatedAt || 0).getTime();
+			const currentTime = new Date(conv.updatedAt || 0).getTime();
+			const newest = currentTime > existingTime ? conv : existing;
+			grouped.set(conv.peerId, {
+				...newest,
+				unreadCount: (existing.unreadCount ?? 0) + (conv.unreadCount ?? 0),
+			});
+		});
+		return Array.from(grouped.values()).sort(
+			(a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
+		);
+	}, [rawConversations]);
 
 	// FIX 1: show skeleton until data actually arrives (prevents "no data" flash)
 	const isConvsLoading = !user?._id || convsLoading || !conversationsData;
@@ -117,7 +136,7 @@ const Messages: NextPage = () => {
 				limit: 100,
 				sort: 'createdAt',
 				direction: 'ASC',
-				search: { peerId: selected?.peerId, bookingId: selected?.bookingId || undefined },
+				search: { peerId: selected?.peerId },
 			},
 		},
 		fetchPolicy: 'network-only',
@@ -125,25 +144,6 @@ const Messages: NextPage = () => {
 	});
 
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];
-
-	const { data: bookingData } = useQuery(GET_BOOKING, {
-		skip: !selected?.bookingId,
-		variables: { bookingId: selected?.bookingId },
-		fetchPolicy: 'network-only',
-	});
-
-	const booking = bookingData?.getBooking ?? null;
-
-	const { data: deviceData } = useQuery(GET_DEVICE, {
-		skip: !booking?.deviceId,
-		variables: { deviceId: booking?.deviceId },
-		fetchPolicy: 'network-only',
-	});
-
-	const device = deviceData?.getDevice ?? null;
-	const deviceLabel = device
-		? [device.deviceBrand, device.deviceModel].filter(Boolean).join(' ')
-		: booking?.problemTitle || '';
 
 	const [sendMessage] = useMutation(SEND_MESSAGE);
 	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ);
@@ -164,7 +164,7 @@ const Messages: NextPage = () => {
 		const conversation = conversations.find((c) => c.peerId === selected.peerId);
 		if (conversation && conversation.unreadCount > 0) {
 			markMessagesAsRead({
-				variables: { input: { peerId: selected.peerId, bookingId: selected.bookingId || undefined } },
+				variables: { input: { peerId: selected.peerId } },
 			})
 				.then(() => refetchConversations())
 				.catch(() => undefined);
@@ -207,7 +207,6 @@ const Messages: NextPage = () => {
 						variables: {
 							input: {
 								receiverId: selected.peerId,
-								bookingId: selected.bookingId || undefined,
 								messageContent: base64,
 								messageType: 'IMAGE',
 							},
@@ -232,7 +231,6 @@ const Messages: NextPage = () => {
 				variables: {
 					input: {
 						receiverId: selected.peerId,
-						bookingId: selected.bookingId || undefined,
 						messageContent: text,
 						messageType: 'TEXT',
 					},
@@ -323,7 +321,7 @@ const Messages: NextPage = () => {
 							const peerId = conv.peerId;
 							return (
 								<div
-									key={`${conv.peerId}-${conv.bookingId ?? 'none'}`}
+										key={conv.peerId}
 									className={`fixora-msg-conv ${conv.peerId === selected?.peerId ? 'fixora-msg-conv--active' : ''}`}
 								>
 									<UserProfileLink userId={peerId} userType={conv.peer?.userType} className="fixora-profile-link fixora-msg-conv__profile-link">
@@ -376,7 +374,6 @@ const Messages: NextPage = () => {
 								<div className="fixora-msg-chat__status">
 									{activeConversation.peer?.isOnline && <span className="fixora-msg-chat__status-dot" />}
 									{activeConversation.peer?.isOnline ? t('messages.online') : t('messages.offline')}
-									{deviceLabel ? ` · ${deviceLabel}` : ''}
 								</div>
 							</div>
 							<div className="fixora-msg-chat__actions">
@@ -386,10 +383,10 @@ const Messages: NextPage = () => {
 							</div>
 						</div>
 
-						{(activeCode || deviceLabel) && (
+						{activeCode && (
 							<div className="fixora-msg-chat__context">
 								<SmartphoneOutlined style={{ fontSize: 16 }} />
-								<span>{[activeCode, deviceLabel].filter(Boolean).join(' — ')}</span>
+								<span>{activeCode}</span>
 							</div>
 						)}
 
@@ -399,7 +396,7 @@ const Messages: NextPage = () => {
 									<div className="fixora-msg-loading__spinner" />
 								</div>
 							) : messages.length === 0 ? (
-								<div className="fixora-tech-empty" style={{ margin: 'auto' }}>No messages yet. Say hello!</div>
+								<div className="fixora-tech-empty" style={{ margin: 'auto' }}>{t('messages.noMessages')}</div>
 							) : null}
 							{!msgsLoading && messages.map((m) => {
 								const dir = m.senderId === user?._id ? 'out' : 'in';
@@ -501,7 +498,7 @@ const Messages: NextPage = () => {
 								</button>
 							</div>
 							<div className="fixora-msg-composer__hint">
-								Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line
+								{t('messages.sendHintPrefix')} <kbd>Enter</kbd> {t('messages.sendHintMiddle')} <kbd>Shift+Enter</kbd> {t('messages.sendHintSuffix')}
 							</div>
 						</div>
 					</>

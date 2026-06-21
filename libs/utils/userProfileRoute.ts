@@ -14,5 +14,6 @@ export function getUserProfileHref(
 	if (isSelf && viewerIsTechnician) return '/technician/profile';
 	if (isSelf) return '/mypage';
 	if (userType === 'TECHNICIAN') return `/technicians/${userId}`;
+	if (viewerIsTechnician && userType === 'USER') return `/technician/clients/${userId}`;
 	return `/member?memberId=${userId}`;
 }

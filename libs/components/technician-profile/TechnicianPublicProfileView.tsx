@@ -92,6 +92,12 @@ const Stars = ({ count }: { count: number }) => (
 const reviewStars = (r: TechnicianReview): number =>
 	Math.round(((r.repairQuality ?? 0) + (r.repairSpeed ?? 0) + (r.communication ?? 0)) / 3);
 
+const reviewDeviceLabel = (r: TechnicianReview): string | undefined => {
+	const device = r.deviceData;
+	if (!device?.deviceModel && !device?.deviceBrand) return undefined;
+	return [device.deviceBrand, device.deviceModel].filter(Boolean).join(' ');
+};
+
 const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = ({ technicianId, variant }) => {
 	const router = useRouter();
 	const { t, i18n } = useTranslation('common');
@@ -360,7 +366,11 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 							<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> {t('technicianProfile.pp.messageMe')}
 						</button>
 						{!isOwner && (
-							<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={toggleFollowHandler}>
+							<button
+								className={`fixora-pp-btn ${isFollowing ? 'fixora-pp-btn--secondary' : 'fixora-pp-btn--primary'}`}
+								type="button"
+								onClick={toggleFollowHandler}
+							>
 								{isFollowing ? (
 									<>
 										<HowToRegOutlined style={{ fontSize: 16 }} /> {t('technicianProfile.following')}
@@ -373,7 +383,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 							</button>
 						)}
 						{!isOwner && (
-							<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={bookServiceHandler}>
+							<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={bookServiceHandler}>
 								<BuildOutlined style={{ fontSize: 16 }} /> {t('technicianProfile.sidebar.bookCta')}
 							</button>
 						)}
@@ -606,16 +616,13 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 								const customer = (r as T).customerData || {};
 								const cName = customer.userNickname || customer.userFullName || t('technicianProfile.pp.defaultCustomer');
 								const cAvatar = resolveProfileImageUrl(customer.userProfileImage);
+								const deviceLabel = reviewDeviceLabel(r);
 								return (
 									<div key={r._id} className="fixora-pp-panel fixora-pp-review">
 										<div className="fixora-pp-review__head">
-											<div className="fixora-pp-review__avatar" style={{ background: '#4CAF50' }}>
+											<div className="fixora-pp-review__avatar">
 												{cAvatar !== '/img/profile/defaultUser.svg' ? (
-													<img
-														src={cAvatar}
-														alt={cName}
-														style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-													/>
+													<img src={cAvatar} alt={cName} />
 												) : (
 													initialsOf(cName)
 												)}
@@ -629,6 +636,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 											</div>
 											<div className="fixora-pp-review__meta">
 												<div className="fixora-pp-review__date">{formatDate(r.createdAt)}</div>
+												{deviceLabel && <div className="fixora-pp-review__device">{deviceLabel}</div>}
 											</div>
 										</div>
 										{r.reviewContent && <p className="fixora-pp-review__text">{r.reviewContent}</p>}

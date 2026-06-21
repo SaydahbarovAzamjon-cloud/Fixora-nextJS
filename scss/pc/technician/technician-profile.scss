@@ -389,14 +389,39 @@
 
 /* -------- Header card -------- */
 .fixora-pp-header {
+	@include fixora-home-card-surface;
 	position: relative;
 	display: flex;
 	align-items: flex-start;
 	gap: 28px;
-	background: radial-gradient(900px 240px at 12% -10%, rgba(115, 12, 30, 0.12), transparent 60%), var(--fixora-surface);
-	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 20px;
 	padding: 28px 32px;
+	overflow: hidden;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: -90px;
+		right: 24px;
+		width: 340px;
+		height: 340px;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(115, 12, 30, 0.22) 0%, transparent 68%);
+		pointer-events: none;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(900px 280px at 8% -20%, rgba(115, 12, 30, 0.16), transparent 58%);
+		pointer-events: none;
+	}
+
+	> * {
+		position: relative;
+		z-index: 1;
+	}
 
 	&__avatar-wrap {
 		position: relative;
@@ -433,7 +458,7 @@
 		height: 18px;
 		border-radius: 50%;
 		background: #22C55E;
-		border: 3px solid var(--fixora-surface);
+		border: 3px solid #2a0a12;
 		box-shadow: 0 0 8px #22C55E;
 	}
 
@@ -466,7 +491,7 @@
 	}
 
 	&__role {
-		color: var(--fixora-primary);
+		color: var(--fixora-text-primary);
 		font-size: 16px;
 		font-weight: 600;
 		margin-top: 6px;
@@ -544,12 +569,19 @@
 	border: none;
 
 	&--primary {
-		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
+		background: linear-gradient(135deg, var(--fixora-primary-dark), var(--fixora-primary));
+		border: 1px solid rgba(72, 4, 21, 0.75);
 		color: #fff;
-		box-shadow: 0 0 22px rgba(115, 12, 30, 0.32);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.06),
+			0 4px 14px rgba(0, 0, 0, 0.35);
 
 		&:hover {
-			box-shadow: 0 0 34px rgba(115, 12, 30, 0.5);
+			background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
+			border-color: rgba(115, 12, 30, 0.65);
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.08),
+				0 6px 18px rgba(72, 4, 21, 0.42);
 		}
 	}
 
@@ -562,12 +594,28 @@
 			background: rgba(255, 255, 255, 0.05);
 		}
 	}
+
+	&--secondary {
+		background: linear-gradient(135deg, #320610, var(--fixora-primary-dark));
+		border: 1px solid rgba(72, 4, 21, 0.65);
+		color: #fff;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.04),
+			0 4px 12px rgba(0, 0, 0, 0.3);
+
+		&:hover {
+			background: linear-gradient(135deg, var(--fixora-primary-dark), var(--fixora-primary));
+			border-color: rgba(115, 12, 30, 0.55);
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.06),
+				0 6px 16px rgba(72, 4, 21, 0.38);
+		}
+	}
 }
 
 /* -------- Repair Stories -------- */
 .fixora-pp-stories-card {
-	background: var(--fixora-surface);
-	border: 1px solid rgba(255, 255, 255, 0.07);
+	@include fixora-home-card-surface;
 	border-radius: 20px;
 	padding: 22px 26px;
 
@@ -724,15 +772,9 @@
 
 /* -------- Panel -------- */
 .fixora-pp-panel {
-	background: var(--fixora-surface);
-	border: 1px solid var(--fixora-border);
+	@include fixora-home-card-surface;
 	border-radius: 16px;
 	padding: 28px 30px;
-	transition: background-color 0.2s ease, border-color 0.2s ease;
-
-	&:hover {
-		background-color: var(--fixora-surface-hover);
-	}
 
 	&__title {
 		color: #F0F0F0;
@@ -1193,16 +1235,14 @@
 }
 
 .fixora-pp-service {
+	@include fixora-home-card-surface;
 	position: relative;
-	background: var(--fixora-surface);
-	border: 1px solid rgba(255, 255, 255, 0.07);
 	border-radius: 16px;
 	padding: 22px 24px;
-	transition: border-color 0.15s ease;
 	font-family: inherit;
 
 	&:hover {
-		border-color: rgba(255, 255, 255, 0.12);
+		border-color: rgba(115, 12, 30, 0.45);
 	}
 
 	&--popular {
@@ -1357,12 +1397,13 @@
 	&__score {
 		flex-shrink: 0;
 		text-align: center;
+		min-width: 120px;
 	}
 
 	&__num {
-		color: var(--fixora-primary);
-		font-size: 56px;
-		font-weight: 700;
+		color: var(--fixora-primary-hover);
+		font-size: 52px;
+		font-weight: 800;
 		letter-spacing: -0.03em;
 		line-height: 1;
 	}
@@ -1403,17 +1444,17 @@
 
 	&__track {
 		flex: 1;
-		height: 8px;
-		background: rgba(255, 255, 255, 0.06);
-		border-radius: 6px;
+		height: 6px;
+		background: rgba(255, 255, 255, 0.08);
+		border-radius: 4px;
 		overflow: hidden;
 	}
 
 	&__fill {
 		display: block;
 		height: 100%;
-		border-radius: 6px;
-		background: var(--fixora-primary-hover);
+		border-radius: 4px;
+		background: linear-gradient(90deg, var(--fixora-primary), var(--fixora-primary-hover));
 	}
 
 	&__pct {
@@ -1444,6 +1485,15 @@
 		font-size: 15px;
 		font-weight: 700;
 		flex-shrink: 0;
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			border-radius: 50%;
+		}
 	}
 
 	&__id {

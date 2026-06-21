@@ -174,21 +174,20 @@
 	}
 
 	&--inline {
-		margin: 0 0 20px;
-		padding: 14px 16px;
-		border-radius: 14px;
-		border: 1px solid var(--fixora-border-subtle);
-		background: rgba(255, 255, 255, 0.02);
+		@include fixora-home-card-surface;
+		margin: 0;
+		padding: 20px 24px;
+		border-radius: 16px;
 	}
 
 	&__label {
 		display: block;
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--fixora-text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		margin-bottom: 10px;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+		letter-spacing: normal;
+		text-transform: none;
+		margin-bottom: 14px;
 	}
 
 	&__chips {
@@ -201,16 +200,20 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		padding: 8px 14px;
-		border-radius: 999px;
+		padding: 10px 18px;
+		border-radius: 12px;
 		border: 1px solid var(--fixora-border-subtle);
-		font-size: 13px;
-		font-weight: 500;
-		color: var(--fixora-text-primary);
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--fixora-text-secondary);
+		background: rgba(255, 255, 255, 0.03);
+		transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 
 		&--active {
 			border-color: var(--fixora-primary);
-			background: rgba(115, 12, 30, 0.1);
+			background: rgba(115, 12, 30, 0.16);
+			color: var(--fixora-text-primary);
+			box-shadow: 0 0 16px rgba(115, 12, 30, 0.18);
 		}
 
 		&--disabled {

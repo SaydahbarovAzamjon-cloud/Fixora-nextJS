@@ -660,6 +660,10 @@ export const GET_TECHNICIAN_REVIEWS = gql`
 					userFullName
 					userProfileImage
 				}
+				deviceData {
+					deviceBrand
+					deviceModel
+				}
 			}
 			distribution {
 				star

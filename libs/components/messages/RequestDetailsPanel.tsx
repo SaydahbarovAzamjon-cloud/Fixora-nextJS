@@ -9,6 +9,7 @@ import { Booking, ConversationPeer, Device } from '../../types/fixora/fixora';
 import { bookingRefId } from '../../utils/messageHelpers';
 import { formatKrw } from '../../utils/formatCurrency';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
+import { getPrimaryDeviceImageUrl } from '../../utils/deviceImage';
 import UserProfileLink from '../common/UserProfileLink';
 import { FixoraButton } from '../ui';
 
@@ -42,6 +43,7 @@ const RequestDetailsPanel = ({ booking, device, technician, loading }: RequestDe
 
 	const price = booking.finalPrice ?? booking.estimatedPrice;
 	const techName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
+	const deviceImageUrl = getPrimaryDeviceImageUrl(device?.deviceImage);
 
 	return (
 		<div className="fixora-messages__details">
@@ -87,7 +89,7 @@ const RequestDetailsPanel = ({ booking, device, technician, loading }: RequestDe
 			</div>
 
 			<div className="fixora-messages__details-device">
-				{device?.deviceImage && <img src={device.deviceImage} alt="" />}
+				{deviceImageUrl && <img src={deviceImageUrl} alt="" />}
 				<div>
 					<strong>
 						{device ? `${t(`booking.device.categories.${device.deviceCategory}`)} ${device.deviceModel}` : booking.problemTitle}

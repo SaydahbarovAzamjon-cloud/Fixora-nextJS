@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
@@ -13,11 +13,13 @@ import { formatKrw } from '../../../utils/formatCurrency';
 import { dateLocale } from '../../../utils/i18nLocale';
 import {
 	ACTIVE_BOOKING_STATUSES,
+	COMPLETED_BOOKING_STATUSES,
 	bookingPrice,
 	bookingRefId,
 	deviceLabel,
 	isReadyForPickup,
 } from './myPageHelpers';
+import UserProfileLink from '../../common/UserProfileLink';
 
 interface OwnerActiveRequestsTabProps {
 	bookings: Booking[];
@@ -68,18 +70,39 @@ const ActiveRequestCard = ({ booking }: ActiveRequestCardProps) => {
 		<article className={`fixora-mypage__active-card ${readyForPickup ? 'fixora-mypage__active-card--pickup' : ''}`}>
 			<div className="fixora-mypage__active-card-body">
 				<div className="fixora-mypage__active-card-left">
-					<div className="fixora-mypage__active-avatar-wrap">
-						<img
-							className="fixora-mypage__active-avatar"
-							src={resolveProfileImageUrl(technician?.userProfileImage)}
-							alt=""
-						/>
-						<span
-							className={`fixora-mypage__active-status-dot ${
-								readyForPickup ? 'fixora-mypage__active-status-dot--ready' : ''
-							}`}
-						/>
-					</div>
+					{booking.technicianId ? (
+						<UserProfileLink
+							userId={booking.technicianId}
+							userType="TECHNICIAN"
+							className="fixora-mypage__active-avatar-link"
+						>
+							<div className="fixora-mypage__active-avatar-wrap">
+								<img
+									className="fixora-mypage__active-avatar"
+									src={resolveProfileImageUrl(technician?.userProfileImage)}
+									alt=""
+								/>
+								<span
+									className={`fixora-mypage__active-status-dot ${
+										readyForPickup ? 'fixora-mypage__active-status-dot--ready' : ''
+									}`}
+								/>
+							</div>
+						</UserProfileLink>
+					) : (
+						<div className="fixora-mypage__active-avatar-wrap">
+							<img
+								className="fixora-mypage__active-avatar"
+								src={resolveProfileImageUrl(technician?.userProfileImage)}
+								alt=""
+							/>
+							<span
+								className={`fixora-mypage__active-status-dot ${
+									readyForPickup ? 'fixora-mypage__active-status-dot--ready' : ''
+								}`}
+							/>
+						</div>
+					)}
 					<div className="fixora-mypage__active-info">
 						<strong className="fixora-mypage__active-title">
 							{deviceLabel(booking, t)} <span className="fixora-mypage__active-sep">·</span>{' '}
@@ -131,29 +154,66 @@ const ActiveRequestCard = ({ booking }: ActiveRequestCardProps) => {
 	);
 };
 
+type RequestFilter = 'active' | 'completed';
+
 const OwnerActiveRequestsTab = ({ bookings }: OwnerActiveRequestsTabProps) => {
 	const { t } = useTranslation('common');
+	const [filter, setFilter] = useState<RequestFilter>('active');
 
 	const active = useMemo(
 		() => bookings.filter((booking) => ACTIVE_BOOKING_STATUSES.includes(booking.bookingStatus)),
 		[bookings],
 	);
 
+	const completed = useMemo(
+		() => bookings.filter((booking) => COMPLETED_BOOKING_STATUSES.includes(booking.bookingStatus)),
+		[bookings],
+	);
+
+	const visible = filter === 'active' ? active : completed;
+
 	return (
 		<div className="fixora-mypage__panel">
 			<div className="fixora-mypage__panel-head">
-				<h2 className="fixora-mypage__panel-title">{t('mypage.activeRequests')}</h2>
-				<Link href="/" className="fixora-mypage__new-request-btn">
+				<h2 className="fixora-mypage__panel-title">
+					{filter === 'active' ? t('mypage.activeRequests') : t('mypage.completedRequests')}
+				</h2>
+				<Link href="/search" className="fixora-mypage__new-request-btn">
 					<BoltOutlinedIcon fontSize="small" />
 					{t('mypage.newRequest')}
 				</Link>
 			</div>
 
-			{!active.length ? (
-				<p className="fixora-mypage__empty">{t('mypage.noRequests')}</p>
+			<div className="fixora-mypage__request-filters" role="tablist" aria-label={t('mypage.requestFilter.label')}>
+				<button
+					type="button"
+					role="tab"
+					aria-selected={filter === 'active'}
+					className={`fixora-mypage__request-filter${filter === 'active' ? ' fixora-mypage__request-filter--active' : ''}`}
+					onClick={() => setFilter('active')}
+				>
+					{t('mypage.requestFilter.active')}
+					{active.length > 0 && <span className="fixora-mypage__request-filter-count">{active.length}</span>}
+				</button>
+				<button
+					type="button"
+					role="tab"
+					aria-selected={filter === 'completed'}
+					className={`fixora-mypage__request-filter${filter === 'completed' ? ' fixora-mypage__request-filter--active' : ''}`}
+					onClick={() => setFilter('completed')}
+				>
+					{t('mypage.requestFilter.completed')}
+					{completed.length > 0 && <span className="fixora-mypage__request-filter-count">{completed.length}</span>}
+				</button>
+			</div>
+
+			{!visible.length ? (
+				<p className="fixora-mypage__empty">
+					{filter === 'active' ? t('mypage.noRequests') : t('mypage.noCompletedRequests')}
+				</p>
 			) : (
 				<div className="fixora-mypage__active-list">
-					{active.map((booking) => (
+					{visible.map((booking) => (
 						<ActiveRequestCard key={booking._id} booking={booking} />
 					))}
 				</div>

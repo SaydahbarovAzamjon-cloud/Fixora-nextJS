@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -6,22 +6,31 @@ import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import HourglassTopOutlinedIcon from '@mui/icons-material/HourglassTopOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { userVar } from '../../../apollo/store';
-import { CREATE_BOOKING, CREATE_DEVICE } from '../../../apollo/user/mutation';
+import { CREATE_BOOKING, CREATE_DEVICE, UPDATE_DEVICE } from '../../../apollo/user/mutation';
 import { GET_MY_DEVICES } from '../../../apollo/user/query';
 import { FixoraButton, FixoraGlassCard, FixoraInput, FixoraSelect } from '../ui';
 import BookingServiceTypeOptions from './BookingServiceTypeOptions';
+import BookingDeviceImageUpload from './BookingDeviceImageUpload';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { useDeviceImageUpload } from '../../hooks/useDeviceImageUpload';
+import {
+	mergeDeviceImages,
+	parseDeviceImagePaths,
+	serializeDeviceImages,
+} from '../../utils/deviceImage';
 import type { Device, DeviceCategory } from '../../types/fixora/fixora';
+import { bookingDevicePlaceholderKey } from '../../utils/bookingDevicePlaceholders';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
 
 interface BookingFormProps {
 	technicianId: string;
 	technicianName?: string;
+	technicianDeviceCategory?: DeviceCategory;
 }
 
 const DEVICE_CATEGORIES: DeviceCategory[] = ['IPHONE', 'IPAD', 'MACBOOK', 'APPLE_WATCH'];
 
-const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
+const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }: BookingFormProps) => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
@@ -43,33 +52,102 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 	const [submitting, setSubmitting] = useState(false);
 	const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
 
+	const deviceSearch = useMemo(
+		() => (technicianDeviceCategory ? { deviceCategory: technicianDeviceCategory } : {}),
+		[technicianDeviceCategory],
+	);
+
 	const { data: devicesData, loading: devicesLoading } = useQuery(GET_MY_DEVICES, {
 		skip: !isLoggedIn,
 		fetchPolicy: 'network-only',
 		variables: {
-			input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC', search: {} },
+			input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC', search: deviceSearch },
 		},
 		onCompleted: (data) => {
 			const list: Device[] = data?.getMyDevices?.list ?? [];
-			if (list.length) setSelectedDeviceId(list[0]._id);
+			setSelectedDeviceId(list.length ? list[0]._id : 'new');
 		},
 	});
 
-	const devices: Device[] = devicesData?.getMyDevices?.list ?? [];
+	const devices: Device[] = useMemo(() => {
+		const list: Device[] = devicesData?.getMyDevices?.list ?? [];
+		if (!technicianDeviceCategory) return list;
+		return list.filter((device) => device.deviceCategory === technicianDeviceCategory);
+	}, [devicesData, technicianDeviceCategory]);
 
 	const [createDevice] = useMutation(CREATE_DEVICE);
+	const [updateDevice] = useMutation(UPDATE_DEVICE);
 	const [createBooking] = useMutation(CREATE_BOOKING);
+
+	const onDeviceImageError = useCallback(
+		(key: string) => {
+			const message =
+				key === 'invalidType'
+					? t('booking.device.imageInvalidType')
+					: key === 'tooLarge'
+						? t('booking.device.imageTooLarge')
+						: key === 'tooMany'
+							? t('booking.device.imageTooMany')
+							: t('booking.errors.generic');
+			void sweetMixinErrorAlert(message);
+		},
+		[t],
+	);
 
 	const isNewDevice = selectedDeviceId === 'new';
 
+	const selectedDevice = useMemo(
+		() => devices.find((device) => device._id === selectedDeviceId),
+		[devices, selectedDeviceId],
+	);
+
+	const existingDeviceImagePaths = useMemo(
+		() => (isNewDevice ? [] : parseDeviceImagePaths(selectedDevice?.deviceImage)),
+		[isNewDevice, selectedDevice?.deviceImage],
+	);
+
+	const existingDeviceImageCount =
+		!isNewDevice && devicesLoading ? 0 : existingDeviceImagePaths.length;
+
+	const deviceImageUpload = useDeviceImageUpload(onDeviceImageError, existingDeviceImageCount);
+
+	const clearDeviceImagesRef = useRef(deviceImageUpload.clearImages);
+	clearDeviceImagesRef.current = deviceImageUpload.clearImages;
+
+	const selectDevice = useCallback((deviceId: string) => {
+		setSelectedDeviceId(deviceId);
+		clearDeviceImagesRef.current();
+	}, []);
+
+	const allowedCategories = useMemo(
+		() => (technicianDeviceCategory ? [technicianDeviceCategory] : DEVICE_CATEGORIES),
+		[technicianDeviceCategory],
+	);
+
 	const categoryOptions = useMemo(
 		() =>
-			DEVICE_CATEGORIES.map((category) => ({
+			allowedCategories.map((category) => ({
 				value: category,
 				label: t(`booking.device.categories.${category}`),
 			})),
-		[t],
+		[allowedCategories, t],
 	);
+
+	useEffect(() => {
+		if (!technicianDeviceCategory) return;
+		setDeviceCategory(technicianDeviceCategory);
+		if (!devicesLoading) {
+			setSelectedDeviceId((current) => {
+				if (current !== 'new' && devices.some((device) => device._id === current)) return current;
+				return devices.length ? devices[0]._id : 'new';
+			});
+		}
+	}, [technicianDeviceCategory, devices, devicesLoading]);
+
+	const activeDeviceCategory = technicianDeviceCategory ?? deviceCategory;
+	const modelPlaceholder = t(bookingDevicePlaceholderKey('model', activeDeviceCategory));
+	const issuePlaceholder = t(bookingDevicePlaceholderKey('issue', activeDeviceCategory));
+	const descriptionPlaceholder = t(bookingDevicePlaceholderKey('description', activeDeviceCategory));
 
 	const validate = useCallback(() => {
 		const next: Record<string, string> = {};
@@ -95,6 +173,12 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 			let deviceId = selectedDeviceId;
 
 			if (isNewDevice) {
+				let deviceImageValue: string | undefined;
+				if (deviceImageUpload.hasImages) {
+					const paths = await deviceImageUpload.uploadDeviceImages();
+					deviceImageValue = serializeDeviceImages(paths);
+				}
+
 				const result = await createDevice({
 					variables: {
 						input: {
@@ -105,10 +189,24 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 							deviceDescription: deviceDescription.trim() || undefined,
 							deviceSerialNumber: deviceSerialNumber.trim() || undefined,
 							releaseYear: releaseYear ? Number(releaseYear) : undefined,
+							deviceImage: deviceImageValue,
 						},
 					},
 				});
 				deviceId = result.data?.createDevice?._id;
+			} else if (deviceImageUpload.hasImages) {
+				const newPaths = await deviceImageUpload.uploadDeviceImages();
+				const mergedImage = mergeDeviceImages(existingDeviceImagePaths, newPaths);
+				if (mergedImage) {
+					await updateDevice({
+						variables: {
+							input: {
+								_id: deviceId,
+								deviceImage: mergedImage,
+							},
+						},
+					});
+				}
 			}
 
 			const bookingResult = await createBooking({
@@ -138,6 +236,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 		selectedDeviceId,
 		isNewDevice,
 		createDevice,
+		updateDevice,
 		createBooking,
 		deviceCategory,
 		deviceModel,
@@ -145,6 +244,8 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 		deviceDescription,
 		deviceSerialNumber,
 		releaseYear,
+		existingDeviceImagePaths,
+		deviceImageUpload,
 		technicianId,
 		problemTitle,
 		problemDescription,
@@ -196,7 +297,13 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 
 			<FixoraGlassCard className="fixora-booking__card">
 				<h2 className="fixora-booking__heading">{t('booking.device.heading')}</h2>
-				<p className="fixora-booking__text">{t('booking.device.subheading')}</p>
+				<p className="fixora-booking__text">
+					{technicianDeviceCategory
+						? t('booking.device.subheadingForCategory', {
+								category: t(`booking.device.categories.${technicianDeviceCategory}`),
+							})
+						: t('booking.device.subheading')}
+				</p>
 
 				{!devicesLoading && devices.length > 0 && (
 					<div className="fixora-booking__device-list">
@@ -210,7 +317,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 									name="device"
 									value={device._id}
 									checked={selectedDeviceId === device._id}
-									onChange={() => setSelectedDeviceId(device._id)}
+									onChange={() => selectDevice(device._id)}
 								/>
 								<span className="fixora-booking__device-info">
 									<strong>{t(`booking.device.categories.${device.deviceCategory}`)} — {device.deviceModel}</strong>
@@ -220,13 +327,24 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 						))}
 						<label
 							className={`fixora-booking__device-option${isNewDevice ? ' fixora-booking__device-option--active' : ''}`}
+							onClick={(e) => {
+								if (isNewDevice) {
+									e.preventDefault();
+									if (devices.length > 0) {
+										selectDevice(devices[0]._id);
+									}
+								}
+							}}
 						>
 							<input
 								type="radio"
 								name="device"
 								value="new"
 								checked={isNewDevice}
-								onChange={() => setSelectedDeviceId('new')}
+								onChange={() => selectDevice('new')}
+								onClick={(e) => {
+									if (isNewDevice) e.preventDefault();
+								}}
 							/>
 							<span className="fixora-booking__device-info">
 								<strong>
@@ -239,20 +357,32 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 
 				{isNewDevice && (
 					<div className="fixora-booking__form-grid">
-						<FixoraSelect
-							label={t('booking.device.category')}
-							name="deviceCategory"
-							value={deviceCategory}
-							onChange={(e) => setDeviceCategory(e.target.value as DeviceCategory)}
-							options={categoryOptions}
-							placeholder={t('booking.device.categoryPlaceholder')}
-							error={!!errors.deviceCategory}
-							helperText={errors.deviceCategory}
-						/>
+						{technicianDeviceCategory ? (
+							<FixoraInput
+								className="fixora-booking__category-locked"
+								label={t('booking.device.category')}
+								name="deviceCategory"
+								value={t(`booking.device.categories.${technicianDeviceCategory}`)}
+								readOnly
+								tabIndex={-1}
+								aria-readonly="true"
+							/>
+						) : (
+							<FixoraSelect
+								label={t('booking.device.category')}
+								name="deviceCategory"
+								value={deviceCategory}
+								onChange={(e) => setDeviceCategory(e.target.value as DeviceCategory)}
+								options={categoryOptions}
+								placeholder={t('booking.device.categoryPlaceholder')}
+								error={!!errors.deviceCategory}
+								helperText={errors.deviceCategory}
+							/>
+						)}
 						<FixoraInput
 							label={t('booking.device.model')}
 							name="deviceModel"
-							placeholder={t('booking.device.modelPlaceholder')}
+							placeholder={modelPlaceholder}
 							value={deviceModel}
 							onChange={(e) => setDeviceModel(e.target.value)}
 							error={!!errors.deviceModel}
@@ -261,7 +391,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 						<FixoraInput
 							label={t('booking.device.issue')}
 							name="deviceIssue"
-							placeholder={t('booking.device.issuePlaceholder')}
+							placeholder={issuePlaceholder}
 							value={deviceIssue}
 							onChange={(e) => setDeviceIssue(e.target.value)}
 							error={!!errors.deviceIssue}
@@ -270,10 +400,13 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 						<FixoraInput
 							label={t('booking.device.releaseYear')}
 							name="releaseYear"
-							type="number"
+							type="text"
+							inputMode="numeric"
+							pattern="[0-9]*"
+							maxLength={4}
 							placeholder={t('booking.device.releaseYearPlaceholder')}
 							value={releaseYear}
-							onChange={(e) => setReleaseYear(e.target.value)}
+							onChange={(e) => setReleaseYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
 						/>
 						<FixoraInput
 							label={t('booking.device.serialNumber')}
@@ -290,7 +423,7 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 								<textarea
 									id="deviceDescription"
 									className="fixora-input__control"
-									placeholder={t('booking.device.descriptionPlaceholder')}
+									placeholder={descriptionPlaceholder}
 									value={deviceDescription}
 									onChange={(e) => setDeviceDescription(e.target.value)}
 									rows={3}
@@ -343,6 +476,8 @@ const BookingForm = ({ technicianId, technicianName }: BookingFormProps) => {
 
 				<BookingServiceTypeOptions />
 			</FixoraGlassCard>
+
+			<BookingDeviceImageUpload upload={deviceImageUpload} existingImagePaths={existingDeviceImagePaths} />
 
 			<FixoraButton variant="primary" fullWidth disabled={submitting} onClick={handleSubmit}>
 				{submitting ? t('booking.submitting') : t('booking.submit')}

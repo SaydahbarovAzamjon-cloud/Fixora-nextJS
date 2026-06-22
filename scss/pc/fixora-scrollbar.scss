@@ -1,0 +1,33 @@
+/** Shared dark burgundy scrollbar — use on overflow panels site-wide */
+
+@mixin fixora-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(115, 12, 30, 0.55) transparent;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: rgba(255, 255, 255, 0.04);
+		border-radius: 999px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: linear-gradient(180deg, var(--fixora-primary-dark), var(--fixora-primary));
+		border-radius: 999px;
+		border: 1px solid rgba(115, 12, 30, 0.35);
+
+		&:hover {
+			background: var(--fixora-primary-hover);
+		}
+	}
+
+	&::-webkit-scrollbar-button,
+	&::-webkit-scrollbar-corner {
+		display: none;
+		width: 0;
+		height: 0;
+	}
+}

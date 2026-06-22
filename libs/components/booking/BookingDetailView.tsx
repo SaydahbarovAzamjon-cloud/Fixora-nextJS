@@ -4,6 +4,12 @@ import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
+import StarIcon from '@mui/icons-material/Star';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import { useQuery } from '@apollo/client';
 import { GET_USER } from '../../../apollo/user/query';
 import { GET_BOOKING_PAYMENTS } from '../../../apollo/user/payment';
@@ -14,11 +20,21 @@ import DepositPaymentCard from './DepositPaymentCard';
 import FinalPaymentCard from './FinalPaymentCard';
 import CancelBookingButton from './CancelBookingButton';
 import BookingReviewSection from './BookingReviewSection';
+import BookingCustomerPhotos from './BookingCustomerPhotos';
+import BookingDeviceCategoryVisual from './BookingDeviceCategoryVisual';
 import { FixoraButton } from '../ui';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
 import { getBookingTypeLabelKey } from '../../utils/bookingServiceType';
-
-const TIMELINE_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'] as const;
+import { formatBookingDisplayId } from '../../utils/deviceCategoryAsset';
+import {
+	BOOKING_PROGRESS_STEPS,
+	getBookingProgressIndex,
+	isBookingProgressStepCurrent,
+	isBookingProgressStepDone,
+} from '../../utils/bookingDetailProgress';
+import { parseDeviceImagePaths, resolveDeviceImageUrl } from '../../utils/deviceImage';
+import { resolveProfileImageUrl } from '../../utils/profileImage';
+import { formatTechnicianWorkingHours } from '../../utils/workingHours';
 
 interface BookingDetailViewProps {
 	booking: Booking;
@@ -48,16 +64,31 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 	const title = device
 		? `${t(`booking.device.categories.${device.deviceCategory}`)} ${device.deviceModel}`
 		: booking.problemTitle;
+	const issueSummary = booking.problemTitle || device?.deviceIssue || '';
+	const problemText =
+		booking.problemDescription?.trim() || device?.deviceDescription?.trim() || device?.deviceIssue?.trim() || '';
+
+	const customerPhotoUrls = useMemo(() => {
+		return parseDeviceImagePaths(device?.deviceImage)
+			.map((path) => resolveDeviceImageUrl(path))
+			.filter((url): url is string => !!url);
+	}, [device?.deviceImage]);
 
 	const price = booking.finalPrice ?? booking.estimatedPrice;
 	const depositPaid = isDepositPaid(payments, booking.isPaid);
 	const finalPaid = isFinalPaid(payments);
 	const depositAmount = price ? Math.round(price / 2) : undefined;
-	const finalAmount = price && depositAmount != null ? price - depositAmount : undefined;
+	const progressIndex = getBookingProgressIndex(booking.bookingStatus, finalPaid);
+	const isVerified = technician?.isVerified === true || technician?.badgeLevel === 'VERIFIED';
+	const technicianAvatar = resolveProfileImageUrl(technician?.userProfileImage);
+	const technicianLocation = technician?.userLocation?.trim() || '';
+	const technicianHours = formatTechnicianWorkingHours(technician?.workingHours);
 
-	const currentTimelineIndex = TIMELINE_STATUSES.indexOf(
-		booking.bookingStatus as (typeof TIMELINE_STATUSES)[number],
-	);
+	const paymentStatusLabel = finalPaid
+		? t('booking.detail.paymentStatusPaid')
+		: depositPaid
+			? t('booking.detail.paymentStatusPartial')
+			: t('booking.detail.paymentStatusPending');
 
 	const messageHref = useMemo(
 		() => `/messages?peerId=${booking.technicianId}&bookingId=${booking._id}`,
@@ -69,6 +100,36 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 		onRefresh?.();
 	};
 
+	const detailRows = [
+		{ label: t('booking.detail.serviceType'), value: t(getBookingTypeLabelKey(booking.bookingType)) },
+		{
+			label: t('booking.detail.estimatedCost'),
+			value: price != null ? formatKrw(price) : '—',
+		},
+		{
+			label: t('booking.detail.deposit'),
+			value: depositPaid ? t('booking.detail.depositPaid') : t('payment.depositDue'),
+			tone: depositPaid ? 'success' : 'warning',
+		},
+		{
+			label: t('booking.detail.paymentStatus'),
+			value: paymentStatusLabel,
+			tone: finalPaid ? 'success' : depositPaid ? 'warning' : 'muted',
+		},
+		{
+			label: t('booking.detail.shopVisitDate'),
+			value: booking.bookingDate ? (
+				<Moment format="MMM D, YYYY · h:mm A">{booking.bookingDate}</Moment>
+			) : (
+				t('booking.detail.shopVisitDatePending')
+			),
+		},
+		{
+			label: t('booking.detail.repairDuration'),
+			value: t('booking.detail.repairDurationEstimate'),
+		},
+	];
+
 	return (
 		<div className="fixora-booking-detail">
 			<Link href={ownerMyPageHref('activeRequests')} className="fixora-booking-detail__back">
@@ -76,154 +137,195 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 				{t('booking.detail.back')}
 			</Link>
 
-			<header className="fixora-booking-detail__header">
-				<div className="fixora-booking-detail__header-main">
-					{device?.deviceImage && (
-						<img className="fixora-booking-detail__device-img" src={device.deviceImage} alt="" />
-					)}
-					<div>
+			<section className="fixora-booking-detail__hero">
+				<div className="fixora-booking-detail__hero-device">
+					<BookingDeviceCategoryVisual category={device?.deviceCategory} size={80} />
+				</div>
+				<div className="fixora-booking-detail__hero-body">
+					<div className="fixora-booking-detail__hero-title-row">
 						<h1>{title}</h1>
-						<p>{booking.problemTitle}</p>
-						<span className={`fixora-messages__status fixora-messages__status--${booking.bookingStatus.toLowerCase()}`}>
+						<span
+							className={`fixora-booking-detail__status fixora-booking-detail__status--${booking.bookingStatus.toLowerCase()}`}
+						>
 							{t(`booking.status.${booking.bookingStatus}`)}
 						</span>
 					</div>
+					{issueSummary && <p className="fixora-booking-detail__hero-subtitle">{issueSummary}</p>}
+					<div className="fixora-booking-detail__hero-stats">
+						<div>
+							<span>{t('booking.detail.bookingId')}</span>
+							<strong>{formatBookingDisplayId(booking._id)}</strong>
+						</div>
+						<div>
+							<span>{t('booking.detail.created')}</span>
+							<strong>
+								<Moment format="MMM D, YYYY · h:mm A">{booking.createdAt}</Moment>
+							</strong>
+						</div>
+						<div>
+							<span>{t('booking.detail.serviceType')}</span>
+							<strong>{t(getBookingTypeLabelKey(booking.bookingType))}</strong>
+						</div>
+						<div>
+							<span>{t('booking.detail.estimatedCost')}</span>
+							<strong>{price != null ? formatKrw(price) : '—'}</strong>
+						</div>
+					</div>
 				</div>
-			</header>
+			</section>
 
-			<div className="fixora-booking-detail__grid">
-				<section className="fixora-booking-detail__panel">
-					<h2>{t('booking.detail.info')}</h2>
-					<dl className="fixora-booking-detail__meta">
+			<div className="fixora-booking-detail__row fixora-booking-detail__row--triple">
+				<section className="fixora-booking-detail__card fixora-booking-detail__card--technician">
+					<h2>{t('booking.detail.technician')}</h2>
+					<div className="fixora-booking-detail__tech-profile">
+						<img src={technicianAvatar} alt="" className="fixora-booking-detail__tech-avatar" />
 						<div>
-							<dt>{t('booking.detail.technician')}</dt>
-							<dd>
-								<Link href={`/technicians/${booking.technicianId}`}>{technicianName || '—'}</Link>
-							</dd>
+							<strong>{technicianName || '—'}</strong>
+							<span className="fixora-booking-detail__tech-rating">
+								<StarIcon fontSize="inherit" />
+								{technician?.averageRating?.toFixed(1) ?? '—'}
+								<em>({technician?.reviewCount ?? 0})</em>
+							</span>
+							{isVerified && (
+								<span className="fixora-booking-detail__tech-verified">
+									<VerifiedOutlinedIcon fontSize="inherit" />
+									{t('booking.detail.verifiedTechnician')}
+								</span>
+							)}
 						</div>
-						<div>
-							<dt>{t('booking.detail.serviceType')}</dt>
-							<dd>{t(getBookingTypeLabelKey(booking.bookingType))}</dd>
-						</div>
-						{booking.bookingDate && (
-							<div>
-								<dt>{t('booking.detail.date')}</dt>
-								<dd>
-									<Moment format="MMMM D, YYYY · h:mm A">{booking.bookingDate}</Moment>
-								</dd>
-							</div>
-						)}
-						{price != null && (
-							<div>
-								<dt>{t('booking.detail.price')}</dt>
-								<dd>{formatKrw(price)}</dd>
-							</div>
-						)}
-					</dl>
-
-					{booking.problemDescription && (
-						<div className="fixora-booking-detail__description">
-							<h3>{t('booking.details.problemDescription')}</h3>
-							<p>{booking.problemDescription}</p>
-						</div>
+					</div>
+					{(technicianLocation || technicianHours) && (
+						<ul className="fixora-booking-detail__tech-meta">
+							{technicianLocation && (
+								<li>
+									<PlaceOutlinedIcon fontSize="inherit" aria-hidden="true" />
+									<span>
+										<strong>{t('booking.detail.location')}</strong>
+										{technicianLocation}
+									</span>
+								</li>
+							)}
+							{technicianHours && (
+								<li>
+									<ScheduleOutlinedIcon fontSize="inherit" aria-hidden="true" />
+									<span>
+										<strong>{t('booking.detail.workingHours')}</strong>
+										{technicianHours}
+									</span>
+								</li>
+							)}
+						</ul>
 					)}
-
-					<div className="fixora-booking-detail__actions-row">
-						<Link href={messageHref}>
-							<FixoraButton variant="secondary">
+					<div className="fixora-booking-detail__tech-actions">
+						<Link href={messageHref} className="fixora-booking-detail__tech-link">
+							<FixoraButton variant="outline" fullWidth>
 								<ChatBubbleOutlineIcon fontSize="small" />
-								{t('booking.detail.message')}
+								{t('booking.detail.messageShort')}
+							</FixoraButton>
+						</Link>
+						<Link href={`/technicians/${booking.technicianId}`} className="fixora-booking-detail__tech-link">
+							<FixoraButton variant="primary" fullWidth>
+								{t('booking.detail.viewProfile')}
 							</FixoraButton>
 						</Link>
 					</div>
-
-					<CancelBookingButton
-						bookingId={booking._id}
-						bookingStatus={booking.bookingStatus}
-						onCancelled={onRefresh}
-					/>
 				</section>
 
-				<section className="fixora-booking-detail__panel">
-					<h2>{t('booking.detail.timeline')}</h2>
-					<ol className="fixora-booking-detail__timeline">
-						{TIMELINE_STATUSES.map((status, index) => {
-							const isDone = currentTimelineIndex >= index && booking.bookingStatus !== 'CANCELLED' && booking.bookingStatus !== 'REJECTED';
-							const isCurrent = booking.bookingStatus === status;
+				<section className="fixora-booking-detail__card fixora-booking-detail__card--progress">
+					<h2>{t('booking.detail.statusProgress')}</h2>
+					<ol className="fixora-booking-detail__stepper">
+						{BOOKING_PROGRESS_STEPS.map((step, index) => {
+							const done = isBookingProgressStepDone(index, progressIndex, finalPaid);
+							const current = isBookingProgressStepCurrent(index, progressIndex, finalPaid);
 							return (
 								<li
-									key={status}
-									className={`fixora-booking-detail__timeline-step${isDone ? ' fixora-booking-detail__timeline-step--done' : ''}${isCurrent ? ' fixora-booking-detail__timeline-step--current' : ''}`}
+									key={step}
+									className={`fixora-booking-detail__step${done ? ' fixora-booking-detail__step--done' : ''}${current ? ' fixora-booking-detail__step--current' : ''}`}
 								>
-									<span>{t(`booking.status.${status}`)}</span>
+									<span className="fixora-booking-detail__step-dot" aria-hidden="true">
+										{done ? <CheckCircleOutlineIcon fontSize="inherit" /> : null}
+									</span>
+									<div className="fixora-booking-detail__step-copy">
+										<span>{t(`booking.detail.progressStep.${step}`)}</span>
+										{index === 0 && (done || current) && (
+											<small>
+												<Moment format="MMM D, YYYY · h:mm A">{booking.createdAt}</Moment>
+											</small>
+										)}
+									</div>
 								</li>
 							);
 						})}
 					</ol>
+				</section>
 
-					{booking.bookingStatus === 'IN_PROGRESS' && booking.progressUpdates && booking.progressUpdates.length > 0 && (
-						<div className="fixora-booking-detail__progress">
-							<h3>{t('booking.detail.progress')}</h3>
-							<ul>
-								{booking.progressUpdates.map((update, index) => (
-									<li key={`${update.step}-${index}`}>
-										<strong>{update.step}</strong>
-										{update.note && <p>{update.note}</p>}
-										<small>
-											<Moment format="MMM D, YYYY · h:mm A">{update.timestamp}</Moment>
-										</small>
-									</li>
-								))}
-							</ul>
-						</div>
+				<section className="fixora-booking-detail__card fixora-booking-detail__card--device">
+					<h2>{t('booking.detail.device')}</h2>
+					<div className="fixora-booking-detail__device-showcase">
+						<BookingCustomerPhotos imageUrls={customerPhotoUrls} variant="embedded" />
+					</div>
+					{device && (
+						<p className="fixora-booking-detail__device-caption">
+							{t(`booking.device.categories.${device.deviceCategory}`)} · {device.deviceModel}
+						</p>
 					)}
 				</section>
 			</div>
 
-			<section className="fixora-booking-detail__payments">
-				<h2>{t('booking.detail.payments')}</h2>
-				<div className="fixora-booking-detail__payment-summary">
-					<div>
-						<span>{t('payment.deposit.depositAmount')}</span>
-						<strong>{depositPaid ? t('payment.alreadyPaid') : t('payment.depositDue')}</strong>
-						{depositAmount != null && <em>{formatKrw(depositAmount)}</em>}
-					</div>
-					<div>
-						<span>{t('payment.final.amount')}</span>
-						<strong>{finalPaid ? t('payment.final.alreadyPaid') : t('payment.final.due')}</strong>
-						{finalAmount != null && <em>{formatKrw(finalAmount)}</em>}
-					</div>
-				</div>
+			<div className="fixora-booking-detail__row fixora-booking-detail__row--double">
+				<section className="fixora-booking-detail__card">
+					<h2>{t('booking.detail.detailsTitle')}</h2>
+					<dl className="fixora-booking-detail__details-list">
+						{detailRows.map((row) => (
+							<div key={row.label}>
+								<dt>{row.label}</dt>
+								<dd className={row.tone ? `fixora-booking-detail__details-value--${row.tone}` : undefined}>
+									{row.value}
+								</dd>
+							</div>
+						))}
+					</dl>
+				</section>
 
-				<div className="fixora-booking-detail__payment-cards">
-					{!depositPaid && booking.bookingStatus === 'ACCEPTED' && (
-						<DepositPaymentCard
-							bookingId={booking._id}
-							problemTitle={booking.problemTitle}
-							technicianName={technicianName}
-							estimatedPrice={booking.estimatedPrice}
-							bookingStatus={booking.bookingStatus}
-							initialPaid={depositPaid}
-							showSuccessLinks
-							technicianId={booking.technicianId}
-							onPaid={handlePaymentRefresh}
-						/>
-					)}
+				<section className="fixora-booking-detail__card fixora-booking-detail__card--problem">
+					<h2>{t('booking.details.problemDescription')}</h2>
+					<BuildOutlinedIcon className="fixora-booking-detail__problem-watermark" aria-hidden="true" />
+					<p>{problemText || t('booking.detail.noProblemDescription')}</p>
+				</section>
+			</div>
 
-					{depositPaid && !finalPaid && (
-						<FinalPaymentCard
-							bookingId={booking._id}
-							problemTitle={booking.problemTitle}
-							technicianName={technicianName}
-							estimatedPrice={booking.estimatedPrice}
-							finalPrice={booking.finalPrice}
-							bookingStatus={booking.bookingStatus}
-							depositPaid={depositPaid}
-							onPaid={handlePaymentRefresh}
-						/>
-					)}
-				</div>
-			</section>
+			{(!depositPaid && booking.bookingStatus === 'ACCEPTED') || (depositPaid && !finalPaid) ? (
+				<section className="fixora-booking-detail__card fixora-booking-detail__card--payments">
+					<h2>{t('booking.detail.payments')}</h2>
+					<div className="fixora-booking-detail__payment-cards">
+						{!depositPaid && booking.bookingStatus === 'ACCEPTED' && (
+							<DepositPaymentCard
+								bookingId={booking._id}
+								problemTitle={booking.problemTitle}
+								technicianName={technicianName}
+								estimatedPrice={booking.estimatedPrice}
+								bookingStatus={booking.bookingStatus}
+								initialPaid={depositPaid}
+								showSuccessLinks
+								technicianId={booking.technicianId}
+								onPaid={handlePaymentRefresh}
+							/>
+						)}
+						{depositPaid && !finalPaid && (
+							<FinalPaymentCard
+								bookingId={booking._id}
+								problemTitle={booking.problemTitle}
+								technicianName={technicianName}
+								estimatedPrice={booking.estimatedPrice}
+								finalPrice={booking.finalPrice}
+								bookingStatus={booking.bookingStatus}
+								depositPaid={depositPaid}
+								onPaid={handlePaymentRefresh}
+							/>
+						)}
+					</div>
+				</section>
+			) : null}
 
 			<BookingReviewSection
 				bookingId={booking._id}
@@ -231,6 +333,21 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 				existingReview={review}
 				onSubmitted={onRefresh}
 			/>
+
+			<div className="fixora-booking-detail__footer-actions">
+				<CancelBookingButton
+					bookingId={booking._id}
+					bookingStatus={booking.bookingStatus}
+					onCancelled={onRefresh}
+					layout="footer"
+				/>
+				<Link href={messageHref} className="fixora-booking-detail__footer-link">
+					<FixoraButton variant="primary" fullWidth>
+						<ChatBubbleOutlineIcon fontSize="small" />
+						{t('booking.detail.message')}
+					</FixoraButton>
+				</Link>
+			</div>
 		</div>
 	);
 };

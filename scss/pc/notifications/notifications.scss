@@ -1,6 +1,7 @@
 /** Notifications — P3-08 */
 
 @import '/scss/pc/homepage/fixora-card-surface.scss';
+@import '/scss/pc/fixora-scrollbar.scss';
 
 .fixora-notifications-page {
 	background: transparent;
@@ -24,6 +25,9 @@
 	flex-direction: column;
 	gap: 18px;
 	box-sizing: border-box;
+	max-height: calc(100vh - 180px);
+	overflow-y: auto;
+	@include fixora-scrollbar;
 }
 
 .fixora-notifications__group {
@@ -102,6 +106,52 @@
 	border-radius: 50%;
 	background: var(--fixora-surface-elevated);
 	color: var(--fixora-primary);
+
+	&--accepted,
+	&--completed,
+	&--payment {
+		color: var(--fixora-success);
+		background: rgba(82, 196, 26, 0.12);
+	}
+
+	&--rejected,
+	&--cancelled {
+		color: var(--fixora-error);
+		background: rgba(255, 77, 79, 0.12);
+	}
+
+	&--pending,
+	&--progress {
+		color: var(--fixora-primary-hover);
+		background: rgba(115, 12, 30, 0.15);
+	}
+
+	&--message,
+	&--comment {
+		color: #60a5fa;
+		background: rgba(96, 165, 250, 0.12);
+	}
+
+	&--follow {
+		color: #22d3ee;
+		background: rgba(34, 211, 238, 0.12);
+	}
+
+	&--like {
+		color: #ec4899;
+		background: rgba(236, 72, 153, 0.12);
+	}
+
+	&--review {
+		color: #f59e0b;
+		background: rgba(245, 158, 11, 0.12);
+	}
+
+	&--booking,
+	&--admin {
+		color: var(--fixora-primary);
+		background: rgba(115, 12, 30, 0.12);
+	}
 }
 
 .fixora-notifications__body {
@@ -181,6 +231,8 @@
 	flex-direction: column;
 	max-height: 360px;
 	overflow-y: auto;
+	overflow-x: hidden;
+	@include fixora-scrollbar;
 }
 
 .fixora-notif-dropdown__item {
@@ -215,6 +267,96 @@
 	border-radius: 50%;
 	background: var(--fixora-surface-elevated);
 	color: var(--fixora-primary);
+
+	&--accepted,
+	&--completed,
+	&--payment {
+		color: var(--fixora-success);
+		background: rgba(82, 196, 26, 0.12);
+	}
+
+	&--rejected,
+	&--cancelled {
+		color: var(--fixora-error);
+		background: rgba(255, 77, 79, 0.12);
+	}
+
+	&--pending,
+	&--progress {
+		color: var(--fixora-primary-hover);
+		background: rgba(115, 12, 30, 0.15);
+	}
+
+	&--message,
+	&--comment {
+		color: #60a5fa;
+		background: rgba(96, 165, 250, 0.12);
+	}
+
+	&--follow {
+		color: #22d3ee;
+		background: rgba(34, 211, 238, 0.12);
+	}
+
+	&--like {
+		color: #ec4899;
+		background: rgba(236, 72, 153, 0.12);
+	}
+
+	&--review {
+		color: #f59e0b;
+		background: rgba(245, 158, 11, 0.12);
+	}
+
+	&--booking,
+	&--admin {
+		color: var(--fixora-primary);
+		background: rgba(115, 12, 30, 0.12);
+	}
+}
+
+.fixora-notif-dropdown__sender,
+.fixora-notifications__sender-row {
+	margin-bottom: 2px;
+}
+
+.fixora-notif-card__sender-row {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	text-decoration: none;
+	color: inherit;
+}
+
+.fixora-notif-card__avatar {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	overflow: hidden;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--fixora-surface-hover);
+	font-size: 9px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+.fixora-notif-card__sender {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--fixora-primary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .fixora-notif-dropdown__body {

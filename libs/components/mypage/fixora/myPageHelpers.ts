@@ -2,6 +2,8 @@ import { Booking, BookingStatus } from '../../../types/fixora/fixora';
 
 export const ACTIVE_BOOKING_STATUSES: BookingStatus[] = ['PENDING', 'ACCEPTED', 'IN_PROGRESS'];
 
+export const COMPLETED_BOOKING_STATUSES: BookingStatus[] = ['COMPLETED'];
+
 export const bookingRefId = (bookingId: string) => {
 	const suffix = bookingId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase();
 	return `RPR-${suffix || '0000'}`;

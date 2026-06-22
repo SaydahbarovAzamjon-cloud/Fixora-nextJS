@@ -5,23 +5,29 @@ import { REACT_APP_API_URL } from '../config';
 import { sweetMixinErrorAlert } from '../sweetAlert';
 import { resolveArticleImageUrl } from '../utils/articleImage';
 
-const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/pjpeg'];
+const ACCEPTED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp'];
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export function formatFileSize(bytes: number): string {
-	if (bytes < 1024) return `${bytes} B`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-	return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
-
 export function validateCoverFile(file: File): string | null {
-	if (!ACCEPTED_TYPES.includes(file.type)) {
+	const type = file.type.toLowerCase();
+	const name = file.name.toLowerCase();
+	const typeOk =
+		(type && ACCEPTED_TYPES.includes(type)) ||
+		ACCEPTED_EXTENSIONS.some((ext) => name.endsWith(ext));
+	if (!typeOk) {
 		return 'invalidType';
 	}
 	if (file.size > MAX_BYTES) {
 		return 'tooLarge';
 	}
 	return null;
+}
+
+export function formatFileSize(bytes: number): string {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export interface CoverFileState {

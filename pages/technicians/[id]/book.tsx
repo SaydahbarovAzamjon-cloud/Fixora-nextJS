@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -11,6 +11,7 @@ import withLayoutFull from '../../../libs/components/layout/LayoutFull';
 import BookingForm from '../../../libs/components/booking/BookingForm';
 import { GET_USER } from '../../../apollo/user/query';
 import { TechnicianProfile } from '../../../libs/types/fixora/fixora';
+import { resolveTechnicianDeviceCategory } from '../../../libs/utils/technicianDeviceCategory';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -30,6 +31,14 @@ const TechnicianBookPage: NextPage = () => {
 	});
 
 	const technician: TechnicianProfile | null = userData?.getUser ?? null;
+	const technicianDeviceCategory = useMemo(
+		() =>
+			resolveTechnicianDeviceCategory({
+				specialty: technician?.specialty,
+				services: technician?.services,
+			}),
+		[technician?.specialty, technician?.services],
+	);
 
 	if (!id) return null;
 
@@ -45,7 +54,11 @@ const TechnicianBookPage: NextPage = () => {
 					{t('booking.title', { technician: technician?.shopName ?? technician?.userFullName ?? '' })}
 				</h1>
 
-				<BookingForm technicianId={id} technicianName={technician?.shopName ?? technician?.userFullName} />
+				<BookingForm
+					technicianId={id}
+					technicianName={technician?.shopName ?? technician?.userFullName}
+					technicianDeviceCategory={technicianDeviceCategory}
+				/>
 			</Stack>
 		</Stack>
 	);

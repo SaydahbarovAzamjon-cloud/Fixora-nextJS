@@ -101,15 +101,19 @@ const TechnicianCard = ({
 					}`}
 				>
 					<LocationOnOutlinedIcon fontSize="inherit" />
-					{locationLabel}
+					<span className="fixora-tech-card__meta-text">{locationLabel}</span>
 				</span>
 				<span className="fixora-tech-card__meta-row">
 					<WorkOutlineIcon fontSize="inherit" />
-					{t('homepage.technicians.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
+					<span className="fixora-tech-card__meta-text">
+						{t('homepage.technicians.jobsCompleted', { total: technician.completedJobsCount ?? 0 })}
+					</span>
 				</span>
 				<span className="fixora-tech-card__meta-row">
 					<GroupOutlinedIcon fontSize="inherit" />
-					{t('homepage.technicians.followers', { count: followersCount })}
+					<span className="fixora-tech-card__meta-text">
+						{t('homepage.technicians.followers', { count: followersCount })}
+					</span>
 				</span>
 			</div>
 

@@ -13,9 +13,15 @@ import { userVar } from '../../apollo/store';
 import { Notification } from '../../libs/types/fixora/fixora';
 import { FixoraButton } from '../../libs/components/ui';
 import NotificationSender from '../../libs/components/notifications/NotificationSender';
-import { NOTIFICATION_CATEGORY_ICONS, getNotificationCategory, getNotificationLink, getNotificationText } from '../../libs/utils/notifications';
-
-const SENDER_NOTIFICATION_TYPES = new Set(['BOOKING', 'FOLLOW', 'REVIEW', 'LIKE', 'COMMENT']);
+import NotificationVisualIcon from '../../libs/components/notifications/NotificationVisualIcon';
+import { GET_BOOKING } from '../../apollo/user/query';
+import {
+	getNotificationDisplayText,
+	getNotificationLink,
+	getNotificationVisualKind,
+	shouldShowNotificationSender,
+	filterCustomerNotifications,
+} from '../../libs/utils/notifications';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -24,6 +30,54 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 });
 
 const PAGE_SIZE = 20;
+
+const NotificationListItem = ({
+	notification,
+	onOpen,
+	onMarkRead,
+}: {
+	notification: Notification;
+	onOpen: () => void;
+	onMarkRead: () => void;
+}) => {
+	const { t } = useTranslation('common');
+	const { data } = useQuery(GET_BOOKING, {
+		skip: notification.referenceType !== 'BOOKING' || !notification.referenceId,
+		variables: { bookingId: notification.referenceId! },
+		fetchPolicy: 'cache-first',
+	});
+
+	const kind = getNotificationVisualKind(notification, data?.getBooking?.bookingStatus);
+	const text = getNotificationDisplayText(notification, kind, t);
+	const showSender = shouldShowNotificationSender(notification);
+
+	return (
+		<div className={`fixora-notifications__item ${!notification.isRead ? 'fixora-notifications__item--unread' : ''}`}>
+			<button type="button" className="fixora-notifications__item-main" onClick={onOpen}>
+				<NotificationVisualIcon
+					notification={notification}
+					bookingStatus={data?.getBooking?.bookingStatus}
+					className="fixora-notifications__icon"
+				/>
+				<span className="fixora-notifications__body">
+					{showSender && notification.userId && (
+						<NotificationSender userId={notification.userId} className="fixora-notifications__sender-row" />
+					)}
+					<span className="fixora-notifications__text">{text}</span>
+					<Moment fromNow className="fixora-notifications__time">
+						{notification.createdAt}
+					</Moment>
+				</span>
+				<ChevronRightIcon className="fixora-notifications__chevron" fontSize="small" />
+			</button>
+			{!notification.isRead && (
+				<button type="button" className="fixora-notifications__mark-read" title={t('notifications.markRead')} onClick={onMarkRead}>
+					<DoneIcon fontSize="small" />
+				</button>
+			)}
+		</div>
+	);
+};
 
 const NotificationsPage: NextPage = () => {
 	const { t } = useTranslation('common');
@@ -39,8 +93,7 @@ const NotificationsPage: NextPage = () => {
 		fetchPolicy: 'network-only',
 		onCompleted: (result) => {
 			if (page === 1) {
-				const list: Notification[] = result?.getNotifications?.list ?? [];
-				setNotifications(list.filter((n) => n.notificationType !== 'MESSAGE'));
+				setNotifications(filterCustomerNotifications(result?.getNotifications?.list ?? []));
 			}
 		},
 	});
@@ -91,8 +144,7 @@ const NotificationsPage: NextPage = () => {
 			variables: { input: { page: nextPage, limit: PAGE_SIZE, sort: 'createdAt', direction: 'DESC' } },
 		});
 		setPage(nextPage);
-		const list: Notification[] = result.data?.getNotifications?.list ?? [];
-		setNotifications((prev) => [...prev, ...list.filter((n) => n.notificationType !== 'MESSAGE')]);
+		setNotifications((prev) => [...prev, ...filterCustomerNotifications(result.data?.getNotifications?.list ?? [])]);
 	};
 
 	const { today, yesterday, earlier } = useMemo(() => {
@@ -118,41 +170,14 @@ const NotificationsPage: NextPage = () => {
 		return (
 			<div className="fixora-notifications__group">
 				<h3 className="fixora-notifications__group-title">{title}</h3>
-				{list.map((notification) => {
-					const Icon = NOTIFICATION_CATEGORY_ICONS[getNotificationCategory(notification)];
-					return (
-						<div
-							key={notification._id}
-							className={`fixora-notifications__item ${!notification.isRead ? 'fixora-notifications__item--unread' : ''}`}
-						>
-							<button type="button" className="fixora-notifications__item-main" onClick={() => openNotification(notification)}>
-								<span className="fixora-notifications__icon">
-									<Icon fontSize="small" />
-								</span>
-								<span className="fixora-notifications__body">
-									{notification.userId && SENDER_NOTIFICATION_TYPES.has(notification.notificationType) && (
-										<NotificationSender userId={notification.userId} className="fixora-notifications__sender-row" />
-									)}
-									<span className="fixora-notifications__text">{getNotificationText(notification, t)}</span>
-									<Moment fromNow className="fixora-notifications__time">
-										{notification.createdAt}
-									</Moment>
-								</span>
-								<ChevronRightIcon className="fixora-notifications__chevron" fontSize="small" />
-							</button>
-							{!notification.isRead && (
-								<button
-									type="button"
-									className="fixora-notifications__mark-read"
-									title={t('notifications.markRead')}
-									onClick={() => markAsRead(notification)}
-								>
-									<DoneIcon fontSize="small" />
-								</button>
-							)}
-						</div>
-					);
-				})}
+				{list.map((notification) => (
+					<NotificationListItem
+						key={notification._id}
+						notification={notification}
+						onOpen={() => openNotification(notification)}
+						onMarkRead={() => markAsRead(notification)}
+					/>
+				))}
 			</div>
 		);
 	};

@@ -1,5 +1,15 @@
 /** Shared dark card surface — homepage hero, technicians, testimonials */
 
+/// Children that claim hover/focus so the parent card surface stays passive.
+$fixora-card-interactive-children: 'input:not([type="hidden"]), textarea, select, button, a, label, [role="button"], [tabindex]:not([tabindex="-1"]), .fixora-btn, .fixora-input, .fixora-select, .fixora-kakao-btn, .fixora-input__field, .fixora-select__wrap, .fixora-booking__device-option, .fixora-booking__device-image-drop, .MuiButtonBase-root';
+
+/// Card hover only on passive areas — not while a child input/button/link is hovered or focused.
+@mixin fixora-card-hover-passive {
+	&:hover:not(:focus-within):not(:has(:is(#{$fixora-card-interactive-children}):hover)) {
+		@content;
+	}
+}
+
 @mixin fixora-home-card-surface {
 	background: var(--fixora-card-gradient);
 	border: 1px solid var(--fixora-border);
@@ -12,7 +22,7 @@
 		box-shadow 0.2s ease,
 		transform 0.2s ease;
 
-	&:hover {
+	@include fixora-card-hover-passive {
 		background: var(--fixora-card-gradient-hover);
 		box-shadow:
 			inset 0 1px 0 rgba(255, 255, 255, 0.05),

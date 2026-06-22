@@ -107,6 +107,187 @@
 	grid-column: 1 / -1;
 }
 
+.fixora-booking__device-image {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.fixora-booking__card--device-images {
+	margin-top: 0;
+}
+
+.fixora-booking__device-image-input {
+	display: none;
+}
+
+.fixora-booking__device-image-grid {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.fixora-booking__device-image-drop {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	border-radius: 12px;
+	border: 1px dashed var(--fixora-border-subtle);
+	background: rgba(0, 0, 0, 0.15);
+	color: var(--fixora-text-secondary);
+	font-family: $font;
+	font-size: 14px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		background: rgba(115, 12, 30, 0.08);
+		color: var(--fixora-text-primary);
+	}
+
+	&--tile {
+		flex-direction: column;
+		width: 120px;
+		height: 120px;
+		padding: 12px;
+		text-align: center;
+
+		span {
+			font-size: 12px;
+			line-height: 1.35;
+		}
+	}
+
+	&:not(&--tile) {
+		width: 100%;
+		padding: 20px 16px;
+	}
+}
+
+.fixora-booking__device-image-preview {
+	position: relative;
+	flex: 0 0 auto;
+	width: 120px;
+	height: 120px;
+	overflow: hidden;
+	border-radius: 12px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: rgba(0, 0, 0, 0.25);
+
+	&--saved {
+		.fixora-booking__device-image-preview-btn {
+			cursor: zoom-in;
+		}
+	}
+}
+
+.fixora-booking__device-image-preview-btn {
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: zoom-in;
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		pointer-events: none;
+	}
+}
+
+.fixora-booking__device-image-replace {
+	position: absolute;
+	bottom: 8px;
+	left: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	cursor: pointer;
+	font-size: 16px;
+
+	&:hover {
+		background: rgba(115, 12, 30, 0.9);
+	}
+}
+
+.fixora-booking__device-image-remove {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(115, 12, 30, 0.9);
+	}
+}
+
+.fixora-booking__image-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 1400;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	background: rgba(0, 0, 0, 0.82);
+	backdrop-filter: blur(4px);
+}
+
+.fixora-booking__image-lightbox-close {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border: none;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(115, 12, 30, 0.85);
+	}
+}
+
+.fixora-booking__image-lightbox-body {
+	max-width: min(920px, 100%);
+	max-height: min(80vh, 100%);
+
+	img {
+		display: block;
+		max-width: 100%;
+		max-height: min(80vh, 100%);
+		border-radius: 12px;
+		object-fit: contain;
+	}
+}
+
 .fixora-booking__type-options {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
@@ -253,6 +434,13 @@
 .fixora-booking__text--muted {
 	color: var(--fixora-text-muted, #6b6b6b);
 	font-size: 13px;
+}
+
+.fixora-booking__category-locked {
+	.fixora-input__control {
+		color: var(--fixora-text-secondary);
+		cursor: default;
+	}
 }
 
 .fixora-booking__link {

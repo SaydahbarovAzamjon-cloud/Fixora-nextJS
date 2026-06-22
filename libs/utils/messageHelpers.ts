@@ -1,26 +1,96 @@
 import { bookingRefId } from '../components/mypage/fixora/myPageHelpers';
-import { Conversation, Message } from '../types/fixora/fixora';
+import { Booking, Conversation, Message } from '../types/fixora/fixora';
 
 export { bookingRefId };
 
-export const dedupeConversationsByPeer = (conversations: Conversation[]): Conversation[] => {
-	const grouped = new Map<string, Conversation>();
-	conversations.forEach((conv) => {
-		const existing = grouped.get(conv.peerId);
-		if (!existing) {
-			grouped.set(conv.peerId, { ...conv });
-			return;
-		}
-		const existingTime = new Date(existing.updatedAt || 0).getTime();
-		const currentTime = new Date(conv.updatedAt || 0).getTime();
-		const newest = currentTime > existingTime ? conv : existing;
-		grouped.set(conv.peerId, {
-			...newest,
-			unreadCount: (existing.unreadCount ?? 0) + (conv.unreadCount ?? 0),
-		});
-	});
-	return Array.from(grouped.values()).sort(
+const ACTIVE_BOOKING_STATUSES: Booking['bookingStatus'][] = [
+	'PENDING',
+	'ACCEPTED',
+	'IN_PROGRESS',
+	'COMPLETED',
+];
+
+const mergePeerConversations = (list: Conversation[]): Conversation => {
+	const sorted = [...list].sort(
 		(a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime(),
+	);
+	const newest = sorted[0];
+	const bookingId = resolvePeerBookingId(newest.peerId, list);
+	const bookingSource = sorted.find((conv) => conv.bookingId === bookingId) ?? newest;
+
+	return {
+		...newest,
+		bookingId,
+		bookingStatus: bookingSource.bookingStatus ?? newest.bookingStatus ?? null,
+		unreadCount: list.reduce((sum, conv) => sum + (conv.unreadCount ?? 0), 0),
+	};
+};
+
+export const dedupeConversationsByPeer = (conversations: Conversation[]): Conversation[] => {
+	const grouped = new Map<string, Conversation[]>();
+	conversations.forEach((conv) => {
+		const list = grouped.get(conv.peerId) ?? [];
+		list.push(conv);
+		grouped.set(conv.peerId, list);
+	});
+
+	return Array.from(grouped.values())
+		.map((list) => mergePeerConversations(list))
+		.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
+};
+
+/** Resolve the best booking id for a peer from raw or deduped conversation rows. */
+export const resolvePeerBookingId = (
+	peerId: string | null | undefined,
+	conversations: Conversation[],
+	preferredBookingId?: string | null,
+): string | null => {
+	if (!peerId) return null;
+	if (preferredBookingId) return preferredBookingId;
+
+	const peerConversations = conversations.filter((conv) => conv.peerId === peerId);
+	const candidates = new Map<string, string>();
+
+	peerConversations.forEach((conv) => {
+		if (conv.bookingId) {
+			candidates.set(conv.bookingId, conv.updatedAt || conv.lastMessage?.createdAt || '');
+		}
+		if (conv.lastMessage?.bookingId) {
+			candidates.set(
+				conv.lastMessage.bookingId,
+				conv.lastMessage.createdAt || conv.updatedAt || '',
+			);
+		}
+	});
+
+	if (candidates.size === 0) return null;
+
+	return [...candidates.entries()].sort(
+		(a, b) => new Date(b[1]).getTime() - new Date(a[1]).getTime(),
+	)[0][0];
+};
+
+export const resolveBookingForPeer = (
+	peerId: string | null | undefined,
+	conversations: Conversation[],
+	bookings: Booking[],
+	preferredBookingId?: string | null,
+): Booking | null => {
+	const bookingId = resolvePeerBookingId(peerId, conversations, preferredBookingId);
+	if (bookingId) {
+		return bookings.find((booking) => booking._id === bookingId) ?? null;
+	}
+
+	if (!peerId) return null;
+
+	const technicianBookings = bookings
+		.filter((booking) => booking.technicianId === peerId)
+		.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+	return (
+		technicianBookings.find((booking) => ACTIVE_BOOKING_STATUSES.includes(booking.bookingStatus)) ??
+		technicianBookings[0] ??
+		null
 	);
 };
 

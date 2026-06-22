@@ -1,6 +1,7 @@
 /** IMPORTS **/
 @import 'variables.scss';
 @import 'fixora-technician-theme-preserve.scss';
+@import 'pc/fixora-scrollbar.scss';
 @import 'reset.scss';
 @import 'fixora-ui.scss';
 @import 'fixora-swal.scss';
@@ -44,20 +45,7 @@ body {
 	background-attachment: fixed;
 	background-color: var(--fixora-bg);
 	color: var(--fixora-text-primary);
-
-	&::-webkit-scrollbar {
-		width: 9px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		height: 30%;
-		background: var(--fixora-text-muted);
-		border-radius: 10px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: var(--fixora-surface);
-	}
+	@include fixora-scrollbar;
 
 	.MuiPopover-paper {
 		box-shadow: none;

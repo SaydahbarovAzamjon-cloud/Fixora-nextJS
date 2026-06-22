@@ -15,7 +15,8 @@ import { Booking, Conversation, ConversationPeer } from '../../libs/types/fixora
 import { sweetErrorHandling } from '../../libs/sweetAlert';
 import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
 import usePeerMessages from '../../libs/hooks/usePeerMessages';
-import { dedupeConversationsByPeer } from '../../libs/utils/messageHelpers';
+import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
+import { dedupeConversationsByPeer, resolvePeerBookingId } from '../../libs/utils/messageHelpers';
 import { fileToDataUrl } from '../../libs/utils/compressMessageImage';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -46,6 +47,16 @@ const MessagesPage: NextPage = () => {
 		pollInterval: conversationsPollMs,
 	});
 
+	const { data: myBookingsData, loading: myBookingsLoading } = useQuery(GET_MY_BOOKINGS, {
+		skip: !user?._id,
+		variables: {
+			input: { page: 1, limit: 50, sort: 'createdAt', direction: 'DESC', search: {} },
+		},
+		fetchPolicy: 'cache-first',
+	});
+
+	const myBookings: Booking[] = myBookingsData?.getMyBookings?.list ?? [];
+
 	const rawConversations: Conversation[] = conversationsData?.getMyConversations?.list ?? [];
 	const conversations = useMemo(() => dedupeConversationsByPeer(rawConversations), [rawConversations]);
 
@@ -54,7 +65,26 @@ const MessagesPage: NextPage = () => {
 		[conversations, selected?.peerId],
 	);
 
-	const activeBookingId = activeConversation?.bookingId ?? selected?.bookingId ?? null;
+	const activeBookingId = useMemo(() => {
+		if (!selected?.peerId) return null;
+
+		const fromConversations = resolvePeerBookingId(
+			selected.peerId,
+			rawConversations,
+			selected.bookingId ?? activeConversation?.bookingId,
+		);
+		if (fromConversations) return fromConversations;
+
+		const technicianBookings = myBookings
+			.filter((booking) => booking.technicianId === selected.peerId)
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+		const activeMatch = technicianBookings.find((booking) =>
+			['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED'].includes(booking.bookingStatus),
+		);
+
+		return activeMatch?._id ?? technicianBookings[0]?._id ?? null;
+	}, [selected, rawConversations, activeConversation?.bookingId, myBookings]);
 
 	const { data: peerData } = useQuery(GET_USER, {
 		skip: !selected?.peerId,
@@ -85,7 +115,27 @@ const MessagesPage: NextPage = () => {
 
 	/** Cache booking summaries for conversation list device labels */
 	useEffect(() => {
-		const ids = [...new Set(conversations.map((c) => c.bookingId).filter(Boolean))] as string[];
+		if (myBookings.length) {
+			setBookingMeta((prev) => {
+				const next = { ...prev };
+				myBookings.forEach((booking) => {
+					if (!next[booking._id]) next[booking._id] = booking;
+				});
+				return next;
+			});
+		}
+	}, [myBookings]);
+
+	useEffect(() => {
+		const ids = [
+			...new Set(
+				conversations
+					.map((conversation) =>
+						resolvePeerBookingId(conversation.peerId, rawConversations, conversation.bookingId),
+					)
+					.filter(Boolean),
+			),
+		] as string[];
 		const missing = ids.filter((id) => !fetchedBookingIds.current.has(id));
 		if (!missing.length) return;
 
@@ -128,13 +178,16 @@ const MessagesPage: NextPage = () => {
 
 	useEffect(() => {
 		if (queryPeerId) {
-			setSelected({ peerId: queryPeerId, bookingId: queryBookingId ?? null });
+			const bookingId = resolvePeerBookingId(queryPeerId, rawConversations, queryBookingId ?? null);
+			setSelected({ peerId: queryPeerId, bookingId });
 			return;
 		}
 		if (!selected && conversations.length > 0) {
-			setSelected({ peerId: conversations[0].peerId, bookingId: conversations[0].bookingId ?? null });
+			const first = conversations[0];
+			const bookingId = resolvePeerBookingId(first.peerId, rawConversations, first.bookingId);
+			setSelected({ peerId: first.peerId, bookingId });
 		}
-	}, [queryPeerId, queryBookingId, conversations, selected]);
+	}, [queryPeerId, queryBookingId, conversations, rawConversations, selected]);
 
 	useEffect(() => {
 		if (!selected?.peerId || !user?._id) return;
@@ -150,7 +203,8 @@ const MessagesPage: NextPage = () => {
 
 	/** HANDLERS **/
 	const selectConversation = (conversation: Conversation) => {
-		setSelected({ peerId: conversation.peerId, bookingId: conversation.bookingId ?? null });
+		const bookingId = resolvePeerBookingId(conversation.peerId, rawConversations, conversation.bookingId);
+		setSelected({ peerId: conversation.peerId, bookingId });
 	};
 
 	const sendHandler = async ({ text, imageFile }: SendMessagePayload) => {
@@ -218,7 +272,7 @@ const MessagesPage: NextPage = () => {
 					booking={booking}
 					device={device}
 					technician={activePeer}
-					loading={activeBookingId ? bookingLoading : false}
+					loading={!!activeBookingId && (bookingLoading || myBookingsLoading)}
 				/>
 			</div>
 		</div>

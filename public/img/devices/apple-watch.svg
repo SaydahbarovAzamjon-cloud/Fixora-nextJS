@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" fill="none">
+  <defs>
+    <linearGradient id="watchGrad" x1="50" y1="30" x2="150" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3a1018"/>
+      <stop offset="0.5" stop-color="#5a0818"/>
+      <stop offset="1" stop-color="#2a0a12"/>
+    </linearGradient>
+  </defs>
+  <rect x="68" y="8" width="64" height="36" rx="12" fill="#2a0a12" stroke="#9a2a3a" stroke-width="2"/>
+  <rect x="68" y="236" width="64" height="36" rx="12" fill="#2a0a12" stroke="#9a2a3a" stroke-width="2"/>
+  <rect x="52" y="44" width="96" height="192" rx="28" fill="url(#watchGrad)" stroke="#9a2a3a" stroke-width="3"/>
+  <rect x="68" y="72" width="64" height="136" rx="16" fill="#12080c" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <rect x="88" y="56" width="24" height="8" rx="4" fill="#1a1a1a"/>
+</svg>

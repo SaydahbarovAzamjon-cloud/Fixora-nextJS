@@ -45,13 +45,7 @@ const HomepageStoriesCarousel = () => {
 	return (
 		<section className="fixora-home-stories">
 			<div className="container">
-				<div className="fixora-home-stories__head">
-					<h2 className="fixora-home-stories__title">{t('story.title')}</h2>
-					<span className="fixora-home-stories__live">
-						<span className="fixora-home-stories__live-dot" />
-						{t('story.livePortfolio')}
-					</span>
-				</div>
+				<h2 className="fixora-home-stories__title">{t('story.title')}</h2>
 
 				<div className="fixora-home-stories__row">
 					{groups.map((group, groupIndex) => {

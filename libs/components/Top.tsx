@@ -19,7 +19,7 @@ import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute'
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
-import { getNotificationLink } from '../utils/notifications';
+import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
 import NotificationDropdown from './notifications/NotificationDropdown';
 import NavSearchInput from './nav/NavSearchInput';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
@@ -61,12 +61,14 @@ const Top = () => {
 		pollInterval: navPollMs,
 	});
 
-	// Messages have their own icon + badge, so they're excluded from the notification bell.
-	const recentNotifications: Notification[] = (notificationsData?.getNotifications?.list ?? [])
-		.filter((n: Notification) => n.notificationType !== 'MESSAGE')
-		.slice(0, 8);
-	const unreadNotifications: number = (unreadCountData?.getNotifications?.list ?? []).filter(
-		(n: Notification) => n.notificationType !== 'MESSAGE',
+	// Messages → chat icon. Customers → booking notifications only (no like/follow/comment).
+	const recentNotifications: Notification[] = filterNavbarNotifications(
+		notificationsData?.getNotifications?.list ?? [],
+		isTechnician,
+	).slice(0, 8);
+	const unreadNotifications: number = filterNavbarNotifications(
+		unreadCountData?.getNotifications?.list ?? [],
+		isTechnician,
 	).length;
 
 	const unreadMessages: number = (conversationsData?.getMyConversations?.list ?? []).reduce(

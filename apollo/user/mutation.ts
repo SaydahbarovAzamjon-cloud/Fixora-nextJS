@@ -369,6 +369,16 @@ export const CREATE_DEVICE = gql`
 	}
 `;
 
+export const UPDATE_DEVICE = gql`
+	mutation UpdateDevice($input: DeviceUpdate!) {
+		updateDevice(input: $input) {
+			_id
+			deviceImage
+			updatedAt
+		}
+	}
+`;
+
 export const CREATE_BOOKING = gql`
 	mutation CreateBooking($input: BookingInput!) {
 		createBooking(input: $input) {

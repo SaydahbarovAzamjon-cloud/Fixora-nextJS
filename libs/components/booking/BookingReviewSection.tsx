@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { CREATE_REVIEW } from '../../../apollo/user/mutation';
 import { GET_BOOKING_REVIEW } from '../../../apollo/user/query';
 import { FixoraButton, FixoraGlassCard } from '../ui';
@@ -21,9 +22,9 @@ const RATING_FIELDS: RatingField[] = ['communication', 'repairQuality', 'repairS
 
 const BookingReviewSection = ({ bookingId, bookingStatus, existingReview, onSubmitted }: BookingReviewSectionProps) => {
 	const { t } = useTranslation('common');
-	const [communication, setCommunication] = useState(5);
-	const [repairQuality, setRepairQuality] = useState(5);
-	const [repairSpeed, setRepairSpeed] = useState(5);
+	const [communication, setCommunication] = useState(0);
+	const [repairQuality, setRepairQuality] = useState(0);
+	const [repairSpeed, setRepairSpeed] = useState(0);
 	const [reviewContent, setReviewContent] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [createReview] = useMutation(CREATE_REVIEW);
@@ -56,8 +57,10 @@ const BookingReviewSection = ({ bookingId, bookingStatus, existingReview, onSubm
 	};
 
 	const ratings: Record<RatingField, number> = { communication, repairQuality, repairSpeed };
+	const canSubmit = communication > 0 && repairQuality > 0 && repairSpeed > 0;
 
 	const handleSubmit = async () => {
+		if (!canSubmit) return;
 		setLoading(true);
 		try {
 			await createReview({
@@ -91,17 +94,21 @@ const BookingReviewSection = ({ bookingId, bookingStatus, existingReview, onSubm
 				<div key={field} className="fixora-booking-detail__rating-field">
 					<span>{t(`review.booking.${field}`)}</span>
 					<div className="fixora-booking-detail__stars" role="group" aria-label={t(`review.booking.${field}`)}>
-						{[1, 2, 3, 4, 5].map((star) => (
-							<button
-								key={star}
-								type="button"
-								className={`fixora-booking-detail__star${ratings[field] >= star ? ' fixora-booking-detail__star--active' : ''}`}
-								onClick={() => setRating(field, star)}
-								aria-label={`${star}`}
-							>
-								<StarIcon fontSize="small" />
-							</button>
-						))}
+						{[1, 2, 3, 4, 5].map((star) => {
+							const active = ratings[field] >= star;
+							return (
+								<button
+									key={star}
+									type="button"
+									className={`fixora-booking-detail__star${active ? ' fixora-booking-detail__star--active' : ''}`}
+									onClick={() => setRating(field, star)}
+									aria-label={`${star}`}
+									aria-pressed={active}
+								>
+									{active ? <StarIcon fontSize="inherit" /> : <StarBorderIcon fontSize="inherit" />}
+								</button>
+							);
+						})}
 					</div>
 				</div>
 			))}
@@ -118,7 +125,7 @@ const BookingReviewSection = ({ bookingId, bookingStatus, existingReview, onSubm
 				rows={3}
 			/>
 
-			<FixoraButton variant="primary" disabled={loading} onClick={handleSubmit}>
+			<FixoraButton variant="primary" disabled={loading || !canSubmit} onClick={handleSubmit}>
 				{t('review.booking.submit')}
 			</FixoraButton>
 		</FixoraGlassCard>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" fill="none">
+  <defs>
+    <linearGradient id="iphoneGrad" x1="40" y1="20" x2="160" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3a1018"/>
+      <stop offset="0.5" stop-color="#5a0818"/>
+      <stop offset="1" stop-color="#2a0a12"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="16" width="128" height="368" rx="28" fill="url(#iphoneGrad)" stroke="#9a2a3a" stroke-width="3"/>
+  <rect x="72" y="34" width="56" height="12" rx="6" fill="#1a1a1a"/>
+  <rect x="52" y="72" width="96" height="256" rx="8" fill="#12080c" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <circle cx="100" cy="352" r="10" fill="#1a1a1a" stroke="#9a2a3a" stroke-width="2"/>
+</svg>

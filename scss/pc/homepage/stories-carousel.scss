@@ -1,7 +1,18 @@
 .fixora-home-stories {
 	padding: 28px 0 8px;
 
+	.container {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		width: 1200px;
+		max-width: calc(100% - 40px);
+		margin: 0 auto;
+	}
+
 	&__title {
+		display: block;
+		width: 100%;
 		margin: 0 0 16px;
 		font-size: 18px;
 		font-weight: 700;
@@ -11,7 +22,11 @@
 
 	&__row {
 		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: flex-start;
 		gap: 18px;
+		width: 100%;
 		overflow-x: auto;
 		padding-bottom: 8px;
 		scrollbar-width: thin;
@@ -27,12 +42,27 @@
 	}
 
 	.fixora-pp-story {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		flex: 0 0 auto;
+		width: 76px;
+		gap: 10px;
+	}
+
+	.fixora-pp-story__ring {
+		width: 64px;
+		height: 64px;
 	}
 
 	.fixora-pp-story__label {
 		color: var(--fixora-text-secondary);
 		font-size: 12px;
 		font-weight: 500;
+		text-align: center;
+		max-width: 72px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }

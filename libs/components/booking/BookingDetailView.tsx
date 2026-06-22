@@ -11,7 +11,7 @@ import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import { useQuery } from '@apollo/client';
-import { GET_USER } from '../../../apollo/user/query';
+import { GET_DEVICE, GET_USER } from '../../../apollo/user/query';
 import { GET_BOOKING_PAYMENTS } from '../../../apollo/user/payment';
 import { isDepositPaid, isFinalPaid } from '../../hooks/useBookingPayment';
 import { formatKrw } from '../../utils/formatCurrency';
@@ -60,7 +60,12 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 	const technician = technicianData?.getUser;
 	const technicianName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
 
-	const device: Device | undefined = booking.deviceData;
+	const { data: deviceFallbackData } = useQuery(GET_DEVICE, {
+		variables: { deviceId: booking.deviceId },
+		fetchPolicy: 'cache-first',
+		skip: !!booking.deviceData || !booking.deviceId,
+	});
+	const device: Device | undefined = (booking.deviceData as Device | undefined) ?? (deviceFallbackData?.getDevice as Device | undefined);
 	const title = device
 		? `${t(`booking.device.categories.${device.deviceCategory}`)} ${device.deviceModel}`
 		: booking.problemTitle;
@@ -73,6 +78,12 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 			.map((path) => resolveDeviceImageUrl(path))
 			.filter((url): url is string => !!url);
 	}, [device?.deviceImage]);
+
+	const heroPhotoUrl = customerPhotoUrls[0] ?? null;
+	const galleryPhotoUrls = useMemo(() => {
+		if (customerPhotoUrls.length <= 1) return customerPhotoUrls;
+		return customerPhotoUrls.slice(1);
+	}, [customerPhotoUrls]);
 
 	const price = booking.finalPrice ?? booking.estimatedPrice;
 	const depositPaid = isDepositPaid(payments, booking.isPaid);
@@ -139,7 +150,11 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 
 			<section className="fixora-booking-detail__hero">
 				<div className="fixora-booking-detail__hero-device">
-					<BookingDeviceCategoryVisual category={device?.deviceCategory} size={80} />
+					{heroPhotoUrl ? (
+						<img src={heroPhotoUrl} alt="" className="fixora-booking-detail__hero-device-img" />
+					) : (
+						<BookingDeviceCategoryVisual category={device?.deviceCategory} size={80} />
+					)}
 				</div>
 				<div className="fixora-booking-detail__hero-body">
 					<div className="fixora-booking-detail__hero-title-row">
@@ -262,7 +277,7 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 				<section className="fixora-booking-detail__card fixora-booking-detail__card--device">
 					<h2>{t('booking.detail.device')}</h2>
 					<div className="fixora-booking-detail__device-showcase">
-						<BookingCustomerPhotos imageUrls={customerPhotoUrls} variant="embedded" />
+						<BookingCustomerPhotos imageUrls={galleryPhotoUrls} variant="embedded" />
 					</div>
 					{device && (
 						<p className="fixora-booking-detail__device-caption">

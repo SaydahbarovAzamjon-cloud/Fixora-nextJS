@@ -104,19 +104,16 @@ const SettingsPage: React.FC = () => {
 						<AccountSettingsSection
 							user={settingsUser}
 							nickname={nickname}
+							email={profileForm.email}
 							onNicknameChange={setNickname}
+							onEmailChange={(v) => patchProfile({ email: v })}
 							onSave={saveAccount}
 							saving={saving}
 						/>
 					)}
 					{activeSection === 'notifications' && <NotificationsSettingsSection />}
 					{activeSection === 'security' && (
-						<SecuritySettingsSection
-							onSavePassword={savePassword}
-							saving={saving}
-							userEmail={settingsUser?.userEmail}
-							userPhone={settingsUser?.userPhoneNumber}
-						/>
+						<SecuritySettingsSection onSavePassword={savePassword} saving={saving} />
 					)}
 					{activeSection === 'payment' && <PaymentMethodsSection />}
 					{activeSection === 'availability' && (

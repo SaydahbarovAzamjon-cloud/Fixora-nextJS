@@ -8,7 +8,7 @@ import HelpOutlineOutlined from '@mui/icons-material/HelpOutlineOutlined';
 import { userVar } from '../../../../apollo/store';
 import { GET_ARTICLE } from '../../../../apollo/user/article';
 import { sweetMixinErrorAlert } from '../../../sweetAlert';
-import { articleCategoryToRepairCategory } from '../../../utils/articleCategoryMap';
+import { articleCategoryToRepairCategory, deviceCategoryToRepairCategory } from '../../../utils/articleCategoryMap';
 import { useArticleCoverUpload } from '../../../hooks/useArticleCoverUpload';
 import { useWriteArticleForm } from '../../../hooks/useWriteArticleForm';
 import WriteArticleHeader from './WriteArticleHeader';
@@ -75,8 +75,23 @@ const WriteArticlePage: React.FC = () => {
 			title: article.articleTitle ?? '',
 			excerpt: article.articleExcerpt ?? '',
 			content: article.articleContent ?? '',
-			categoryId: articleCategoryToRepairCategory(article.articleCategory),
-			pubMode: article.articleStatus === 'DRAFT' ? 'draft' : 'publish',
+			categoryId: article.repairDeviceCategory
+				? deviceCategoryToRepairCategory(article.repairDeviceCategory)
+				: articleCategoryToRepairCategory(article.articleCategory),
+			metaTitle: article.seoTitle ?? '',
+			metaDescription: article.seoDescription ?? '',
+			keywords: article.seoKeywords ?? '',
+			featured: article.isFeatured ?? false,
+			allowComments: article.allowComments ?? true,
+			visibility: article.articleVisibility === 'TECHNICIANS_ONLY' ? 'technicians' : 'public',
+			pubMode: article.scheduledPublishAt
+				? 'schedule'
+				: article.articleStatus === 'DRAFT'
+					? 'draft'
+					: 'publish',
+			scheduledAt: article.scheduledPublishAt
+				? new Date(article.scheduledPublishAt).toISOString().slice(0, 16)
+				: '',
 		});
 		if (article.articleImage) {
 			coverUpload.setExistingImage(article.articleImage);
@@ -191,10 +206,12 @@ const WriteArticlePage: React.FC = () => {
 						visibility={form.visibility}
 						featured={form.featured}
 						allowComments={form.allowComments}
+						scheduledAt={form.scheduledAt}
 						onPubMode={(pubMode) => patch({ pubMode })}
 						onVisibility={(visibility) => patch({ visibility })}
 						onFeatured={(featured) => patch({ featured })}
 						onAllowComments={(allowComments) => patch({ allowComments })}
+						onScheduledAt={(scheduledAt) => patch({ scheduledAt })}
 					/>
 				</div>
 			</div>

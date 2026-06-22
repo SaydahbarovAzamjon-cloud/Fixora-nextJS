@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-21 |
+| **Last updated** | 2026-06-22 |
 | **Last agent** | Cursor |
-| **Last session** | `/technicians` discovery redesign — 6 Swiper carousels (`TechnicianCard` + optional Follow), `useTechniciansDiscovery` + `technicianDiscoverySections.ts`; removed search/map clone from technicians page. GAP-100/099 documented for trending/fast-responder proxies. |
-| **Next agent should start with** | User-driven UI changes — **backend gaps deferred**; PM-01+ when user approves mobile |
+| **Last session** | **Backend wiring Phase 0–4** — synced FixoraB docs; wired admin (GAP-071…077), earnings/payout, analytics/schedule, discovery/articles, messages/notifications/settings/social; removed mock/workaround layers per `FIXORAF_SYNC.md`. |
+| **Next agent should start with** | **PM-01** mobile foundation OR desktop QA pass with FixoraB running |
 
 ---
 
@@ -41,7 +41,8 @@
 | `docs/design/auth/` | `auth-login-signup-hifi.png`, `auth-flow-wireframe.png` |
 | `docs/design/customer/` | `homepage.png`, `customer-pages-full.png` |
 | `docs/design/technician/` | `technician-dashboard-full.png` |
-| `docs/design/admin/` | TBD — see `admin/README.md` |
+| `docs/design/admin/` | Reference screenshots implemented — see `admin/README.md` |
+| Admin console (P3-15) | ✅ `/_admin/*` — dashboard, verification, users, bookings, payments, devices, moderation, settings |
 
 ---
 

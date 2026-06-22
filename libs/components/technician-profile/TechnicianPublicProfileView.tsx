@@ -155,7 +155,8 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	});
 	const reviews: TechnicianReview[] = (reviewsData as T)?.getTechnicianReviews?.list ?? [];
 	const distribution: { star: number; count: number }[] = (reviewsData as T)?.getTechnicianReviews?.distribution ?? [];
-	const reviewsTotal: number = (reviewsData as T)?.getTechnicianReviews?.metaCounter?.[0]?.total ?? reviews.length;
+	const reviewsFromQuery: number = (reviewsData as T)?.getTechnicianReviews?.metaCounter?.[0]?.total ?? reviews.length;
+	const reviewsTotal = profile?.reviewCount ?? reviewsFromQuery;
 
 	const { data: followersData } = useQuery(GET_USER_FOLLOWERS, {
 		variables: { input: { page: 1, limit: 24, search: { followingId: technicianId ?? '' } } },
@@ -183,6 +184,10 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	const location = profile?.userLocation || '';
 	const rating = profile?.averageRating ?? 0;
 	const completed = profile?.completedJobsCount ?? 0;
+	const responseDisplay =
+		profile?.avgResponseMinutes != null
+			? t('technicianProfile.pp.stat.responseValueMinutes', { minutes: Math.round(profile.avgResponseMinutes) })
+			: t('technicianProfile.pp.stat.responseValue');
 	const isOnline = profile?.isOnline === true;
 	const isVerified = profile?.isVerified === true;
 	const bio = profile?.userBio;
@@ -356,7 +361,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 								<div className="fixora-pp-stat__label">
 									<AccessTimeOutlined style={{ fontSize: 14, color: '#A855F7' }} /> {t('technicianProfile.pp.stat.response')}
 								</div>
-								<div className="fixora-pp-stat__value">{t('technicianProfile.pp.stat.responseValue')}</div>
+								<div className="fixora-pp-stat__value">{responseDisplay}</div>
 							</div>
 						</div>
 					</div>
@@ -439,6 +444,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 											article={article}
 											onLike={handleArticleLike}
 											likePending={likePendingId === article._id}
+											userId={authUser?._id}
 										/>
 									))}
 								</div>

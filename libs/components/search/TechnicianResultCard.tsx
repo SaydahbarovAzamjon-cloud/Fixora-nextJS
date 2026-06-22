@@ -14,6 +14,7 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { TechnicianSummary } from '../../types/fixora/fixora';
 import { userVar } from '../../../apollo/store';
 import { formatKrwNumber } from '../../utils/formatCurrency';
+import { FAST_RESPONDER_MAX_MINUTES } from '../../utils/technicianDiscoverySections';
 import {
 	getTechnicianDisplayName,
 	getTechnicianOwnerSubtitle,
@@ -36,6 +37,9 @@ const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 const getBadgeTag = (technician: TechnicianSummary): (typeof BADGE_TAGS)[number] => {
 	if ((technician.averageRating ?? 0) >= 4.8) return 'topRated';
 	if ((technician.reviewCount ?? 0) >= 50) return 'greatReviews';
+	if (technician.avgResponseMinutes != null && technician.avgResponseMinutes <= FAST_RESPONDER_MAX_MINUTES) {
+		return 'fastResponder';
+	}
 	return (technician.completedJobsCount ?? 0) % 2 === 0 ? 'fastResponder' : 'affordable';
 };
 
@@ -58,6 +62,10 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 		: technician.specialty;
 	const badgeTag = getBadgeTag(technician);
 	const distance = getDistance(technician._id);
+	const responseLabel =
+		technician.avgResponseMinutes != null
+			? t('search.results.responseTimeMinutes', { minutes: Math.round(technician.avgResponseMinutes) })
+			: t('search.results.responseTime');
 	const isSelf = !!user?._id && user._id === technician._id;
 	const avatarSrc = resolveProfileImageUrl(technician.userProfileImage);
 
@@ -159,7 +167,7 @@ const TechnicianResultCard = ({ technician, view, favorited, following, onToggle
 							{t('search.results.fromPrice', { price: formatKrwNumber(fromPrice) })}
 						</span>
 					)}
-					<span className="fixora-result-card__response">{t('search.results.responseTime')}</span>
+					<span className="fixora-result-card__response">{responseLabel}</span>
 				</div>
 			)}
 		</Link>

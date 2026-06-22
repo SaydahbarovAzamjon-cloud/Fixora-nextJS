@@ -1,6 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
+import { useMutation } from '@apollo/client';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -8,27 +9,37 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
+import { SAVE_ARTICLE, UNSAVE_ARTICLE } from '../../../apollo/user/article';
 import { Article } from '../../types/fixora/fixora';
 import { resolveArticleImageUrl } from '../../utils/articleImage';
-import { isArticleSaved, toggleSavedArticle } from '../../utils/savedArticles';
+import { sweetErrorHandling } from '../../sweetAlert';
 
 interface ProfileArticleCardProps {
 	article: Article;
 	onLike: (articleId: string) => void;
 	likePending?: boolean;
+	userId?: string;
 }
 
 const formatCount = (value: number): string =>
 	value >= 1000 ? `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k` : `${value}`;
 
-const ProfileArticleCard = ({ article, onLike, likePending = false }: ProfileArticleCardProps) => {
+const ProfileArticleCard = ({ article, onLike, likePending = false, userId }: ProfileArticleCardProps) => {
 	const { t } = useTranslation('common');
 	const detailHref = `/community/${article._id}`;
 	const coverUrl = resolveArticleImageUrl(article.articleImage);
 	const [imgFailed, setImgFailed] = useState(false);
-	const [saved, setSaved] = useState(() => isArticleSaved(article._id));
+	const [saved, setSaved] = useState(() => article.meSaved?.[0]?.mySaved ?? false);
+	const [savePending, setSavePending] = useState(false);
 	const showCover = !!coverUrl && !imgFailed;
 	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
+
+	const [saveArticle] = useMutation(SAVE_ARTICLE);
+	const [unsaveArticle] = useMutation(UNSAVE_ARTICLE);
+
+	useEffect(() => {
+		setSaved(article.meSaved?.[0]?.mySaved ?? false);
+	}, [article.meSaved]);
 
 	const handleLike = useCallback(
 		(e: React.MouseEvent) => {
@@ -40,12 +51,27 @@ const ProfileArticleCard = ({ article, onLike, likePending = false }: ProfileArt
 	);
 
 	const handleSave = useCallback(
-		(e: React.MouseEvent) => {
+		async (e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			setSaved(toggleSavedArticle(article._id));
+			if (!userId) {
+				await sweetErrorHandling(new Error(t('community.loginToSave')));
+				return;
+			}
+			setSavePending(true);
+			try {
+				const result = saved
+					? await unsaveArticle({ variables: { articleId: article._id } })
+					: await saveArticle({ variables: { articleId: article._id } });
+				const updated = result.data?.saveArticle ?? result.data?.unsaveArticle;
+				setSaved(updated?.meSaved?.[0]?.mySaved ?? !saved);
+			} catch (err) {
+				await sweetErrorHandling(err);
+			} finally {
+				setSavePending(false);
+			}
 		},
-		[article._id],
+		[article._id, saveArticle, saved, unsaveArticle, userId, t],
 	);
 
 	return (
@@ -99,6 +125,7 @@ const ProfileArticleCard = ({ article, onLike, likePending = false }: ProfileArt
 						saved ? 'fixora-tip-card__stat--save--active' : ''
 					}`}
 					onClick={handleSave}
+					disabled={savePending}
 					aria-pressed={saved}
 					aria-label={t('technicianProfile.articles.save')}
 				>

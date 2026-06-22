@@ -50,9 +50,8 @@ const ConversationList = ({ conversations, selectedPeerId, bookingMeta = {}, onS
 					const preview = formatMessagePreview(conversation.lastMessage, t);
 					const booking = conversation.bookingId ? bookingMeta[conversation.bookingId] : undefined;
 					const deviceText =
-						booking && conversation.bookingId
-							? deviceLabel(booking, t)
-							: '';
+						conversation.deviceLabel ||
+						(booking && conversation.bookingId ? deviceLabel(booking, t) : '');
 
 					return (
 						<div

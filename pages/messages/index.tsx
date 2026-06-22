@@ -8,7 +8,7 @@ import ConversationList from '../../libs/components/messages/ConversationList';
 import ChatThread, { SendMessagePayload } from '../../libs/components/messages/ChatThread';
 import ChatBookingContextBar from '../../libs/components/messages/ChatBookingContextBar';
 import RequestDetailsPanel from '../../libs/components/messages/RequestDetailsPanel';
-import { GET_MY_CONVERSATIONS, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../apollo/user/message';
+import { GET_MY_CONVERSATIONS, SEND_MESSAGE, MARK_MESSAGES_AS_READ, UPLOAD_MESSAGE_IMAGE } from '../../apollo/user/message';
 import { GET_USER, GET_BOOKING, GET_DEVICE } from '../../apollo/user/query';
 import { userVar } from '../../apollo/store';
 import { Booking, Conversation, ConversationPeer } from '../../libs/types/fixora/fixora';
@@ -17,7 +17,7 @@ import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
 import usePeerMessages from '../../libs/hooks/usePeerMessages';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { dedupeConversationsByPeer, resolvePeerBookingId } from '../../libs/utils/messageHelpers';
-import { fileToDataUrl } from '../../libs/utils/compressMessageImage';
+import { compressMessageImage } from '../../libs/utils/compressMessageImage';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -92,7 +92,7 @@ const MessagesPage: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const { messages, refetchMessages } = usePeerMessages(selected?.peerId, rawConversations, messagesPollMs);
+	const { messages, refetchMessages } = usePeerMessages(selected?.peerId, messagesPollMs);
 
 	const { data: bookingData, loading: bookingLoading } = useQuery(GET_BOOKING, {
 		skip: !activeBookingId,
@@ -111,6 +111,7 @@ const MessagesPage: NextPage = () => {
 	const device = deviceData?.getDevice ?? booking?.deviceData ?? null;
 
 	const [sendMessage, { loading: sending }] = useMutation(SEND_MESSAGE);
+	const [uploadMessageImage] = useMutation(UPLOAD_MESSAGE_IMAGE);
 	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ);
 
 	/** Cache booking summaries for conversation list device labels */
@@ -227,8 +228,11 @@ const MessagesPage: NextPage = () => {
 
 		try {
 			if (imageFile) {
-				const base64 = await fileToDataUrl(imageFile);
-				await send(base64, 'IMAGE');
+				const compressed = await compressMessageImage(imageFile);
+				const { data: uploadData } = await uploadMessageImage({ variables: { file: compressed } });
+				const imageUrl = uploadData?.uploadMessageImage;
+				if (!imageUrl) throw new Error('Image upload failed');
+				await send(imageUrl, 'IMAGE');
 				return;
 			}
 			if (text?.trim()) {

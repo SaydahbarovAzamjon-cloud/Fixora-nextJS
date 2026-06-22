@@ -20,7 +20,7 @@ import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
 import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import { setSavedTechnicianLiked } from '../../libs/utils/savedTechnicians';
+import { notifySavedTechniciansChanged } from '../../libs/utils/savedTechnicians';
 import { sortTechniciansList } from '../../libs/utils/sortTechnicians';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
@@ -81,8 +81,7 @@ const SearchPage: NextPage = () => {
 
 			const { data } = await likeTargetUser({ variables: { userId: id } });
 			if (user._id) {
-				const myFavorite = !!data?.likeTargetUser?.meLiked?.[0]?.myFavorite;
-				setSavedTechnicianLiked(user._id, id, myFavorite);
+				notifySavedTechniciansChanged(user._id);
 			}
 			await refetch({ input: searchFilter });
 		} catch (err: any) {

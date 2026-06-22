@@ -1,289 +1,193 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import type { NextPage } from 'next';
-import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
-import { MemberPanelList } from '../../../libs/components/admin/users/MemberList';
-import { Box, InputAdornment, List, ListItem, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import { TabContext } from '@mui/lab';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import TablePagination from '@mui/material/TablePagination';
-import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
-import { MembersInquiry } from '../../../libs/types/member/member.input';
-import { Member } from '../../../libs/types/member/member';
-import { MemberStatus, MemberType } from '../../../libs/enums/member.enum';
-import { sweetErrorHandling } from '../../../libs/sweetAlert';
-import { MemberUpdate } from '../../../libs/types/member/member.update';
-import { useMutation, useQuery } from '@apollo/client';
-import { UPDATE_MEMBER_BY_ADMIN } from '../../../apollo/admin/mutation';
-import { GET_ALL_MEMBERS_BY_ADMIN } from '../../../apollo/admin/query';
-import { T } from '../../../libs/types/common';
+import React, { useEffect, useMemo, useState } from 'react';
+import { NextPage } from 'next';
+import { useTranslation } from 'next-i18next';
+import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
+import withAdminLayout from '../../../libs/components/layout/AdminLayout';
+import { adminPageProps } from '../../../libs/i18n/adminPageProps';
+import AdminHeader from '../../../libs/components/admin/AdminHeader';
+import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar';
+import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
+import AdminPagination from '../../../libs/components/admin/shared/AdminPagination';
+import { GET_ALL_USERS_BY_ADMIN } from '../../../apollo/admin/query';
+import type { AdminUser, AdminUserStatus, AdminUserType } from '../../../libs/types/admin/admin';
+import { displayUserName } from '../../../libs/hooks/useUserLookup';
+import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
+import { userRoleTone, userStatusTone } from '../../../libs/utils/adminBadges';
+import { dateLocale } from '../../../libs/utils/i18nLocale';
+import { Star } from 'lucide-react';
 
-const AdminUsers: NextPage = ({ initialInquiry, ...props }: any) => {
-	const [anchorEl, setAnchorEl] = useState<[] | HTMLElement[]>([]);
-	const [membersInquiry, setMembersInquiry] = useState<MembersInquiry>(initialInquiry);
-	const [members, setMembers] = useState<Member[]>([]);
-	const [membersTotal, setMembersTotal] = useState<number>(0);
-	const [value, setValue] = useState(
-		membersInquiry?.search?.memberStatus ? membersInquiry?.search?.memberStatus : 'ALL',
-	);
-	const [searchText, setSearchText] = useState('');
-	const [searchType, setSearchType] = useState('ALL');
+const PAGE_SIZE = 10;
 
-const [updateMemberByAdmin] = useMutation(UPDATE_MEMBER_BY_ADMIN);
+const AdminUsersPage: NextPage = () => {
+	const { t } = useTranslation('admin');
+	const router = useRouter();
+	const [page, setPage] = useState(1);
+	const [search, setSearch] = useState('');
+	const [debouncedSearch, setDebouncedSearch] = useState('');
+	const [roleFilter, setRoleFilter] = useState<AdminUserType | ''>('');
+	const [statusFilter, setStatusFilter] = useState<AdminUserStatus | ''>('');
 
-const {
-	loading: getAllMembersByAdminLoading,
-	data: getAllMembersByAdminData,
-	error: getAllMembersByAdminError,
-	refetch: getAllMembersRefetch,
-} = useQuery(GET_ALL_MEMBERS_BY_ADMIN, {
-	fetchPolicy: 'network-only',
-	variables: { input: membersInquiry },
-	notifyOnNetworkStatusChange: true,
-	onCompleted: (data: T) => {
-		setMembers(data?.getAllMembersByAdmin?.list);
-		setMembersTotal(data?.getAllMembersByAdmin?.metaCounter[0]?.total ?? 0);
-	},
-});
+	useEffect(() => {
+		const timer = setTimeout(() => setDebouncedSearch(search), 350);
+		return () => clearTimeout(timer);
+	}, [search]);
 
-/** LIFECYCLES **/
-useEffect(() => {
-	getAllMembersRefetch({ input: membersInquiry }).then();
-}, [membersInquiry]);
+	useEffect(() => {
+		setPage(1);
+	}, [debouncedSearch, roleFilter, statusFilter]);
 
-	/** HANDLERS **/
-	const changePageHandler = async (event: unknown, newPage: number) => {
-		membersInquiry.page = newPage + 1;
-		await getAllMembersRefetch({ input: membersInquiry }).then();
-		setMembersInquiry({ ...membersInquiry });
-	};
-
-	const changeRowsPerPageHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		membersInquiry.limit = parseInt(event.target.value, 10);
-		membersInquiry.page = 1;
-		await getAllMembersRefetch({ input: membersInquiry }).then();
-		setMembersInquiry({ ...membersInquiry });
-	};
-
-	const menuIconClickHandler = (e: any, index: number) => {
-		const tempAnchor = anchorEl.slice();
-		tempAnchor[index] = e.currentTarget;
-		setAnchorEl(tempAnchor);
-	};
-
-	const menuIconCloseHandler = () => {
-		setAnchorEl([]);
-	};
-
-	const tabChangeHandler = async (event: any, newValue: string) => {
-		setValue(newValue);
-		setSearchText('');
-
-		setMembersInquiry({ ...membersInquiry, page: 1, sort: 'createdAt' });
-
-		switch (newValue) {
-			case 'ACTIVE':
-				setMembersInquiry({ ...membersInquiry, search: { memberStatus: MemberStatus.ACTIVE } });
-				break;
-			case 'BLOCK':
-				setMembersInquiry({ ...membersInquiry, search: { memberStatus: MemberStatus.BLOCK } });
-				break;
-			case 'DELETE':
-				setMembersInquiry({ ...membersInquiry, search: { memberStatus: MemberStatus.DELETE } });
-				break;
-			default:
-				delete membersInquiry?.search?.memberStatus;
-				setMembersInquiry({ ...membersInquiry });
-				break;
-		}
-	};
-
-	const updateMemberHandler = async (updateData: MemberUpdate) => {
-		try {
-			await updateMemberByAdmin(			
-			{
-				variables: {
-					input: updateData
-				}
-			})
-
-			menuIconCloseHandler();
-			getAllMembersRefetch({input: membersInquiry})
-		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
-	};
-
-	const textHandler = useCallback((value: string) => {
-		try {
-			setSearchText(value);
-		} catch (err: any) {
-			console.log('textHandler: ', err.message);
-		}
-	}, []);
-
-	const searchTextHandler = () => {
-		try {
-			setMembersInquiry({
-				...membersInquiry,
+	const { data, loading } = useQuery(GET_ALL_USERS_BY_ADMIN, {
+		variables: {
+			input: {
+				page,
+				limit: PAGE_SIZE,
 				search: {
-					...membersInquiry.search,
-					text: searchText,
+					text: debouncedSearch || undefined,
+					userType: roleFilter || undefined,
+					userStatus: statusFilter || undefined,
 				},
-			});
-		} catch (err: any) {
-			console.log('searchTextHandler: ', err.message);
-		}
-	};
+			},
+		},
+		fetchPolicy: 'cache-and-network',
+	});
 
-	const searchTypeHandler = async (newValue: string) => {
-		try {
-			setSearchType(newValue);
+	const list: AdminUser[] = data?.getAllUsersByAdmin?.list ?? [];
+	const total = data?.getAllUsersByAdmin?.metaCounter?.[0]?.total ?? 0;
+	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-			if (newValue !== 'ALL') {
-				setMembersInquiry({
-					...membersInquiry,
-					page: 1,
-					sort: 'createdAt',
-					search: {
-						...membersInquiry.search,
-						memberType: newValue as MemberType,
-					},
-				});
-			} else {
-				delete membersInquiry?.search?.memberType;
-				setMembersInquiry({ ...membersInquiry });
-			}
-		} catch (err: any) {
-			console.log('searchTypeHandler: ', err.message);
-		}
+	const badgeLabel = (level: string) => {
+		const key = `users.badges.${level}` as const;
+		return t(key, { defaultValue: level });
 	};
 
 	return (
-		<Box component={'div'} className={'content'}>
-			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Member List
-			</Typography>
-			<Box component={'div'} className={'table-wrap'}>
-				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
-					<TabContext value={value}>
-						<Box component={'div'}>
-							<List className={'tab-menu'}>
-								<ListItem
-									onClick={(e:any) => tabChangeHandler(e, 'ALL')}
-									value="ALL"
-									className={value === 'ALL' ? 'li on' : 'li'}
-								>
-									All
-								</ListItem>
-								<ListItem
-									onClick={(e:any) => tabChangeHandler(e, 'ACTIVE')}
-									value="ACTIVE"
-									className={value === 'ACTIVE' ? 'li on' : 'li'}
-								>
-									Active
-								</ListItem>
-								<ListItem
-									onClick={(e:any) => tabChangeHandler(e, 'BLOCK')}
-									value="BLOCK"
-									className={value === 'BLOCK' ? 'li on' : 'li'}
-								>
-									Blocked
-								</ListItem>
-								<ListItem
-									onClick={(e:any) => tabChangeHandler(e, 'DELETE')}
-									value="DELETE"
-									className={value === 'DELETE' ? 'li on' : 'li'}
-								>
-									Deleted
-								</ListItem>
-							</List>
-							<Divider />
-							<Stack className={'search-area'} sx={{ m: '24px' }}>
-								<OutlinedInput
-									value={searchText}
-									onChange={(e: any) => textHandler(e.target.value)}
-									sx={{ width: '100%' }}
-									className={'search'}
-									placeholder="Search user name"
-									onKeyDown={(event) => {
-										if (event.key == 'Enter') searchTextHandler();
-									}}
-									endAdornment={
-										<>
-											{searchText && (
-												<CancelRoundedIcon
-													style={{ cursor: 'pointer' }}
-													onClick={async () => {
-														setSearchText('');
-														setMembersInquiry({
-															...membersInquiry,
-															search: {
-																...membersInquiry.search,
-																text: '',
-															},
-														});
-														await getAllMembersRefetch({input: membersInquiry})
-													}}
-												/>
-											)}
-											<InputAdornment position="end" onClick={() => searchTextHandler()}>
-												<img src="/img/icons/search_icon.png" alt={'searchIcon'} />
-											</InputAdornment>
-										</>
-									}
-								/>
-								<Select sx={{ width: '160px', ml: '20px' }} value={searchType}>
-									<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
-										All
-									</MenuItem>
-									<MenuItem value={'USER'} onClick={() => searchTypeHandler('USER')}>
-										User
-									</MenuItem>
-									<MenuItem value={'AGENT'} onClick={() => searchTypeHandler('AGENT')}>
-										Agent
-									</MenuItem>
-									<MenuItem value={'ADMIN'} onClick={() => searchTypeHandler('ADMIN')}>
-										Admin
-									</MenuItem>
-								</Select>
-							</Stack>
-							<Divider />
-						</Box>
-						<MemberPanelList
-							members={members}
-							anchorEl={anchorEl}
-							menuIconClickHandler={menuIconClickHandler}
-							menuIconCloseHandler={menuIconCloseHandler}
-							updateMemberHandler={updateMemberHandler}
-						/>
+		<>
+			<AdminHeader title={t('users.title')} subtitle={t('users.subtitle')} />
+			<div className="fixora-admin-page">
+				<div className="fixora-admin-table-wrap">
+					<div className="fixora-admin-table-toolbar">
+						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
+						<select
+							className="fixora-admin-select"
+							value={roleFilter}
+							onChange={(e) => setRoleFilter(e.target.value as AdminUserType | '')}
+						>
+							<option value="">{t('users.allRoles')}</option>
+							<option value="USER">{t('users.roles.USER')}</option>
+							<option value="TECHNICIAN">{t('users.roles.TECHNICIAN')}</option>
+							<option value="ADMIN">{t('users.roles.ADMIN')}</option>
+						</select>
+						<select
+							className="fixora-admin-select"
+							value={statusFilter}
+							onChange={(e) => setStatusFilter(e.target.value as AdminUserStatus | '')}
+						>
+							<option value="">{t('users.allStatuses')}</option>
+							<option value="ACTIVE">{t('users.statuses.ACTIVE')}</option>
+							<option value="BLOCK">{t('users.statuses.BLOCK')}</option>
+							<option value="DELETE">{t('users.statuses.DELETE')}</option>
+						</select>
+					</div>
 
-						<TablePagination
-							rowsPerPageOptions={[10, 20, 40, 60]}
-							component="div"
-							count={membersTotal}
-							rowsPerPage={membersInquiry?.limit}
-							page={membersInquiry?.page - 1}
-							onPageChange={changePageHandler}
-							onRowsPerPageChange={changeRowsPerPageHandler}
-						/>
-					</TabContext>
-				</Box>
-			</Box>
-		</Box>
+					<table className="fixora-admin-table">
+						<thead>
+							<tr>
+								<th>{t('users.columns.user')}</th>
+								<th>{t('users.columns.email')}</th>
+								<th>{t('users.columns.phone')}</th>
+								<th>{t('users.columns.role')}</th>
+								<th>{t('users.columns.status')}</th>
+								<th>{t('users.columns.badge')}</th>
+								<th>{t('users.columns.rating')}</th>
+								<th>{t('users.columns.joined')}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{loading && (
+								<tr>
+									<td colSpan={8} className="fixora-admin-empty">
+										{t('common.loading')}
+									</td>
+								</tr>
+							)}
+							{!loading && list.length === 0 && (
+								<tr>
+									<td colSpan={8} className="fixora-admin-empty">
+										{t('users.empty')}
+									</td>
+								</tr>
+							)}
+							{list.map((user) => {
+								const name = displayUserName(user);
+								const initial = name.charAt(0).toUpperCase();
+								return (
+									<tr key={user._id}>
+										<td>
+											<div className="fixora-admin-table-user">
+												<div className="fixora-admin-table-user__avatar">
+													<img src={resolveProfileImageUrl(user.userProfileImage)} alt="" />
+												</div>
+												<span className="fixora-admin-table-user__name">{name}</span>
+											</div>
+										</td>
+										<td>{user.userEmail || '—'}</td>
+										<td>{user.userPhoneNumber || '—'}</td>
+										<td>
+											<AdminStatusBadge label={t(`users.roles.${user.userType}`)} tone={userRoleTone(user.userType)} />
+										</td>
+										<td>
+											<AdminStatusBadge
+												label={t(`users.statuses.${user.userStatus}`)}
+												tone={userStatusTone(user.userStatus)}
+											/>
+										</td>
+										<td>
+											{user.badgeLevel && user.badgeLevel !== 'NEW' ? (
+												<AdminStatusBadge label={badgeLabel(user.badgeLevel)} tone="info" />
+											) : (
+												'—'
+											)}
+										</td>
+										<td>
+											{user.userType === 'TECHNICIAN' ? (
+												<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+													<Star size={12} color="#faad14" fill="#faad14" />
+													{user.averageRating?.toFixed(1) ?? '0.0'}
+												</span>
+											) : (
+												'—'
+											)}
+										</td>
+										<td>
+											{new Date(user.createdAt).toLocaleDateString(dateLocale(router.locale), {
+												year: 'numeric',
+												month: '2-digit',
+												day: '2-digit',
+											})}
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+
+					<div className="fixora-admin-table-footer">
+						<span>
+							{t('users.showing', {
+								from: total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1,
+								to: Math.min(page * PAGE_SIZE, total),
+								total,
+							})}
+						</span>
+						<AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+					</div>
+				</div>
+			</div>
+		</>
 	);
 };
 
-AdminUsers.defaultProps = {
-	initialInquiry: {
-		page: 1,
-		limit: 10,
-		sort: 'createdAt',
-		search: {},
-	},
-};
+export const getServerSideProps = adminPageProps;
 
-export default withAdminLayout(AdminUsers);
+export default withAdminLayout(AdminUsersPage, { title: 'Users' });

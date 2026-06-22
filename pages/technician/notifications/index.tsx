@@ -16,11 +16,15 @@ import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import { GET_NOTIFICATIONS, MARK_ALL_NOTIFICATIONS_READ, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
-import { GET_MY_PAYMENTS, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
+import {
+	DELETE_NOTIFICATION,
+	GET_NOTIFICATIONS,
+	MARK_ALL_NOTIFICATIONS_READ,
+	MARK_NOTIFICATION_READ,
+} from '../../../apollo/user/notification';
 import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
-import { formatKrw } from '../../../libs/utils/formatCurrency';
+import { sweetErrorHandling } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -66,7 +70,6 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		color: '#22D3EE',
 		icon: <PersonAddAlt1Rounded style={ICON_SX} />,
 		filter: 'follows',
-		// The follower's id is stored on the notification (userId === referenceId === followerId).
 		action: (n) => {
 			const followerId = n.referenceId || n.userId;
 			return { label: 'View Profile', link: followerId ? `/technician/client/${followerId}` : '/technician/profile' };
@@ -116,22 +119,13 @@ const FILTER_KEYS: Record<FilterId, string> = {
 };
 
 const BOOKING_REQUEST_PATTERN = /request|requested|new booking/i;
-const PAYMENT_PATTERN = /payment|paid|payout|earnings|deposit|final|kakao|kakaopay|결제|입금|보증금|잔금/i;
-const FINAL_PAYMENT_PATTERN = /final|잔금/i;
-const DEPOSIT_PAYMENT_PATTERN = /deposit|보증금/i;
 
-const paymentKindFromText = (n: any): 'DEPOSIT' | 'FINAL' | 'ANY' => {
-	const text = `${n.notificationTitle ?? ''} ${n.notificationDescription ?? ''}`;
-	if (FINAL_PAYMENT_PATTERN.test(text)) return 'FINAL';
-	if (DEPOSIT_PAYMENT_PATTERN.test(text)) return 'DEPOSIT';
-	return 'ANY';
-};
-
-/** Derive the display category from real DB fields (notificationType + referenceType + text). */
 const detectCat = (n: any): NotifCat => {
 	const type = (n.notificationType ?? '').toUpperCase();
 	const text = `${n.notificationTitle ?? ''} ${n.notificationDescription ?? ''}`;
 	switch (type) {
+		case 'PAYMENT':
+			return 'payment';
 		case 'REVIEW':
 			return 'review';
 		case 'FOLLOW':
@@ -141,10 +135,8 @@ const detectCat = (n: any): NotifCat => {
 		case 'COMMENT':
 			return 'comment';
 		case 'BOOKING':
-			if (PAYMENT_PATTERN.test(text)) return 'payment';
 			return BOOKING_REQUEST_PATTERN.test(text) ? 'request' : 'status';
 		default:
-			if (PAYMENT_PATTERN.test(text)) return 'payment';
 			return 'alert';
 	}
 };
@@ -169,7 +161,6 @@ const timeAgo = (dateStr?: string | null) => {
 const isToday = (dateStr?: string | null) =>
 	!!dateStr && new Date(dateStr).toDateString() === new Date().toDateString();
 
-/** Shows the sender's avatar + nickname (fetched by userId) linking to their profile. */
 const NotifSender = ({ userId }: { userId?: string | null }) => (
 	<NotificationSender userId={userId} />
 );
@@ -179,8 +170,6 @@ const Notifications: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
-	const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-	const dismissedStorageKey = user?._id ? `fixora_tech_dismissed_notifications_${user._id}` : null;
 
 	const FILTERS: FilterId[] = ['all', 'requests', 'payments', 'reviews', 'likes', 'follows'];
 
@@ -190,115 +179,17 @@ const Notifications: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	// The backend only creates FOLLOW notification records for follows that happen
-	// after that feature shipped, so older followers never appear in the feed. We
-	// pull the technician's full followers list and surface every follower (old and
-	// new) as a follow notification — this is the source of truth for "who followed".
-	const { data: followersData } = useQuery(GET_USER_FOLLOWERS, {
-		skip: !user?._id,
-		variables: { input: { page: 1, limit: 100, search: { followingId: user?._id } } },
-		fetchPolicy: 'network-only',
-	});
-	const { data: paymentsData } = useQuery(GET_MY_PAYMENTS, {
-		skip: !user?._id,
-		variables: { input: { page: 1, limit: 100, search: {} } },
-		fetchPolicy: 'network-only',
-	});
-
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
+	const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
 
-	useEffect(() => {
-		if (!dismissedStorageKey || typeof window === 'undefined') return;
-		try {
-			const raw = window.localStorage.getItem(dismissedStorageKey);
-			const ids = raw ? JSON.parse(raw) : [];
-			setDismissed(new Set(Array.isArray(ids) ? ids : []));
-		} catch {
-			setDismissed(new Set());
-		}
-	}, [dismissedStorageKey]);
-
-	// Turn each follower relationship into a synthetic follow notification.
-	const followNotifications = useMemo(() => {
-		const list = followersData?.getUserFollowers?.list ?? [];
-		return list.map((f: any) => {
-			const fd = f.followerData ?? {};
-			const followerId = fd._id || f.followerId;
-			const name = fd.userNickname || fd.userFullName || 'Someone';
-			return {
-				_id: `follow-${f._id}`,
-				userId: followerId,
-				receiverId: user?._id,
-				notificationType: 'FOLLOW',
-				notificationTitle: t('notifications.newFollower'),
-				notificationDescription: `${name} ${t('notifications.startedFollowing')}`,
-				referenceId: followerId,
-				referenceType: null,
-				isRead: true,
-				createdAt: f.createdAt,
-			};
-		});
-	}, [followersData, user]);
-
-	const realNotifications = useMemo(
+	const notifications = useMemo(
 		() =>
-			(data?.getNotifications?.list ?? []).filter(
-				(n: any) => n.notificationType !== 'MESSAGE' && n.notificationType !== 'FOLLOW',
-			),
+			(data?.getNotifications?.list ?? [])
+				.filter((n: any) => n.notificationType !== 'MESSAGE')
+				.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
 		[data],
 	);
-
-	const paymentNotifications = useMemo(() => {
-		const payments = paymentsData?.getMyPayments?.list ?? [];
-		const realPaymentKeys = new Set(
-			realNotifications
-				.filter((n: any) => detectCat(n) === 'payment' && n.referenceId)
-				.map((n: any) => `${n.referenceId}-${paymentKindFromText(n)}`),
-		);
-
-		return payments
-			.filter((p: any) => p.paymentType && (p.paymentStatus === 'COMPLETED' || p.paymentStatus === 'PENDING'))
-			.filter((p: any) => {
-				const exact = `${p.bookingId}-${p.paymentType}`;
-				const any = `${p.bookingId}-ANY`;
-				return !realPaymentKeys.has(exact) && !realPaymentKeys.has(any);
-			})
-			.map((p: any) => {
-				const typeLabel = p.paymentType === 'DEPOSIT'
-					? t('notifications.paymentTypeDeposit')
-					: t('notifications.paymentTypeFinal');
-				const statusLabel = p.paymentStatus === 'COMPLETED'
-					? t('notifications.paymentStatusCompleted')
-					: t('notifications.paymentStatusPending');
-				return {
-					_id: `payment-${p._id}`,
-					userId: null,
-					receiverId: user?._id,
-					notificationType: 'BOOKING',
-					notificationTitle: p.paymentType === 'DEPOSIT'
-						? t('notifications.depositPaymentTitle')
-						: t('notifications.finalPaymentTitle'),
-					notificationDescription: t('notifications.paymentDescription', {
-						type: typeLabel,
-						status: statusLabel,
-						amount: formatKrw(p.paymentAmount || 0),
-					}),
-					referenceId: p.bookingId,
-					referenceType: 'BOOKING',
-					isRead: true,
-					createdAt: p.paidAt || p.createdAt,
-				};
-			});
-	}, [paymentsData, realNotifications, t, user?._id]);
-
-	// Real notifications (minus chat messages and real FOLLOW rows), merged with
-	// derived follow/payment notifications and sorted.
-	const notifications = useMemo(() => {
-		return [...realNotifications, ...followNotifications, ...paymentNotifications]
-			.filter((n: any) => !dismissed.has(n._id))
-			.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-	}, [realNotifications, followNotifications, paymentNotifications, dismissed]);
 
 	const unreadCount = useMemo(() => notifications.filter((n: any) => !n.isRead).length, [notifications]);
 
@@ -328,23 +219,19 @@ const Notifications: NextPage = () => {
 		if (action) router.push(action.link);
 	};
 
-	// Backend has no deleteNotification mutation (see docs/schema.gql), so this
-	// persists a local dismiss per technician/browser. Wire a mutation once it exists.
-	const handleDelete = (id: string) => {
-		setDismissed((prev) => {
-			const next = new Set(prev).add(id);
-			if (dismissedStorageKey && typeof window !== 'undefined') {
-				window.localStorage.setItem(dismissedStorageKey, JSON.stringify(Array.from(next)));
-			}
-			return next;
-		});
+	const handleDelete = async (id: string) => {
+		try {
+			await deleteNotification({ variables: { notificationId: id } });
+			await refetch();
+		} catch (err: unknown) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	const renderCard = (n: any) => {
 		const cat = detectCat(n);
 		const meta = CAT_META[cat];
 		const action = meta.action(n);
-		// Only repair-related notifications carry an "issue" (e.g. screen damage) shown in red.
 		const isIssue = cat === 'request' || cat === 'status';
 		return (
 			<div
@@ -369,7 +256,7 @@ const Notifications: NextPage = () => {
 							<button
 								type="button"
 								className="fixora-notif-card__delete"
-								title="Delete notification"
+								title={t('notifications.delete')}
 								onClick={(e) => {
 									e.stopPropagation();
 									handleDelete(n._id);

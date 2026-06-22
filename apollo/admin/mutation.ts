@@ -1,155 +1,118 @@
 import { gql } from '@apollo/client';
 
-/**************************
- *         MEMBER         *
- *************************/
+const ADMIN_USER_FIELDS = gql`
+	fragment AdminMutationUserFields on User {
+		_id
+		userFullName
+		userNickname
+		userEmail
+		userPhoneNumber
+		userProfileImage
+		userType
+		userStatus
+		badgeLevel
+		verificationStatus
+		isVerified
+		updatedAt
+	}
+`;
 
-export const UPDATE_MEMBER_BY_ADMIN = gql`
-	mutation UpdateMemberByAdmin($input: MemberUpdate!) {
-		updateMemberByAdmin(input: $input) {
-			_id
-			memberType
-			memberStatus
-			memberAuthType
-			memberPhone
-			memberNick
-			memberFullName
-			memberImage
-			memberAddress
-			memberDesc
-			memberProperties
-			memberRank
-			memberArticles
-			memberPoints
-			memberLikes
-			memberViews
-			memberWarnings
-			memberBlocks
-			deletedAt
-			createdAt
-			updatedAt
-			accessToken
+export const APPROVE_TECHNICIAN = gql`
+	${ADMIN_USER_FIELDS}
+	mutation ApproveTechnician($userId: String!) {
+		approveTechnician(userId: $userId) {
+			...AdminMutationUserFields
 		}
 	}
 `;
 
-/**************************
- *        PROPERTY        *
- *************************/
-
-export const UPDATE_PROPERTY_BY_ADMIN = gql`
-	mutation UpdatePropertyByAdmin($input: PropertyUpdate!) {
-		updatePropertyByAdmin(input: $input) {
-			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
-			memberId
-			soldAt
-			deletedAt
-			constructedAt
-			createdAt
-			updatedAt
+export const REJECT_TECHNICIAN = gql`
+	${ADMIN_USER_FIELDS}
+	mutation RejectTechnician($userId: String!, $reason: String) {
+		rejectTechnician(userId: $userId, reason: $reason) {
+			...AdminMutationUserFields
 		}
 	}
 `;
 
-export const REMOVE_PROPERTY_BY_ADMIN = gql`
-	mutation RemovePropertyByAdmin($input: String!) {
-		removePropertyByAdmin(propertyId: $input) {
-			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
-			memberId
-			soldAt
-			deletedAt
-			constructedAt
-			createdAt
-			updatedAt
+export const UPDATE_USER_BY_ADMIN = gql`
+	${ADMIN_USER_FIELDS}
+	mutation UpdateUserByAdmin($input: UserUpdate!) {
+		updateUserByAdmin(input: $input) {
+			...AdminMutationUserFields
 		}
 	}
 `;
 
-/**************************
- *      BOARD-ARTICLE     *
- *************************/
-
-export const UPDATE_BOARD_ARTICLE_BY_ADMIN = gql`
-	mutation UpdateBoardArticleByAdmin($input: BoardArticleUpdate!) {
-		updateBoardArticleByAdmin(input: $input) {
+export const UPDATE_ARTICLE_BY_ADMIN = gql`
+	mutation UpdateArticleByAdmin($input: ArticleUpdate!) {
+		updateArticleByAdmin(input: $input) {
 			_id
-			articleCategory
-			articleStatus
 			articleTitle
-			articleContent
-			articleImage
-			articleViews
-			articleLikes
-			memberId
-			createdAt
-			updatedAt
-		}
-	}
-`;
-
-export const REMOVE_BOARD_ARTICLE_BY_ADMIN = gql`
-	mutation RemoveBoardArticleByAdmin($input: String!) {
-		removeBoardArticleByAdmin(articleId: $input) {
-			_id
-			articleCategory
 			articleStatus
-			articleTitle
-			articleContent
-			articleImage
-			articleViews
-			articleLikes
-			memberId
-			createdAt
 			updatedAt
 		}
 	}
 `;
 
-/**************************
- *         COMMENT        *
- *************************/
+export const REMOVE_ARTICLE_BY_ADMIN = gql`
+	mutation RemoveArticleByAdmin($articleId: String!) {
+		removeArticleByAdmin(articleId: $articleId) {
+			_id
+			articleStatus
+		}
+	}
+`;
 
 export const REMOVE_COMMENT_BY_ADMIN = gql`
-	mutation RemoveCommentByAdmin($input: String!) {
-		removeCommentByAdmin(commentId: $input) {
+	mutation RemoveCommentByAdmin($commentId: String!) {
+		removeCommentByAdmin(commentId: $commentId) {
 			_id
 			commentStatus
-			commentGroup
-			commentContent
-			commentRefId
-			memberId
-			createdAt
-			updatedAt
+		}
+	}
+`;
+
+export const REMOVE_STORY = gql`
+	mutation RemoveStory($storyId: String!) {
+		removeStory(storyId: $storyId) {
+			_id
+		}
+	}
+`;
+
+export const REVIEW_STORY_REPORT = gql`
+	mutation ReviewStoryReport($input: ReviewStoryReportInput!) {
+		reviewStoryReport(input: $input) {
+			_id
+			status
+			adminNotes
+		}
+	}
+`;
+
+export const WARN_TECHNICIAN_FOR_STORY = gql`
+	mutation WarnTechnicianForStory($input: WarnTechnicianInput!) {
+		warnTechnicianForStory(input: $input)
+	}
+`;
+
+export const REFUND_PAYMENT = gql`
+	mutation RefundPayment($paymentId: String!) {
+		refundPayment(paymentId: $paymentId) {
+			_id
+			paymentStatus
+		}
+	}
+`;
+
+export const UPDATE_ADMIN_PLATFORM_SETTINGS = gql`
+	mutation UpdateAdminPlatformSettings($input: UpdateAdminPlatformSettingsInput!) {
+		updateAdminPlatformSettings(input: $input) {
+			defaultLocale
+			defaultCurrency
+			defaultTimezone
+			moderationSlaHours
 		}
 	}
 `;

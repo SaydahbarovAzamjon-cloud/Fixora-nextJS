@@ -1,6 +1,6 @@
 import imageCompression from 'browser-image-compression';
 
-/** BACKEND_GAPS: GAP-087 — compress before base64 send to avoid 413 Payload Too Large */
+/** Compress before uploadMessageImage to keep payloads small. */
 export async function compressMessageImage(file: File): Promise<File> {
 	try {
 		return await imageCompression(file, {

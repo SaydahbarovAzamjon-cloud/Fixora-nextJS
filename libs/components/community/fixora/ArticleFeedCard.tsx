@@ -42,7 +42,7 @@ const ArticleFeedCard: React.FC<ArticleFeedCardProps> = ({
 		: null;
 
 	const author = article.authorData;
-	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor');
+	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor') || 'Author';
 
 	const publishedAt = formatArticlePublishedAt(article.createdAt, i18n.language);
 

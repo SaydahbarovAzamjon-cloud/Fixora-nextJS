@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { UPDATE_TECHNICIAN_SETTINGS } from '../../apollo/user/settings';
+import {
+	CHANGE_PASSWORD,
+	UPDATE_EMAIL,
+	UPDATE_TECHNICIAN_SETTINGS,
+	UPDATE_USER_SLUG,
+} from '../../apollo/user/settings';
 import { GET_USER } from '../../apollo/user/query';
 import { profileImageDraftVar, userVar } from '../../apollo/store';
 import { getJwtToken, setJwtToken, updateStorage, updateUserInfo } from '../auth';
@@ -14,6 +19,7 @@ export interface TechnicianSettingsUser {
 	userEmail?: string | null;
 	userFullName?: string | null;
 	userNickname?: string | null;
+	userSlug?: string | null;
 	shopName?: string | null;
 	userPhoneNumber?: string | null;
 	userLocation?: string | null;
@@ -77,6 +83,9 @@ export function useTechnicianSettings(userId?: string) {
 	const [updateUser, { loading: saving }] = useMutation(UPDATE_TECHNICIAN_SETTINGS, {
 		refetchQueries: ['GetTechnicians'],
 	});
+	const [changePassword] = useMutation(CHANGE_PASSWORD);
+	const [updateEmail] = useMutation(UPDATE_EMAIL);
+	const [updateUserSlug] = useMutation(UPDATE_USER_SLUG);
 
 	const graphqlUser: TechnicianSettingsUser | null = data?.getUser ?? null;
 	const user: TechnicianSettingsUser | null = graphqlUser ?? settingsUserFromAuth(authUser);
@@ -110,7 +119,7 @@ export function useTechnicianSettings(userId?: string) {
 			location: next.userLocation ?? '',
 			bio: next.userBio ?? '',
 		});
-		setNickname(next.userNickname ?? '');
+		setNickname(next.userSlug ?? next.userNickname ?? '');
 		const wh = next.workingHours;
 		const daysState = defaultDays();
 		if (wh?.days?.length) {
@@ -290,19 +299,54 @@ export function useTechnicianSettings(userId?: string) {
 				input.userProfileImage = profileImagePath || null;
 			}
 
+			if (emailChanged) {
+				try {
+					await updateEmail({
+						variables: { input: { userEmail: profileForm.email.trim() } },
+					});
+				} catch (err) {
+					await sweetErrorHandling(err);
+					return false;
+				}
+			}
+
 			const ok = await saveUpdate(input, t('settings.profile.saved'));
 			if (ok && emailChanged) {
-				await sweetMixinErrorAlert(t('settings.profile.emailChangePending'));
-				setProfileForm((prev) => ({ ...prev, email: user?.userEmail ?? prev.email }));
+				await refetch();
 			}
 			return ok;
 		},
-		[profileForm, saveUpdate, t, user?.userEmail],
+		[profileForm, saveUpdate, t, updateEmail, user?.userEmail, refetch],
 	);
 
 	const saveAccount = useCallback(async () => {
-		return saveUpdate({ userNickname: nickname.trim() }, 'Account saved.');
-	}, [nickname, saveUpdate]);
+		if (!userId) return false;
+		const slug = nickname.trim().toLowerCase();
+		if (!slug) {
+			await sweetMixinErrorAlert(t('settings.account.slugRequired'));
+			return false;
+		}
+		try {
+			const emailChanged =
+				!!user?.userEmail &&
+				profileForm.email.trim().toLowerCase() !== user.userEmail.trim().toLowerCase();
+
+			if (emailChanged) {
+				await updateEmail({
+					variables: { input: { userEmail: profileForm.email.trim() } },
+				});
+			}
+
+			await updateUserSlug({ variables: { input: { userSlug: slug } } });
+			await refetch();
+			formDirtyRef.current = false;
+			await sweetTopSmallSuccessAlert(t('settings.account.saved'), 1200);
+			return true;
+		} catch (err) {
+			await sweetErrorHandling(err);
+			return false;
+		}
+	}, [nickname, profileForm.email, refetch, t, updateEmail, updateUserSlug, user?.userEmail, userId]);
 
 	const saveAvailability = useCallback(async () => {
 		const selectedDays = SETTINGS_DAYS.filter((d) => availability.days[d]);
@@ -319,10 +363,19 @@ export function useTechnicianSettings(userId?: string) {
 	}, [availability, saveUpdate]);
 
 	const savePassword = useCallback(
-		async (newPassword: string) => {
-			return saveUpdate({ userPassword: newPassword }, 'Password updated.');
+		async (currentPassword: string, newPassword: string) => {
+			try {
+				await changePassword({
+					variables: { input: { currentPassword, newPassword } },
+				});
+				await sweetTopSmallSuccessAlert(t('settings.security.passwordSaved'), 1200);
+				return true;
+			} catch (err) {
+				await sweetErrorHandling(err);
+				return false;
+			}
 		},
-		[saveUpdate],
+		[changePassword, t],
 	);
 
 	return {

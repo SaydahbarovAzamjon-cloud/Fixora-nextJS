@@ -15,6 +15,14 @@ export const GET_ARTICLE = gql`
 			articleLikes
 			articleViews
 			articleComments
+			articleVisibility
+			isFeatured
+			allowComments
+			scheduledPublishAt
+			seoTitle
+			seoDescription
+			seoKeywords
+			repairDeviceCategory
 			userId
 			createdAt
 			updatedAt
@@ -30,6 +38,11 @@ export const GET_ARTICLE = gql`
 				memberId
 				likeRefId
 				myFavorite
+			}
+			meSaved {
+				articleRefId
+				memberId
+				mySaved
 			}
 		}
 	}
@@ -62,6 +75,14 @@ export const CREATE_ARTICLE = gql`
 			articleLikes
 			articleViews
 			articleComments
+			articleVisibility
+			isFeatured
+			allowComments
+			scheduledPublishAt
+			seoTitle
+			seoDescription
+			seoKeywords
+			repairDeviceCategory
 			createdAt
 		}
 	}
@@ -139,6 +160,14 @@ export const UPDATE_ARTICLE = gql`
 			articleLikes
 			articleViews
 			articleComments
+			articleVisibility
+			isFeatured
+			allowComments
+			scheduledPublishAt
+			seoTitle
+			seoDescription
+			seoKeywords
+			repairDeviceCategory
 			updatedAt
 		}
 	}
@@ -149,6 +178,41 @@ export const DELETE_ARTICLE = gql`
 		deleteArticle(articleId: $articleId) {
 			_id
 			articleStatus
+		}
+	}
+`;
+
+export const SAVE_ARTICLE = gql`
+	mutation SaveArticle($articleId: String!) {
+		saveArticle(articleId: $articleId) {
+			_id
+			meSaved {
+				articleRefId
+				memberId
+				mySaved
+			}
+		}
+	}
+`;
+
+export const UNSAVE_ARTICLE = gql`
+	mutation UnsaveArticle($articleId: String!) {
+		unsaveArticle(articleId: $articleId) {
+			_id
+			meSaved {
+				articleRefId
+				memberId
+				mySaved
+			}
+		}
+	}
+`;
+
+export const INCREMENT_ARTICLE_VIEW = gql`
+	mutation IncrementArticleView($articleId: String!) {
+		incrementArticleView(articleId: $articleId) {
+			_id
+			articleViews
 		}
 	}
 `;

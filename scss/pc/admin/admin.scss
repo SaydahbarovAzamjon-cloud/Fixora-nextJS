@@ -1,546 +1,1179 @@
-#pc-wrap {
-  .MuiAppBar-root {
-    height: 64px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 0 24px;
-    position: fixed;
-    left: auto;
-    box-shadow: none;
-    background: #fff;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    .settings-icon-admin {
-      margin-right: 15px;
-      color: #7b809a;
-      cursor: pointer;
-    }
-  }
-  .aside {
-    .logo-box {
-      display: flex;
-      flex-direction: row;
-      padding: 16px 0;
+/** Fixora Admin Console — burgundy dark theme (P3-15) */
 
-      .fixora-logo__image {
-        max-height: 56px;
-      }
-    }
-    .user {
-      background: #f5f5f5;
-    }
-    hr {
-      margin: 24px 0;
-    }
-    .MuiListItemIcon-root {
-      margin-right: 16px;
-    }
-  }
-  .user {
-    background: #f5f5f5;
-  }
-  .menu-list {
-    padding: 8px 24px 8px 32px;
-    li {
-      padding: 8px 16px 8px 28px;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    li.on {
-      font-weight: 600;
-      background: #FDF4F4;
-      color: #F54D56;
-      span {
-        color: #212121;
-      }
-    }
-  }
-  #bunker {
-    width: calc(100% - 280px);
-    margin-left: auto;
-    padding: 116px 24px;
-    align-items: center;
-    .flex-space {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .title {
-      margin-bottom: 24px;
-    }
-    .badge {
-      padding: 3px 8px;
-      font-weight: 500;
-      font-size: 12px;
-      border-radius: 4px;
-    }
-    .success {
-      color: #229a16;
-      background: rgba(84, 214, 44, 0.16);
-    }
-    .warning {
-      color: #f57c00;
-      //padding: 4px;
-      background: rgba(245, 124, 0, 0.1);
-      border-radius: 4px;
-    }
-    .error {
-      color: #B72136;
-      background: rgba(255, 72, 66, 0.16);
-    }
-    .block {
-      color: #ab47bc;
-      background: rgba(171, 71, 188, 0.1);
-      border-radius: 4px;
-    }
-    .delete {
-      background: #757575;
-      color: #fff;
-      border-radius: 4px;
-    }
-    .success-txt {
-      font-size: 14px;
-      color: #229a16;
-    }
-    .warning-txt {
-      font-size: 14px;
-      color: #f57c00;
-    }
-    .error-txt {
-      font-size: 14px;
-      color: #B72136;
-    }
-    .hacking-txt {
-      font-size: 14px;
-      color: #ab47bc;
-    }
-    .delete-txt {
-      font-size: 14px;
-      color: #757575;
-    }
-    .up {
-      color: rgba(45, 153, 255);
-      background: rgba(45, 153, 255, 0.3) ;
-    }
-    .down {
-      color: rgba(255, 48, 48);
-      background: rgba(255, 48, 48, 0.3);
-    }
-    .content {
-      width: 100%;
-      .no-data {
-        font-size: 16px;
-      }
-    }
-    .detail {
-      // width: 1080px;
-      min-width: 1080px;
-      align-items: center;
-      justify-content: center;
-      .back {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        margin-bottom: 24px;
-      }
-      .info-area {
-        flex-direction: row;
-        & > ul {
-          flex: 1;
-        }
-        li {
-          padding: 16px 24px;
-        }
-        hr {
-          margin: 6px 10px;
-          border-color: #bdbdbd;
-        }
-        span:first-child {
-          width: 220px;
-          min-width: 220px;
-        }
-        .active {
-          color: #229a16;
-          background: rgba(84, 214, 44, 0.16);
-        }
-        .warning {
-          color: #f57c00;
-          padding: 4px;
-          background: rgba(245, 124, 0, 0.1);
-          border-radius: 4px;
-        }
-        .error {
-          color: #B72136;
-          background: rgba(255, 72, 66, 0.16);
-        }
-        .hacking {
-          color: #ab47bc;
-          padding: 4px;
-          background: rgba(171, 71, 188, 0.1);
-          border-radius: 4px;
-        }
-      }
-      .MuiTabPanel-root {
-        padding: 0;
-        margin: 24px 0;
-      }
-      .banned-wrap {
-        & > div {
-          margin: 0 8px 8px 0;
-        }
-      }
-    }
-    .content-area {
-      strong {
-        margin: 0 3px;
-      }
-      .tit {
-        font-size: 20px;
-        padding: 32px 24px;
-      }
-      .btn-upload {
-        flex-direction: column;
-        .img-area {
-          img { width: 100%; }
-        }
-      }
-      .comment {
-        height: 150px;
-        textarea {
-          width: 50%;
-          height: 80%;
-          padding: 10px;
-          font-size: 14px;
-          border: 1px solid #eee;
-          border-radius: 4px;
-          resize: none;
-        }
-      }
-      .desc {
-        span {
-          color: #757575;
-          margin-right: 4px;
-        }
-      }
-    }
-    .user-area {
-      margin-bottom: 24px;
-      .user-id {
-        background: #f5f5f5;
-        border-radius: 30px;
-        padding: 0 8px;
-        margin-top: 8px;
-        text-align: center;
-      }
-      .connect {
-        height: min-content;
-        border-radius: 8px;
-        padding: 2px 6px;
-        margin-left: 10px;
-      }
-      .connect.online {
-        color: #229a16;
-        background: rgba(84, 214, 44, 0.16);
-      }
-      .connect.offline {
-        color: #b72136;
-        background: rgba(255, 72, 66, 0.16);
-      }
-    }
-    .input-area {
-      div:nth-child(1) {
-        margin-right: 16px;
-      }
-      .MuiInputAdornment-root {
-        button {
-          margin-right: 0;
-        }
-      }
-    }
-    .btn-wrap {
-      margin-top: 24px;
-      flex-direction: row;
-      justify-content: flex-end;
-      button {
-        font-weight: 500;
-      }
-      button:nth-child(2) {
-        color:#fff;
-        box-shadow: rgb(255 48 48 / 24%) 0px 8px 16px 0px;
-      }
-    }
-    .btn-complete {
-      color:#fff;
-      box-shadow: rgb(255 48 48 / 24%) 0px 8px 16px 0px;
-    }
-    .btn-action {
-      position: static;
-      font-weight: 500;
-      color: #fff;
-      border-radius: 8px;
-    }
-    .btn-add {
-      color: #fff;
-      font-weight: 500;
-      box-shadow: rgb(255 48 48 / 24%) 0px 8px 16px 0px;
-    }
-    .btn-cancel {
-      color: #757575;
-      border: 1px solid #eee;
-    }
-    .btn-upload {
-      border: 1px dashed #eee;
-    }
-    .btn-text { color: #e92c28; }
-    .btn-window {
-      color: #757575;
-      margin-left: 8px;
-      svg {
-        font-size: 20px;
-      }
-    }
-    .name a {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
+$admin-sidebar-width: 260px;
+$admin-bg: var(--fixora-bg);
+$admin-surface: var(--fixora-surface);
+$admin-surface-elevated: var(--fixora-surface-elevated);
+$admin-border: var(--fixora-border-subtle);
+$admin-primary: var(--fixora-primary);
+$admin-text: var(--fixora-text-primary);
+$admin-text-muted: var(--fixora-text-muted);
+$admin-text-secondary: var(--fixora-text-secondary);
 
-    .table-wrap {
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: rgb(145 158 171 / 20%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px;
-      .tab-menu {
-        display: flex;
-        flex-direction: row;
-        padding: 0 24px;
-        li {
-          width: auto;
-          height: 48px;
-          cursor: pointer;
-          padding: 12px 16px;
-          color: #bdbdbd;
-          font-size: 14px;
-        }
-        li.on {
-          font-weight: 500;
-          color: #e92c28;
-          border-bottom: 2px solid #e92c28;
-        }
-      }
-      &.check-table-wrap {
-        th:nth-child(1),td:first-child {
-          width: 50px;
-          padding: 0 0 0 15px;
-        }
-      }
-      thead {
-        tr {
-          background: #fafafa;
-        }
-        th {
-          font-weight: bold;
-          color: #374151;
-          font-size: 14px;
-          border-bottom: 1px solid #eee;
-        }
-        th:last-child {
-          padding-right: 24px;
-        }
-        th:first-child {
-          padding-left: 24px;
-        }
-      }
-      tbody {
-        color: #616161;
-        tr {
-          border-bottom: 1px solid #eee;
-        }
-        tr:last-child {
-          border-bottom: 0;
-        }
-        th:first-child {
-          padding-left: 24px;
-        }
-        td {
-          padding: 12px 16px;
-          border-bottom: 0;
-          font-size: 14px;
-          color: #616161;
-          &.info {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-          }
-          &.info-community {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            a:visited {
-              color: #959595;
-            }
-          }
-          .img-box {
-            width: 80px;
-            height: 80px;
-          }
-          p.text-ellipsis {
-            width: 280px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-          }
-        }
-        /*td:last-child {
-          padding-right: 24px;
-        }*/
-        td:first-child {
-          padding-left: 24px;
-        }
-      }
-      .MuiAvatar-root {
-        //width: 30px;
-        //height: 30px;
-      }
-      .flex-box {
-        button {
-          color: #e92c28;
-          font-weight: 500;
-          margin-right: 8px;
-        }
-        button:last-child { margin-right:0; }
-      }
-      .edit-options {
-        padding: 25px;
-        .option-wrap {
-          margin-bottom: 40px;
-          .tit {
-            height: 40px;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            background: #f5f5f5;
-            border-radius: 4px;
-            padding: 2px 16px;
-          }
-          .notice {
-            margin: 6px 0 0 30px;
-            color: #bdbdbd;
-          }
-        }
-        .option {
-          flex-flow: row wrap;
-          label {
-            width:301px;
-            height: 48px;
-            padding-right: 8px;
-            color: #616161;
-            span { font-size: 14px; }
-          }
-        }
-      }
-    }
-    .tit {
-      flex-direction: row;
-      font-size: 28px;
-      font-weight: bold;
-      // margin-bottom: 24px;
-    }
-    .info-area {
-      flex-direction: row;
-    }
-    .search-area {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      img {
-        cursor: pointer;
-      }
-      .MuiOutlinedInput-root {
-        height: 48px;
-        background: #fff;
-        font-size: 14px;
-      }
-      .MuiTableCell-root {
-        padding: 12px 20px;
-        border-bottom: 1px solid #eee;
-      }
-      .MuiToolbar-root {
-        align-items: center;
-      }
-    }
-    .btn-action-wrap {
-      display: flex;
-      flex-direction: row;
-      button {
-        height: 44px;
-        background: #fff;
-        border: 1px solid #eee;
-        color: #757575;
-        margin-right: 8px;
-      }
-      thead { font-weight: 600; }
-    }
-    .MuiTabPanel-root {
-      padding: 0;
-    }
-    .MuiTableContainer-root {
-      box-shadow: none;
-    }
-  }
+.fixora-admin-layout {
+	display: flex;
+	min-height: 100vh;
+	background: $admin-bg;
+	color: $admin-text;
 }
 
-.right-dashboard-settings {
-  position: relative;
-  padding: 0 10px;
-  width: 360px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  .top {
-    position: relative;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-    box-sizing: border-box;
-    h5 {
-      font-size: 20px;
-      font-family: $font;
-    }
-    p {
-      color: #344767;
-      font-family: $font;
-    }
-    .close-icon {
-      position: absolute;
-      right: 8px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-  }
-  .main {
-    position: relative;
-    padding: 16px 24px 24px 24px;
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    .switch-box {
-      width: 100%;
-      height: auto;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      h6 {
-        font-size: 16px;
-        font-family: $font ;
-        font-weight: 600;
-      }
-    }
-  }
+.fixora-admin-main {
+	flex: 1;
+	margin-left: $admin-sidebar-width;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.fixora-admin-page {
+	padding: 28px 32px 40px;
+	flex: 1;
+}
+
+/* ── Sidebar ── */
+.fixora-admin-sidebar {
+	width: $admin-sidebar-width;
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 100;
+	display: flex;
+	flex-direction: column;
+	background: $admin-surface;
+	border-right: 1px solid $admin-border;
+	padding: 20px 12px 16px;
+
+	&__brand {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 10px 20px;
+		margin-bottom: 8px;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		text-align: left;
+		width: 100%;
+		border-bottom: 1px solid $admin-border;
+	}
+
+	&__logo .fixora-logo__image {
+		max-height: 36px;
+		width: auto;
+	}
+
+	&__brand-text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__brand-name {
+		font-size: 16px;
+		font-weight: 700;
+		color: $admin-text;
+		line-height: 1.2;
+	}
+
+	&__brand-sub {
+		font-size: 9px;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		color: $admin-text-muted;
+	}
+
+	&__nav {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 12px 0;
+		overflow-y: auto;
+	}
+
+	&__nav-item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		padding: 10px 12px;
+		border: 1px solid transparent;
+		border-radius: 10px;
+		background: transparent;
+		color: $admin-text-secondary;
+		font-size: 13px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		text-align: left;
+
+		&:hover {
+			background: var(--fixora-primary-soft);
+			color: $admin-text;
+		}
+
+		&--active {
+			background: var(--fixora-primary-soft);
+			border-color: rgba(115, 12, 30, 0.45);
+			color: $admin-primary;
+			box-shadow: inset 3px 0 0 $admin-primary;
+		}
+	}
+
+	&__nav-icon {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	&__nav-label {
+		flex: 1;
+	}
+
+	&__nav-badge {
+		min-width: 20px;
+		height: 20px;
+		padding: 0 6px;
+		border-radius: 999px;
+		background: $admin-primary;
+		color: #fff;
+		font-size: 11px;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__nav-chevron {
+		opacity: 0.7;
+		flex-shrink: 0;
+	}
+
+	&__footer {
+		border-top: 1px solid $admin-border;
+		padding-top: 12px;
+	}
+
+	&__profile {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 6px;
+	}
+
+	&__avatar {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		color: #fff;
+		font-size: 14px;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	&__profile-info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+	}
+
+	&__profile-name {
+		font-size: 13px;
+		font-weight: 600;
+		color: $admin-text;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__profile-role {
+		font-size: 9px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		color: $admin-primary;
+	}
+
+	&__logout {
+		border: none;
+		background: transparent;
+		color: $admin-text-muted;
+		cursor: pointer;
+		padding: 6px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+
+		&:hover {
+			color: $admin-text;
+			background: var(--fixora-primary-soft);
+		}
+	}
+}
+
+/* ── Header ── */
+.fixora-admin-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	padding: 24px 32px 0;
+	flex-wrap: wrap;
+
+	&__titles {
+		flex: 0 0 auto;
+	}
+
+	&__title {
+		font-size: 26px;
+		font-weight: 700;
+		margin: 0;
+		line-height: 1.2;
+		color: $admin-text;
+	}
+
+	&__subtitle {
+		margin: 6px 0 0;
+		font-size: 13px;
+		color: $admin-text-muted;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex: 1;
+		justify-content: flex-end;
+		min-width: 280px;
+	}
+
+	&__bell {
+		position: relative;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
+		border: 1px solid $admin-border;
+		background: $admin-surface-elevated;
+		color: $admin-text-secondary;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:hover {
+			border-color: rgba(115, 12, 30, 0.45);
+		}
+	}
+
+	&__bell-dot {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #ff4d4f;
+	}
+
+	&__user {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 12px 6px 6px;
+		border-radius: 999px;
+		border: 1px solid $admin-border;
+		background: $admin-surface-elevated;
+		color: $admin-text;
+		font-size: 13px;
+		font-weight: 500;
+		cursor: pointer;
+	}
+
+	&__avatar {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		color: #fff;
+		font-size: 12px;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+/* ── Search ── */
+.fixora-admin-search {
+	position: relative;
+	flex: 1;
+	max-width: 420px;
+
+	&--header {
+		max-width: 360px;
+	}
+
+	&__icon {
+		position: absolute;
+		left: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: $admin-text-muted;
+		pointer-events: none;
+	}
+
+	&__input {
+		width: 100%;
+		height: 40px;
+		padding: 0 14px 0 40px;
+		border-radius: 10px;
+		border: 1px solid $admin-border;
+		background: $admin-surface-elevated;
+		color: $admin-text;
+		font-size: 13px;
+		outline: none;
+
+		&::placeholder {
+			color: $admin-text-muted;
+		}
+
+		&:focus {
+			border-color: rgba(115, 12, 30, 0.55);
+		}
+
+		&:disabled {
+			opacity: 0.55;
+			cursor: not-allowed;
+		}
+	}
+
+	&__dropdown {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		right: 0;
+		z-index: 50;
+		background: $admin-surface-elevated;
+		border: 1px solid $admin-border;
+		border-radius: 10px;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+		max-height: 280px;
+		overflow-y: auto;
+	}
+
+	&__item {
+		display: block;
+		width: 100%;
+		padding: 10px 14px;
+		font-size: 13px;
+		color: $admin-text-muted;
+		border: none;
+		background: transparent;
+		text-align: left;
+
+		&--btn {
+			cursor: pointer;
+
+			strong {
+				display: block;
+				color: $admin-text;
+				font-weight: 600;
+				margin-bottom: 2px;
+			}
+
+			span {
+				font-size: 12px;
+				color: $admin-text-muted;
+			}
+
+			&:hover {
+				background: rgba(115, 12, 30, 0.12);
+			}
+		}
+	}
+}
+
+/* ── Stat cards ── */
+
+/* ── Cards & panels ── */
+.fixora-admin-card {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	padding: 20px;
+}
+
+.fixora-admin-stat-card {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	padding: 18px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	&__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 8px;
+	}
+
+	&__icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&--primary { background: rgba(115, 12, 30, 0.2); color: #e85a6f; }
+		&--success { background: rgba(82, 196, 26, 0.15); color: #52c41a; }
+		&--warning { background: rgba(250, 173, 20, 0.15); color: #faad14; }
+		&--danger { background: rgba(255, 77, 79, 0.15); color: #ff4d4f; }
+		&--info { background: rgba(24, 144, 255, 0.15); color: #69b1ff; }
+	}
+
+	&__value {
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1.1;
+		color: $admin-text;
+	}
+
+	&__label {
+		font-size: 13px;
+		color: $admin-text-secondary;
+	}
+
+	&__sub {
+		font-size: 12px;
+		color: $admin-text-muted;
+		margin-top: 4px;
+	}
+}
+
+.fixora-admin-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.fixora-admin-charts-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.fixora-admin-two-col {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+/* ── Filter tabs ── */
+.fixora-admin-filter-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+
+	&__tab {
+		padding: 8px 16px;
+		border-radius: 999px;
+		border: 1px solid $admin-border;
+		background: transparent;
+		color: $admin-text-secondary;
+		font-size: 13px;
+		font-weight: 500;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+
+		&--active {
+			background: var(--fixora-primary-soft);
+			border-color: rgba(115, 12, 30, 0.5);
+			color: $admin-primary;
+		}
+	}
+
+	&__badge {
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border-radius: 999px;
+		background: #ff4d4f;
+		color: #fff;
+		font-size: 10px;
+		font-weight: 700;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+/* ── Status badges ── */
+.fixora-admin-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px 10px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+	&--primary { background: rgba(115, 12, 30, 0.25); color: #e85a6f; border: 1px solid rgba(115, 12, 30, 0.4); }
+	&--success { background: rgba(82, 196, 26, 0.15); color: #52c41a; border: 1px solid rgba(82, 196, 26, 0.35); }
+	&--warning { background: rgba(250, 173, 20, 0.12); color: #faad14; border: 1px solid rgba(250, 173, 20, 0.35); }
+	&--danger { background: rgba(255, 77, 79, 0.12); color: #ff4d4f; border: 1px solid rgba(255, 77, 79, 0.35); }
+	&--neutral { background: rgba(255, 255, 255, 0.06); color: $admin-text-secondary; border: 1px solid $admin-border; }
+	&--info { background: rgba(24, 144, 255, 0.12); color: #69b1ff; border: 1px solid rgba(24, 144, 255, 0.3); }
+	&--purple { background: rgba(114, 46, 209, 0.15); color: #b37feb; border: 1px solid rgba(114, 46, 209, 0.35); }
+	&--blue { background: rgba(24, 144, 255, 0.12); color: #69b1ff; border: 1px solid rgba(24, 144, 255, 0.3); }
+	&--yellow { background: rgba(250, 173, 20, 0.12); color: #ffc53d; border: 1px solid rgba(250, 173, 20, 0.35); }
+}
+
+/* ── Table ── */
+.fixora-admin-table-wrap {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	overflow: hidden;
+}
+
+.fixora-admin-table-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px 20px;
+	border-bottom: 1px solid $admin-border;
+	flex-wrap: wrap;
+
+	.fixora-admin-search {
+		flex: 1;
+		min-width: 200px;
+		max-width: none;
+	}
+}
+
+.fixora-admin-select {
+	height: 40px;
+	padding: 0 32px 0 12px;
+	border-radius: 10px;
+	border: 1px solid $admin-border;
+	background: $admin-surface-elevated;
+	color: $admin-text;
+	font-size: 13px;
+	cursor: pointer;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+}
+
+.fixora-admin-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+
+	th {
+		text-align: left;
+		padding: 12px 16px;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: $admin-text-muted;
+		border-bottom: 1px solid $admin-border;
+		white-space: nowrap;
+	}
+
+	td {
+		padding: 14px 16px;
+		border-bottom: 1px solid rgba(115, 12, 30, 0.12);
+		color: $admin-text-secondary;
+		vertical-align: middle;
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+
+	tr:hover td {
+		background: rgba(115, 12, 30, 0.04);
+	}
+}
+
+.fixora-admin-table-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 20px;
+	border-top: 1px solid $admin-border;
+	font-size: 13px;
+	color: $admin-text-muted;
+}
+
+.fixora-admin-table-user {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
+	&__avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: $admin-surface-elevated;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		font-weight: 600;
+		color: $admin-text-secondary;
+		overflow: hidden;
+		flex-shrink: 0;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__name {
+		font-weight: 500;
+		color: $admin-text;
+	}
+}
+
+.fixora-admin-link-id {
+	color: $admin-primary;
+	font-weight: 600;
+	font-size: 12px;
+}
+
+/* ── Pagination ── */
+.fixora-admin-pagination {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	&__btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		border: 1px solid $admin-border;
+		background: transparent;
+		color: $admin-text-secondary;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:hover:not(:disabled) {
+			border-color: $admin-primary;
+			color: $admin-primary;
+		}
+
+		&:disabled {
+			opacity: 0.35;
+			cursor: not-allowed;
+		}
+	}
+
+	&__label {
+		font-size: 13px;
+		color: $admin-text-muted;
+		min-width: 80px;
+		text-align: center;
+	}
+}
+
+/* ── Buttons ── */
+.fixora-admin-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 10px 20px;
+	border-radius: 10px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: background 0.15s, border-color 0.15s;
+
+	&--primary {
+		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		color: #fff;
+		&:hover { background: linear-gradient(135deg, #8e1428 0%, #730c1e 100%); }
+	}
+
+	&--outline {
+		background: transparent;
+		border-color: $admin-border;
+		color: $admin-text-secondary;
+		&:hover { border-color: $admin-primary; color: $admin-primary; }
+	}
+
+	&--danger-outline {
+		background: transparent;
+		border-color: rgba(255, 77, 79, 0.45);
+		color: #ff4d4f;
+		&:hover { background: rgba(255, 77, 79, 0.08); }
+	}
+
+	&--sm {
+		padding: 6px 14px;
+		font-size: 12px;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+/* ── Gap banner ── */
+.fixora-admin-gap-banner {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+	border-radius: 10px;
+	border: 1px dashed rgba(115, 12, 30, 0.45);
+	background: rgba(115, 12, 30, 0.08);
+	font-size: 12px;
+	color: $admin-text-secondary;
+
+	strong {
+		color: $admin-primary;
+		font-size: 12px;
+	}
+}
+
+/* ── Verification layout ── */
+.fixora-admin-verification {
+	display: grid;
+	grid-template-columns: 1fr 380px;
+	gap: 16px;
+	min-height: 480px;
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		max-height: calc(100vh - 220px);
+		overflow-y: auto;
+	}
+
+	&__list-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 14px 16px;
+		border-radius: 12px;
+		border: 1px solid $admin-border;
+		background: $admin-surface;
+		cursor: pointer;
+		text-align: left;
+		width: 100%;
+		color: inherit;
+		transition: border-color 0.15s;
+
+		&:hover {
+			border-color: rgba(115, 12, 30, 0.4);
+		}
+
+		&--active {
+			border-color: $admin-primary;
+			box-shadow: 0 0 0 1px rgba(115, 12, 30, 0.35);
+		}
+	}
+
+	&__detail {
+		background: $admin-surface;
+		border: 1px solid $admin-border;
+		border-radius: 14px;
+		padding: 20px;
+		max-height: calc(100vh - 220px);
+		overflow-y: auto;
+	}
+
+	&__docs {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-top: 12px;
+	}
+
+	&__doc-card {
+		aspect-ratio: 1;
+		border-radius: 10px;
+		border: 1px solid $admin-border;
+		background: $admin-surface-elevated;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		font-size: 11px;
+		color: $admin-text-muted;
+		padding: 8px;
+		text-align: center;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__checklist {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-top: 12px;
+	}
+
+	&__check-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12px;
+		color: $admin-text-secondary;
+	}
+
+	&__actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+		margin-top: 20px;
+	}
+}
+
+/* ── Booking status pills row ── */
+.fixora-admin-status-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 16px;
+
+	&__pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 14px;
+		border-radius: 999px;
+		border: 1px solid $admin-border;
+		background: $admin-surface;
+		font-size: 12px;
+		font-weight: 600;
+		color: $admin-text-secondary;
+		cursor: pointer;
+
+		&--active {
+			border-color: rgba(115, 12, 30, 0.5);
+			background: var(--fixora-primary-soft);
+		}
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+	}
+}
+
+/* ── Device grid ── */
+.fixora-admin-device-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+}
+
+.fixora-admin-device-card {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	padding: 18px;
+
+	&__top {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 12px;
+	}
+
+	&__title {
+		font-size: 16px;
+		font-weight: 600;
+		color: $admin-text;
+		margin: 0 0 6px;
+	}
+
+	&__meta {
+		font-size: 12px;
+		color: $admin-text-muted;
+		margin-bottom: 4px;
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 14px;
+		padding-top: 12px;
+		border-top: 1px solid $admin-border;
+	}
+}
+
+/* ── Moderation ── */
+.fixora-admin-moderation-card {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	padding: 20px;
+	margin-bottom: 16px;
+
+	&__actions {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 10px;
+		margin-top: 16px;
+	}
+}
+
+/* ── Settings ── */
+.fixora-admin-settings-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	max-width: 900px;
+}
+
+.fixora-admin-form-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.fixora-admin-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	label {
+		font-size: 12px;
+		font-weight: 500;
+		color: $admin-text-secondary;
+	}
+
+	input, select {
+		height: 44px;
+		padding: 0 14px;
+		border-radius: 10px;
+		border: 1px solid $admin-border;
+		background: $admin-surface-elevated;
+		color: $admin-text;
+		font-size: 14px;
+	}
+}
+
+.fixora-admin-empty {
+	padding: 40px 20px;
+	text-align: center;
+	color: $admin-text-muted;
+	font-size: 14px;
+}
+
+/* ── Chart card ── */
+.fixora-admin-chart-card {
+	background: $admin-surface;
+	border: 1px solid $admin-border;
+	border-radius: 14px;
+	padding: 20px;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 16px;
+	}
+
+	&__title {
+		font-size: 15px;
+		font-weight: 600;
+		margin: 0;
+		color: $admin-text;
+	}
+
+	&__sub {
+		font-size: 12px;
+		color: $admin-text-muted;
+		margin: 4px 0 0;
+	}
+
+	&__legend {
+		display: flex;
+		gap: 16px;
+		font-size: 12px;
+		color: $admin-text-secondary;
+
+		span {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+
+		&--primary { background: $admin-primary; }
+		&--blue { background: #69b1ff; }
+	}
+}
+
+/* ── Activity list ── */
+.fixora-admin-activity-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.fixora-admin-activity-item {
+	display: flex;
+	gap: 12px;
+	padding: 12px 0;
+	border-bottom: 1px solid rgba(115, 12, 30, 0.12);
+	font-size: 13px;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		margin-top: 6px;
+		flex-shrink: 0;
+	}
+
+	&__text {
+		flex: 1;
+		color: $admin-text-secondary;
+	}
+
+	&__time {
+		font-size: 12px;
+		color: $admin-text-muted;
+		white-space: nowrap;
+	}
+}
+
+/* ── Responsive ── */
+@media (max-width: 1279px) {
+	.fixora-admin-stats-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.fixora-admin-charts-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-admin-verification {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 1023px) {
+	.fixora-admin-sidebar {
+		transform: translateX(-100%);
+		transition: transform 0.25s ease;
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+
+		&--open {
+			transform: translateX(0);
+		}
+	}
+
+	.fixora-admin-main {
+		margin-left: 0;
+	}
+
+	.fixora-admin-header__actions {
+		flex-wrap: wrap;
+	}
+
+	.fixora-admin-mobile-menu {
+		position: fixed;
+		top: 12px;
+		left: 12px;
+		z-index: 110;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
+		border: 1px solid $admin-border;
+		background: $admin-surface;
+		color: $admin-text;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+
+	.fixora-admin-mobile-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 99;
+		background: rgba(0, 0, 0, 0.5);
+		border: none;
+		cursor: pointer;
+	}
+}
+
+@media (max-width: 767px) {
+	.fixora-admin-page {
+		padding: 16px;
+	}
+
+	.fixora-admin-stats-grid,
+	.fixora-admin-two-col,
+	.fixora-admin-device-grid,
+	.fixora-admin-form-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-admin-moderation-card__actions {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.fixora-admin-table-wrap {
+		overflow-x: auto;
+	}
+
+	.fixora-admin-table {
+		min-width: 720px;
+	}
+}
+
+/* Hide legacy admin light theme */
+#pc-wrap.admin {
+	display: none !important;
 }

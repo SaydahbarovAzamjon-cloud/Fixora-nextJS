@@ -89,11 +89,11 @@
 | P3-12 | Rename UI copy: Agent → Technician | ✅ Done | Same i18n pass (`Agents` → Technicians, etc.) |
 | P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | MVP: `likeTargetUser` on search/technicians; `getUserFollowers` on tech notifications; duplicate Apollo WS removed. Legacy routes unchanged. |
 | P3-14 | ON_SITE "Coming Soon" UI | ✅ Done | `BookingServiceTypeOptions` on profile + booking form; ON_SITE disabled badge (BIZ-01) |
-| P3-15 | Admin UI (incremental) | ⬜ Todo | No mockup — see `docs/design/admin/README.md` |
-| P3-15a | Admin shell (light, Fixora orange) | ⬜ Todo | Adapt `LayoutAdmin` — part of P3-15 |
-| P3-15b | Technician verification queue | ⬜ Todo | After P3-09 — required for onboarding flow |
-| P3-15c | Users + Bookings lists | ⬜ Todo | When FIXORAB admin APIs ready |
-| P3-15d | Community moderation | ⬜ Todo | After P3-10 |
+| P3-15 | Admin UI (incremental) | ✅ Done | Reference screenshots + burgundy theme; see `/_admin/*` |
+| P3-15a | Admin shell + menu | ✅ Done | `AdminLayout`, `AdminSidebar`, `AdminHeader` |
+| P3-15b | Technician verification queue | ✅ Done | `/_admin/verification` — GAP-074 for extra filters |
+| P3-15c | Users + Bookings lists | ✅ Done | `/_admin/users`, `/_admin/bookings` |
+| P3-15d | Community moderation | ✅ Done | `/_admin/moderation` — GAP-075 for comments tab |
 
 ---
 
@@ -119,8 +119,10 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** **GAP-098** saved technicians (FixoraB) OR **P3-15** admin incremental OR desktop QA pass
+**Next task:** **PM-01** mobile foundation OR desktop QA pass (FixoraB API required)
 
-**Desktop gap checklist (Phase 2):** P3-14 ✅ · P3-07b ✅ · Story viewer ✅ · P3-11/12 ✅ · P3-13 partial ✅ · GAP-098/GAP-063 blocked on backend · **PM-01+ deferred** until user approves mobile phase
+**Backend wiring:** Phase 0–4 ✅ — `docs/FIXORAF_SYNC.md`
+
+**Desktop gap checklist (Phase 2):** P3-14 ✅ · P3-07b ✅ · Backend gaps wired ✅ · **PM-01+ deferred** until user approves mobile phase
 
 See `AI_HANDOFF.md` for last agent and session notes.

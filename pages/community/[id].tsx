@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -6,6 +6,7 @@ import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import {
 	GET_ARTICLE,
+	INCREMENT_ARTICLE_VIEW,
 	LIKE_TARGET_ARTICLE,
 	GET_ARTICLE_COMMENTS,
 	CREATE_ARTICLE_COMMENT,
@@ -16,7 +17,6 @@ import { Article, Comment } from '../../libs/types/fixora/fixora';
 import PostHeader from '../../libs/components/community/fixora/PostHeader';
 import CommentSection from '../../libs/components/community/fixora/CommentSection';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
-import { recordArticleView } from '../../libs/utils/articleViews';
 
 const ToastViewerComponent = dynamic(() => import('../../libs/components/community/TViewer'), {
 	ssr: false,
@@ -32,13 +32,26 @@ const PostDetailPage: NextPage = () => {
 	const [likePending, setLikePending] = useState(false);
 	const [submitCommentPending, setSubmitCommentPending] = useState(false);
 	const [viewBump, setViewBump] = useState(0);
+	const viewRecordedRef = useRef(false);
+
+	const [incrementArticleView] = useMutation(INCREMENT_ARTICLE_VIEW);
 
 	useEffect(() => {
-		if (!article?._id) return;
-		if (recordArticleView(article._id)) {
-			setViewBump(1);
-		}
-	}, [article?._id]);
+		if (!article?._id || viewRecordedRef.current) return;
+		viewRecordedRef.current = true;
+		incrementArticleView({ variables: { articleId: article._id } })
+			.then((result) => {
+				const views = result.data?.incrementArticleView?.articleViews;
+				if (views != null) {
+					setArticle((prev) => (prev ? { ...prev, articleViews: views } : null));
+				} else {
+					setViewBump(1);
+				}
+			})
+			.catch(() => {
+				viewRecordedRef.current = false;
+			});
+	}, [article?._id, incrementArticleView]);
 
 	/** APOLLO REQUESTS **/
 	const { data: articleData, loading: articleLoading } = useQuery(GET_ARTICLE, {

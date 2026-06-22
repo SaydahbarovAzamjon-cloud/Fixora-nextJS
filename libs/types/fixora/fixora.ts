@@ -24,8 +24,10 @@ export interface TechnicianSummary {
 	averageRating?: number;
 	reviewCount?: number;
 	completedJobsCount?: number;
+	avgResponseMinutes?: number;
 	badgeLevel?: BadgeLevel;
 	followersCount?: number;
+	userArticles?: number;
 	createdAt?: string;
 	services?: UserServiceItem[];
 	meLiked?: MeLiked[];
@@ -42,6 +44,10 @@ export interface ArticleSummary {
 	articleViews: number;
 	articleComments: number;
 	createdAt: string;
+	meLiked?: MeLiked[];
+	meSaved?: boolean;
+	isFeatured?: boolean;
+	allowComments?: boolean;
 	authorData?: {
 		_id: string;
 		userNickname?: string;
@@ -66,6 +72,7 @@ export interface TechniciansInquiry {
 		latitude?: number;
 		longitude?: number;
 		radiusKm?: number;
+		maxAvgResponseMinutes?: number;
 	};
 }
 
@@ -103,6 +110,7 @@ export interface TechnicianProfile {
 	averageRating?: number;
 	reviewCount?: number;
 	completedJobsCount?: number;
+	avgResponseMinutes?: number;
 	yearsExperience?: number;
 	badgeLevel?: BadgeLevel;
 	followersCount?: number;
@@ -301,14 +309,31 @@ export interface Conversation {
 	peerId: string;
 	bookingId?: string | null;
 	bookingStatus?: BookingStatus | null;
+	deviceLabel?: string | null;
+	deviceModel?: string | null;
 	unreadCount: number;
 	updatedAt: string;
 	peer?: ConversationPeer;
 	lastMessage?: Message;
 }
 
-export type ArticleCategory = 'FREE' | 'HUMOR' | 'NEWS' | 'RECOMMEND';
+export type ArticleCategory =
+	| 'FREE'
+	| 'HUMOR'
+	| 'NEWS'
+	| 'RECOMMEND'
+	| 'REPAIR_GUIDE'
+	| 'QUICK_TIP'
+	| 'CASE_STUDY'
+	| 'TECHNIQUE';
 export type ArticleStatus = 'ACTIVE' | 'DELETE' | 'DRAFT' | 'PUBLISHED';
+export type ArticleVisibility = 'PUBLIC' | 'TECHNICIANS_ONLY';
+
+export interface MeSaved {
+	articleRefId: string;
+	memberId: string;
+	mySaved: boolean;
+}
 
 export interface ArticleAuthor {
 	_id: string;
@@ -330,12 +355,21 @@ export interface Article {
 	articleLikes: number;
 	articleViews: number;
 	articleComments: number;
+	articleVisibility?: ArticleVisibility | null;
+	isFeatured?: boolean | null;
+	allowComments?: boolean | null;
+	scheduledPublishAt?: string | null;
+	seoTitle?: string | null;
+	seoDescription?: string | null;
+	seoKeywords?: string | null;
+	repairDeviceCategory?: string | null;
 	userId: string;
 	createdAt: string;
 	updatedAt?: string;
 	deletedAt?: string | null;
 	authorData?: ArticleAuthor;
 	meLiked?: MeLiked[];
+	meSaved?: MeSaved[];
 }
 
 export interface StoryImage {
@@ -437,7 +471,34 @@ export interface ArticleInput {
 	articleExcerpt?: string;
 	articleImage?: string;
 	articleStatus?: ArticleStatus;
+	articleVisibility?: ArticleVisibility;
+	isFeatured?: boolean;
+	allowComments?: boolean;
+	repairDeviceCategory?: string;
+	scheduledPublishAt?: string;
+	seoTitle?: string;
+	seoDescription?: string;
+	seoKeywords?: string;
 }
+
+export interface ArticleUpdate {
+	_id: string;
+	articleTitle?: string;
+	articleContent?: string;
+	articleExcerpt?: string;
+	articleImage?: string;
+	articleStatus?: ArticleStatus;
+	articleVisibility?: ArticleVisibility;
+	isFeatured?: boolean;
+	allowComments?: boolean;
+	repairDeviceCategory?: string;
+	scheduledPublishAt?: string | null;
+	seoTitle?: string;
+	seoDescription?: string;
+	seoKeywords?: string;
+}
+
+export type EarningsReportPeriod = 'ALL_TIME' | 'LAST_30_DAYS' | 'LAST_90_DAYS' | 'THIS_MONTH';
 
 export type NotificationType = 'BOOKING' | 'COMMENT' | 'FOLLOW' | 'LIKE' | 'MESSAGE' | 'REVIEW';
 export type NotificationReferenceType = 'ARTICLE' | 'BOOKING' | 'MESSAGE' | 'REVIEW';

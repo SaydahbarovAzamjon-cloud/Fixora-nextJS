@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../libs/i18n/technicianPageProps';
 import { dateLocale } from '../../libs/utils/i18nLocale';
 import { formatClockTime, formatDueDate, formatTimeAgo } from '../../libs/utils/i18nTime';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useLazyQuery, useReactiveVar } from '@apollo/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
@@ -27,8 +27,11 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
 import { GET_INCOMING_REQUESTS, GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
 import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
+import { EXPORT_EARNINGS_REPORT } from '../../apollo/user/payout';
+import { EarningsReportPeriod } from '../../libs/types/fixora/fixora';
 import { userVar } from '../../apollo/store';
 import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
+import { CREATE_SCHEDULE_ITEM, DELETE_SCHEDULE_ITEM, GET_MY_SCHEDULE } from '../../apollo/user/schedule';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import { formatKrw, formatKrwCompact } from '../../libs/utils/formatCurrency';
 import { getPrimaryDeviceImageUrl } from '../../libs/utils/deviceImage';
@@ -49,12 +52,40 @@ import {
 
 type Period = 'Week' | 'Month' | 'Year';
 
-interface CustomScheduleItem {
-	id: string;
-	when: string; // ISO datetime (today)
-	task: string;
-	client: string;
+function downloadBase64File(contentBase64: string, fileName: string, mimeType: string) {
+	const binary = atob(contentBase64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i += 1) {
+		bytes[i] = binary.charCodeAt(i);
+	}
+	const blob = new Blob([bytes], { type: mimeType });
+	const url = URL.createObjectURL(blob);
+	const anchor = document.createElement('a');
+	anchor.href = url;
+	anchor.download = fileName;
+	anchor.click();
+	URL.revokeObjectURL(url);
 }
+
+function earningsReportPeriod(selected: Period | null): EarningsReportPeriod {
+	switch (selected) {
+		case 'Week':
+			return 'LAST_30_DAYS';
+		case 'Year':
+			return 'ALL_TIME';
+		case 'Month':
+		default:
+			return 'THIS_MONTH';
+	}
+}
+
+const todayScheduleRange = () => {
+	const from = new Date();
+	from.setHours(0, 0, 0, 0);
+	const to = new Date();
+	to.setHours(23, 59, 59, 999);
+	return { from: from.toISOString(), to: to.toISOString() };
+};
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -148,10 +179,25 @@ const TechnicianDashboard: NextPage = () => {
 	const [hoveredJob, setHoveredJob] = useState<string | null>(null);
 	const [period, setPeriod] = useState<Period | null>(null);
 	const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-	const [customSchedule, setCustomSchedule] = useState<CustomScheduleItem[]>([]);
+	const [exportingReport, setExportingReport] = useState(false);
+	const [scheduleSaving, setScheduleSaving] = useState(false);
 	const scheduleRef = useRef<HTMLDivElement>(null);
 
+	const scheduleInput = useMemo(() => {
+		const { from, to } = todayScheduleRange();
+		return {
+			page: 1,
+			limit: 50,
+			sort: 'startsAt',
+			direction: 'ASC' as const,
+			search: { from, to },
+		};
+	}, []);
+
 	const [updateUser] = useMutation(UPDATE_USER);
+	const [createScheduleItem] = useMutation(CREATE_SCHEDULE_ITEM);
+	const [deleteScheduleItem] = useMutation(DELETE_SCHEDULE_ITEM);
+	const [exportEarningsReport] = useLazyQuery(EXPORT_EARNINGS_REPORT, { fetchPolicy: 'network-only' });
 
 	const { data: incomingRequestsData } = useQuery(GET_INCOMING_REQUESTS, {
 		skip: !user?._id,
@@ -178,26 +224,16 @@ const TechnicianDashboard: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	// Locally-stored custom schedule items (no backend schedule model — device only)
-	const scheduleStorageKey = user?._id ? `fixora_tech_schedule_${user._id}` : '';
-	useEffect(() => {
-		if (!scheduleStorageKey) return;
-		try {
-			const raw = localStorage.getItem(scheduleStorageKey);
-			setCustomSchedule(raw ? JSON.parse(raw) : []);
-		} catch {
-			setCustomSchedule([]);
-		}
-	}, [scheduleStorageKey]);
-
-	const persistSchedule = (items: CustomScheduleItem[]) => {
-		setCustomSchedule(items);
-		try {
-			if (scheduleStorageKey) localStorage.setItem(scheduleStorageKey, JSON.stringify(items));
-		} catch {
-			/* ignore storage errors */
-		}
-	};
+	const {
+		data: scheduleData,
+		loading: scheduleLoading,
+		error: scheduleError,
+		refetch: refetchSchedule,
+	} = useQuery(GET_MY_SCHEDULE, {
+		skip: !user?._id,
+		variables: { input: scheduleInput },
+		fetchPolicy: 'network-only',
+	});
 
 	const { data: reviewsData } = useQuery(GET_TECHNICIAN_REVIEWS, {
 		skip: !user?._id,
@@ -218,6 +254,7 @@ const TechnicianDashboard: NextPage = () => {
 	const payments = useMemo(() => paymentsData?.getMyPayments?.list ?? [], [paymentsData]);
 	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
+	const customSchedule = useMemo(() => scheduleData?.getMySchedule?.list ?? [], [scheduleData]);
 	const usePaymentData = hasRealPayments(payments);
 
 	const activeJobs = useMemo(() => bookings.filter((b: any) => ['ACCEPTED', 'IN_PROGRESS'].includes(b?.bookingStatus)), [bookings]);
@@ -296,11 +333,11 @@ const TechnicianDashboard: NextPage = () => {
 				status: b.bookingStatus as string,
 				custom: false,
 			}));
-		const fromCustom = customSchedule.map((c) => ({
-			id: c.id,
-			when: new Date(c.when),
-			task: c.task,
-			client: c.client,
+		const fromCustom = customSchedule.map((c: any) => ({
+			id: c._id,
+			when: new Date(c.startsAt),
+			task: c.title,
+			client: c.notes ?? '',
 			status: 'CUSTOM',
 			custom: true,
 		}));
@@ -327,21 +364,61 @@ const TechnicianDashboard: NextPage = () => {
 
 	const viewScheduleHandler = () => scheduleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-	const exportReportHandler = () => router.push('/technician/earnings');
-
-	const addScheduleHandler = (item: NewScheduleItem) => {
-		const [h, m] = item.time.split(':');
-		const when = new Date();
-		when.setHours(Number(h) || 0, Number(m) || 0, 0, 0);
-		const next = [
-			...customSchedule,
-			{ id: `sch_${Date.now()}`, when: when.toISOString(), task: item.task, client: item.client },
-		];
-		persistSchedule(next);
+	const exportReportHandler = async () => {
+		if (!user?._id || exportingReport) return;
+		setExportingReport(true);
+		try {
+			const { data } = await exportEarningsReport({
+				variables: { input: { period: earningsReportPeriod(period) } },
+			});
+			const report = data?.exportEarningsReport;
+			if (!report?.contentBase64) {
+				throw new Error(t('dashboard.exportReportEmpty'));
+			}
+			downloadBase64File(report.contentBase64, report.fileName, report.mimeType);
+			await sweetTopSmallSuccessAlert(t('dashboard.exportReportSuccess'), 900);
+		} catch (err) {
+			await sweetErrorHandling(err);
+		} finally {
+			setExportingReport(false);
+		}
 	};
 
-	const removeScheduleHandler = (id: string) => {
-		persistSchedule(customSchedule.filter((c) => c.id !== id));
+	const addScheduleHandler = async (item: NewScheduleItem) => {
+		try {
+			if (!user?._id) return;
+			setScheduleSaving(true);
+			const [h, m] = item.time.split(':');
+			const startsAt = new Date();
+			startsAt.setHours(Number(h) || 0, Number(m) || 0, 0, 0);
+			const endsAt = new Date(startsAt);
+			endsAt.setHours(endsAt.getHours() + 1);
+			await createScheduleItem({
+				variables: {
+					input: {
+						title: item.task,
+						notes: item.client.trim() || undefined,
+						startsAt: startsAt.toISOString(),
+						endsAt: endsAt.toISOString(),
+					},
+				},
+			});
+			await refetchSchedule();
+			await sweetTopSmallSuccessAlert(t('schedule.added'), 900);
+		} catch (err) {
+			await sweetErrorHandling(err);
+		} finally {
+			setScheduleSaving(false);
+		}
+	};
+
+	const removeScheduleHandler = async (id: string) => {
+		try {
+			await deleteScheduleItem({ variables: { scheduleItemId: id } });
+			await refetchSchedule();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	return (
@@ -374,7 +451,12 @@ const TechnicianDashboard: NextPage = () => {
 							<CalendarTodayOutlined style={{ fontSize: 19 }} />
 							<span>{t('dashboard.viewSchedule')}</span>
 						</button>
-					<button className="fixora-tech-quick-action fixora-tech-quick-action--purple" type="button" onClick={exportReportHandler}>
+					<button
+						className="fixora-tech-quick-action fixora-tech-quick-action--purple"
+						type="button"
+						onClick={exportReportHandler}
+						disabled={exportingReport}
+					>
 							<NorthEastOutlined style={{ fontSize: 20 }} />
 							<span>{t('dashboard.exportReport')}</span>
 						</button>
@@ -602,7 +684,11 @@ const TechnicianDashboard: NextPage = () => {
 							</button>
 						</div>
 						<div className="fixora-tech-schedule-list">
-							{mergedSchedule.length > 0 ? (
+							{scheduleLoading ? (
+								<div className="fixora-tech-empty">{t('dashboard.scheduleLoading')}</div>
+							) : scheduleError ? (
+								<div className="fixora-tech-empty" role="alert">{t('dashboard.scheduleError')}</div>
+							) : mergedSchedule.length > 0 ? (
 								mergedSchedule.map((item, idx) => {
 									const done = item.status === 'COMPLETED';
 									const dotColor = item.custom ? '#FF6B00' : scheduleDotColor(item.status);
@@ -641,7 +727,12 @@ const TechnicianDashboard: NextPage = () => {
 					</div>
 			</div>
 
-			<AddScheduleModal open={scheduleModalOpen} onClose={() => setScheduleModalOpen(false)} onAdd={addScheduleHandler} />
+			<AddScheduleModal
+				open={scheduleModalOpen}
+				onClose={() => setScheduleModalOpen(false)}
+				onAdd={addScheduleHandler}
+				saving={scheduleSaving}
+			/>
 
 			{/* Recent Reviews (full width) */}
 			<div className="fixora-tech-card">

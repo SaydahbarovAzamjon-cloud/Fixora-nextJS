@@ -41,3 +41,9 @@ export const MARK_ALL_NOTIFICATIONS_READ = gql`
 		markAllNotificationsRead
 	}
 `;
+
+export const DELETE_NOTIFICATION = gql`
+	mutation DeleteNotification($notificationId: String!) {
+		deleteNotification(notificationId: $notificationId)
+	}
+`;

@@ -427,6 +427,8 @@ function mapIssueCategory(raw?: string | null): string {
 			return 'Battery';
 		case 'WATER_DAMAGE':
 			return 'Water';
+		case 'CAMERA':
+			return 'Camera';
 		case 'CHARGING':
 			return 'Charging';
 		case 'KEYBOARD':
@@ -534,6 +536,25 @@ export function computeRepeatClientRate(bookings: TechnicianBooking[]): number |
 	if (clients.length === 0) return null;
 	const repeat = clients.filter((id) => counts[id] >= 2).length;
 	return Math.round((repeat / clients.length) * 100);
+}
+
+export function buildMonthlyPayoutsFromRecords(
+	payouts: { payoutAmount: number; completedAt?: string | null; requestedAt?: string | null }[],
+): MonthlyPayoutPoint[] {
+	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	const year = new Date().getFullYear();
+	const totals = months.map((month, i) => ({ month, payout: 0, color: MONTH_COLORS[i] || '#7C6FF0' }));
+
+	payouts
+		.filter((p) => p.completedAt)
+		.forEach((p) => {
+			const when = new Date(p.completedAt || p.requestedAt || 0);
+			if (when.getFullYear() !== year) return;
+			totals[when.getMonth()].payout += p.payoutAmount ?? 0;
+		});
+
+	const currentMonth = new Date().getMonth();
+	return totals.slice(0, currentMonth + 1).filter((m) => m.payout > 0);
 }
 
 export function buildMonthlyPayouts(bookings: TechnicianBooking[], payments: TechnicianPayment[]): MonthlyPayoutPoint[] {

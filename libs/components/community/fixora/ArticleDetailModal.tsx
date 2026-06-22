@@ -9,13 +9,12 @@ import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import BookmarkBorderRoundedIcon from '@mui/icons-material/BookmarkBorderRounded';
 import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import ShareOutlined from '@mui/icons-material/ShareOutlined';
-import { GET_ARTICLE, LIKE_TARGET_ARTICLE } from '../../../../apollo/user/article';
+import { GET_ARTICLE, INCREMENT_ARTICLE_VIEW, LIKE_TARGET_ARTICLE } from '../../../../apollo/user/article';
 import { Article } from '../../../types/fixora/fixora';
 import { resolveArticleImageUrl } from '../../../utils/articleImage';
 import { estimateArticleReadMinutes } from '../../../utils/articleReadTime';
 import { articleCategoryToCommunityFilter } from '../../../utils/communityCategories';
 import { formatArticleCount, formatArticlePublishedAt, getArticleTagKeys } from '../../../utils/communityArticleDisplay';
-import { recordArticleView } from '../../../utils/articleViews';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
 import ArticleAuthorLink from './ArticleAuthorLink';
 
@@ -54,6 +53,7 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 	});
 
 	const [likeArticle] = useMutation(LIKE_TARGET_ARTICLE);
+	const [incrementArticleView] = useMutation(INCREMENT_ARTICLE_VIEW);
 
 	const article: Article | undefined = data?.getArticle
 		? { ...data.getArticle, ...articleOverride }
@@ -73,15 +73,24 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 
 	useEffect(() => {
 		if (!open || !article || viewRecorded) return;
-		if (recordArticleView(article._id)) {
-			onViewRecorded?.(article._id, article.articleViews ?? 0);
-			setViewRecorded(true);
-			setArticleOverride((prev) => ({
-				...prev,
-				articleViews: (article.articleViews ?? 0) + 1,
-			}));
-		}
-	}, [open, article, viewRecorded, onViewRecorded]);
+		incrementArticleView({ variables: { articleId: article._id } })
+			.then((result) => {
+				const views = result.data?.incrementArticleView?.articleViews;
+				onViewRecorded?.(article._id, article.articleViews ?? 0);
+				setViewRecorded(true);
+				if (views != null) {
+					setArticleOverride((prev) => ({ ...prev, articleViews: views }));
+				} else {
+					setArticleOverride((prev) => ({
+						...prev,
+						articleViews: (article.articleViews ?? 0) + 1,
+					}));
+				}
+			})
+			.catch(() => {
+				/* ignore view tracking failures */
+			});
+	}, [open, article, viewRecorded, onViewRecorded, incrementArticleView]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -122,7 +131,8 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 
 	const handleSave = useCallback(() => {
 		if (!article) return;
-		setSaved(onToggleSave(article._id));
+		onToggleSave(article._id);
+		setSaved((prev) => !prev);
 	}, [article, onToggleSave]);
 
 	const handleShare = useCallback(async () => {
@@ -150,7 +160,7 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 		: null;
 	const tagKeys = article ? getArticleTagKeys(article) : [];
 	const author = article?.authorData;
-	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor');
+	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor') || 'Author';
 	const formattedDate = article?.createdAt
 		? formatArticlePublishedAt(article.createdAt, i18n.language)
 		: '';

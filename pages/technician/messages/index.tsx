@@ -16,11 +16,12 @@ import DoneRounded from '@mui/icons-material/DoneRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../../apollo/user/message';
+import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ, UPLOAD_MESSAGE_IMAGE } from '../../../apollo/user/message';
 import { userVar } from '../../../apollo/store';
 import { Conversation, Message } from '../../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
 import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
+import { compressMessageImage } from '../../../libs/utils/compressMessageImage';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 import useRealtimePollInterval from '../../../libs/hooks/useRealtimePollInterval';
 
@@ -149,6 +150,7 @@ const Messages: NextPage = () => {
 	const messages: Message[] = messagesData?.getMessages?.list ?? [];
 
 	const [sendMessage] = useMutation(SEND_MESSAGE);
+	const [uploadMessageImage] = useMutation(UPLOAD_MESSAGE_IMAGE);
 	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ);
 
 	/** LIFECYCLES **/
@@ -202,27 +204,26 @@ const Messages: NextPage = () => {
 
 		// FIX 3: send image if preview exists
 		if (imgPreview) {
-			const reader = new FileReader();
-			reader.onloadend = async () => {
-				const base64 = reader.result as string;
-				try {
-					await sendMessage({
-						variables: {
-							input: {
-								receiverId: selected.peerId,
-								messageContent: base64,
-								messageType: 'IMAGE',
-							},
+			try {
+				const compressed = await compressMessageImage(imgPreview.file);
+				const { data: uploadData } = await uploadMessageImage({ variables: { file: compressed } });
+				const imageUrl = uploadData?.uploadMessageImage;
+				if (!imageUrl) throw new Error('Image upload failed');
+				await sendMessage({
+					variables: {
+						input: {
+							receiverId: selected.peerId,
+							messageContent: imageUrl,
+							messageType: 'IMAGE',
 						},
-					});
-					setImgPreview(null);
-					await refetchMessages();
-					await refetchConversations();
-				} catch (err: any) {
-					await sweetErrorHandling(err);
-				}
-			};
-			reader.readAsDataURL(imgPreview.file);
+					},
+				});
+				setImgPreview(null);
+				await refetchMessages();
+				await refetchConversations();
+			} catch (err: any) {
+				await sweetErrorHandling(err);
+			}
 			return;
 		}
 
@@ -414,7 +415,7 @@ const Messages: NextPage = () => {
 										<div className="fixora-msg-row__wrap">
 											<div className={`fixora-msg-bubble fixora-msg-bubble--${dir}`}>
 												{isImg
-													? <img src={m.messageContent} alt="image" className="fixora-msg-bubble__img" />
+													? <img src={resolveProfileImageUrl(m.messageContent)} alt="image" className="fixora-msg-bubble__img" />
 													: m.messageContent}
 											</div>
 											<div className="fixora-msg-bubble__meta">

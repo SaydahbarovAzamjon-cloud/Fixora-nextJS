@@ -19,7 +19,7 @@ interface PostHeaderProps {
 const PostHeader = ({ article, isLiked, onLike, likePending = false }: PostHeaderProps) => {
 	const { t } = useTranslation('common');
 	const author = article.authorData;
-	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor');
+	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor') || 'Author';
 	const coverUrl = resolveArticleImageUrl(article.articleImage);
 
 	return (

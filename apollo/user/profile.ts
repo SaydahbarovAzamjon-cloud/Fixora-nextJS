@@ -233,6 +233,57 @@ export const GET_USER_FOLLOWINGS = gql`
  *    PROFILE FOLLOWERS   *
  *************************/
 
+export const GET_USER_LIKED_TECHNICIANS = gql`
+	query GetUserLikedTechnicians($input: LikedTechniciansInquiry!) {
+		getUserLikedTechnicians(input: $input) {
+			list {
+				_id
+				userNickname
+				userFullName
+				userProfileImage
+				shopName
+				specialty
+				averageRating
+				reviewCount
+				badgeLevel
+				userArticles
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_PUBLIC_CLIENT_PROFILE = gql`
+	query GetPublicClientProfile($clientId: String!) {
+		getPublicClientProfile(clientId: $clientId) {
+			client {
+				_id
+				userNickname
+				userFullName
+				userProfileImage
+				userBio
+				userLocation
+				userType
+				followingCount
+				reviewCount
+				createdAt
+			}
+			totalBookings
+			completedBookings
+			totalSpent
+			reviewsWritten
+			savedTechniciansCount
+		}
+	}
+`;
+
 export const GET_USER_FOLLOWERS = gql`
 	query GetUserFollowers($input: FollowInquiry!) {
 		getUserFollowers(input: $input) {
@@ -269,6 +320,8 @@ export const GET_MY_ARTICLES = gql`
 				articleExcerpt
 				articleImage
 				articleStatus
+				isFeatured
+				allowComments
 				articleLikes
 				articleViews
 				articleComments

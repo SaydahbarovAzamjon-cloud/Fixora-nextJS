@@ -40,6 +40,8 @@
     "available": "Available",
     "viewSchedule": "View Schedule",
     "exportReport": "Export Report",
+    "exportReportSuccess": "Report downloaded",
+    "exportReportEmpty": "No earnings data to export",
     "totalRequests": "Total Requests",
     "activeJobs": "Active Jobs",
     "thisWeek": "This Week",
@@ -66,7 +68,9 @@
     "due": "Due: {{date}}",
     "periodWeek": "Week",
     "periodMonth": "Month",
-    "periodYear": "Year"
+    "periodYear": "Year",
+    "scheduleLoading": "Loading schedule…",
+    "scheduleError": "Could not load schedule. Try again later."
   },
   "urgency": {
     "high": "high",
@@ -163,7 +167,8 @@
     "topClients": "Top Clients",
     "byLifetimeRevenue": "By lifetime revenue",
     "jobsCount": "{{count}} jobs",
-    "tooltipJobs": "Jobs"
+    "tooltipJobs": "Jobs",
+    "loadError": "Could not load analytics KPIs. Charts may still show booking data."
   },
   "earnings": {
     "title": "Earnings & Payouts",
@@ -174,6 +179,8 @@
     "rangeThisYear": "This Year",
     "requestPayout": "Request Payout",
     "payoutComingSoon": "Payout requests coming soon",
+    "payoutRequested": "Payout requested successfully",
+    "noPayoutHistory": "No payout history yet",
     "totalEarned": "Total Earned",
     "pending": "Pending",
     "nextPayout": "Next Payout",
@@ -241,7 +248,8 @@
     "paymentStatusPending": "pending",
     "paymentDescription": "{{type}} {{status}} · {{amount}}",
     "subtitle": "Stay on top of your repair workflow",
-    "newBadge": "{{count}} new"
+    "newBadge": "{{count}} new",
+    "delete": "Delete notification"
   },
   "profile": {
     "proTechnician": "Pro Technician",
@@ -304,8 +312,7 @@
       "invalidType": "Only PNG, JPG, or WebP images are allowed.",
       "tooLarge": "Image must be 5MB or smaller.",
       "uploadFailed": "Could not upload profile photo. Please try again.",
-      "saved": "Profile saved.",
-      "emailChangePending": "Profile updated. Email change is not available yet — your login email is unchanged."
+      "saved": "Profile saved."
     },
     "account": {
       "title": "Account Settings",
@@ -316,11 +323,30 @@
       "proTechnician": "Pro Technician",
       "proSub": "Your current plan",
       "enterprise": "Enterprise",
-      "enterpriseSub": "Team features"
+      "enterpriseSub": "Team features",
+      "slugRequired": "Enter a profile URL slug.",
+      "saved": "Account saved."
     },
     "notifications": {
       "title": "Notifications",
-      "desc": "Choose what you get notified about"
+      "desc": "Choose what you get notified about",
+      "saved": "Notification preferences saved.",
+      "prefs": {
+        "bookingUpdates": "Booking updates",
+        "bookingUpdatesHint": "Status changes on your active jobs",
+        "messages": "Messages",
+        "messagesHint": "New chat messages from clients",
+        "payments": "Payments",
+        "paymentsHint": "Deposits, final payments, and payouts",
+        "reviews": "Reviews",
+        "reviewsHint": "New ratings and review comments",
+        "marketing": "Marketing",
+        "marketingHint": "Product news and promotions",
+        "followAlerts": "Follow alerts",
+        "followAlertsHint": "When someone follows your profile",
+        "emailDigest": "Email digest",
+        "emailDigestHint": "Weekly summary by email"
+      }
     },
     "security": {
       "title": "Security",
@@ -334,13 +360,37 @@
       "passwordMin": "Password must be at least 8 characters.",
       "passwordMismatch": "Passwords do not match.",
       "currentRequired": "Enter your current password.",
-      "gap090Hint": "Note: current password verification requires FIXORAB changePassword mutation (GAP-090).",
+      "passwordSaved": "Password updated.",
       "twoFactor": "Two-Factor Authentication",
-      "twoFactorFuture": "Planned: Authenticator, email ({{email}}), SMS ({{phone}})."
+      "twoFactorOn": "Enabled",
+      "twoFactorOff": "Disabled",
+      "enable2FA": "Set up authenticator",
+      "verify2FA": "Verify and enable",
+      "disable2FA": "Disable 2FA",
+      "totpCode": "AUTHENTICATOR CODE",
+      "scanQr": "Scan the QR code in your authenticator app, then enter the 6-digit code.",
+      "manualSecret": "Manual entry secret: {{secret}}",
+      "twoFactorEnabled": "Two-factor authentication enabled.",
+      "twoFactorDisabled": "Two-factor authentication disabled.",
+      "twoFactorEnableFailed": "Could not start 2FA setup.",
+      "twoFactorVerifyFailed": "Invalid code. Try again.",
+      "twoFactorDisableFailed": "Could not disable 2FA. Check your password."
     },
     "payment": {
       "title": "Payment Methods",
-      "desc": "Manage how you receive earnings"
+      "desc": "Manage how you receive earnings",
+      "savedMethods": "Saved methods",
+      "empty": "No payment methods saved yet.",
+      "primary": "Primary",
+      "makePrimary": "Make primary",
+      "addMethod": "Add payment method",
+      "label": "LABEL",
+      "type": "TYPE",
+      "typeCard": "Card",
+      "typeCash": "Cash",
+      "masked": "MASKED NUMBER",
+      "addButton": "Add method",
+      "added": "Payment method added."
     },
     "availability": {
       "title": "Availability",
@@ -351,16 +401,21 @@
     },
     "preferences": {
       "title": "Preferences",
-      "desc": "Customize your FIXORA experience"
+      "desc": "Customize your FIXORA experience",
+      "language": "LANGUAGE",
+      "currency": "CURRENCY",
+      "timezone": "TIMEZONE",
+      "darkMode": "Dark mode",
+      "saved": "Preferences saved."
     },
     "delete": {
       "title": "Delete Account",
       "desc": "Permanently remove your FIXORA account and all data",
       "dangerZone": "Danger Zone",
       "warning": "Deleting your account is permanent and cannot be undone. All of your profile data, job history, reviews, and earnings records will be permanently erased. Active jobs and pending payments must be resolved before deletion.",
-      "confirmLabel": "TYPE \"DELETE MY ACCOUNT\" TO CONFIRM",
-      "submit": "Permanently Delete Account",
-      "gap095Message": "Account deletion requires FIXORAB deleteAccount mutation ({{gap}})."
+      "confirmLabel": "TYPE \"DELETE\" TO CONFIRM",
+      "confirmPrompt": "This will permanently delete your account. Continue?",
+      "submit": "Permanently Delete Account"
     }
   },
   "schedule": {
@@ -371,7 +426,9 @@
     "clientOptional": "Client (optional)",
     "clientPlaceholder": "e.g. Kim Sofia",
     "cancel": "Cancel",
-    "add": "Add"
+    "add": "Add",
+    "added": "Schedule item added",
+    "saving": "Saving…"
   },
   "time": {
     "justNow": "just now",
@@ -446,6 +503,7 @@
     "saveDraftMode": "Save Draft",
     "publishNow": "Publish Now",
     "schedulePublication": "Schedule Publication",
+    "scheduleDate": "Publish date & time",
     "visibility": "VISIBILITY",
     "public": "Public",
     "techsOnly": "Techs Only",

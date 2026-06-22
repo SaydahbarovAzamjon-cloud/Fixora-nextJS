@@ -40,7 +40,7 @@ const FeaturedArticleCard: React.FC<FeaturedArticleCardProps> = ({
 	const tagKeys = getArticleTagKeys(article);
 
 	const author = article.authorData;
-	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor');
+	const authorName = author?.userNickname || author?.userFullName || t('community.anonymousAuthor') || 'Author';
 	const publishedAt = formatArticlePublishedAt(article.createdAt, i18n.language);
 
 	const handleOpen = useCallback(() => onOpen(article._id), [article._id, onOpen]);

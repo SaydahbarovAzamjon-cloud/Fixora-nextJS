@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import { GET_ARTICLES } from '../../apollo/user/query';
-import { LIKE_TARGET_ARTICLE } from '../../apollo/user/article';
+import {
+	INCREMENT_ARTICLE_VIEW,
+	LIKE_TARGET_ARTICLE,
+	SAVE_ARTICLE,
+	UNSAVE_ARTICLE,
+} from '../../apollo/user/article';
 import { Article } from '../types/fixora/fixora';
 import { CommunityCategoryId, communityFilterToArticleCategory } from '../utils/communityCategories';
-import { getArticleLocalSettings } from '../utils/articleLocalSettings';
-import { recordArticleView } from '../utils/articleViews';
-import { isArticleSaved, toggleSavedArticle } from '../utils/savedArticles';
 import { sweetErrorHandling } from '../sweetAlert';
 
 export const COMMUNITY_PAGE_SIZE = 6;
@@ -31,6 +33,7 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 	const [page, setPage] = useState(1);
 	const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
 	const [likePendingId, setLikePendingId] = useState<string | null>(null);
+	const [savePendingId, setSavePendingId] = useState<string | null>(null);
 	const [overrides, setOverrides] = useState<Record<string, ArticleOverride>>({});
 
 	useEffect(() => {
@@ -81,7 +84,7 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 
 	const featuredArticle = useMemo((): Article | null => {
 		if (page !== 1 || articles.length === 0) return null;
-		const flagged = articles.find((a) => getArticleLocalSettings(a._id)?.featured);
+		const flagged = articles.find((a) => a.isFeatured);
 		return flagged ?? articles[0];
 	}, [articles, page]);
 
@@ -91,6 +94,9 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 	}, [articles, featuredArticle]);
 
 	const [likeArticleMutation] = useMutation(LIKE_TARGET_ARTICLE);
+	const [saveArticleMutation] = useMutation(SAVE_ARTICLE);
+	const [unsaveArticleMutation] = useMutation(UNSAVE_ARTICLE);
+	const [incrementArticleViewMutation] = useMutation(INCREMENT_ARTICLE_VIEW);
 
 	const handleCategoryChange = useCallback((filter: CommunityCategoryId) => {
 		setCategoryFilter(filter);
@@ -110,16 +116,26 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 		setSelectedArticleId(null);
 	}, []);
 
-	const bumpViewCount = useCallback((articleId: string, baseViews: number) => {
-		if (!recordArticleView(articleId)) return;
-		setOverrides((prev) => ({
-			...prev,
-			[articleId]: {
-				...prev[articleId],
-				articleViews: (prev[articleId]?.articleViews ?? baseViews) + 1,
-			},
-		}));
-	}, []);
+	const bumpViewCount = useCallback(
+		async (articleId: string, _baseViews: number) => {
+			try {
+				const result = await incrementArticleViewMutation({ variables: { articleId } });
+				const updated = result.data?.incrementArticleView;
+				if (updated) {
+					setOverrides((prev) => ({
+						...prev,
+						[articleId]: {
+							...prev[articleId],
+							articleViews: updated.articleViews,
+						},
+					}));
+				}
+			} catch {
+				/* public view tracking — ignore failures */
+			}
+		},
+		[incrementArticleViewMutation],
+	);
 
 	const handleLike = useCallback(
 		async (articleId: string) => {
@@ -154,22 +170,39 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 		[userId, t, likeArticleMutation, refetch],
 	);
 
-	const handleToggleSave = useCallback((articleId: string) => {
-		const saved = toggleSavedArticle(articleId);
-		setOverrides((prev) => ({
-			...prev,
-			[articleId]: { ...prev[articleId], saved },
-		}));
-		return saved;
-	}, []);
+	const handleToggleSave = useCallback(
+		async (articleId: string) => {
+			if (!userId) {
+				await sweetErrorHandling(new Error(t('community.loginToSave')));
+				return false;
+			}
+
+			const currentlySaved = isSavedState(articleId, rawArticles, overrides);
+			setSavePendingId(articleId);
+			try {
+				const result = currentlySaved
+					? await unsaveArticleMutation({ variables: { articleId } })
+					: await saveArticleMutation({ variables: { articleId } });
+				const updated = result.data?.saveArticle ?? result.data?.unsaveArticle;
+				const saved = updated?.meSaved?.[0]?.mySaved ?? !currentlySaved;
+				setOverrides((prev) => ({
+					...prev,
+					[articleId]: { ...prev[articleId], saved },
+				}));
+				return saved;
+			} catch (err) {
+				await sweetErrorHandling(err);
+				return currentlySaved;
+			} finally {
+				setSavePendingId(null);
+			}
+		},
+		[userId, t, rawArticles, overrides, saveArticleMutation, unsaveArticleMutation],
+	);
 
 	const isSaved = useCallback(
-		(articleId: string) => {
-			const patch = overrides[articleId];
-			if (patch?.saved !== undefined) return patch.saved;
-			return isArticleSaved(articleId);
-		},
-		[overrides],
+		(articleId: string) => isSavedState(articleId, rawArticles, overrides),
+		[rawArticles, overrides],
 	);
 
 	return {
@@ -184,6 +217,7 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 		featuredArticle,
 		selectedArticleId,
 		likePendingId,
+		savePendingId,
 		handleCategoryChange,
 		handlePageChange,
 		openModal,
@@ -193,4 +227,15 @@ export function useCommunityFeed({ userId }: UseCommunityFeedOptions = {}) {
 		handleToggleSave,
 		isSaved,
 	};
+}
+
+function isSavedState(
+	articleId: string,
+	articles: Article[],
+	overrides: Record<string, ArticleOverride>,
+): boolean {
+	const patch = overrides[articleId];
+	if (patch?.saved !== undefined) return patch.saved;
+	const article = articles.find((a) => a._id === articleId);
+	return article?.meSaved?.[0]?.mySaved ?? false;
 }

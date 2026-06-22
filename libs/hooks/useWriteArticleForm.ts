@@ -2,18 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { CREATE_ARTICLE, UPDATE_ARTICLE } from '../../apollo/user/article';
-import { ArticleInput, ArticleStatus } from '../types/fixora/fixora';
+import { ArticleInput, ArticleStatus, ArticleUpdate } from '../types/fixora/fixora';
 import { sweetErrorHandling, sweetMixinSuccessAlert } from '../sweetAlert';
 import {
 	REPAIR_TO_ARTICLE_CATEGORY,
 	RepairCategoryId,
+	repairCategoryToDeviceCategory,
 } from '../utils/articleCategoryMap';
 import { estimateReadMinutes } from '../utils/articleReadTime';
 import { isLegacyArticleTemplate } from '../utils/articleContentTemplate';
-import {
-	getArticleLocalSettings,
-	saveArticleLocalSettings,
-} from '../utils/articleLocalSettings';
 
 export type PublicationMode = 'draft' | 'publish' | 'schedule';
 export type VisibilityMode = 'public' | 'technicians';
@@ -30,6 +27,7 @@ export interface WriteArticleFormState {
 	visibility: VisibilityMode;
 	featured: boolean;
 	allowComments: boolean;
+	scheduledAt: string;
 }
 
 export interface FieldErrors {
@@ -39,6 +37,7 @@ export interface FieldErrors {
 	metaTitle?: string;
 	metaDescription?: string;
 	keywords?: string;
+	scheduledAt?: string;
 }
 
 export interface UseWriteArticleFormOptions {
@@ -68,6 +67,21 @@ export function countWords(text: string): number {
 	return text.split(/\s+/).filter(Boolean).length;
 }
 
+function buildArticleExtras(form: WriteArticleFormState) {
+	return {
+		seoTitle: form.metaTitle.trim() || undefined,
+		seoDescription: form.metaDescription.trim() || undefined,
+		seoKeywords: form.keywords.trim() || undefined,
+		articleVisibility: form.visibility === 'technicians' ? ('TECHNICIANS_ONLY' as const) : ('PUBLIC' as const),
+		isFeatured: form.featured,
+		allowComments: form.allowComments,
+		repairDeviceCategory: repairCategoryToDeviceCategory(form.categoryId),
+		...(form.pubMode === 'schedule' && form.scheduledAt
+			? { scheduledPublishAt: new Date(form.scheduledAt).toISOString() }
+			: {}),
+	};
+}
+
 export function useWriteArticleForm(
 	userId?: string,
 	options: UseWriteArticleFormOptions = {},
@@ -88,6 +102,7 @@ export function useWriteArticleForm(
 		visibility: 'public',
 		featured: false,
 		allowComments: true,
+		scheduledAt: '',
 	});
 	const [errors, setErrors] = useState<FieldErrors>({});
 	const [submitting, setSubmitting] = useState(false);
@@ -115,18 +130,6 @@ export function useWriteArticleForm(
 	}, [draftKey]);
 
 	useEffect(() => {
-		if (!editId || typeof window === 'undefined') return;
-		const local = getArticleLocalSettings(editId);
-		if (!local) return;
-		setForm((prev) => ({
-			...prev,
-			featured: local.featured,
-			allowComments: local.allowComments,
-			visibility: local.visibility,
-		}));
-	}, [editId]);
-
-	useEffect(() => {
 		if (!draftKey || typeof window === 'undefined') return;
 		const timer = setTimeout(() => {
 			const savedAt = new Date().toISOString();
@@ -144,6 +147,7 @@ export function useWriteArticleForm(
 						visibility: form.visibility,
 						featured: form.featured,
 						allowComments: form.allowComments,
+						scheduledAt: form.scheduledAt,
 						savedAt,
 					}),
 				);
@@ -189,6 +193,9 @@ export function useWriteArticleForm(
 				if (!form.content.trim() || form.content.trim().length < CONTENT_MIN) {
 					next.content = 'contentRequired';
 				}
+				if (form.pubMode === 'schedule' && !form.scheduledAt) {
+					next.scheduledAt = 'scheduleRequired';
+				}
 			}
 			return next;
 		},
@@ -198,11 +205,6 @@ export function useWriteArticleForm(
 	const submit = useCallback(
 		async (status: ArticleStatus, uploadCover?: () => Promise<string | undefined>) => {
 			const forPublish = status === 'PUBLISHED';
-			if (form.pubMode === 'schedule' && forPublish) {
-				await sweetErrorHandling(new Error('Schedule publication is not available yet.'));
-				return;
-			}
-
 			const validation = validate(forPublish);
 			if (Object.keys(validation).length) {
 				setErrors(validation);
@@ -218,12 +220,14 @@ export function useWriteArticleForm(
 				}
 
 				const articleTitle = form.title.trim() || 'Untitled';
+				const extras = buildArticleExtras(form);
 				const payload = {
 					articleTitle,
 					articleContent: form.content.trim() || ' ',
 					articleExcerpt: form.excerpt.trim() || undefined,
 					articleImage,
 					articleStatus: status,
+					...extras,
 				};
 
 				if (isEdit && editId) {
@@ -232,16 +236,11 @@ export function useWriteArticleForm(
 							input: {
 								_id: editId,
 								...payload,
-							},
+							} as ArticleUpdate,
 						},
 					});
 					const updatedId = result.data?.updateArticle?._id;
 					if (updatedId) {
-						saveArticleLocalSettings(updatedId, {
-							featured: form.featured,
-							allowComments: form.allowComments,
-							visibility: form.visibility,
-						});
 						await sweetMixinSuccessAlert(
 							status === 'DRAFT' ? 'Draft updated successfully.' : 'Article updated successfully.',
 							2000,
@@ -262,11 +261,6 @@ export function useWriteArticleForm(
 					if (draftKey) localStorage.removeItem(draftKey);
 
 					if (newId) {
-						saveArticleLocalSettings(newId, {
-							featured: form.featured,
-							allowComments: form.allowComments,
-							visibility: form.visibility,
-						});
 						await sweetMixinSuccessAlert(
 							status === 'DRAFT' ? 'Draft saved successfully.' : 'Article published successfully.',
 							2000,

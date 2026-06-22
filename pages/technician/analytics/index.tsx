@@ -28,10 +28,12 @@ import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
 import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import StarRounded from '@mui/icons-material/StarRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { GET_TECHNICIAN_ANALYTICS, GET_TECHNICIAN_RANK } from '../../../apollo/user/analytics';
 import { GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { GET_TECHNICIAN_REVIEWS, GET_USER } from '../../../apollo/user/query';
 import { userVar } from '../../../apollo/store';
 import { buildKrwTicks, formatKrw, formatKrwCompact } from '../../../libs/utils/formatCurrency';
+import { formatAvgResponseMinutes, formatTrendPercent } from '../../../libs/utils/formatResponseTime';
 import {
 	AnalyticsRange,
 	buildDeviceBreakdown,
@@ -127,6 +129,22 @@ const Analytics: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
+	const {
+		data: analyticsData,
+		loading: analyticsLoading,
+		error: analyticsError,
+	} = useQuery(GET_TECHNICIAN_ANALYTICS, {
+		skip: !user?._id,
+		variables: { technicianId: user?._id ?? '' },
+		fetchPolicy: 'network-only',
+	});
+
+	const { data: rankData } = useQuery(GET_TECHNICIAN_RANK, {
+		skip: !user?._id,
+		variables: { technicianId: user?._id ?? '' },
+		fetchPolicy: 'network-only',
+	});
+
 	const { data: userData } = useQuery(GET_USER, {
 		skip: !user?._id,
 		variables: { userId: user?._id },
@@ -150,7 +168,10 @@ const Analytics: NextPage = () => {
 	const bookings = useMemo(() => bookingsData?.getTechnicianBookings?.list ?? [], [bookingsData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
 	const technicianUser = userData?.getUser;
+	const analytics = analyticsData?.getTechnicianAnalytics;
+	const rank = rankData?.getTechnicianRank;
 	const useReal = hasRealBookings(bookings);
+	const useAnalytics = !!analytics && !analyticsError;
 
 	const revenueSeries = useMemo(() => {
 		const real = buildRevenueJobsSeries(bookings, range);
@@ -178,9 +199,10 @@ const Analytics: NextPage = () => {
 	}, [bookings, useReal]);
 
 	const completedCount = useMemo(() => {
+		if (useAnalytics) return analytics?.completedJobsCount ?? 0;
 		if (useReal) return technicianUser?.completedJobsCount ?? getCompletedBookings(bookings).length;
 		return 137;
-	}, [bookings, technicianUser, useReal]);
+	}, [analytics, bookings, technicianUser, useAnalytics, useReal]);
 
 	const completionRate = useMemo(() => {
 		const rate = computeCompletionRate(bookings);
@@ -193,9 +215,44 @@ const Analytics: NextPage = () => {
 	}, [bookings, useReal]);
 
 	const avgRating = useMemo(() => {
+		if (useAnalytics && analytics?.averageRating != null) return analytics.averageRating.toFixed(1);
 		if (useReal && technicianUser?.averageRating) return technicianUser.averageRating.toFixed(1);
 		return '4.9';
-	}, [technicianUser, useReal]);
+	}, [analytics, technicianUser, useAnalytics, useReal]);
+
+	const avgResponseDisplay = useMemo(() => {
+		if (useAnalytics && analytics?.avgResponseMinutes != null) {
+			return formatAvgResponseMinutes(analytics.avgResponseMinutes) ?? '—';
+		}
+		return '11m';
+	}, [analytics, useAnalytics]);
+
+	const topPerformerDisplay = useMemo(() => rank?.badgeLabel ?? 'Top 3%', [rank]);
+
+	const jobsTrend = useMemo(
+		() => (useAnalytics ? formatTrendPercent(analytics?.completedJobsTrendPercent) : '+12%'),
+		[analytics, useAnalytics],
+	);
+	const completionTrend = useMemo(() => (useReal ? '+3%' : '+3%'), [useReal]);
+	const responseTrend = useMemo(
+		() => (useAnalytics ? formatTrendPercent(analytics?.avgResponseTrendPercent) : '-4%'),
+		[analytics, useAnalytics],
+	);
+	const repeatTrend = useMemo(() => (useReal ? '+6%' : '+6%'), [useReal]);
+	const ratingTrendKpi = useMemo(() => {
+		if (useAnalytics && analytics?.averageRatingTrendPercent != null) {
+			const sign = analytics.averageRatingTrendPercent > 0 ? '+' : '';
+			return `${sign}${analytics.averageRatingTrendPercent.toFixed(1)}`;
+		}
+		return '+0.1';
+	}, [analytics, useAnalytics]);
+	const rankTrend = useMemo(() => {
+		if (rank?.percentile != null) return `Top ${Math.round(rank.percentile)}%`;
+		if (analytics?.topPerformerPercentile != null) {
+			return `Top ${Math.round(analytics.topPerformerPercentile)}%`;
+		}
+		return rank?.badgeLabel ?? '—';
+	}, [analytics, rank]);
 
 	const ratingAvgDisplay = useMemo(() => {
 		if (ratingTrend.length === 0) return '4.9';
@@ -213,12 +270,12 @@ const Analytics: NextPage = () => {
 	const ratingMax = Math.min(5, Math.max(...ratingTrend.map((d) => d.rating)) + 0.05);
 
 	const kpis = [
-		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: '+12%', value: String(completedCount), label: t('analytics.totalJobs') },
-		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: '+3%', value: completionRate, label: t('analytics.completionRate') },
-		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: '-4m', value: '11m', label: t('analytics.avgResponse') },
-		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: '+6%', value: repeatRate, label: t('analytics.repeatClients') },
-		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: '+0.1', value: avgRating, label: t('analytics.avgRating') },
-		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: 'rank', value: 'Top 3%', label: t('analytics.topPerformer') },
+		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: jobsTrend, value: analyticsLoading ? '—' : String(completedCount), label: t('analytics.totalJobs') },
+		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: completionTrend, value: analyticsLoading ? '—' : completionRate, label: t('analytics.completionRate') },
+		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: responseTrend, value: analyticsLoading ? '—' : avgResponseDisplay, label: t('analytics.avgResponse') },
+		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: repeatTrend, value: analyticsLoading ? '—' : repeatRate, label: t('analytics.repeatClients') },
+		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: ratingTrendKpi, value: analyticsLoading ? '—' : avgRating, label: t('analytics.avgRating') },
+		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)', trend: rankTrend, value: analyticsLoading ? '—' : topPerformerDisplay, label: t('analytics.topPerformer') },
 	];
 
 	return (
@@ -241,6 +298,12 @@ const Analytics: NextPage = () => {
 					))}
 				</div>
 			</div>
+
+			{analyticsError && (
+				<div className="fixora-an-header__sub" role="alert" style={{ color: '#F87171', marginBottom: 16 }}>
+					{t('analytics.loadError')}
+				</div>
+			)}
 
 			<div className="fixora-an-kpis">
 				{kpis.map((k) => (

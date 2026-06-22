@@ -4,6 +4,7 @@ type SortGetter = (technician: TechnicianSummary) => number;
 
 const SORT_GETTERS: Record<string, SortGetter> = {
 	averageRating: (technician) => technician.averageRating ?? 0,
+	avgResponseMinutes: (technician) => technician.avgResponseMinutes ?? Number.POSITIVE_INFINITY,
 	completedJobsCount: (technician) => technician.completedJobsCount ?? 0,
 	reviewCount: (technician) => technician.reviewCount ?? 0,
 	createdAt: (technician) => new Date(technician.createdAt ?? 0).getTime(),

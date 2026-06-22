@@ -6,8 +6,7 @@ import { useQuery } from '@apollo/client';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import ClientMyPageView, { ClientMyPageTab } from '../../../libs/components/mypage/fixora/ClientMyPageView';
-import { GET_USER } from '../../../apollo/user/query';
-import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS, GET_USER_FOLLOWINGS } from '../../../apollo/user/profile';
+import { GET_INCOMING_REQUESTS, GET_PUBLIC_CLIENT_PROFILE, GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { Booking } from '../../../libs/types/fixora/fixora';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
@@ -33,15 +32,9 @@ const TechnicianClientProfile: NextPage = () => {
 		? (router.query.tab as Tab)
 		: 'repairHistory';
 
-	const { data: clientData, loading: clientLoading } = useQuery(GET_USER, {
+	const { data: profileData, loading: profileLoading } = useQuery(GET_PUBLIC_CLIENT_PROFILE, {
 		skip: !router.isReady || !clientId,
-		variables: { userId: clientId },
-		fetchPolicy: 'network-only',
-	});
-
-	const { data: followingData } = useQuery(GET_USER_FOLLOWINGS, {
-		skip: !router.isReady || !clientId,
-		variables: { input: { page: 1, limit: 50, search: { followerId: clientId } } },
+		variables: { clientId: clientId! },
 		fetchPolicy: 'network-only',
 	});
 
@@ -57,8 +50,10 @@ const TechnicianClientProfile: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const profile = clientData?.getUser;
+	const publicProfile = profileData?.getPublicClientProfile;
+	const profile = publicProfile?.client;
 	const profileMatchesRoute = !!profile?._id && !!clientId && profile._id === clientId;
+
 	const visibleBookings = useMemo(() => {
 		const incoming = incomingData?.getIncomingRequests?.list ?? [];
 		const technicianBookings = technicianBookingsData?.getTechnicianBookings?.list ?? [];
@@ -67,15 +62,8 @@ const TechnicianClientProfile: NextPage = () => {
 		);
 	}, [incomingData, technicianBookingsData, clientId]);
 
-	const completedBookings = useMemo(
-		() => visibleBookings.filter((booking) => booking.bookingStatus === 'COMPLETED'),
-		[visibleBookings],
-	);
-	const totalSpent = useMemo(
-		() => completedBookings.reduce((sum, booking) => sum + Number(booking.finalPrice ?? booking.estimatedPrice ?? 0), 0),
-		[completedBookings],
-	);
-	const followingCount = followingData?.getUserFollowings?.metaCounter?.[0]?.total ?? profile?.followingCount ?? 0;
+	const totalSpent = publicProfile?.totalSpent ?? 0;
+	const followingCount = profile?.followingCount ?? 0;
 
 	useEffect(() => {
 		if (!router.isReady || !clientId || !profileMatchesRoute) return;
@@ -89,7 +77,7 @@ const TechnicianClientProfile: NextPage = () => {
 		router.push(`/technician/client/${clientId}?tab=${next}`, undefined, { shallow: true });
 	};
 
-	if (!router.isReady || !clientId || clientLoading || !profileMatchesRoute || profile?.userType === 'TECHNICIAN') {
+	if (!router.isReady || !clientId || profileLoading || !profileMatchesRoute || profile?.userType === 'TECHNICIAN') {
 		return (
 			<div className="fixora-mypage-page">
 				<div className="container fixora-mypage">

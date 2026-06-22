@@ -1,201 +1,87 @@
-# FixoraB — Technician Settings (backend spec)
+# Fixora — Settings API (Phase 4)
 
-> **Repo:** `FIXORAB` / `FixoraB`  
-> **Frontend:** `FixoraF` — `/technician/settings` (8 sections)  
-> **Related gaps:** GAP-090…096 in [BACKEND_GAPS.md](./BACKEND_GAPS.md)
-
----
-
-## Frontend status (FixoraF)
-
-| Section | Wired to GraphQL | Notes |
-|---------|------------------|-------|
-| Profile Settings | **Yes** | `getUser` + `updateUser` + `imageUploader(target:"user")` |
-| Account | **Partial** | `userNickname` via `updateUser`; `badgeLevel` read-only |
-| Notifications | **Pending** | GAP-092 — empty state in UI |
-| Security (password) | **Partial** | `updateUser.userPassword` — no current-password verify (GAP-090) |
-| Security (2FA) | **Pending** | GAP-091 |
-| Payment Methods | **Pending** | GAP-093 (+ GAP-010…014 payouts) |
-| Availability | **Yes** | `updateUser.workingHours` |
-| Preferences | **Pending** | GAP-094 |
-| Delete Account | **Pending** | GAP-095 |
+> **Status:** Implemented (GAP-090…096) — 2026-06-22  
+> **Auth:** Bearer on all operations  
+> **Module:** `SettingsModule`
 
 ---
 
-## Already in schema (use today)
-
-### `getUser(userId: String!)`
-
-Fields used by settings UI:
-
-- `userEmail`, `userFullName`, `userNickname`, `userPhoneNumber`
-- `userLocation`, `userBio`, `userProfileImage`
-- `badgeLevel`, `userType`
-- `workingHours { days, startTime, endTime }`
-
-### `updateUser(input: UserUpdate!)`
-
-Writable from settings:
-
-- `userFullName`, `userNickname`, `userPhoneNumber`, `userLocation`, `userBio`
-- `userProfileImage`, `userPassword`
-- `workingHours: UserWorkingHoursInput`
-
-### `imageUploader(file: Upload!, target: String!)`
-
-Frontend uses `target: "user"` for profile avatar. Confirm allowed targets in FIXORAB (legacy: `"member"`, `"article"`, `"story"`).
-
----
-
-## GAP-090 — Change password with verification
-
-**Problem:** `UserUpdate.userPassword` has no `currentPassword` check.
+## Security
 
 ```graphql
 mutation ChangePassword($input: ChangePasswordInput!) {
-  changePassword(input: $input) { success message }
-}
-
-input ChangePasswordInput {
-  currentPassword: String!
-  newPassword: String!
+  changePassword(input: $input)
 }
 ```
 
+| Field | Required |
+|-------|----------|
+| `currentPassword` | Yes |
+| `newPassword` | Yes (5–12 chars) |
+
+Errors: `WRONG_PASSWORD`, session tokens invalidated via `refreshTokenVersion` bump.
+
 ---
 
-## GAP-091 — Two-Factor Authentication
-
-UI: Authenticator App, Email Verification, SMS Code toggles.
+## Account
 
 ```graphql
-type TwoFactorStatus {
-  authenticatorEnabled: Boolean!
-  emailEnabled: Boolean!
-  smsEnabled: Boolean!
-}
-
-query getTwoFactorStatus: TwoFactorStatus!
-mutation enableTwoFactor(method: TwoFactorMethod!): TwoFactorSetupPayload!
-mutation disableTwoFactor(method: TwoFactorMethod!): Boolean!
-mutation verifyTwoFactorCode(method: TwoFactorMethod!, code: String!): Boolean!
-
-enum TwoFactorMethod { AUTHENTICATOR EMAIL SMS }
+mutation UpdateEmail($input: UpdateEmailInput!) { updateEmail(input: $input) { _id userEmail } }
+mutation UpdateUserSlug($input: UpdateUserSlugInput!) { updateUserSlug(input: $input) { _id userSlug } }
+mutation DeleteAccount($input: DeleteAccountInput!) { deleteAccount(input: $input) }
 ```
+
+| Operation | Notes |
+|-----------|-------|
+| `updateEmail` | Unique email check |
+| `updateUserSlug` | Lowercase `[a-z0-9-]{3,40}` |
+| `deleteAccount` | `confirmation` must be `"DELETE"`; soft-delete user |
 
 ---
 
-## GAP-092 — Notification preferences
-
-7 toggles in mockup:
-
-1. New Repair Requests  
-2. New Messages  
-3. Payment Received  
-4. New Reviews  
-5. Job Status Updates  
-6. Weekly Earnings Report  
-7. Tips & Promotions  
+## Two-factor authentication (TOTP)
 
 ```graphql
-type NotificationPreferences {
-  newRepairRequests: Boolean!
-  newMessages: Boolean!
-  paymentReceived: Boolean!
-  newReviews: Boolean!
-  jobStatusUpdates: Boolean!
-  weeklyEarningsReport: Boolean!
-  tipsAndPromotions: Boolean!
-}
-
-query getNotificationPreferences: NotificationPreferences!
-mutation updateNotificationPreferences(input: NotificationPreferencesInput!): NotificationPreferences!
+mutation Enable2FA { enable2FA { secret provisioningUri } }
+mutation Verify2FASetup($input: VerifyTwoFactorInput!) { verify2FASetup(input: $input) }
+mutation Disable2FA($input: DisableTwoFactorInput!) { disable2FA(input: $input) }
+query GetTwoFactorStatus { getTwoFactorStatus }
 ```
+
+Flow: `enable2FA` → user scans QR / enters secret → `verify2FASetup(code)` → `twoFactorEnabled: true`.
 
 ---
 
-## GAP-093 — Saved payment methods
+## Preferences
 
 ```graphql
-type PaymentMethodRecord {
-  _id: String!
-  type: PaymentMethodType!   # BANK, PAYPAL, ...
-  label: String!
-  last4: String
-  isPrimary: Boolean!
-}
+query GetNotificationPreferences { getNotificationPreferences { bookingUpdates messages payments reviews marketing followAlerts emailDigest } }
+mutation UpdateNotificationPreferences($input: NotificationPreferencesInput!) { updateNotificationPreferences(input: $input) { ... } }
 
-enum PaymentMethodType { BANK PAYPAL KAKAOPAY }
-
-query getPaymentMethods: [PaymentMethodRecord!]!
-mutation addPaymentMethod(input: AddPaymentMethodInput!): PaymentMethodRecord!
-mutation deletePaymentMethod(id: String!): Boolean!
-mutation setPrimaryPaymentMethod(id: String!): PaymentMethodRecord!
+query GetUserPreferences { getUserPreferences { language currency timezone darkMode } }
+mutation UpdateUserPreferences($input: UserPreferencesInput!) { updateUserPreferences(input: $input) { ... } }
 ```
 
-Related: **GAP-010…014** (payouts / wallet).
+Stored embedded on `users.notificationPreferences` / `users.userPreferences`.
 
 ---
 
-## GAP-094 — User preferences
+## Saved payment methods
+
+Collection: `user_payment_methods` (operational, not ER entity).
 
 ```graphql
-type UserPreferences {
-  darkMode: Boolean!
-  showEarningsPublicly: Boolean!
-  autoAcceptRequests: Boolean!
-  distanceRadiusAlerts: Boolean!
-}
-
-query getUserPreferences: UserPreferences!
-mutation updateUserPreferences(input: UserPreferencesInput!): UserPreferences!
+query GetPaymentMethods { getPaymentMethods { list { _id methodLabel methodType maskedNumber isPrimary } } }
+mutation CreatePaymentMethod($input: CreatePaymentMethodInput!) { createPaymentMethod(input: $input) { _id } }
+mutation UpdatePaymentMethod($input: UpdatePaymentMethodInput!) { updatePaymentMethod(input: $input) { _id } }
+mutation DeletePaymentMethod($paymentMethodId: String!) { deletePaymentMethod(paymentMethodId: $paymentMethodId) }
 ```
 
-MVP ships dark-only — `darkMode` may stay `true` until Phase 5 light theme.
+`isPrimary: true` clears primary flag on other methods for the same user.
 
 ---
 
-## GAP-095 — Delete account
+## Related
 
-```graphql
-mutation deleteAccount(confirmation: String!): DeleteAccountResult!
-
-type DeleteAccountResult {
-  success: Boolean!
-  message: String
-}
-```
-
-Rules:
-
-- Require exact confirmation string: `DELETE MY ACCOUNT`
-- Block if active bookings / pending payouts
-- Soft-delete via `userStatus: DELETE` + `deletedAt`
-- Invalidate refresh tokens / logout all sessions
-
----
-
-## GAP-096 — Profile URL slug & email update
-
-- Public URL: `fixora.io/tech/{slug}` — today mapped to `userNickname`
-- Optional dedicated `userSlug` with uniqueness validation
-- `updateEmail(newEmail, password)` + verification flow
-
----
-
-## FixoraF sync checklist
-
-After FIXORAB merge:
-
-1. Update `docs/schema.gql`, `docs/FRONTEND_API.md`
-2. Add operations in `apollo/user/settings.ts`
-3. Replace `SettingsEmptyBackend` sections with live queries/mutations
-4. Remove GAP hint copy from Security password form when GAP-090 done
-
----
-
-## O'zgarishlar tarixi
-
-| Sana | Agent | O'zgarish |
-|------|-------|-----------|
-| 2026-06-19 | Cursor | Initial spec GAP-090…096 for technician settings module |
+- [`FRONTEND_API.md`](FRONTEND_API.md) — Settings section
+- [`BACKEND_GAPS.md`](BACKEND_GAPS.md) — GAP-090…096

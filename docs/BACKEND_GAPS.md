@@ -1,13 +1,27 @@
-# Frontend → Backend Gaps Registry
+# Fixora — Frontend → Backend Gaps Registry (FixoraB)
 
-> **Maqsad:** FixoraF da **dizayn/UI bor**, lekin FixoraB da **logika yoki API yo‘q** bo‘lgan joylarni yagona ro‘yxatda saqlash.  
-> **Kim yangilaydi:** Har qanday frontend agent — yangi ekran/mock element ulaganda yoki mock fallback qo‘yganda shu faylga qator qo‘shadi.  
-> **Backend agent:** FixoraB da ish boshlashdan oldin shu ro‘yxatni o‘qiydi; band hal qilinganda `Status` ni `DONE` qiladi va `FRONTEND_API.md` / `schema.gql` ni sync qiladi.
+> **Maqsad:** FixoraF da dizayn/UI bor, FixoraB da logika/API yo‘q yoki qisman bo‘lgan joylarni yagona ro‘yxatda saqlash.  
+> **Kim yangilaydi:** Backend agent gap hal qilganda `Status` → `DONE` + `FRONTEND_API.md` / `docs/schema.gql` sync.  
+> **Last updated:** 2026-06-22 (Phase 4 complete)
 
 **Bog‘liq hujjatlar:**
-- GraphQL kontrakt: [`FRONTEND_API.md`](FRONTEND_API.md), [`schema.gql`](schema.gql)
+- GraphQL: [`FRONTEND_API.md`](FRONTEND_API.md), [`docs/schema.gql`](schema.gql)
+- Payout + reviews: [`PAYOUT_API.md`](PAYOUT_API.md)
+- Admin contract: [`BACKEND_ADMIN.md`](BACKEND_ADMIN.md)
 - Qarorlar: [`DECISIONS.md`](DECISIONS.md)
-- Search audit (alohida): [`backend-search-gaps-prompt.md`](backend-search-gaps-prompt.md)
+
+---
+
+## Implementation phases (roadmap)
+
+| Phase | Fokus | Gap IDs | FixoraB status |
+|-------|--------|---------|----------------|
+| **0** | Contract sync + admin API tayyor | 070–077 | ✅ FixoraF wired (2026-06-22) |
+| **1** | Payout + client reviews (P0) | 010–014, 031 | ✅ FixoraF wired |
+| **2** | Response time + schedule + search (P1) | 001, 020, 030, 040, 099 | ✅ FixoraF wired |
+| **3** | Analytics, discovery, article (P2) | 002–004, 021, 080–086, 097, 100, 003 | ✅ FixoraF wired |
+| **4** | Notif, messages, settings, social (P3) | 060–063, 087–089, 090–096, 098, 032 | ✅ FixoraF wired |
+| **5** | Post-MVP | 041, 051 | ⏸ DECISIONS kerak · GAP-050 ✅ |
 
 ---
 
@@ -15,203 +29,179 @@
 
 | Status | Ma'nosi |
 |--------|---------|
-| `MISSING` | Backendda model/query/mutation umuman yo‘q |
-| `PARTIAL` | Schema yoki maydon bor, lekin to‘liq ishlamaydi yoki noto‘g‘ri |
-| `WORKAROUND` | Frontend vaqtincha hack/mock/localStorage bilan yopilgan |
-| `MOCK` | Ataylab mock (masalan PAY-05 to‘lov gateway) |
-| `DONE` | Backend tayyor; frontend hali yangilanmagan bo‘lishi mumkin |
+| `MISSING` | Backendda model/query/mutation yo‘q |
+| `PARTIAL` | Schema/maydon bor, to‘liq ishlamaydi |
+| `WORKAROUND` | Frontend mock/localStorage/hack |
+| `MOCK` | Ataylab mock (masalan PAY-05) |
+| `DONE` | FixoraB tayyor (FixoraF ulanishi alohida) |
 
 ---
 
-## Agent protokoli (kelajak uchun)
+## Phase 0 — Sync checklist
 
-Yangi UI element qo‘shganda:
+### FixoraB (this repo) ✅
 
-1. Backend API bormi? — `schema.gql` + `FRONTEND_API.md` dan tekshir.
-2. Yo‘q bo‘lsa — **shu faylga yangi qator** qo‘sh (ID keyingi raqam).
-3. Frontendda **mock fallback** qoldir (dizayn buzilmasin).
-4. Kodda qisqa izoh: `// BACKEND_GAPS: GAP-XXX`
-5. Backend tayyor bo‘lganda — workaround olib tashla, statusni `DONE` qil.
+- [x] GAP-071…077 implemented (`AdminModule`)
+- [x] [`BACKEND_ADMIN.md`](BACKEND_ADMIN.md) contract
+- [x] [`FRONTEND_API.md`](FRONTEND_API.md) admin section
+- [x] [`docs/schema.gql`](schema.gql) — `apps/fixora-api/src/graphql/schema.gql` nusxasi
+- [x] Full gaps registry (this file)
+
+### FixoraF (this repo) ✅ — 2026-06-22
+
+- [x] Docs sync (`schema.gql`, `FRONTEND_API.md`, `FIXORAF_SYNC.md`, `PAYOUT_API.md`, …)
+- [x] Phase 0 — Admin GAP-071…077 wired
+- [x] Phase 1 — Earnings + `getUserReviews`
+- [x] Phase 2 — Analytics, schedule, response time
+- [x] Phase 3 — Discovery, articles, export
+- [x] Phase 4 — Messages, notifications, settings, social
+
+**Skipped (by design):** GAP-041 ON_SITE, GAP-051 real KakaoPay, GAP-050 Apple OAuth UI stays Coming Soon
 
 ---
 
 ## Ro‘yxat
 
-### Analytics — `/technician/analytics`
+### Admin (P3-15)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-001 | **Avg Response** KPI (`11m`, `-4m`) | Technician o‘rtacha javob vaqti: masalan `User.avgResponseMinutes` yoki `getTechnicianAnalytics` aggregation (birinchi xabar/booking qabul vaqti oralig‘i) | Analytics mockupida alohida KPI; technician ishonchliligi ko‘rsatkichi | Statik mock qiymat | `MISSING` | `pages/technician/analytics/index.tsx` |
-| GAP-002 | **Top Performer** KPI (`Top 3%`) | Platforma bo‘yicha reyting/percentile: `getTechnicianRank` yoki leaderboard query | Raqobat motivatsiyasi; mockupda badge bor | Statik `Top 3%` | `MISSING` | `pages/technician/analytics/index.tsx` |
-| GAP-003 | KPI **trend** badge (`+12%`, `+3%`, …) | Oldingi davr bilan taqqoslash API (bookings/reviews bo‘yicha period-over-period) | Mockupda har KPI ostida trend ko‘rsatkich | Ko‘p joyda statik trend; ba’zi hisob-kitob bookingdan | `PARTIAL` | `pages/technician/analytics/index.tsx` |
-| GAP-004 | **Revenue by Repair Type → Camera** | `IssueCategory` da `CAMERA` yoki AI classification kengaytmasi | Mockupda 6 ta repair turi; schema da Camera yo‘q | `KEYBOARD`/`SOFTWARE` → Logic, Camera faqat mockda | `PARTIAL` | `libs/utils/technicianMetrics.ts`, `schema.gql` `IssueCategory` |
-
-**Ishlaydi (real data):** Total Jobs, Completion Rate, Repeat Clients, Avg Rating, Jobs vs Revenue chart, Repairs by Device, Revenue by Repair Type (mavjud category), Rating Trend, Top Clients — `getTechnicianBookings`, `getUser`, `getTechnicianReviews`.
-
----
-
-### Earnings & Payouts — `/technician/earnings`
-
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-010 | **Request Payout** tugma | `requestPayout(input)` mutation + payout workflow | Technician daromadini yechib olish | Toast: "Payout requests coming soon" | `MISSING` | `pages/technician/earnings/index.tsx` |
-| GAP-011 | **Withdraw Now** + **Available Balance** | `Payout` / `WalletBalance` modeli; available vs pending ajratish | Mockupda balans kartochkasi | `DEMO_KRW.availableBalance` mock | `MISSING` | `pages/technician/earnings/index.tsx` |
-| GAP-012 | **Next Payout** stat + sana | Avtomatik payout jadvali (`nextPayoutAt`, `estimatedAmount`) | Technician cashflow rejalashtirish | Mock sana + summa | `MISSING` | `pages/technician/earnings/index.tsx` |
-| GAP-013 | **Payout History** ro‘yxati | `getMyPayouts` — amount, bank/KakaoPay account, completedAt, duration | Mockupda o‘tgan to‘lovlar tarixi | `DEMO_PAYOUTS` mock (KakaoPay) | `MISSING` | `pages/technician/earnings/index.tsx` |
-| GAP-014 | **Monthly Payouts** (to‘liq ma'noda) | Oyma-oy **haqiqiy payout** yozuvlari (`Payout` entity), faqat `Payment` emas | Bar chart "payout" deyiladi; hozir completed payment/booking yig‘indisi | `getMyPayments` + booking fallback; payout modeli yo‘q | `PARTIAL` | `pages/technician/earnings/index.tsx`, `apollo/user/profile.ts` |
-
-**Ishlaydi (real data):** Total Earned, Pending (booking + `getMyPayments`), This Month, Daily Earnings chart, Transactions list — `getTechnicianBookings`, `getMyPayments`.
-
-**Eslatma:** `getMyPayments` mavjud (`schema.gql`), lekin alohida **Payout** entity yo‘q (GAP-010…013).
+| ID | UI | Backend | Status | FixoraB |
+|----|-----|---------|--------|---------|
+| GAP-070 | Verification queue | `getTechnicianVerificationQueue`, approve/reject | `DONE` | ✅ |
+| GAP-071 | Dashboard analytics | `getAdminDashboardStats` | `DONE` | ✅ |
+| GAP-072 | Activity feed | `getAdminRecentActivity` | `DONE` | ✅ |
+| GAP-073 | Payment summary | `getAdminPaymentSummary` | `DONE` | ✅ |
+| GAP-074 | Verification tabs | `TVISearch.verificationStatus` | `DONE` | ✅ |
+| GAP-075 | Admin comments | `getAllCommentsByAdmin` | `DONE` | ✅ |
+| GAP-076 | Platform settings | `getAdminPlatformSettings` / `updateAdminPlatformSettings` | `DONE` | ✅ |
+| GAP-077 | Global search | `adminGlobalSearch` | `DONE` | ✅ |
 
 ---
 
-### Technician Dashboard — `/technician/dashboard`
+### Analytics — `/technician/analytics` (Phase 2–3)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-020 | **Today's Schedule → Add** (custom items) | `TechnicianSchedule` CRUD: `createScheduleItem`, `getMySchedule`, `deleteScheduleItem` | Technician bookingdan tashqari vaqt bloklarini saqlashi | `localStorage` (`fixora_tech_schedule_<userId>`) — faqat shu qurilmada | `MISSING` | `pages/technician/dashboard.tsx`, `libs/components/technician/AddScheduleModal.tsx` |
-| GAP-021 | **Export Report** | `exportEarningsReport(period)` — CSV/PDF yoki signed URL | Quick action mockupida bor | Faqat `/technician/earnings` ga navigate | `PARTIAL` | `pages/technician/dashboard.tsx` |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-001 | Avg Response KPI | `avgResponseMinutes` / `getTechnicianAnalytics` | `DONE` | ✅ |
+| GAP-002 | Top Performer KPI | `getTechnicianRank` | `DONE` | ✅ |
+| GAP-003 | KPI trend badges | Period-over-period analytics | `DONE` | ✅ |
+| GAP-004 | Revenue → Camera | `IssueCategory.CAMERA` | `DONE` | ✅ |
 
-**Ishlaydi:** Weekly Earnings chart, booking-based schedule items, Mark Available (`updateUser.isOnline`), incoming requests, active jobs.
+**Ishlaydi:** Total Jobs, Completion Rate, Repeat Clients, Avg Rating, charts — `getTechnicianBookings`, `getUser`, `getTechnicianReviews`.
+
+---
+
+### Earnings & Payouts — `/technician/earnings` (Phase 1) ✅
+
+| ID | UI | Backend | Status | FixoraB |
+|----|-----|---------|--------|---------|
+| GAP-010 | Request Payout | `requestPayout` | `DONE` | ✅ |
+| GAP-011 | Withdraw / Available Balance | `getWalletBalance` | `DONE` | ✅ |
+| GAP-012 | Next Payout | `nextPayoutAt`, `estimatedAmount` | `DONE` | ✅ |
+| GAP-013 | Payout History | `getMyPayouts` | `DONE` | ✅ |
+| GAP-014 | Monthly Payouts chart | `Payout` + `getMyPayouts` | `DONE` | ✅ |
+
+Contract: [`PAYOUT_API.md`](PAYOUT_API.md)
+
+---
+
+### Technician Dashboard (Phase 2)
+
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-020 | Schedule Add (custom) | `TechnicianSchedule` CRUD | `DONE` | ✅ |
+| GAP-021 | Export Report | `exportEarningsReport` | `DONE` | ✅ |
+
+**Ishlaydi:** Weekly earnings, booking schedule, `updateUser.isOnline`, requests, active jobs.
 
 ---
 
 ### Public profiles
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-030 | **Response time** (`<15m`, `~15m response`) | `User.avgResponseMinutes` yoki computed field | Search va technician profile mockupida ishonch signali | Statik matn (DECISIONS UI-09) | `MISSING` | `pages/technician/profile/index.tsx`, search cards |
-| GAP-031 | **Client reviews on `/member`** | Public `getUserReviews(userId)` — client yozgan reviewlar | BIZ-05: client faqat review yozadi, article emas | 40 ta technician scan + `getTechnicianReviews` filter (`userId`) — sekin, noto‘g‘ri scale | `MISSING` | `libs/components/member/CustomerReviewsSection.tsx` |
-| GAP-032 | **Followers/Reviews count** (header) | `User.followersCount` / `User.reviewCount` real-time sync | Count fieldlar seeded/stale | `metaCounter[0].total` list querydan olinadi (workaround) | `PARTIAL` | `pages/technician/profile/index.tsx`, DECISIONS UI-09 |
+| ID | UI | Backend | Status | Phase |
+|----|-----|---------|--------|-------|
+| GAP-030 | Response time display | `avgResponseMinutes` | `DONE` | ✅ |
+| GAP-031 | Client reviews on `/member` | `getUserReviews` | `DONE` | ✅ |
+| GAP-032 | Followers/Reviews count | Count sync | `DONE` | ✅ |
 
 ---
 
-### Search & discovery — `/search`, `/technicians`, `/technicians/[id]`
+### Search & discovery (Phase 2–3)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-040 | Search filters to‘liq ishlashi | `getTechnicians` filter implementation audit | P3-05 search sahifasi | Ba’zi filterlar backendda tasdiqlanmagan | `PARTIAL` | [`backend-search-gaps-prompt.md`](backend-search-gaps-prompt.md) |
-| GAP-041 | **ON_SITE** booking | `BookingType.ON_SITE` flow + technician on-site dispatch | Mockupda "Coming Soon" | UI faqat badge; MVP `SHOP_VISIT` (BIZ-01) | `MISSING` | Booking UI, DECISIONS BIZ-01 |
-| GAP-097 | **Platform technician stats** (`/technicians`) | `getTechnicianPlatformStats` yoki `TISearch.createdAtFrom` / `createdAtTo` | Oylik signup, o‘sish trendi, aniq “joined this month” KPI | `metaCounter` + 100 ta recent sample client-side count (approximate) | `WORKAROUND` | `libs/components/technicians/TechniciansPageStats.tsx`, `pages/technicians/index.tsx` |
-| GAP-100 | **Trending technicians row** (`/technicians`) | `getTechnicianTrending` yoki growth metrics (`reviewGrowth`, `bookingGrowth`, `profileViews`) | Discovery “Trending” carousel haqiqiy momentum bo‘yicha | Client composite: `reviewCount×3 + completedJobs×2 + rating×15 + followers + online` | `WORKAROUND` | `libs/utils/technicianDiscoverySections.ts`, `pages/technicians/index.tsx` |
-| GAP-099 | **Fast responders row** (`/technicians`) | `User.avgResponseMinutes` (GAP-030) | Discovery “Fast Responders” carousel | Client proxy: `online×100 + rating×20 + min(jobs,50)` | `WORKAROUND` | `libs/utils/technicianDiscoverySections.ts` |
-
----
-
-### Auth & payments (global)
-
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-050 | **Apple OAuth** | Apple provider to‘liq config + `loginWithOAuth(APPLE)` | AUTH-02 mockup/schema | "Coming Soon" badge | `PARTIAL` | `libs/components/auth/SocialAuthRow.tsx` |
-| GAP-051 | **Real payment gateway** | KakaoPay production API (hozir mock) | Production to‘lov | Frontend deposit UI wired (`DepositPaymentCard`, `useDepositPayment`); backend mock `initiatePayment` → `confirmPayment` (PAY-05) | `MOCK` | `apollo/user/payment.ts`, `libs/components/booking/DepositPaymentCard.tsx`, DECISIONS BIZ-03 |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-040 | Search filters | `getTechnicians` audit | `DONE` | ✅ |
+| GAP-041 | ON_SITE booking | `BookingType.ON_SITE` flow | `MISSING` | 5 |
+| GAP-097 | Platform stats | `getTechnicianPlatformStats` | `DONE` | ✅ |
+| GAP-099 | Fast responders | `avgResponseMinutes` | `DONE` | ✅ |
+| GAP-100 | Trending row | `getTechnicianTrending` | `DONE` | ✅ |
 
 ---
 
-### Notifications & social
+### Auth & payments (Phase 5)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-060 | **Follow notifications** (eski followerlar) | Tarixiy FOLLOW notification backfill yoki `getUserFollowers` notification feedda | Eski followlar uchun notification record yaratilmagan | `getUserFollowers` dan synthetic notification (workaround) | `WORKAROUND` | `pages/technician/notifications/index.tsx` |
-| GAP-061 | **Payment notification + delete persistence** | `PAYMENT` notification type yoki `confirmPayment` dan consistent BOOKING notification; `deleteNotification` / archive mutation | Technician deposit/final payment notificationlari va cross-device delete uchun contract kerak | `getMyPayments` dan synthetic payment cards; dismissed ids localStorage per technician/browser | `WORKAROUND` | `pages/technician/notifications/index.tsx` |
-| GAP-062 | **Booking complete + payment WS notifications** | `completeBooking` va `confirmPayment` ichida Notification yaratish + `notificationReceived` WS emit; ixtiyoriy system `sendMessage` | Mijoz/technician realtime yangilanishi backend yozuvsiz ishlamaydi | Frontend: `FixoraWebSocketBridge` refetch + technician `sendMessage` workaround on complete | `WORKAROUND` | `libs/components/FixoraWebSocketBridge.tsx`, `pages/technician/jobs/index.tsx` |
-| GAP-063 | **Public client profile full data** | `getPublicClientProfile(clientId)` yoki public-safe queries: client repair history, saved technicians, written reviews, total spent | Technician boshqa clientning to‘liq marketplace reputatsiyasini ko‘rishi uchun current schema yetarli emas (`getMyBookings`/saved likes viewer-scoped) | `/technician/client/[clientId]` mavjud real API bilan: `getUser`, `getUserFollowings`, technician-visible bookings/reviews; saved/full history unavailable state | `PARTIAL` | `pages/technician/client/[clientId].tsx` |
-| GAP-098 | **Saved technicians list (client My Page)** | `getUserLikedTechnicians(input)` — list technicians the auth user liked via `likeTargetUser` | Owner My Page Saved Technicians tab; `likeTargetUser` mutation exists but no list query | localStorage per user + `getUser` fetch until FixoraB ships | `WORKAROUND` | `libs/utils/savedTechnicians.ts`, `SavedTechniciansTab.tsx` |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-050 | Apple OAuth | Apple credentials + `loginWithOAuth(APPLE)` | `DONE` | ✅ |
+| GAP-051 | Real payment gateway | KakaoPay production | `MOCK` | 5 |
 
 ---
 
-### Admin (kelajak)
+### Notifications & social (Phase 4)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-070 | **Technician verification queue** | Admin `getTechnicianVerificationQueue`, approve/reject | Onboarding `/register/technician/pending` | Admin UI incremental (P3-15) | `PARTIAL` | `docs/design/admin/README.md` |
-
----
-
-### Write Article (technician)
-
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-080 | **Repair category pills** (iPhone/MacBook/iPad/Watch) + **Community hub filters** (Repair Guides, Quick Tips, …) | `ArticleCategory` yoki `articleTags` kengaytmasi — device/repair turlari | Figma mockup repair pill'lar; schema faqat FREE/RECOMMEND/NEWS/HUMOR | UI repair label; API ga 4 pill → 4 enum mapping (workaround); Community `/community` 6 filter → 4 enum (`libs/utils/communityCategories.ts`) | `WORKAROUND` | `libs/utils/articleCategoryMap.ts`, `libs/utils/communityCategories.ts`, `pages/community/` |
-| GAP-081 | **SEO fields** (meta title, description, keywords) | `ArticleInput` yoki `ArticleSeo` nested input | Write Article SEO panel mockup | Form state + validation; `createArticle` ga yuborilmaydi | `MISSING` | `libs/components/technician/writeArticle/SeoSettingsPanel.tsx` |
-| GAP-082 | **Visibility** (Public / Techs Only) | `articleVisibility` enum yoki `ArticleInput` field | Mockup visibility toggle | UI state only | `MISSING` | `ArticleSettingsPanel.tsx` |
-| GAP-083 | **Featured Article** | `isFeatured: Boolean` on Article | Mockup featured switch | UI state only; `localStorage` workaround | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `ArticleSettingsPanel.tsx` |
-| GAP-084 | **Allow Comments** / **Schedule Publication** | `allowComments`, `scheduledPublishAt` | Mockup article settings | Schedule blocks publish with toast; comments UI-only + `localStorage` | `MISSING` | [BACKEND_ARTICLE_FEATURED_COMMENTS.md](./BACKEND_ARTICLE_FEATURED_COMMENTS.md), `useWriteArticleForm.ts`, `ArticleSettingsPanel.tsx` |
-| GAP-085 | **Save / bookmark article** | `saveArticle` yoki `bookmarkTargetArticle` mutation | Profile + community save icon | `localStorage` (`fixora_saved_articles`); wired on `/community` feed + modal | `MISSING` | `libs/utils/savedArticles.ts`, `ProfileArticleCard.tsx`, `pages/community/` |
-| GAP-086 | **Increment article view** | `incrementArticleView(articleId)` mutation yoki `getArticle` read-side bump | Community modal + `/community/[id]` view count | `sessionStorage` dedupe + optimistic +1 (`libs/utils/articleViews.ts`) | `MISSING` | `libs/utils/articleViews.ts`, `ArticleDetailModal.tsx`, `pages/community/[id].tsx` |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-060 | Follow notifications (eski) | Backfill / feed | `DONE` | ✅ |
+| GAP-061 | Payment notif + delete | `PAYMENT` type, `deleteNotification` | `DONE` | ✅ |
+| GAP-062 | Complete/payment WS | Payment notification hook | `DONE` | ✅ |
+| GAP-063 | Public client profile | `getPublicClientProfile` | `DONE` | ✅ |
+| GAP-098 | Saved technicians | `getUserLikedTechnicians` | `DONE` | ✅ |
 
 ---
 
-### Messages — `/messages`
+### Write Article / Community (Phase 3)
 
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-087 | **Image message upload** | `uploadMessageImage` → CDN URL yoki `Message.attachmentUrl` | Base64 `messageContent` katta payload, cheklovlarga duch keladi | `FileReader` → base64 → `sendMessage(messageType: IMAGE)` | `WORKAROUND` | `libs/components/messages/ChatThread.tsx`, `pages/messages/index.tsx` |
-| GAP-088 | **Conversation device summary** | `getMyConversations` → `deviceLabel` yoki `deviceModel` maydoni | Chat list footer mockup device nomi | Har bir `bookingId` uchun alohida `getBooking` cache (`pages/messages/index.tsx`) | `WORKAROUND` | `pages/messages/index.tsx`, `ConversationList.tsx` |
-| GAP-089 | **Peer thread message merge** | `getMessages` should return all messages for `peerId` regardless of `bookingId` | Customer thread empty when only `peerId` search used | `usePeerMessages` merges fetches per `peerId` + each `bookingId` (`libs/hooks/usePeerMessages.ts`) | `WORKAROUND` | `libs/hooks/usePeerMessages.ts`, `pages/messages/index.tsx` |
-
----
-
-### Technician Settings (`/technician/settings`)
-
-| ID | UI element | Backend kerak | Nega kerak | Hozirgi frontend | Status | Fayl |
-|----|------------|---------------|------------|------------------|--------|------|
-| GAP-090 | **Change password (current verify)** | `changePassword(old, new)` | Security mockup current password field | `updateUser.userPassword` only — no verify | `PARTIAL` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md), `SecuritySettingsSection.tsx` |
-| GAP-091 | **2FA** | `enable2FA`, `disable2FA`, `verify2FACode` | Security 2FA toggles | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
-| GAP-092 | **Notification preferences** (7 toggles) | `getNotificationPreferences`, `updateNotificationPreferences` | Notifications section mockup | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
-| GAP-093 | **Saved payment methods** | `getPaymentMethods`, CRUD, set primary | Payment Methods mockup | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
-| GAP-094 | **User preferences** | `getUserPreferences`, `updateUserPreferences` | Preferences toggles | Empty backend state | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
-| GAP-095 | **Delete account** | `deleteAccount(confirmation)` | Danger zone mockup | UI only — mutation missing | `MISSING` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
-| GAP-096 | **Profile slug / email update** | `userSlug`, `updateEmail` | Account profile URL + email edit | `userNickname` only; email read-only | `PARTIAL` | [BACKEND_SETTINGS.md](./BACKEND_SETTINGS.md) |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-080 | Repair category pills | `ArticleCategory` + `repairDeviceCategory` | `DONE` | ✅ |
+| GAP-081 | SEO fields | Article SEO input | `DONE` | ✅ |
+| GAP-082 | Visibility toggle | `articleVisibility` | `DONE` | ✅ |
+| GAP-083 | Featured article | `isFeatured` | `DONE` | ✅ |
+| GAP-084 | Comments / schedule publish | `allowComments`, `scheduledPublishAt` | `DONE` | ✅ |
+| GAP-085 | Save/bookmark article | `saveArticle` / `unsaveArticle` | `DONE` | ✅ |
+| GAP-086 | Increment article view | `incrementArticleView` | `DONE` | ✅ |
 
 ---
 
-## Ustuvorlik (tavsiya)
+### Messages (Phase 4)
 
-| Priority | ID lar | Sabab |
-|----------|--------|-------|
-| **P0** | GAP-031, GAP-010…014 | Client profile va pul oqimi — biznes jihatdan muhim |
-| **P1** | GAP-020, GAP-001, GAP-030, GAP-040 | Dashboard schedule, analytics ishonch, search |
-| **P2** | GAP-002, GAP-003, GAP-004, GAP-021, GAP-032 | Nice-to-have metrics va export |
-| **P3** | GAP-050, GAP-041, GAP-051 | Phase 2+ (Apple, ON_SITE, real payments) |
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-087 | Image upload | `uploadMessageImage` / `attachmentUrl` | `DONE` | ✅ |
+| GAP-088 | Conversation device label | `getMyConversations.deviceLabel` | `DONE` | ✅ |
+| GAP-089 | Peer thread merge | `getMessages` by `peerId` | `DONE` | ✅ |
 
 ---
 
-## FixoraB uchun minimal API takliflari (qisqa)
+### Technician Settings (Phase 4)
 
-```graphql
-# GAP-031 — Client public reviews
-getUserReviews(input: ReviewsInquiry!): TechnicianReviews!
-
-# GAP-020 — Technician schedule
-getMySchedule(input: ScheduleInquiry!): ScheduleItems!
-createScheduleItem(input: ScheduleItemInput!): ScheduleItem!
-deleteScheduleItem(scheduleItemId: String!): ScheduleItem!
-
-# GAP-010…013 — Payouts
-getMyPayouts(input: PayoutsInquiry!): Payouts!
-requestPayout(input: RequestPayoutInput!): Payout!
-getWalletBalance: WalletBalance!
-
-# GAP-001, GAP-030 — Response time
-# User.avgResponseMinutes: Float  OR  getTechnicianAnalytics(technicianId): AnalyticsSummary
-
-# GAP-002 — Ranking
-getTechnicianRank(technicianId: String!): TechnicianRank  # e.g. percentile, badge
-
-# GAP-083, GAP-084 — Article settings (Featured, Allow Comments)
-# Batafsil: docs/BACKEND_ARTICLE_FEATURED_COMMENTS.md
-
-# GAP-090…096 — Technician Settings
-# Batafsil: docs/BACKEND_SETTINGS.md
-```
+| ID | UI | Backend kerak | Status | Phase |
+|----|-----|---------------|--------|-------|
+| GAP-090 | Change password (verify old) | `changePassword` | `DONE` | ✅ |
+| GAP-091 | 2FA | `enable2FA` / `disable2FA` | `DONE` | ✅ |
+| GAP-092 | Notification prefs | preferences API | `DONE` | ✅ |
+| GAP-093 | Saved payment methods | payment methods CRUD | `DONE` | ✅ |
+| GAP-094 | User preferences | preferences API | `DONE` | ✅ |
+| GAP-095 | Delete account | `deleteAccount` | `DONE` | ✅ |
+| GAP-096 | Profile slug / email | `userSlug`, `updateEmail` | `DONE` | ✅ |
 
 ---
 
 ## O‘zgarishlar tarixi
 
-| Sana | Agent | O‘zgarish |
-|------|-------|-----------|
-| 2026-06-18 | Cursor | Dastlabki registry: Analytics, Earnings, Dashboard, Member reviews, Search, Notifications |
-| 2026-06-18 | Cursor | `BACKEND_ARTICLE_FEATURED_COMMENTS.md` — GAP-083/084 backend spec (isFeatured, allowComments, community logic) |
-| 2026-06-19 | Cursor | Technician Settings 1:1 UI + Profile/Account/Security/Availability GraphQL; `BACKEND_SETTINGS.md` GAP-090…096 |
+| Sana | O‘zgarish |
+|------|-----------|
+| 2026-06-18 | FixoraF dastlabki registry (Analytics, Earnings, …) |
+| 2026-06-22 | Phase 1 — GAP-010…014, GAP-031 | `PayoutModule`, `getUserReviews` | FixoraB |
+| 2026-06-22 | Phase 2 — GAP-001, 020, 030, 040, 099 | `AnalyticsModule`, `ScheduleModule`, `avgResponseMinutes` | FixoraB |
+| 2026-06-22 | Phase 4 — GAP-060…063, 087…089, 090…096, 098, 032 | SettingsModule, messages, notifications, social | FixoraB |
+| 2026-06-22 | GAP-050 Apple OAuth | Unblock `loginWithOAuth(APPLE)`; `fixora-web` AppleSignInButton | FixoraB |

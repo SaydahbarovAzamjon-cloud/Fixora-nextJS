@@ -11,6 +11,8 @@ export const GET_MY_CONVERSATIONS = gql`
 				peerId
 				bookingId
 				bookingStatus
+				deviceLabel
+				deviceModel
 				unreadCount
 				updatedAt
 				peer {
@@ -85,5 +87,11 @@ export const SEND_MESSAGE = gql`
 export const MARK_MESSAGES_AS_READ = gql`
 	mutation MarkMessagesAsRead($input: MarkMessagesAsReadInput!) {
 		markMessagesAsRead(input: $input)
+	}
+`;
+
+export const UPLOAD_MESSAGE_IMAGE = gql`
+	mutation UploadMessageImage($file: Upload!) {
+		uploadMessageImage(file: $file)
 	}
 `;

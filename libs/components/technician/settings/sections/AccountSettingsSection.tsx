@@ -8,7 +8,9 @@ import { TechnicianSettingsUser } from '../../../../hooks/useTechnicianSettings'
 interface AccountSettingsSectionProps {
 	user: TechnicianSettingsUser | null;
 	nickname: string;
+	email: string;
 	onNicknameChange: (v: string) => void;
+	onEmailChange: (v: string) => void;
 	onSave: () => Promise<boolean>;
 	saving: boolean;
 }
@@ -16,7 +18,9 @@ interface AccountSettingsSectionProps {
 const AccountSettingsSection: React.FC<AccountSettingsSectionProps> = ({
 	user,
 	nickname,
+	email,
 	onNicknameChange,
+	onEmailChange,
 	onSave,
 	saving,
 }) => {
@@ -40,6 +44,15 @@ const AccountSettingsSection: React.FC<AccountSettingsSectionProps> = ({
 							onChange={(e) => onNicknameChange(e.target.value)}
 						/>
 					</div>
+				</SettingsField>
+
+				<SettingsField label={t('settings.profile.email')}>
+					<input
+						className="fts-input"
+						type="email"
+						value={email}
+						onChange={(e) => onEmailChange(e.target.value)}
+					/>
 				</SettingsField>
 
 				<SettingsField label={t('settings.account.accountType')}>

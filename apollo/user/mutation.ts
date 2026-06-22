@@ -439,3 +439,5 @@ export const CREATE_REVIEW = gql`
 		}
 	}
 `;
+
+export { INCREMENT_ARTICLE_VIEW, SAVE_ARTICLE, UNSAVE_ARTICLE } from './article';

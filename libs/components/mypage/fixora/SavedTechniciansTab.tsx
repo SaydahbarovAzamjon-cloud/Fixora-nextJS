@@ -1,19 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { useApolloClient, useMutation, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
-import { GET_USER } from '../../../../apollo/user/query';
+import { GET_USER_LIKED_TECHNICIANS } from '../../../../apollo/user/profile';
 import { LIKE_TARGET_USER } from '../../../../apollo/user/mutation';
 import { userVar } from '../../../../apollo/store';
-import { BadgeLevel, User } from '../../../types/fixora/fixora';
+import { BadgeLevel, TechnicianSummary } from '../../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../../utils/profileImage';
-import {
-	getSavedTechnicianIds,
-	setSavedTechnicianLiked,
-	SAVED_TECHNICIANS_CHANGED,
-} from '../../../utils/savedTechnicians';
+import { notifySavedTechniciansChanged } from '../../../utils/savedTechnicians';
 import { sweetErrorHandling } from '../../../sweetAlert';
 
 const badgeLabelKey = (level?: BadgeLevel) => {
@@ -30,78 +26,32 @@ const badgeLabelKey = (level?: BadgeLevel) => {
 const SavedTechniciansTab = () => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
-	const client = useApolloClient();
 	const user = useReactiveVar(userVar);
 	const userId = user?._id;
 
-	const [technicians, setTechnicians] = useState<User[]>([]);
-	const [loading, setLoading] = useState(true);
+	const { data, loading, refetch } = useQuery(GET_USER_LIKED_TECHNICIANS, {
+		skip: !userId,
+		variables: { input: { page: 1, limit: 50, sort: 'createdAt', direction: 'DESC' } },
+		fetchPolicy: 'cache-and-network',
+	});
+
 	const [likeTargetUser] = useMutation(LIKE_TARGET_USER);
 
-	const loadSaved = useCallback(async () => {
-		if (!userId) {
-			setTechnicians([]);
-			setLoading(false);
-			return;
-		}
+	const technicians: TechnicianSummary[] = data?.getUserLikedTechnicians?.list ?? [];
 
-		setLoading(true);
-		const ids = getSavedTechnicianIds(userId);
-		if (!ids.length) {
-			setTechnicians([]);
-			setLoading(false);
-			return;
-		}
-
-		try {
-			const results = await Promise.all(
-				ids.map(async (technicianId) => {
-					const { data } = await client.query({
-						query: GET_USER,
-						variables: { userId: technicianId },
-						fetchPolicy: 'network-only',
-					});
-					return data?.getUser as User | undefined;
-				}),
-			);
-			const valid = results.filter(
-				(tech): tech is User => !!tech?._id && tech.userType === 'TECHNICIAN',
-			);
-			setTechnicians(valid);
-		} catch {
-			setTechnicians([]);
-		} finally {
-			setLoading(false);
-		}
-	}, [client, userId]);
-
-	useEffect(() => {
-		loadSaved();
-	}, [loadSaved]);
-
-	useEffect(() => {
-		if (!userId) return;
-
-		const onChanged = (event: Event) => {
-			const detail = (event as CustomEvent<{ userId?: string }>).detail;
-			if (!detail?.userId || detail.userId === userId) loadSaved();
-		};
-
-		window.addEventListener(SAVED_TECHNICIANS_CHANGED, onChanged);
-		return () => window.removeEventListener(SAVED_TECHNICIANS_CHANGED, onChanged);
-	}, [loadSaved, userId]);
-
-	const unsave = async (technicianId: string) => {
-		if (!userId) return;
-		try {
-			const { data } = await likeTargetUser({ variables: { userId: technicianId } });
-			const myFavorite = !!data?.likeTargetUser?.meLiked?.[0]?.myFavorite;
-			setSavedTechnicianLiked(userId, technicianId, myFavorite);
-			await loadSaved();
-		} catch (err: unknown) {
-			await sweetErrorHandling(err);
-		}
-	};
+	const unsave = useCallback(
+		async (technicianId: string) => {
+			if (!userId) return;
+			try {
+				await likeTargetUser({ variables: { userId: technicianId } });
+				notifySavedTechniciansChanged(userId);
+				await refetch();
+			} catch (err: unknown) {
+				await sweetErrorHandling(err);
+			}
+		},
+		[likeTargetUser, refetch, userId],
+	);
 
 	if (loading) return null;
 

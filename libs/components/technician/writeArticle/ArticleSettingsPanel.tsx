@@ -15,10 +15,12 @@ interface ArticleSettingsPanelProps {
 	visibility: VisibilityMode;
 	featured: boolean;
 	allowComments: boolean;
+	scheduledAt: string;
 	onPubMode: (mode: PublicationMode) => void;
 	onVisibility: (v: VisibilityMode) => void;
 	onFeatured: (v: boolean) => void;
 	onAllowComments: (v: boolean) => void;
+	onScheduledAt: (value: string) => void;
 }
 
 const ArticleSettingsPanel: React.FC<ArticleSettingsPanelProps> = ({
@@ -26,10 +28,12 @@ const ArticleSettingsPanel: React.FC<ArticleSettingsPanelProps> = ({
 	visibility,
 	featured,
 	allowComments,
+	scheduledAt,
 	onPubMode,
 	onVisibility,
 	onFeatured,
 	onAllowComments,
+	onScheduledAt,
 }) => {
 	const { t } = useTranslation('technician');
 
@@ -71,6 +75,21 @@ const ArticleSettingsPanel: React.FC<ArticleSettingsPanelProps> = ({
 						))}
 					</div>
 				</div>
+
+				{pubMode === 'schedule' && (
+					<div className="ftwa-settings__section">
+						<label className="ftwa-seo__label" htmlFor="ftwa-scheduled-at">
+							{t('writeArticle.scheduleDate')}
+						</label>
+						<input
+							id="ftwa-scheduled-at"
+							type="datetime-local"
+							className="ftwa-seo__input"
+							value={scheduledAt}
+							onChange={(e) => onScheduledAt(e.target.value)}
+						/>
+					</div>
+				)}
 
 				<div className="ftwa-settings__section">
 					<label className="ftwa-seo__label">{t('writeArticle.visibility')}</label>

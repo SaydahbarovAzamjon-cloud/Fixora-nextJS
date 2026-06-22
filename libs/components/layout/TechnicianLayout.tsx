@@ -4,7 +4,7 @@ import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { useTechnicianUserSync } from '../../hooks/useTechnicianUserSync';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
 import { fixoraTechnicianOrange } from '../../../scss/MaterialTheme';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { isTechnicianUser } from '../../utils/userRole';
@@ -16,7 +16,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-const technicianTheme = createTheme(fixoraTechnicianOrange);
+const technicianTheme = createTheme(fixoraTechnicianOrange as ThemeOptions);
 
 const withTechnicianLayout = (Component: any) => {
 	return (props: any) => {

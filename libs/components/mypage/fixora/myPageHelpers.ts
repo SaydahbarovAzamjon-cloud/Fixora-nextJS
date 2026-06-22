@@ -16,7 +16,7 @@ export const averageReviewScore = (review?: {
 }) => {
 	if (!review) return null;
 	const scores = [review.repairQuality, review.repairSpeed, review.communication].filter(
-		(value) => typeof value === 'number',
+		(value): value is number => typeof value === 'number',
 	);
 	if (!scores.length) return null;
 	return scores.reduce((sum, value) => sum + value, 0) / scores.length;

@@ -1,0 +1,318 @@
+{
+	"nav": {
+		"console": "ADMIN CONSOLE",
+		"dashboard": "Dashboard",
+		"verification": "Verification Queue",
+		"users": "Users",
+		"bookings": "Bookings",
+		"payments": "Payments",
+		"devices": "Devices",
+		"moderation": "Content Moderation",
+		"settings": "Settings",
+		"superAdmin": "SUPER ADMIN",
+		"admin": "Admin",
+		"logout": "Log out"
+	},
+	"header": {
+		"searchPlaceholder": "Search anything...",
+		"searchEmpty": "No results found",
+		"notifications": "Notifications"
+	},
+	"gap": {
+		"backendRequired": "Backend API required",
+		"gap071": "Dashboard trends and revenue chart require getAdminDashboardStats (GAP-071).",
+		"gap072": "Recent activity requires getAdminRecentActivity (GAP-072).",
+		"gap073": "Payment summary totals require getAdminPaymentSummary (GAP-073).",
+		"gap074": "Only Under Review verifications are available until GAP-074 is implemented.",
+		"gap075": "Comment moderation requires getAllCommentsByAdmin (GAP-075).",
+		"gap076": "Platform preferences require getAdminPlatformSettings (GAP-076).",
+		"gap077": "Global search requires adminGlobalSearch (GAP-077)."
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"subtitle": "Platform health at a glance",
+		"stats": {
+			"totalUsers": "Total Users",
+			"totalTechnicians": "Total Technicians",
+			"pendingVerifications": "Pending Verifications",
+			"totalBookings": "Total Bookings",
+			"platformRevenue": "Platform Revenue",
+			"openReports": "Open Reports",
+			"verified": "{{count}} verified",
+			"needsAttention": "Needs attention",
+			"active": "{{count}} active",
+			"critical": "{{count}} critical",
+			"unavailable": "—"
+		},
+		"charts": {
+			"revenueBookings": "Revenue & Bookings",
+			"revenueBookingsSub": "Monthly performance overview",
+			"revenue": "Revenue",
+			"bookings": "Bookings",
+			"byStatus": "Bookings by Status",
+			"total": "{{count}} total",
+			"noData": "No chart data available yet"
+		},
+		"pendingVerifications": {
+			"title": "Pending Verifications",
+			"subtitle": "{{count}} technicians awaiting review",
+			"viewAll": "View all",
+			"review": "Review",
+			"empty": "No technicians awaiting review"
+		},
+		"recentActivity": {
+			"title": "Recent Activity",
+			"subtitle": "Live platform events",
+			"empty": "No recent activity yet"
+		},
+		"period": {
+			"month": "This month",
+			"quarter": "This quarter",
+			"year": "This year"
+		}
+	},
+	"verification": {
+		"title": "Verification Queue",
+		"subtitle": "Review and approve technician submissions",
+		"tabs": {
+			"all": "All",
+			"pending": "Pending",
+			"underReview": "Under Review",
+			"approved": "Approved",
+			"rejected": "Rejected"
+		},
+		"approve": "Approve",
+		"reject": "Reject",
+		"rejectReason": "Rejection reason (optional)",
+		"documents": "Verification Documents",
+		"completenessTitle": "Profile Completeness",
+		"badges": "Badges",
+		"newAccount": "New",
+		"empty": "No verification requests in this filter",
+		"emptyFilter": "This filter requires backend support (GAP-074). Only Under Review is available now.",
+		"completeness": {
+			"photo": "Profile Photo",
+			"services": "Services Listed",
+			"bio": "Bio / Description",
+			"hours": "Working Hours",
+			"docs": "ID Documents"
+		},
+		"fields": {
+			"shop": "Shop",
+			"specialty": "Specialty",
+			"experience": "Experience",
+			"email": "Email",
+			"phone": "Phone",
+			"location": "Location"
+		}
+	},
+	"users": {
+		"title": "Users",
+		"subtitle": "Manage customers, technicians, and admins",
+		"searchPlaceholder": "Search by name or email...",
+		"allRoles": "All Roles",
+		"allStatuses": "All Statuses",
+		"showing": "Showing {{from}}-{{to}} of {{total}} users",
+		"columns": {
+			"user": "User",
+			"email": "Email",
+			"phone": "Phone",
+			"role": "Role",
+			"status": "Status",
+			"badge": "Badge",
+			"rating": "Rating",
+			"joined": "Joined"
+		},
+		"roles": {
+			"USER": "USER",
+			"TECHNICIAN": "TECHNICIAN",
+			"ADMIN": "ADMIN"
+		},
+		"statuses": {
+			"ACTIVE": "ACTIVE",
+			"BLOCK": "BLOCK",
+			"DELETE": "DELETE"
+		},
+		"badges": {
+			"NEW": "New",
+			"VERIFIED": "Verified",
+			"PREMIUM_PRO": "Pro"
+		},
+		"empty": "No users found"
+	},
+	"bookings": {
+		"title": "Bookings",
+		"subtitle": "Oversee all repair bookings across the platform",
+		"searchPlaceholder": "Search by ID, customer, or technician...",
+		"allTypes": "All Types",
+		"shopVisit": "Shop Visit",
+		"onSite": "On-Site",
+		"onSiteSoon": "Coming Soon",
+		"found": "{{count}} bookings found",
+		"status": {
+			"PENDING": "PENDING",
+			"ACCEPTED": "ACCEPTED",
+			"IN_PROGRESS": "IN PROGRESS",
+			"COMPLETED": "COMPLETED",
+			"CANCELLED": "CANCELLED",
+			"REJECTED": "REJECTED"
+		},
+		"columns": {
+			"id": "Booking ID",
+			"customer": "Customer",
+			"technician": "Technician",
+			"device": "Device",
+			"problem": "Problem",
+			"status": "Status",
+			"type": "Type",
+			"price": "Price"
+		},
+		"empty": "No bookings found"
+	},
+	"payments": {
+		"title": "Payments",
+		"subtitle": "Monitor transactions and issue refunds",
+		"searchPlaceholder": "Search by payment ID, booking, payer...",
+		"allStatuses": "All Statuses",
+		"allMethods": "All Methods",
+		"allTypes": "All Types",
+		"summary": {
+			"revenue": "Total Revenue",
+			"pending": "Pending",
+			"refunded": "Refunded",
+			"failed": "Failed",
+			"count": "{{count}} items",
+			"transactions": "{{count}} transactions",
+			"refunds": "{{count}} refunds"
+		},
+		"columns": {
+			"paymentId": "Payment ID",
+			"bookingId": "Booking ID",
+			"payer": "Payer",
+			"type": "Type",
+			"method": "Method",
+			"amount": "Amount",
+			"status": "Status",
+			"transactionId": "Transaction ID",
+			"date": "Date"
+		},
+		"empty": "No payments found"
+	},
+	"devices": {
+		"title": "Devices",
+		"subtitle": "Registry of customer Apple devices",
+		"searchPlaceholder": "Search by model or owner...",
+		"allCategories": "All Categories",
+		"allStatuses": "All Statuses",
+		"owner": "Owner: {{name}}",
+		"empty": "No devices found",
+		"status": {
+			"ACTIVE": "ACTIVE",
+			"INACTIVE": "INACTIVE",
+			"IN_REPAIR": "In Repair",
+			"REPAIR_COMPLETE": "Complete"
+		}
+	},
+	"moderation": {
+		"title": "Content Moderation",
+		"subtitle": "Review reported stories, articles, and comments",
+		"tabs": {
+			"stories": "Reported Stories",
+			"articles": "Articles",
+			"comments": "Comments"
+		},
+		"views": "{{count}} views",
+		"reports": "{{count}} reports",
+		"expires": "Expires in {{time}}",
+		"actions": {
+			"remove": "Remove",
+			"warn": "Warn",
+			"suspend": "Suspend",
+			"dismiss": "Dismiss"
+		},
+		"articles": {
+			"columns": {
+				"title": "Title",
+				"author": "Author",
+				"category": "Category",
+				"status": "Status",
+				"views": "Views",
+				"likes": "Likes",
+				"comments": "Comments",
+				"created": "Created"
+			},
+			"empty": "No articles found"
+		},
+		"comments": {
+			"columns": {
+				"content": "Comment",
+				"comment": "Comment",
+				"author": "Author",
+				"article": "Article",
+				"status": "Status",
+				"date": "Created",
+				"created": "Created",
+				"actions": "Actions"
+			},
+			"remove": "Remove",
+			"empty": "No comments available"
+		},
+		"empty": "No reported stories",
+		"reasons": {
+			"SPAM_PROMOTIONAL": "Spam/Promotional",
+			"MISLEADING_CLAIMS": "Misleading Claims",
+			"OFFENSIVE_CONTENT": "Offensive Content",
+			"IRRELEVANT_PERSONAL": "Irrelevant/Personal",
+			"COPYRIGHT_VIOLATION": "Copyright Violation",
+			"OTHER": "Other"
+		}
+	},
+	"settings": {
+		"title": "Settings",
+		"subtitle": "Admin profile and platform configuration",
+		"profile": {
+			"title": "Admin Profile",
+			"fullName": "Full Name",
+			"email": "Email",
+			"newPassword": "New Password",
+			"passwordPlaceholder": "Enter new password",
+			"save": "Save Profile"
+		},
+		"preferences": {
+			"title": "Platform Preferences",
+			"darkMode": "Dark Mode",
+			"locked": "Locked",
+			"language": "Language",
+			"currency": "Currency",
+			"timezone": "Time Zone",
+			"save": "Save Preferences"
+		},
+		"moderation": {
+			"title": "Moderation Settings",
+			"slaTitle": "SLA Target: 24 hours",
+			"slaDesc": "All reported content and verification requests should be reviewed within 24 hours."
+		},
+		"team": {
+			"title": "Admin Team (read-only)",
+			"empty": "No admin users found"
+		},
+		"saved": "Settings saved"
+	},
+	"common": {
+		"loading": "Loading...",
+		"error": "Something went wrong",
+		"retry": "Retry",
+		"page": "Page",
+		"of": "of",
+		"noResults": "No results",
+		"success": "Success"
+	},
+	"bookingStatus": {
+		"PENDING": "Pending",
+		"ACCEPTED": "Accepted",
+		"IN_PROGRESS": "In Progress",
+		"COMPLETED": "Completed",
+		"CANCELLED": "Cancelled",
+		"REJECTED": "Rejected"
+	}
+}

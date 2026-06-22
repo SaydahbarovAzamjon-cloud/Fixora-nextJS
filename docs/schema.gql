@@ -16,6 +16,11 @@ input ABSearch {
   userId: String
 }
 
+input ACISearch {
+  commentStatus: CommentStatus
+  text: String
+}
+
 input ADSearch {
   deviceCategory: DeviceCategory
   deviceStatus: DeviceStatus
@@ -25,6 +30,7 @@ input ADSearch {
 
 input AISearch {
   articleCategory: ArticleCategory
+  repairDeviceCategory: DeviceCategory
   text: String
   userId: String
 }
@@ -42,6 +48,107 @@ input AddProgressUpdateInput {
   bookingId: String!
   note: String
   step: String!
+}
+
+enum AdminActivityEventType {
+  BOOKING_COMPLETED
+  BOOKING_CREATED
+  PAYMENT_RECEIVED
+  STORY_REPORTED
+  TECHNICIAN_APPROVED
+  USER_SIGNUP
+}
+
+type AdminActivityItem {
+  actorName: String
+  createdAt: DateTime!
+  entityId: String!
+  eventType: AdminActivityEventType!
+  message: String!
+  severity: AdminActivitySeverity!
+}
+
+enum AdminActivitySeverity {
+  CRITICAL
+  INFO
+  WARNING
+}
+
+type AdminBookingsKpi {
+  activeCount: Int!
+  trendPercent: Float!
+  value: Float!
+}
+
+enum AdminDashboardPeriod {
+  MONTH
+  QUARTER
+  YEAR
+}
+
+type AdminDashboardStats {
+  monthlySeries: [AdminMonthlyPoint!]!
+  openReports: AdminReportsKpi!
+  pendingVerifications: AdminKpiStat!
+  period: AdminDashboardPeriod!
+  platformRevenue: AdminKpiStat!
+  totalBookings: AdminBookingsKpi!
+  totalTechnicians: AdminTechniciansKpi!
+  totalUsers: AdminKpiStat!
+}
+
+type AdminGlobalSearchResult {
+  bookings: [AdminSearchHit!]!
+  payments: [AdminSearchHit!]!
+  users: [AdminSearchHit!]!
+}
+
+type AdminKpiStat {
+  trendPercent: Float!
+  value: Float!
+}
+
+type AdminMonthlyPoint {
+  bookings: Int!
+  month: String!
+  revenue: Float!
+}
+
+type AdminPaymentSummary {
+  currency: String!
+  failedAmount: Float!
+  failedCount: Int!
+  pendingAmount: Float!
+  pendingCount: Int!
+  refundedAmount: Float!
+  refundedCount: Int!
+  totalRevenue: Float!
+}
+
+type AdminPlatformSettings {
+  defaultCurrency: String!
+  defaultLocale: String!
+  defaultTimezone: String!
+  moderationSlaHours: Int!
+}
+
+type AdminReportsKpi {
+  criticalCount: Int!
+  trendPercent: Float!
+  value: Float!
+}
+
+type AdminSearchHit {
+  _id: String!
+  label: String!
+  route: String!
+  subtitle: String!
+}
+
+type AdminTechniciansKpi {
+  trendPercent: Float!
+  value: Float!
+  verifiedCount: Int!
 }
 
 type AiClassification {
@@ -77,6 +184,14 @@ input AllBookingsInquiry {
   sort: String
 }
 
+input AllCommentsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: ACISearch!
+  sort: String
+}
+
 input AllDevicesInquiry {
   direction: Direction
   limit: Int!
@@ -95,6 +210,7 @@ input AllPaymentsInquiry {
 
 type Article {
   _id: String!
+  allowComments: Boolean
   articleCategory: ArticleCategory
   articleComments: Int!
   articleContent: String!
@@ -104,28 +220,48 @@ type Article {
   articleStatus: ArticleStatus!
   articleTitle: String!
   articleViews: Int!
+  articleVisibility: ArticleVisibility
   authorData: User
   createdAt: DateTime!
   deletedAt: DateTime
+  isFeatured: Boolean
   meLiked: [MeLiked!]
+  meSaved: [MeSaved!]
+  repairDeviceCategory: DeviceCategory
+  scheduledPublishAt: DateTime
+  seoDescription: String
+  seoKeywords: String
+  seoTitle: String
   updatedAt: DateTime!
   userId: String!
 }
 
 enum ArticleCategory {
+  CASE_STUDY
   FREE
   HUMOR
   NEWS
+  QUICK_TIP
   RECOMMEND
+  REPAIR_GUIDE
+  TECHNIQUE
 }
 
 input ArticleInput {
+  allowComments: Boolean
   articleCategory: ArticleCategory
   articleContent: String!
   articleExcerpt: String
   articleImage: String
   articleStatus: ArticleStatus
   articleTitle: String!
+  articleVisibility: ArticleVisibility
+  isFeatured: Boolean
+  repairDeviceCategory: DeviceCategory
+  scheduledPublishAt: DateTime
+  seoDescription: String
+  seoKeywords: String
+  seoTitle: String
 }
 
 enum ArticleStatus {
@@ -137,11 +273,24 @@ enum ArticleStatus {
 
 input ArticleUpdate {
   _id: String!
+  allowComments: Boolean
   articleContent: String
   articleExcerpt: String
   articleImage: String
   articleStatus: ArticleStatus
   articleTitle: String
+  articleVisibility: ArticleVisibility
+  isFeatured: Boolean
+  repairDeviceCategory: DeviceCategory
+  scheduledPublishAt: DateTime
+  seoDescription: String
+  seoKeywords: String
+  seoTitle: String
+}
+
+enum ArticleVisibility {
+  PUBLIC
+  TECHNICIANS_ONLY
 }
 
 type Articles {
@@ -242,6 +391,11 @@ input CISearch {
   commentRefId: String!
 }
 
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
 enum ClassificationProviderType {
   GEMINI
   RULE_BASED
@@ -253,6 +407,7 @@ input ClassifyIssueInput {
 
 type Comment {
   _id: String!
+  articleTitle: String
   authorData: User
   commentContent: String!
   commentGroup: CommentGroup!
@@ -320,6 +475,8 @@ input ConfirmPaymentInput {
 type Conversation {
   bookingId: String
   bookingStatus: BookingStatus
+  deviceLabel: String
+  deviceModel: String
   lastMessage: Message
   peer: User
   peerId: String!
@@ -335,6 +492,13 @@ type Conversations {
 input ConversationsInquiry {
   limit: Int!
   page: Int!
+}
+
+input CreatePaymentMethodInput {
+  isPrimary: Boolean
+  maskedNumber: String
+  methodLabel: String!
+  methodType: String!
 }
 
 input CreateReviewInput {
@@ -361,6 +525,10 @@ input DISearch {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeleteAccountInput {
+  confirmation: String!
+}
 
 type Device {
   _id: String!
@@ -439,6 +607,28 @@ enum Direction {
   DESC
 }
 
+input DisableTwoFactorInput {
+  currentPassword: String!
+}
+
+type EarningsReportExport {
+  contentBase64: String!
+  fileName: String!
+  mimeType: String!
+  rowCount: Int!
+}
+
+enum EarningsReportPeriod {
+  ALL_TIME
+  LAST_30_DAYS
+  LAST_90_DAYS
+  THIS_MONTH
+}
+
+input ExportEarningsReportInput {
+  period: EarningsReportPeriod!
+}
+
 input FollowInquiry {
   limit: Int!
   page: Int!
@@ -500,6 +690,7 @@ input InitiatePaymentInput {
 
 enum IssueCategory {
   BATTERY
+  CAMERA
   CHARGING
   GENERAL
   KEYBOARD
@@ -515,6 +706,13 @@ type IssueClassificationResult {
   keywords: [String!]!
   provider: ClassificationProviderType!
   repairComplexity: RepairComplexity!
+}
+
+input LikedTechniciansInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  sort: String
 }
 
 input LoginInput {
@@ -546,6 +744,12 @@ type MeLiked {
   likeRefId: String!
   memberId: String!
   myFavorite: Boolean!
+}
+
+type MeSaved {
+  articleRefId: String!
+  memberId: String!
+  mySaved: Boolean!
 }
 
 type Message {
@@ -588,6 +792,7 @@ type Mutation {
   addProgressUpdate(input: AddProgressUpdateInput!): Booking!
   approveTechnician(userId: String!): User!
   cancelBooking(bookingId: String!): Booking!
+  changePassword(input: ChangePasswordInput!): Boolean!
   completeBooking(input: CompleteBookingInput!): Booking!
   completeOAuthSignup(input: CompleteOAuthSignupInput!): User!
   confirmCashPayment(paymentId: String!): Payment!
@@ -596,12 +801,21 @@ type Mutation {
   createBooking(input: BookingInput!): Booking!
   createComment(input: CommentInput!): Comment!
   createDevice(input: DeviceInput!): Device!
+  createPaymentMethod(input: CreatePaymentMethodInput!): SavedPaymentMethod!
   createReview(input: CreateReviewInput!): Review!
+  createScheduleItem(input: ScheduleItemInput!): TechnicianScheduleItem!
   createStory(input: CreateStoryInput!): Story!
+  deleteAccount(input: DeleteAccountInput!): Boolean!
   deleteArticle(articleId: String!): Article!
+  deleteNotification(notificationId: String!): Boolean!
+  deletePaymentMethod(paymentMethodId: String!): Boolean!
+  deleteScheduleItem(scheduleItemId: String!): TechnicianScheduleItem!
   deleteStory(storyId: String!): Story!
+  disable2FA(input: DisableTwoFactorInput!): Boolean!
+  enable2FA: TwoFactorSetup!
   imageUploader(file: Upload!, target: String!): String!
   imagesUploader(files: [Upload!]!, target: String!): [String!]!
+  incrementArticleView(articleId: String!): Article!
   incrementStoryView(storyId: String!): Story!
   initiatePayment(input: InitiatePaymentInput!): Payment!
   likeTargetArticle(articleId: String!): Article!
@@ -623,21 +837,32 @@ type Mutation {
   removeStory(storyId: String!): Story!
   reportStory(input: ReportStoryInput!): String!
   requestPasswordReset(userEmail: String!): PasswordResetRequestResult!
+  requestPayout(input: RequestPayoutInput!): Payout!
   resetPassword(input: ResetPasswordInput!): PasswordResetRequestResult!
   reviewStoryReport(input: ReviewStoryReportInput!): StoryReport!
+  saveArticle(articleId: String!): Article!
   sendMessage(input: SendMessageInput!): Message!
   signup(input: UserInput!): User!
   submitTechnicianVerification: User!
   subscribe(input: String!): Follower!
+  unsaveArticle(articleId: String!): Article!
   unsubscribe(input: String!): Follower!
+  updateAdminPlatformSettings(input: UpdateAdminPlatformSettingsInput!): AdminPlatformSettings!
   updateArticle(input: ArticleUpdate!): Article!
   updateArticleByAdmin(input: ArticleUpdate!): Article!
   updateBooking(input: UpdateBookingInput!): Booking!
   updateBookingStatus(input: UpdateBookingStatusInput!): Booking!
   updateComment(input: CommentUpdate!): Comment!
   updateDevice(input: DeviceUpdate!): Device!
+  updateEmail(input: UpdateEmailInput!): User!
+  updateNotificationPreferences(input: NotificationPreferencesInput!): NotificationPreferences!
+  updatePaymentMethod(input: UpdatePaymentMethodInput!): SavedPaymentMethod!
   updateUser(input: UserUpdate!): User!
   updateUserByAdmin(input: UserUpdate!): User!
+  updateUserPreferences(input: UserPreferencesInput!): UserPreferences!
+  updateUserSlug(input: UpdateUserSlugInput!): User!
+  uploadMessageImage(file: Upload!): String!
+  verify2FASetup(input: VerifyTwoFactorInput!): Boolean!
   warnTechnicianForStory(input: WarnTechnicianInput!): String!
 }
 
@@ -679,11 +904,33 @@ type Notification {
   userId: String!
 }
 
+type NotificationPreferences {
+  bookingUpdates: Boolean!
+  emailDigest: Boolean!
+  followAlerts: Boolean!
+  marketing: Boolean!
+  messages: Boolean!
+  payments: Boolean!
+  reviews: Boolean!
+}
+
+input NotificationPreferencesInput {
+  bookingUpdates: Boolean
+  emailDigest: Boolean
+  followAlerts: Boolean
+  marketing: Boolean
+  messages: Boolean
+  payments: Boolean
+  reviews: Boolean
+}
+
 enum NotificationReferenceType {
   ARTICLE
   BOOKING
   MESSAGE
+  PAYMENT
   REVIEW
+  USER
 }
 
 input NotificationSearch {
@@ -697,6 +944,7 @@ enum NotificationType {
   FOLLOW
   LIKE
   MESSAGE
+  PAYMENT
   REVIEW
 }
 
@@ -788,6 +1036,51 @@ input PaymentsInquiry {
   sort: String
 }
 
+type Payout {
+  _id: String!
+  accountLabel: String
+  completedAt: DateTime
+  createdAt: DateTime!
+  failedAt: DateTime
+  payoutAmount: Float!
+  payoutMethod: PayoutMethod!
+  payoutStatus: PayoutStatus!
+  requestedAt: DateTime!
+  technicianId: String!
+  updatedAt: DateTime!
+}
+
+enum PayoutMethod {
+  BANK_TRANSFER
+  KAKAOPAY
+}
+
+input PayoutSearch {
+  payoutMethod: PayoutMethod
+  payoutStatus: PayoutStatus
+}
+
+enum PayoutStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  PENDING
+  PROCESSING
+}
+
+type Payouts {
+  list: [Payout!]!
+  metaCounter: [TotalCounter!]
+}
+
+input PayoutsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: PayoutSearch
+  sort: String
+}
+
 type ProgressUpdate {
   note: String
   step: String!
@@ -799,12 +1092,28 @@ input ProgressUpdateInput {
   step: String!
 }
 
+type PublicClientProfile {
+  client: User!
+  completedBookings: Int!
+  reviewsWritten: Int!
+  savedTechniciansCount: Int!
+  totalBookings: Int!
+  totalSpent: Float!
+}
+
 type Query {
+  adminGlobalSearch(limit: Int! = 5, query: String!): AdminGlobalSearchResult!
   checkAuth: String!
   checkAuthRoles: String!
   classifyRepairIssue(input: ClassifyIssueInput!): IssueClassificationResult!
+  exportEarningsReport(input: ExportEarningsReportInput!): EarningsReportExport!
+  getAdminDashboardStats(period: AdminDashboardPeriod!): AdminDashboardStats!
+  getAdminPaymentSummary: AdminPaymentSummary!
+  getAdminPlatformSettings: AdminPlatformSettings!
+  getAdminRecentActivity(limit: Int! = 20): [AdminActivityItem!]!
   getAllArticlesByAdmin(input: AllArticlesInquiry!): Articles!
   getAllBookingsByAdmin(input: AllBookingsInquiry!): Bookings!
+  getAllCommentsByAdmin(input: AllCommentsInquiry!): Comments!
   getAllDevicesByAdmin(input: AllDevicesInquiry!): Devices!
   getAllPaymentsByAdmin(input: AllPaymentsInquiry!): Payments!
   getAllUsersByAdmin(input: UsersInquiry!): Users!
@@ -824,19 +1133,33 @@ type Query {
   getMyConversations(input: ConversationsInquiry!): Conversations!
   getMyDevices(input: DevicesInquiry!): Devices!
   getMyPayments(input: PaymentsInquiry!): Payments!
+  getMyPayouts(input: PayoutsInquiry!): Payouts!
   getMyReviews(input: MyReviewsInquiry!): Reviews!
+  getMySchedule(input: ScheduleInquiry!): TechnicianScheduleItems!
+  getNotificationPreferences: NotificationPreferences!
   getNotifications(input: NotificationsInquiry!): Notifications!
+  getPaymentMethods: SavedPaymentMethods!
+  getPublicClientProfile(clientId: String!): PublicClientProfile!
   getStoriesCarousel(input: StoriesCarouselInquiry!): Stories!
   getStory(storyId: String!): Story!
   getStoryReports(input: StoryReportsInquiry!): StoryReports!
+  getTechnicianAnalytics(technicianId: String!): TechnicianAnalytics!
   getTechnicianBookings(input: BookingsInquiry!): Bookings!
+  getTechnicianPlatformStats: TechnicianPlatformStats!
+  getTechnicianRank(technicianId: String!): TechnicianRank!
   getTechnicianReviews(input: ReviewsInquiry!): TechnicianReviews!
   getTechnicianStories(input: TechnicianStoriesInquiry!): Stories!
+  getTechnicianTrending(limit: Float = 12): TrendingTechnicians!
   getTechnicianVerificationQueue(input: TechnicianVerificationInquiry!): Users!
   getTechnicians(input: TechniciansInquiry!): Users!
+  getTwoFactorStatus: Boolean!
   getUser(userId: String!): User!
   getUserFollowers(input: FollowInquiry!): Followers!
   getUserFollowings(input: FollowInquiry!): Followings!
+  getUserLikedTechnicians(input: LikedTechniciansInquiry!): Users!
+  getUserPreferences: UserPreferences!
+  getUserReviews(input: UserReviewsInquiry!): Reviews!
+  getWalletBalance: WalletBalance!
   heroRepairSearch(input: HeroSearchInput!): HeroSearchResult!
   recommendTechnicians(input: RecommendTechniciansInput!): TechnicianRecommendations!
   sayHello: String!
@@ -881,6 +1204,12 @@ input ReportStoryInput {
   storyId: String!
 }
 
+input RequestPayoutInput {
+  accountLabel: String
+  payoutAmount: Float
+  payoutMethod: PayoutMethod!
+}
+
 input ResetPasswordInput {
   newPassword: String!
   token: String!
@@ -897,6 +1226,7 @@ type Review {
   repairSpeed: Float!
   reviewContent: String
   reviewImages: [String!]
+  technicianData: User
   technicianId: String!
   updatedAt: DateTime!
   userId: String!
@@ -928,6 +1258,39 @@ input ReviewsInquiry {
   page: Int!
   search: ReviewSearch!
   sort: String
+}
+
+type SavedPaymentMethod {
+  _id: String!
+  createdAt: DateTime!
+  isPrimary: Boolean!
+  maskedNumber: String
+  methodLabel: String!
+  methodType: String!
+}
+
+type SavedPaymentMethods {
+  list: [SavedPaymentMethod!]!
+}
+
+input ScheduleInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: ScheduleSearch
+  sort: String
+}
+
+input ScheduleItemInput {
+  endsAt: DateTime!
+  notes: String
+  startsAt: DateTime!
+  title: String!
+}
+
+input ScheduleSearch {
+  from: DateTime
+  to: DateTime
 }
 
 input SendMessageInput {
@@ -1001,6 +1364,7 @@ input TISearch {
   issueCategory: IssueCategory
   latitude: Float
   longitude: Float
+  maxAvgResponseMinutes: Float
   minAverageRating: Float
   radiusKm: Float
   text: String
@@ -1009,6 +1373,31 @@ input TISearch {
 
 input TVISearch {
   text: String
+  verificationStatus: VerificationStatus
+}
+
+type TechnicianAnalytics {
+  averageRating: Float!
+  averageRatingTrendPercent: Float!
+  avgResponseMinutes: Float
+  avgResponseTrendPercent: Float!
+  completedJobsCount: Int!
+  completedJobsTrendPercent: Float!
+  reviewCount: Int!
+  reviewCountTrendPercent: Float!
+  topPerformerPercentile: Float
+}
+
+type TechnicianPlatformStats {
+  growthPercent: Float!
+  joinedLastMonth: Int!
+  joinedThisMonth: Int!
+  totalTechnicians: Int!
+}
+
+type TechnicianRank {
+  badgeLabel: String!
+  percentile: Float!
 }
 
 type TechnicianRecommendation {
@@ -1025,6 +1414,22 @@ type TechnicianRecommendations {
 type TechnicianReviews {
   distribution: [ReviewDistribution!]!
   list: [Review!]!
+  metaCounter: [TotalCounter!]
+}
+
+type TechnicianScheduleItem {
+  _id: String!
+  createdAt: DateTime!
+  endsAt: DateTime!
+  notes: String
+  startsAt: DateTime!
+  technicianId: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type TechnicianScheduleItems {
+  list: [TechnicianScheduleItem!]!
   metaCounter: [TotalCounter!]
 }
 
@@ -1053,10 +1458,26 @@ type TotalCounter {
   total: Int
 }
 
+type TrendingTechnicians {
+  list: [User!]!
+}
+
+type TwoFactorSetup {
+  provisioningUri: String!
+  secret: String!
+}
+
 input UISearch {
   text: String
   userStatus: UserStatus
   userType: UserType
+}
+
+input UpdateAdminPlatformSettingsInput {
+  defaultCurrency: String
+  defaultLocale: String
+  defaultTimezone: String
+  moderationSlaHours: Int
 }
 
 input UpdateBookingInput {
@@ -1073,6 +1494,20 @@ input UpdateBookingStatusInput {
   progressUpdate: ProgressUpdateInput
 }
 
+input UpdateEmailInput {
+  userEmail: String!
+}
+
+input UpdatePaymentMethodInput {
+  isPrimary: Boolean
+  methodLabel: String
+  paymentMethodId: String!
+}
+
+input UpdateUserSlugInput {
+  userSlug: String!
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -1081,6 +1516,7 @@ type User {
   accessToken: String
   authProvider: AuthProvider!
   averageRating: Float!
+  avgResponseMinutes: Float
   badgeLevel: BadgeLevel!
   certifications: [String!]
   completedJobsCount: Int!
@@ -1094,6 +1530,7 @@ type User {
   lastLoginAt: DateTime
   meFollowed: [MeFollowed!]
   meLiked: [MeLiked!]
+  notificationPreferences: NotificationPreferences
   portfolioImages: [String!]
   profileComplete: Boolean!
   refreshToken: String
@@ -1104,6 +1541,7 @@ type User {
   shopName: String
   specialty: String
   termsAcceptedAt: DateTime
+  twoFactorEnabled: Boolean
   updatedAt: DateTime!
   userArticles: Int!
   userBio: String
@@ -1113,8 +1551,10 @@ type User {
   userLocation: String
   userNickname: String
   userPhoneNumber: String
+  userPreferences: UserPreferences
   userProfileImage: String!
   userRank: Int!
+  userSlug: String
   userStatus: UserStatus!
   userType: UserType!
   userViews: Int!
@@ -1132,6 +1572,32 @@ input UserInput {
   userPassword: String!
   userPhoneNumber: String!
   userType: UserType!
+}
+
+type UserPreferences {
+  currency: String!
+  darkMode: Boolean!
+  language: String!
+  timezone: String!
+}
+
+input UserPreferencesInput {
+  currency: String
+  darkMode: Boolean
+  language: String
+  timezone: String
+}
+
+input UserReviewsInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+  search: UserReviewsSearch!
+  sort: String
+}
+
+input UserReviewsSearch {
+  userId: String!
 }
 
 type UserServiceItem {
@@ -1211,6 +1677,19 @@ enum VerificationStatus {
   PENDING
   REJECTED
   UNDER_REVIEW
+}
+
+input VerifyTwoFactorInput {
+  code: String!
+}
+
+type WalletBalance {
+  availableBalance: Float!
+  currency: String!
+  estimatedAmount: Float!
+  nextPayoutAt: DateTime
+  pendingBalance: Float!
+  totalEarned: Float!
 }
 
 input WarnTechnicianInput {

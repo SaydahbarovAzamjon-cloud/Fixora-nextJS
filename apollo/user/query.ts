@@ -555,9 +555,20 @@ export const GET_MEMBER_FOLLOWERS = gql`
  *     FIXORA — USERS     *
  *************************/
 
-export const GET_TECHNICIANS = gql`
-	query GetTechnicians($input: TechniciansInquiry!) {
-		getTechnicians(input: $input) {
+export const GET_TECHNICIAN_PLATFORM_STATS = gql`
+	query GetTechnicianPlatformStats {
+		getTechnicianPlatformStats {
+			totalTechnicians
+			joinedThisMonth
+			joinedLastMonth
+			growthPercent
+		}
+	}
+`;
+
+export const GET_TECHNICIAN_TRENDING = gql`
+	query GetTechnicianTrending($limit: Float) {
+		getTechnicianTrending(limit: $limit) {
 			list {
 				_id
 				userNickname
@@ -590,6 +601,46 @@ export const GET_TECHNICIANS = gql`
 					myFollowing
 				}
 			}
+		}
+	}
+`;
+
+export const GET_TECHNICIANS = gql`
+	query GetTechnicians($input: TechniciansInquiry!) {
+		getTechnicians(input: $input) {
+			list {
+				_id
+				userNickname
+				userFullName
+				userProfileImage
+				shopName
+				specialty
+				userLocation
+				shopLatitude
+				shopLongitude
+				isOnline
+				averageRating
+				reviewCount
+				completedJobsCount
+				avgResponseMinutes
+				badgeLevel
+				followersCount
+				createdAt
+				services {
+					title
+					basePrice
+				}
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+				meFollowed {
+					followingId
+					followerId
+					myFollowing
+				}
+			}
 			metaCounter {
 				total
 			}
@@ -602,6 +653,7 @@ export const GET_USER = gql`
 		getUser(userId: $userId) {
 			_id
 			userNickname
+			userSlug
 			userFullName
 			userProfileImage
 			userBio
@@ -615,6 +667,7 @@ export const GET_USER = gql`
 			averageRating
 			reviewCount
 			completedJobsCount
+			avgResponseMinutes
 			yearsExperience
 			badgeLevel
 			followersCount
@@ -676,6 +729,36 @@ export const GET_TECHNICIAN_REVIEWS = gql`
 	}
 `;
 
+export const GET_USER_REVIEWS = gql`
+	query GetUserReviews($input: UserReviewsInquiry!) {
+		getUserReviews(input: $input) {
+			list {
+				_id
+				reviewContent
+				repairQuality
+				repairSpeed
+				communication
+				createdAt
+				technicianId
+				technicianData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+					shopName
+				}
+				deviceData {
+					deviceModel
+					deviceCategory
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
 /**************************
  *    FIXORA — ARTICLES   *
  *************************/
@@ -693,11 +776,18 @@ export const GET_ARTICLES = gql`
 				articleLikes
 				articleViews
 				articleComments
+				isFeatured
+				allowComments
 				createdAt
 				meLiked {
 					memberId
 					likeRefId
 					myFavorite
+				}
+				meSaved {
+					articleRefId
+					memberId
+					mySaved
 				}
 				authorData {
 					_id

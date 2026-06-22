@@ -195,7 +195,7 @@ const ChatThread = ({
 							<div className="fixora-messages__bubble-group">
 								<div className={`fixora-messages__bubble ${isMine ? 'fixora-messages__bubble--mine' : ''} ${isImage ? 'fixora-messages__bubble--image' : ''}`}>
 									{isImage ? (
-										<img src={message.messageContent} alt="" className="fixora-messages__bubble-img" />
+										<img src={resolveProfileImageUrl(message.messageContent)} alt="" className="fixora-messages__bubble-img" />
 									) : (
 										<p>{message.messageContent}</p>
 									)}

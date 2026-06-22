@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useQuery, useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import FileDownloadOutlined from '@mui/icons-material/FileDownloadOutlined';
 import AttachMoneyOutlined from '@mui/icons-material/AttachMoneyOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
@@ -14,11 +14,13 @@ import CreditCardOutlined from '@mui/icons-material/CreditCardOutlined';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
 import { GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
+import { GET_MY_PAYOUTS, GET_WALLET_BALANCE, REQUEST_PAYOUT } from '../../../apollo/user/payout';
 import { userVar } from '../../../apollo/store';
-import { buildKrwTicks, DEMO_KRW, formatKrw, formatKrwCompact } from '../../../libs/utils/formatCurrency';
+import { buildKrwTicks, formatKrw, formatKrwCompact } from '../../../libs/utils/formatCurrency';
 import {
 	buildDailyEarningsSeriesWithPayments,
 	buildMonthlyPayouts,
+	buildMonthlyPayoutsFromRecords,
 	buildTransactions,
 	EarningsRange,
 	hasRealBookings,
@@ -32,7 +34,7 @@ import {
 	TxStatus,
 	withFallback,
 } from '../../../libs/utils/technicianMetrics';
-import { sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -82,13 +84,6 @@ const DEMO_TRANSACTIONS = [
 	{ name: 'Priya Kapoor', ref: 'REQ-1040', service: 'iPad Charging Port', amount: 160000, status: 'Paid' as TxStatus },
 ];
 
-const DEMO_PAYOUTS = [
-	{ amount: formatKrw(4320000), acct: 'KakaoPay · Jun 14, 2026', dur: '1 day' },
-	{ amount: formatKrw(3850000), acct: 'KakaoPay · Jun 7, 2026', dur: '1 day' },
-	{ amount: formatKrw(5490000), acct: 'KakaoPay · May 31, 2026', dur: '2 days' },
-	{ amount: formatKrw(4890000), acct: 'KakaoPay · May 24, 2026', dur: '1 day' },
-];
-
 const TX_FILTERS: ('All' | TxStatus)[] = ['All', 'Paid', 'Pending', 'Processing'];
 
 const TX_STATUS_STYLE: Record<TxStatus, { color: string; bg: string }> = {
@@ -124,25 +119,45 @@ const Earnings: NextPage = () => {
 		fetchPolicy: 'network-only',
 	});
 
-	const { data: paymentsData } = useQuery(GET_MY_PAYMENTS, {
+	const { data: paymentsData, refetch: refetchPayments } = useQuery(GET_MY_PAYMENTS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 200, search: {} } },
 		fetchPolicy: 'network-only',
 	});
 
+	const { data: walletData, refetch: refetchWallet } = useQuery(GET_WALLET_BALANCE, {
+		skip: !user?._id,
+		fetchPolicy: 'network-only',
+	});
+
+	const { data: payoutsData, refetch: refetchPayouts } = useQuery(GET_MY_PAYOUTS, {
+		skip: !user?._id,
+		variables: { input: { page: 1, limit: 20, search: {} } },
+		fetchPolicy: 'network-only',
+	});
+
+	const [requestPayout, { loading: requestingPayout }] = useMutation(REQUEST_PAYOUT);
+
+	const wallet = walletData?.getWalletBalance;
+	const payoutList = useMemo(() => payoutsData?.getMyPayouts?.list ?? [], [payoutsData]);
+
 	const bookings = useMemo(() => bookingsData?.getTechnicianBookings?.list ?? [], [bookingsData]);
 	const payments = useMemo(() => paymentsData?.getMyPayments?.list ?? [], [paymentsData]);
-	const useReal = hasRealBookings(bookings) || hasRealPayments(payments);
+	const useReal = hasRealBookings(bookings) || hasRealPayments(payments) || !!wallet;
 
 	const totalEarnings = useMemo(() => {
+		if (wallet?.totalEarned != null) return wallet.totalEarned;
 		if (hasRealPayments(payments)) return sumCompletedPaymentEarnings(payments);
 		return sumCompletedEarnings(bookings);
-	}, [bookings, payments]);
+	}, [bookings, payments, wallet]);
 	const monthlyEarnings = useMemo(() => {
 		if (hasRealPayments(payments)) return sumThisMonthPaymentEarnings(payments);
 		return sumThisMonthEarnings(bookings);
 	}, [bookings, payments]);
-	const pendingAmount = useMemo(() => sumPendingAmount(bookings, payments), [bookings, payments]);
+	const pendingAmount = useMemo(() => {
+		if (wallet?.pendingBalance != null) return wallet.pendingBalance;
+		return sumPendingAmount(bookings, payments);
+	}, [bookings, payments, wallet]);
 
 	const dailySeries = useMemo(() => {
 		const real = buildDailyEarningsSeriesWithPayments(bookings, payments, range);
@@ -150,9 +165,11 @@ const Earnings: NextPage = () => {
 	}, [bookings, payments, range, useReal]);
 
 	const monthlySeries = useMemo(() => {
+		const fromPayouts = buildMonthlyPayoutsFromRecords(payoutList);
+		if (fromPayouts.length > 0) return fromPayouts;
 		const real = buildMonthlyPayouts(bookings, payments);
 		return withFallback(real.length > 0 ? real : [], DEMO_MONTHLY, useReal && real.length > 0);
-	}, [bookings, payments, useReal]);
+	}, [bookings, payments, payoutList, useReal]);
 
 	const transactions = useMemo(() => {
 		const real = buildTransactions(bookings, payments);
@@ -184,11 +201,15 @@ const Earnings: NextPage = () => {
 		return pct ? `${pct} vs last week` : '+18% vs last week';
 	}, [bookings, periodEarned, useReal]);
 
-	const totalEarnedLabel = useReal ? formatKrw(totalEarnings) : formatKrw(DEMO_KRW.totalEarned);
-	const monthLabel = useReal ? formatKrw(monthlyEarnings) : formatKrw(DEMO_KRW.thisMonth);
-	const pendingLabel = useReal ? formatKrw(pendingAmount) : formatKrw(DEMO_KRW.pending);
-	const periodTotalLabel = useReal && periodEarned > 0 ? formatKrw(periodEarned) : formatKrw(DEMO_KRW.weeklyTotal);
-	const monthlyTotalLabel = useReal && monthlyTotal > 0 ? formatKrw(monthlyTotal) : formatKrw(DEMO_KRW.monthlyPayoutsTotal);
+	const totalEarnedLabel = formatKrw(totalEarnings);
+	const monthLabel = formatKrw(monthlyEarnings);
+	const pendingLabel = formatKrw(pendingAmount);
+	const periodTotalLabel = periodEarned > 0 ? formatKrw(periodEarned) : formatKrw(0);
+	const monthlyTotalLabel = monthlyTotal > 0 ? formatKrw(monthlyTotal) : formatKrw(0);
+	const availableBalance = wallet?.availableBalance ?? 0;
+	const nextPayoutDate = wallet?.nextPayoutAt
+		? new Date(wallet.nextPayoutAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+		: '—';
 
 	const chartMax = Math.max(100000, ...dailySeries.flatMap((d) => [d.earned, d.pending]));
 	const chartTicks = buildKrwTicks(chartMax, 4);
@@ -210,7 +231,7 @@ const Earnings: NextPage = () => {
 			icon: <AccessTimeOutlined style={{ fontSize: 19, color: '#F59E0B' }} />,
 			bg: 'rgba(245,158,11,0.12)',
 		},
-		{ label: t('earnings.nextPayout'), value: formatKrw(DEMO_KRW.nextPayout), sub: 'Est. Jun 21, 2026', subColor: '#808080', icon: <AccountBalanceWalletOutlined style={{ fontSize: 19, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)' },
+		{ label: t('earnings.nextPayout'), value: formatKrw(wallet?.estimatedAmount ?? 0), sub: nextPayoutDate, subColor: '#808080', icon: <AccountBalanceWalletOutlined style={{ fontSize: 19, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)' },
 		{ label: t('earnings.thisMonth'), value: monthLabel, sub: '+22% vs May', subColor: '#22C55E', icon: <ShowChartOutlined style={{ fontSize: 19, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)' },
 	];
 
@@ -220,8 +241,16 @@ const Earnings: NextPage = () => {
 		return `${monthlySeries[0]?.month} — ${monthlySeries[monthlySeries.length - 1]?.month} ${year}`;
 	}, [monthlySeries]);
 
-	const handlePayoutAction = () => {
-		sweetTopSmallSuccessAlert(t('earnings.payoutComingSoon'), 1200);
+	const handlePayoutAction = async () => {
+		try {
+			await requestPayout({
+				variables: { input: { payoutMethod: 'KAKAOPAY', accountLabel: 'KakaoPay' } },
+			});
+			await sweetTopSmallSuccessAlert(t('earnings.payoutRequested'), 1200);
+			await Promise.all([refetchWallet(), refetchPayouts(), refetchPayments()]);
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	return (
@@ -244,7 +273,7 @@ const Earnings: NextPage = () => {
 							</button>
 						))}
 					</div>
-					<button className="fixora-ea-payout-btn" type="button" onClick={handlePayoutAction}>
+					<button className="fixora-ea-payout-btn" type="button" onClick={handlePayoutAction} disabled={requestingPayout}>
 						<FileDownloadOutlined style={{ fontSize: 18 }} /> {t('earnings.requestPayout')}
 					</button>
 				</div>
@@ -369,29 +398,40 @@ const Earnings: NextPage = () => {
 
 					<div className="fixora-ea-balance">
 						<div className="fixora-ea-balance__label">{t('earnings.availableBalance')}</div>
-						<div className="fixora-ea-balance__value">{formatKrw(DEMO_KRW.availableBalance)}</div>
-						<div className="fixora-ea-balance__note">{t('earnings.nextAutoPayout')}</div>
-						<button className="fixora-ea-balance__btn" type="button" onClick={handlePayoutAction}>
+						<div className="fixora-ea-balance__value">{formatKrw(availableBalance)}</div>
+						<div className="fixora-ea-balance__note">{t('earnings.nextAutoPayout')} {nextPayoutDate}</div>
+						<button className="fixora-ea-balance__btn" type="button" onClick={handlePayoutAction} disabled={requestingPayout || availableBalance <= 0}>
 							<FileDownloadOutlined style={{ fontSize: 17 }} /> {t('earnings.withdrawNow')}
 						</button>
 					</div>
 
 					<div className="fixora-ea-payouts">
-						{DEMO_PAYOUTS.map((p, i) => (
-							<div key={i} className="fixora-ea-payout">
-								<div className="fixora-ea-payout__icon">
-									<CheckCircleOutline style={{ fontSize: 18, color: '#22C55E' }} />
-								</div>
-								<div className="fixora-ea-payout__info">
-									<div className="fixora-ea-payout__amount">{p.amount}</div>
-									<div className="fixora-ea-payout__acct">{p.acct}</div>
-								</div>
-								<div className="fixora-ea-payout__right">
-									<div className="fixora-ea-payout__status">{t('earnings.completed')}</div>
-									<div className="fixora-ea-payout__dur">{p.dur}</div>
-								</div>
+						{payoutList.length === 0 && (
+							<div className="fixora-ea-payout__info" style={{ padding: '12px 0', color: '#808080' }}>
+								{t('earnings.noPayoutHistory')}
 							</div>
-						))}
+						)}
+						{payoutList.map((p: { _id: string; payoutAmount: number; accountLabel?: string; completedAt?: string; requestedAt?: string; payoutStatus: string }) => {
+							const when = p.completedAt || p.requestedAt;
+							const acct = p.accountLabel || 'KakaoPay';
+							const dateLabel = when
+								? new Date(when).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+								: '';
+							return (
+								<div key={p._id} className="fixora-ea-payout">
+									<div className="fixora-ea-payout__icon">
+										<CheckCircleOutline style={{ fontSize: 18, color: '#22C55E' }} />
+									</div>
+									<div className="fixora-ea-payout__info">
+										<div className="fixora-ea-payout__amount">{formatKrw(p.payoutAmount)}</div>
+										<div className="fixora-ea-payout__acct">{acct}{dateLabel ? ` · ${dateLabel}` : ''}</div>
+									</div>
+									<div className="fixora-ea-payout__right">
+										<div className="fixora-ea-payout__status">{p.payoutStatus}</div>
+									</div>
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			</div>

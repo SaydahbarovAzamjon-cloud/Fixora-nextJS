@@ -1,11 +1,13 @@
 # Fixora — Frontend GraphQL Integration Contract
 
-> **Status:** Frozen for FixoraF integration (synced from FixoraB 2026-06-17)  
+> **Status:** Frozen for FixoraF / `fixora-web` integration (2026-06-09)  
 > **Endpoint:** `POST {{NEXT_PUBLIC_GRAPHQL_URL}}` (default `http://localhost:2000/graphql`)  
-> **Schema file:** [`docs/schema.gql`](schema.gql) — sync from FixoraB `apps/fixora-api/src/graphql/schema.gql`  
-> **Authority:** [`DECISIONS.md`](DECISIONS.md), [`AUTH_API.md`](AUTH_API.md)
+> **Schema file:** [`apps/fixora-api/src/graphql/schema.gql`](../apps/fixora-api/src/graphql/schema.gql) — auto-regenerated on API start  
+> **FixoraF sync copy:** [`docs/schema.gql`](schema.gql) — update when schema changes  
+> **Gaps & phases:** [`BACKEND_GAPS.md`](BACKEND_GAPS.md)
+> **Authority:** [`DECISIONS.md`](DECISIONS.md), [`AUTH_API.md`](AUTH_API.md), [`PAYMENT_API.md`](PAYMENT_API.md)
 
-This document is the **single integration reference** for FixoraF. Do not contradict backend business rules here.
+This document is the **single integration reference** for the separate frontend repo (`FixoraF`). Do not contradict backend business rules here.
 
 ---
 
@@ -28,7 +30,7 @@ This document is the **single integration reference** for FixoraF. Do not contra
 |-----------|------|-------|
 | `signup` | Public | `userEmail`, `userNickname`, `userPassword`, `userPhoneNumber`, `userType`, `termsAcceptedAt` |
 | `login` | Public | `LoginInput.userEmail` + `userPassword` only |
-| `loginWithOAuth` | Public | `KAKAO`, `GOOGLE`, `APPLE` (Apple may be blocked until configured) |
+| `loginWithOAuth` | Public | `KAKAO`, `GOOGLE`, `APPLE` — requires provider env (`APPLE_CLIENT_ID`, etc.) |
 | `completeOAuthSignup` | Bearer | Mandatory phone for new OAuth users |
 | `refreshToken` | Public | Rotation via `refreshTokenVersion` |
 | `requestPasswordReset` / `resetPassword` | Public | Email only — no SMS |
@@ -74,8 +76,6 @@ This document is the **single integration reference** for FixoraF. Do not contra
 |-----------|------|--------------|
 | `createBooking` | Bearer | USER — requires `deviceId`, `technicianId`, `bookingType: SHOP_VISIT` |
 | `getMyBookings` | Bearer | USER |
-| `getBooking` | Bearer | USER — single booking detail |
-| `getBookingReview` | Bearer | USER — review for COMPLETED booking |
 | `getTechnicianBookings` | Bearer | TECHNICIAN |
 | `getIncomingRequests` | Bearer | TECHNICIAN — PENDING |
 | `acceptBooking` / `rejectBooking` | Bearer | TECHNICIAN (APPROVED) |
@@ -83,7 +83,6 @@ This document is the **single integration reference** for FixoraF. Do not contra
 | `addProgressUpdate` | Bearer | TECHNICIAN — IN_PROGRESS only |
 | `completeBooking` | Bearer | TECHNICIAN |
 | `cancelBooking` | Bearer | USER — cancellable statuses only |
-| `createReview` | Bearer | USER — COMPLETED booking, 1 per booking |
 | `updateBooking` | Bearer | USER — PENDING only |
 
 **Statuses:** `PENDING`, `ACCEPTED`, `REJECTED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`  
@@ -91,11 +90,11 @@ This document is the **single integration reference** for FixoraF. Do not contra
 
 **Embed:** `booking.aiClassification` — `deviceType`, `issueCategory`, `repairComplexity`, `confidenceScore`, `keywords`, `classifiedAt`
 
-**New embeds (synced 2026-06-17):** technician booking queries now expose `customerData` (User) and `deviceData` (Device) inline — use these instead of separate `getUser` / `getDevice` round-trips on the technician dashboard.
-
 ---
 
 ## Payment (mock — PAY-05)
+
+See [`PAYMENT_API.md`](PAYMENT_API.md). Summary:
 
 | Step | Operation |
 |------|-----------|
@@ -107,31 +106,105 @@ Deposit **COMPLETED** gates `ACCEPTED → IN_PROGRESS`.
 
 ---
 
+## Payout (technician earnings — Phase 1)
+
+> Full contract: [`PAYOUT_API.md`](PAYOUT_API.md)  
+> **Auth:** Bearer + `UserType.TECHNICIAN`
+
+| Operation | Type | Purpose |
+|-----------|------|---------|
+| `getWalletBalance` | Query | Available/pending/total + `nextPayoutAt` |
+| `getMyPayouts(input)` | Query | Payout history (monthly chart source) |
+| `requestPayout(input)` | Mutation | Withdraw available balance (MVP mock → instant `COMPLETED`) |
+
+---
+
+## Reviews
+
+| Operation | Auth | Notes |
+|-----------|------|-------|
+| `createReview` | Bearer USER | COMPLETED booking, 1 per booking |
+| `getTechnicianReviews` | Public | By `technicianId` + distribution |
+| `getUserReviews` | Public | **GAP-031** — reviews written by client `userId` |
+| `getMyReviews` | Bearer | Auth user's reviews |
+| `getBookingReview` | Bearer | Participant only |
+
+---
+
 ## Technician discovery
 
 | Operation | Auth | Notes |
 |-----------|------|-------|
-| `getTechnicians` | Public | APPROVED + ACTIVE only; filters in `TechniciansInquiry` |
-| `getUser` | Public | Public profile |
+| `getTechnicians` | Public | APPROVED + ACTIVE + not blocked; filters in `TechniciansInquiry` |
+| `getUser` | Public | Public profile; TECHNICIAN must be APPROVED |
 
 Prefer AI `recommendTechnicians` / `heroRepairSearch` for Hero-driven discovery.
 
-### `getTechnicians` search filters (`TISearch`)
+### `getTechnicians` — `TechniciansInquiry`
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `page` | `Int!` | Yes | Min 1 |
+| `limit` | `Int!` | Yes | Min 1 |
+| `sort` | `String` | No | Default `userRank` |
+| `direction` | `Direction` | No | Default `DESC` |
+| `search` | `TISearch!` | Yes | Object required; inner fields optional |
+
+**Sort keys:** `createdAt`, `updatedAt`, `userLikes`, `userViews`, `userRank`, `averageRating`, `completedJobsCount`
+
+### `TISearch` filters
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `text` | String | Nickname, shop name, specialty, location text |
-| `deviceCategory` | `DeviceCategory` | iPhone, MacBook, etc. |
-| `isOnline` | Boolean | Omit = online-only; `null` = all |
-| `minAverageRating` | Float | Minimum rating |
-| `userLocation` | String | Regex on location label — used when **no** geo coords sent |
-| `latitude` | Float | User/search center latitude (with `longitude` enables radius filter) |
-| `longitude` | Float | User/search center longitude |
-| `radiusKm` | Float | Radius in km; default **10** when geo active |
+| `text` | `String` | Regex on `userNickname`, `shopName`, `specialty`, `userLocation` (escaped) |
+| `deviceCategory` | `DeviceCategory` | `IPHONE`, `MACBOOK`, `IPAD`, `APPLE_WATCH` — matches `specialty` / `services.title` |
+| `issueCategory` | `IssueCategory` | Hero → search deep-link; same regex heuristic as AI matching |
+| `userLocation` | `String` | Regex on `userLocation` (not `location`) |
+| `minAverageRating` | `Float` | 1–5; `averageRating >= value` (not `rating`) |
+| `isOnline` | `Boolean` | **Omit** → online only; **`null`** → all; `true` / `false` → explicit |
 
-**Geo rule:** When `latitude` + `longitude` are provided, backend filters by Haversine distance and sorts nearest-first. `userLocation` string filter is skipped. Technicians without `shopLatitude` / `shopLongitude` are excluded from geo-filtered results (no map pin).
+**Empty results:** HTTP 200 with `{ list: [], metaCounter: [{ total: 0 }] }` — not an error.
 
-**User response fields for map pins:** `shopLatitude`, `shopLongitude` on each technician in `getTechnicians.list`.
+**Suggested card fields:** `_id`, `userNickname`, `shopName`, `specialty`, `averageRating`, `reviewCount`, `completedJobsCount`, `isOnline`, `userProfileImage`, `userLocation`, `badgeLevel`, `userRank`
+
+### Example
+
+```graphql
+query GetTechnicians($input: TechniciansInquiry!) {
+  getTechnicians(input: $input) {
+    list {
+      _id
+      userNickname
+      shopName
+      specialty
+      averageRating
+      reviewCount
+      isOnline
+      userProfileImage
+      userLocation
+    }
+    metaCounter { total }
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "page": 1,
+    "limit": 12,
+    "sort": "averageRating",
+    "direction": "DESC",
+    "search": {
+      "text": "강남",
+      "deviceCategory": "IPHONE",
+      "userLocation": "서울",
+      "minAverageRating": 4,
+      "isOnline": null
+    }
+  }
+}
+```
 
 ---
 
@@ -147,41 +220,6 @@ Prefer AI `recommendTechnicians` / `heroRepairSearch` for Hero-driven discovery.
 
 **Author field:** `authorData` (User) — **preferred**  
 **Do not use:** `BoardArticle`, `getBoardArticles`, `memberId` on article (removed)
-
----
-
-## Story (24h technician stories) ✅ backend live
-
-> Backend is **fully implemented** in FixoraB (`apps/fixora-api/src/components/story`). The Story types **are** in `docs/schema.gql` (synced 2026-06-17). Do **not** hardcode/disable — use the real API below.
-
-| Operation | Auth | Role / notes |
-|-----------|------|--------------|
-| `imagesUploader(files, target: "story")` | Bearer | Upload **first** → returns `[String]` URLs. `target` **must be** `"story"`. |
-| `createStory(input: CreateStoryInput!)` | Bearer | **TECHNICIAN (APPROVED)** — 1–5 images + caption ≤ 200 |
-| `getStoriesCarousel(input: { limit })` | Public | Homepage carousel — active stories only |
-| `getTechnicianStories(input: { technicianId, limit })` | Public | One technician's active stories |
-| `incrementStoryView(storyId)` | Public | View counter — no token needed (anonymous counts) |
-| `reportStory(input: ReportStoryInput!)` | Bearer | Any user — **1 report per user per story** |
-| `deleteStory(storyId)` | Bearer | **Owner** soft-delete |
-| `removeStory(storyId)` / `getStory(storyId)` | Bearer | ADMIN |
-| `getStoryReports(input: { status? })` | Bearer | ADMIN moderation queue |
-| `reviewStoryReport(input: ReviewStoryReportInput!)` | Bearer | ADMIN — `status`: `REVIEWED`/`DISMISSED`/`ACTIONED` |
-| `warnTechnicianForStory(input)` | Bearer | ADMIN |
-
-**Two-step create flow (important):**
-
-1. `imagesUploader(files: [<File>], target: "story")` → `["uploads/story/ab12.jpg", ...]`
-2. `createStory(input: { images: [{ url, order }], caption })`
-
-`createStory` itself does **not** accept files — only URLs from step 1. Upload mutation needs `apollo-upload-client` (multipart), not the plain HTTP link.
-
-**`CreateStoryInput`:** `images: [StoryImageInput!]!` (`{ url: String!, order: Int! }`, 1–5) + `caption: String` (≤ 200).  
-**`Story` fields:** `_id`, `userId`, `images { url order }`, `caption`, `viewCount`, `reportCount`, `createdAt`, `expiresAt`, `isExpired`, `userData` (User).  
-**Lifecycle:** active 24h → batch job flips `isExpired` → drops out of public queries automatically.  
-**Render URLs:** relative (`uploads/story/...`) — prefix with API origin (`http://localhost:2000/`).  
-**Mime:** `image/png`, `image/jpg`, `image/jpeg` only.
-
-> Full UI spec: copy `FixoraB/docs/STORY_CREATE_FRONTEND.md` (components, hook `useCreateStory`, error map, test checklist).
 
 ---
 
@@ -215,18 +253,131 @@ Prefer AI `recommendTechnicians` / `heroRepairSearch` for Hero-driven discovery.
 
 ---
 
+## Analytics & schedule (Phase 2 — GAP-001, 020, 030, 040, 099)
+
+| Operation | Auth | Purpose |
+|-----------|------|---------|
+| `getTechnicianAnalytics(technicianId)` | Public | KPI bundle: `avgResponseMinutes`, trends, `topPerformerPercentile` |
+| `getTechnicianRank(technicianId)` | Public | `percentile`, `badgeLabel` (e.g. `Top 3%`) |
+| `getMySchedule(input)` | TECHNICIAN | Custom schedule items |
+| `createScheduleItem(input)` | TECHNICIAN | Block time outside bookings |
+| `deleteScheduleItem(scheduleItemId)` | TECHNICIAN | Remove schedule item |
+
+**`User.avgResponseMinutes`** — denormalized on technician profile; recomputed when technician sends a message (customer msg → first reply delta).
+
+**Fast responders (GAP-099):** `getTechnicians` → `search.maxAvgResponseMinutes` + `sort: avgResponseMinutes`.
+
+---
+
+## Discovery (Phase 3 — GAP-097, 100)
+
+| Operation | Auth | Purpose |
+|-----------|------|---------|
+| `getTechnicianPlatformStats` | Public | `totalTechnicians`, `joinedThisMonth`, `growthPercent` |
+| `getTechnicianTrending(limit)` | Public | Momentum-ranked technicians (30-day bookings + reviews) |
+
+---
+
+## Earnings export (Phase 3 — GAP-021)
+
+| Operation | Auth | Purpose |
+|-----------|------|---------|
+| `exportEarningsReport(input)` | TECHNICIAN | CSV as `contentBase64`; `period`: `LAST_30_DAYS`, `LAST_90_DAYS`, `THIS_MONTH`, `ALL_TIME` |
+
+See also [`PAYOUT_API.md`](PAYOUT_API.md).
+
+---
+
+## Article community (Phase 3 — GAP-080…086)
+
+**New Article fields:** `repairDeviceCategory`, `articleVisibility` (`PUBLIC` | `TECHNICIANS_ONLY`), `isFeatured`, `allowComments`, `scheduledPublishAt`, `seoTitle`, `seoDescription`, `seoKeywords`.
+
+**Extended `ArticleCategory`:** `REPAIR_GUIDE`, `QUICK_TIP`, `CASE_STUDY`, `TECHNIQUE` (+ legacy `FREE`, `RECOMMEND`, `NEWS`, `HUMOR`).
+
+| Operation | Auth | Purpose |
+|-----------|------|---------|
+| `saveArticle(articleId)` | Bearer | Bookmark article (`article_bookmarks` collection) |
+| `unsaveArticle(articleId)` | Bearer | Remove bookmark |
+| `incrementArticleView(articleId)` | Public | View count bump (deduped per user via `views` when logged in) |
+
+**`IssueCategory.CAMERA`** added for analytics revenue-by-repair-type chart (GAP-004).
+
+---
+
+## Admin panel (GAP-071…077)
+
+> Full contract: [`BACKEND_ADMIN.md`](BACKEND_ADMIN.md)  
+> **Auth:** Bearer + `UserType.ADMIN` on all operations below.
+
+| Operation | Type | Purpose |
+|-----------|------|---------|
+| `getAdminDashboardStats(period)` | Query | KPI + trend % + 12-month chart |
+| `getAdminPaymentSummary` | Query | Revenue/pending/refunded/failed totals |
+| `getAdminRecentActivity(limit)` | Query | Platform activity feed |
+| `getAllCommentsByAdmin(input)` | Query | Paginated comments + `authorData`, `articleTitle` |
+| `getAdminPlatformSettings` | Query | Locale/currency/timezone/SLA |
+| `updateAdminPlatformSettings(input)` | Mutation | Update platform config |
+| `adminGlobalSearch(query, limit)` | Query | Users, bookings, payments hits |
+
+**Verification tabs (GAP-074):** `getTechnicianVerificationQueue` → `search.verificationStatus` optional. Pending review tab → `UNDER_REVIEW`; All tab → omit filter.
+
+**Pre-existing admin:** `getAllUsersByAdmin`, `getAllBookingsByAdmin`, `getAllDevicesByAdmin`, `getAllPaymentsByAdmin`, `getAllArticlesByAdmin`, `approveTechnician`, `rejectTechnician`, `getStoryReports`, `refundPayment`, etc.
+
+---
+
 ## Message + WebSocket
 
-| Operation | Auth |
-|-----------|------|
-| `sendMessage` | Bearer |
-| `getMessages` | Bearer |
-| `getMyConversations` | Bearer |
-| `markMessagesAsRead` | Bearer |
+| Operation | Auth | Notes |
+|-----------|------|-------|
+| `sendMessage` | Bearer | TEXT / IMAGE (`uploads/message/...`) |
+| `uploadMessageImage` | Bearer | Returns CDN path for `sendMessage` IMAGE type |
+| `getMessages` | Bearer | Omit `bookingId` → all peer messages merged (GAP-089) |
+| `getMyConversations` | Bearer | Includes `deviceLabel`, `deviceModel` when booking linked |
+| `markMessagesAsRead` | Bearer | Omit `bookingId` → mark all peer threads |
 
 **WS:** `ws://host:port?token=<accessToken>` — events: `messageReceived`, `notificationReceived`
 
 Pre-booking chat: `bookingId` nullable on messages.
+
+---
+
+## Notifications (Phase 4)
+
+| Operation | Auth | Notes |
+|-----------|------|-------|
+| `getNotifications` | Bearer | Filter `notificationType: PAYMENT` |
+| `deleteNotification(notificationId)` | Bearer | Persistent delete (GAP-061) |
+| `markNotificationRead` / `markAllNotificationsRead` | Bearer | — |
+
+**Triggers:** follow → `FOLLOW`; payment complete → `PAYMENT` + WS; booking/message/review unchanged.
+
+---
+
+## Settings (Phase 4 — GAP-090…096)
+
+| Operation | Auth |
+|-----------|------|
+| `changePassword(input)` | Bearer — verifies `currentPassword` |
+| `updateEmail(input)` | Bearer |
+| `updateUserSlug(input)` | Bearer |
+| `deleteAccount(input)` | Bearer — confirmation `"DELETE"` |
+| `getNotificationPreferences` / `updateNotificationPreferences` | Bearer |
+| `getUserPreferences` / `updateUserPreferences` | Bearer |
+| `enable2FA` / `verify2FASetup` / `disable2FA` / `getTwoFactorStatus` | Bearer |
+| `getPaymentMethods` / `createPaymentMethod` / `updatePaymentMethod` / `deletePaymentMethod` | Bearer |
+
+Collection: `user_payment_methods` (operational, not ER entity).
+
+---
+
+## Social & profiles (Phase 4)
+
+| Operation | Auth | Notes |
+|-----------|------|-------|
+| `getUserLikedTechnicians(input)` | Bearer | Saved technicians via `likeTargetUser` |
+| `getPublicClientProfile(clientId)` | TECHNICIAN / ADMIN | Bookings, spend, reviews, saved count |
+
+**Count fields:** `followersCount`, `reviewCount` on `User` — updated on follow/review (GAP-032).
 
 ---
 
@@ -261,17 +412,23 @@ Pre-booking chat: `bookingId` nullable on messages.
 | Search | `getTechnicians` |
 | Technician profile | `getUser` |
 | Booking flow | `createDevice`, `createBooking`, `initiatePayment`, `confirmPayment` |
-| My Page | `getMyDevices`, `getMyBookings`, `getUserFollowings`, `getBooking`, `getBookingReview`, `getBookingPayments` |
+| My Page | `getMyDevices`, `getMyBookings`, `getUserFollowings` |
 | Messages | `getMyConversations`, `getMessages`, `sendMessage` |
 | Community | `getArticles`, `getArticle`, `getComments`, `createComment` |
-| Stories | `imagesUploader(target:"story")` → `createStory`; `getStoriesCarousel`, `getTechnicianStories`, `incrementStoryView` |
 | Technician dashboard | `getIncomingRequests`, `acceptBooking`, `getTechnicianBookings` |
+| Admin dashboard | `getAdminDashboardStats`, `getAdminRecentActivity`, `getAdminPaymentSummary` |
+| Admin search | `adminGlobalSearch` |
+| Admin verification | `getTechnicianVerificationQueue` with `verificationStatus` filter |
+| Admin moderation | `getAllCommentsByAdmin`, `getStoryReports`, `getAllArticlesByAdmin` |
+| Admin settings | `getAdminPlatformSettings`, `updateAdminPlatformSettings` |
 
 ---
 
 ## Related docs
 
-- [`AGENTS.md`](../AGENTS.md) — agent instructions
+- [`FRONTEND_AGENTS.md`](FRONTEND_AGENTS.md) — copy to FixoraF `AGENTS.md`
 - [`AUTH_API.md`](AUTH_API.md) — auth detail
-- [`NEXT_SESSION.md`](NEXT_SESSION.md) — current active task prompt
+- [`PAYMENT_API.md`](PAYMENT_API.md) — payment detail
+- [`BACKEND_ADMIN.md`](BACKEND_ADMIN.md) — admin panel GraphQL contract
+- [`BACKEND_GAPS.md`](BACKEND_GAPS.md) — gap tracker (GAP-071…077)
 - [`FIXORA-ANALIZ.md`](FIXORA-ANALIZ.md) — UI mockups §9

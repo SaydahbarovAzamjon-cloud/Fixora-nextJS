@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'next-i18next';
+import { useMutation } from '@apollo/client';
 import DeleteOutlineOutlined from '@mui/icons-material/DeleteOutlineOutlined';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import SettingsSectionHead from '../SettingsSectionHead';
-import { sweetMixinErrorAlert } from '../../../../sweetAlert';
+import { DELETE_ACCOUNT } from '../../../../../apollo/user/settings';
+import { logOut } from '../../../../auth';
+import { sweetConfirmAlert, sweetErrorHandling } from '../../../../sweetAlert';
 
-const CONFIRM_PHRASE = 'DELETE MY ACCOUNT';
+const CONFIRM_PHRASE = 'DELETE';
 
 const DeleteAccountSection: React.FC = () => {
 	const { t } = useTranslation('technician');
 	const [confirmText, setConfirmText] = useState('');
+	const [deleteAccount, { loading }] = useMutation(DELETE_ACCOUNT);
 
 	const canDelete = confirmText.trim() === CONFIRM_PHRASE;
 
 	const handleDelete = async () => {
 		if (!canDelete) return;
-		await sweetMixinErrorAlert(t('settings.delete.gap095Message', { gap: 'GAP-095' }));
+		const confirmed = await sweetConfirmAlert(t('settings.delete.confirmPrompt'));
+		if (!confirmed) return;
+
+		try {
+			await deleteAccount({ variables: { input: { confirmation: CONFIRM_PHRASE } } });
+			logOut();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	return (
@@ -40,7 +52,7 @@ const DeleteAccountSection: React.FC = () => {
 				<button
 					type="button"
 					className="fts-danger-btn"
-					disabled={!canDelete}
+					disabled={!canDelete || loading}
 					onClick={handleDelete}
 				>
 					<DeleteOutlineOutlined style={{ fontSize: 14 }} />

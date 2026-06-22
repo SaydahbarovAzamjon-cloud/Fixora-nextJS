@@ -4,6 +4,15 @@ import { sortTechniciansList } from './sortTechnicians';
 export const DISCOVERY_POOL_LIMIT = 100;
 export const DISCOVERY_SECTION_LIMIT = 8;
 export const MIN_REVIEWS_TOP_RATED = 3;
+export const FAST_RESPONDER_MAX_MINUTES = 15;
+
+export const FAST_RESPONDERS_INPUT = {
+	page: 1,
+	limit: DISCOVERY_SECTION_LIMIT,
+	sort: 'avgResponseMinutes',
+	direction: 'ASC' as const,
+	search: { isOnline: null, maxAvgResponseMinutes: FAST_RESPONDER_MAX_MINUTES },
+};
 
 export const DISCOVERY_SECTION_IDS = [
 	'trending',
@@ -68,6 +77,12 @@ export function buildMostReviewedSection(list: TechnicianSummary[]): TechnicianS
 }
 
 export function buildFastRespondersSection(list: TechnicianSummary[]): TechnicianSummary[] {
+	const withResponse = list.filter((tech) => tech.avgResponseMinutes != null);
+	if (withResponse.length > 0) {
+		return takeTop(
+			sortTechniciansList(withResponse, { sort: 'avgResponseMinutes', direction: 'ASC' }),
+		);
+	}
 	return takeTop(
 		[...list].sort((a, b) => fastResponderScore(b) - fastResponderScore(a)),
 	);
@@ -104,10 +119,13 @@ const SECTION_TITLE_KEYS: Record<DiscoverySectionId, string> = {
 	verified: 'technicians.sections.verified',
 };
 
-export function buildDiscoverySections(list: TechnicianSummary[]): DiscoverySection[] {
+export function buildDiscoverySections(
+	list: TechnicianSummary[],
+	overrides?: Partial<Record<DiscoverySectionId, TechnicianSummary[]>>,
+): DiscoverySection[] {
 	return DISCOVERY_SECTION_IDS.map((id) => ({
 		id,
 		titleKey: SECTION_TITLE_KEYS[id],
-		technicians: SECTION_BUILDERS[id](list),
+		technicians: overrides?.[id] ?? SECTION_BUILDERS[id](list),
 	})).filter((section) => section.technicians.length > 0);
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useTranslation } from 'next-i18next';
 import { buildTimeline, formatDateTime } from './jobHelpers';
 
 interface RepairTimelineProps {
@@ -40,7 +41,8 @@ const StepContent = styled(Box)<{ last?: boolean }>(({ last }) => ({
 }));
 
 const RepairTimeline: React.FC<RepairTimelineProps> = ({ booking }) => {
-	const steps = buildTimeline(booking);
+	const { t } = useTranslation('technician');
+	const steps = buildTimeline(booking, t);
 
 	return (
 		<Card>

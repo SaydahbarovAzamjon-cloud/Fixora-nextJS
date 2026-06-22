@@ -11,9 +11,9 @@ import { userVar } from '../../../../apollo/store';
 import { GET_MY_ARTICLES } from '../../../../apollo/user/profile';
 import { DELETE_ARTICLE } from '../../../../apollo/user/article';
 import { Article, ArticleStatus } from '../../../types/fixora/fixora';
-import { removeArticleLocalSettings } from '../../../utils/articleLocalSettings';
 import MyArticleCard from './MyArticleCard';
 import ArticleCommentsModal from './ArticleCommentsModal';
+import { sweetConfirmAlert, sweetErrorHandling, sweetMixinSuccessAlert } from '../../../sweetAlert';
 
 type StatusFilter = 'ALL' | ArticleStatus;
 
@@ -61,7 +61,6 @@ const MyArticlesPage: React.FC = () => {
 		setDeletingId(id);
 		try {
 			await deleteArticle({ variables: { articleId: id } });
-			removeArticleLocalSettings(id);
 			await sweetMixinSuccessAlert(t('myArticles.deleteSuccess'), 2000);
 			await refetch();
 		} catch (err) {

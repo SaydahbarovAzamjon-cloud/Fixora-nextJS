@@ -11,10 +11,11 @@ export interface NewScheduleItem {
 interface AddScheduleModalProps {
 	open: boolean;
 	onClose: () => void;
-	onAdd: (item: NewScheduleItem) => void;
+	onAdd: (item: NewScheduleItem) => void | Promise<void>;
+	saving?: boolean;
 }
 
-const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
+const AddScheduleModal = ({ open, onClose, onAdd, saving = false }: AddScheduleModalProps) => {
 	const { t } = useTranslation('technician');
 	const [time, setTime] = useState('');
 	const [task, setTask] = useState('');
@@ -32,9 +33,9 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 
 	const canSave = time !== '' && task.trim() !== '';
 
-	const saveHandler = () => {
-		if (!canSave) return;
-		onAdd({ time, task: task.trim(), client: client.trim() });
+	const saveHandler = async () => {
+		if (!canSave || saving) return;
+		await onAdd({ time, task: task.trim(), client: client.trim() });
 		onClose();
 	};
 
@@ -88,8 +89,8 @@ const AddScheduleModal = ({ open, onClose, onAdd }: AddScheduleModalProps) => {
 					<button className="fixora-pp-btn fixora-pp-btn--ghost" type="button" onClick={onClose}>
 						{t('schedule.cancel')}
 					</button>
-					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={saveHandler} disabled={!canSave}>
-						{t('schedule.add')}
+					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={saveHandler} disabled={!canSave || saving}>
+						{saving ? t('schedule.saving') : t('schedule.add')}
 					</button>
 				</div>
 			</div>

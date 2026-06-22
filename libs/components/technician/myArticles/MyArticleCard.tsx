@@ -10,7 +10,6 @@ import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import StarRounded from '@mui/icons-material/StarRounded';
 import { Article } from '../../../types/fixora/fixora';
 import { resolveArticleImageUrl } from '../../../utils/articleImage';
-import { getArticleLocalSettings } from '../../../utils/articleLocalSettings';
 
 interface MyArticleCardProps {
 	article: Article;
@@ -34,15 +33,14 @@ const MyArticleCard: React.FC<MyArticleCardProps> = ({
 	const [imgFailed, setImgFailed] = useState(false);
 	const coverUrl = resolveArticleImageUrl(article.articleImage);
 	const showCover = !!coverUrl && !imgFailed;
-	const localSettings = getArticleLocalSettings(article._id);
 	const isDraft = article.articleStatus === 'DRAFT';
 	const isPublished = article.articleStatus === 'PUBLISHED';
-	const commentsDisabled = localSettings?.allowComments === false;
+	const commentsDisabled = article.allowComments === false;
 
 	return (
 		<article className={`ftma-card fixora-tip-card ${deleting ? 'ftma-card--deleting' : ''}`}>
 			<div className="ftma-card__top">
-				{localSettings?.featured && (
+				{article.isFeatured && (
 					<span className="ftma-card__badge ftma-card__badge--featured">
 						<StarRounded style={{ fontSize: 10 }} />
 						{t('myArticles.status.featured')}

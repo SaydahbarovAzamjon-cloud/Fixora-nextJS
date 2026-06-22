@@ -40,6 +40,8 @@
     "available": "작업 가능",
     "viewSchedule": "일정 보기",
     "exportReport": "보고서 내보내기",
+    "exportReportSuccess": "보고서가 다운로드되었습니다",
+    "exportReportEmpty": "내보낼 수익 데이터가 없습니다",
     "totalRequests": "총 요청",
     "activeJobs": "진행 중 작업",
     "thisWeek": "이번 주",
@@ -66,7 +68,9 @@
     "due": "마감: {{date}}",
     "periodWeek": "주",
     "periodMonth": "월",
-    "periodYear": "년"
+    "periodYear": "년",
+    "scheduleLoading": "일정 불러오는 중…",
+    "scheduleError": "일정을 불러올 수 없습니다. 나중에 다시 시도하세요."
   },
   "urgency": {
     "high": "높음",
@@ -163,7 +167,8 @@
     "topClients": "상위 고객",
     "byLifetimeRevenue": "누적 수익 기준",
     "jobsCount": "작업 {{count}}건",
-    "tooltipJobs": "작업"
+    "tooltipJobs": "작업",
+    "loadError": "분석 KPI를 불러올 수 없습니다. 차트에는 예약 데이터가 표시될 수 있습니다."
   },
   "earnings": {
     "title": "수익 및 정산",
@@ -174,6 +179,8 @@
     "rangeThisYear": "올해",
     "requestPayout": "정산 요청",
     "payoutComingSoon": "정산 요청은 곧 제공됩니다",
+    "payoutRequested": "정산 요청이 완료되었습니다",
+    "noPayoutHistory": "정산 내역이 없습니다",
     "totalEarned": "총 수익",
     "pending": "대기 중",
     "nextPayout": "다음 정산",
@@ -241,7 +248,8 @@
     "paymentStatusPending": "대기 중",
     "paymentDescription": "{{type}} {{status}} · {{amount}}",
     "subtitle": "수리 업무를 놓치지 마세요",
-    "newBadge": "새 알림 {{count}}건"
+    "newBadge": "새 알림 {{count}}건",
+    "delete": "알림 삭제"
   },
   "profile": {
     "proTechnician": "프로 기술자",
@@ -304,8 +312,7 @@
       "invalidType": "PNG, JPG, WebP 이미지만 허용됩니다.",
       "tooLarge": "이미지는 5MB 이하여야 합니다.",
       "uploadFailed": "프로필 사진을 업로드할 수 없습니다. 다시 시도해 주세요.",
-      "saved": "프로필이 저장되었습니다.",
-      "emailChangePending": "프로필이 업데이트되었습니다. 이메일 변경은 아직 지원되지 않습니다 — 로그인 이메일은 변경되지 않았습니다."
+      "saved": "프로필이 저장되었습니다."
     },
     "account": {
       "title": "계정 설정",
@@ -316,11 +323,30 @@
       "proTechnician": "프로 기술자",
       "proSub": "현재 요금제",
       "enterprise": "엔터프라이즈",
-      "enterpriseSub": "팀 기능"
+      "enterpriseSub": "팀 기능",
+      "slugRequired": "프로필 URL 슬러그를 입력하세요.",
+      "saved": "계정이 저장되었습니다."
     },
     "notifications": {
       "title": "알림",
-      "desc": "알림 받을 항목 선택"
+      "desc": "알림 받을 항목 선택",
+      "saved": "알림 설정이 저장되었습니다.",
+      "prefs": {
+        "bookingUpdates": "예약 업데이트",
+        "bookingUpdatesHint": "진행 중인 작업 상태 변경",
+        "messages": "메시지",
+        "messagesHint": "고객의 새 채팅 메시지",
+        "payments": "결제",
+        "paymentsHint": "보증금, 잔금, 정산",
+        "reviews": "리뷰",
+        "reviewsHint": "새 평점 및 리뷰",
+        "marketing": "마케팅",
+        "marketingHint": "제품 소식 및 프로모션",
+        "followAlerts": "팔로우 알림",
+        "followAlertsHint": "프로필을 팔로우할 때",
+        "emailDigest": "이메일 요약",
+        "emailDigestHint": "주간 이메일 요약"
+      }
     },
     "security": {
       "title": "보안",
@@ -334,13 +360,37 @@
       "passwordMin": "비밀번호는 최소 8자 이상이어야 합니다.",
       "passwordMismatch": "비밀번호가 일치하지 않습니다.",
       "currentRequired": "현재 비밀번호를 입력하세요.",
-      "gap090Hint": "참고: 현재 비밀번호 확인은 FIXORAB changePassword mutation이 필요합니다 (GAP-090).",
+      "passwordSaved": "비밀번호가 변경되었습니다.",
       "twoFactor": "2단계 인증",
-      "twoFactorFuture": "예정: 인증 앱, 이메일 ({{email}}), SMS ({{phone}})."
+      "twoFactorOn": "사용 중",
+      "twoFactorOff": "사용 안 함",
+      "enable2FA": "인증 앱 설정",
+      "verify2FA": "확인 후 활성화",
+      "disable2FA": "2단계 인증 해제",
+      "totpCode": "인증 앱 코드",
+      "scanQr": "인증 앱에서 QR 코드를 스캔한 뒤 6자리 코드를 입력하세요.",
+      "manualSecret": "수동 입력 시크릿: {{secret}}",
+      "twoFactorEnabled": "2단계 인증이 활성화되었습니다.",
+      "twoFactorDisabled": "2단계 인증이 해제되었습니다.",
+      "twoFactorEnableFailed": "2단계 인증 설정을 시작할 수 없습니다.",
+      "twoFactorVerifyFailed": "코드가 올바르지 않습니다. 다시 시도하세요.",
+      "twoFactorDisableFailed": "2단계 인증을 해제할 수 없습니다. 비밀번호를 확인하세요."
     },
     "payment": {
       "title": "결제 수단",
-      "desc": "수익 수령 방법 관리"
+      "desc": "수익 수령 방법 관리",
+      "savedMethods": "저장된 수단",
+      "empty": "저장된 결제 수단이 없습니다.",
+      "primary": "기본",
+      "makePrimary": "기본으로 설정",
+      "addMethod": "결제 수단 추가",
+      "label": "이름",
+      "type": "유형",
+      "typeCard": "카드",
+      "typeCash": "현금",
+      "masked": "마스킹된 번호",
+      "addButton": "수단 추가",
+      "added": "결제 수단이 추가되었습니다."
     },
     "availability": {
       "title": "근무 가능 시간",
@@ -351,16 +401,21 @@
     },
     "preferences": {
       "title": "환경 설정",
-      "desc": "FIXORA 경험 맞춤 설정"
+      "desc": "FIXORA 경험 맞춤 설정",
+      "language": "언어",
+      "currency": "통화",
+      "timezone": "시간대",
+      "darkMode": "다크 모드",
+      "saved": "환경 설정이 저장되었습니다."
     },
     "delete": {
       "title": "계정 삭제",
       "desc": "FIXORA 계정 및 모든 데이터를 영구 삭제",
       "dangerZone": "위험 구역",
       "warning": "계정 삭제는 영구적이며 되돌릴 수 없습니다. 프로필, 작업 기록, 리뷰, 수익 기록이 모두 삭제됩니다. 진행 중인 작업과 미결제는 삭제 전 해결해야 합니다.",
-      "confirmLabel": "확인을 위해 \"DELETE MY ACCOUNT\" 입력",
-      "submit": "계정 영구 삭제",
-      "gap095Message": "계정 삭제는 FIXORAB deleteAccount mutation이 필요합니다 ({{gap}})."
+      "confirmLabel": "확인을 위해 \"DELETE\" 입력",
+      "confirmPrompt": "계정이 영구 삭제됩니다. 계속하시겠습니까?",
+      "submit": "계정 영구 삭제"
     }
   },
   "schedule": {
@@ -371,7 +426,9 @@
     "clientOptional": "고객 (선택)",
     "clientPlaceholder": "예: 김소피아",
     "cancel": "취소",
-    "add": "추가"
+    "add": "추가",
+    "added": "일정이 추가되었습니다",
+    "saving": "저장 중…"
   },
   "time": {
     "justNow": "방금",
@@ -446,6 +503,7 @@
     "saveDraftMode": "초안 저장",
     "publishNow": "지금 게시",
     "schedulePublication": "예약 게시",
+    "scheduleDate": "게시 일시",
     "visibility": "공개 범위",
     "public": "공개",
     "techsOnly": "기술자 전용",

@@ -37,8 +37,6 @@ const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceI
 		return () => window.removeEventListener('keydown', onKeyDown);
 	}, [closeLightbox, lightboxUrl]);
 
-	const hasAnyImages = existingUrls.length > 0 || upload.images.length > 0;
-
 	return (
 		<FixoraGlassCard className="fixora-booking__card fixora-booking__card--device-images">
 			<div className="fixora-input fixora-booking__device-image">
@@ -74,7 +72,7 @@ const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceI
 									index: existingUrls.length + index + 1,
 								})}
 							>
-								<img src={image.previewUrl} alt="" />
+								<img src={image.previewUrl} alt="" width={120} height={120} decoding="async" />
 							</button>
 							<button
 								type="button"
@@ -102,11 +100,7 @@ const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceI
 							onClick={upload.openPicker}
 						>
 							<CloudUploadOutlinedIcon fontSize="small" />
-							<span>
-								{hasAnyImages
-									? t('booking.device.imageAddMore', { count: upload.remainingSlots })
-									: t('booking.device.imageUpload')}
-							</span>
+							<span>{t('booking.device.imageUpload')}</span>
 						</button>
 					)}
 				</div>

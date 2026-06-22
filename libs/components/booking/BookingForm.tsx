@@ -51,6 +51,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [submitting, setSubmitting] = useState(false);
 	const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+	const hasInitializedDeviceSelection = useRef(false);
 
 	const deviceSearch = useMemo(
 		() => (technicianDeviceCategory ? { deviceCategory: technicianDeviceCategory } : {}),
@@ -64,6 +65,8 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 			input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC', search: deviceSearch },
 		},
 		onCompleted: (data) => {
+			if (hasInitializedDeviceSelection.current) return;
+			hasInitializedDeviceSelection.current = true;
 			const list: Device[] = data?.getMyDevices?.list ?? [];
 			setSelectedDeviceId(list.length ? list[0]._id : 'new');
 		},
@@ -106,8 +109,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 		[isNewDevice, selectedDevice?.deviceImage],
 	);
 
-	const existingDeviceImageCount =
-		!isNewDevice && devicesLoading ? 0 : existingDeviceImagePaths.length;
+	const existingDeviceImageCount = isNewDevice ? 0 : existingDeviceImagePaths.length;
 
 	const deviceImageUpload = useDeviceImageUpload(onDeviceImageError, existingDeviceImageCount);
 
@@ -138,7 +140,8 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 		setDeviceCategory(technicianDeviceCategory);
 		if (!devicesLoading) {
 			setSelectedDeviceId((current) => {
-				if (current !== 'new' && devices.some((device) => device._id === current)) return current;
+				if (current === 'new') return current;
+				if (devices.some((device) => device._id === current)) return current;
 				return devices.length ? devices[0]._id : 'new';
 			});
 		}
@@ -327,14 +330,6 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 						))}
 						<label
 							className={`fixora-booking__device-option${isNewDevice ? ' fixora-booking__device-option--active' : ''}`}
-							onClick={(e) => {
-								if (isNewDevice) {
-									e.preventDefault();
-									if (devices.length > 0) {
-										selectDevice(devices[0]._id);
-									}
-								}
-							}}
 						>
 							<input
 								type="radio"
@@ -342,9 +337,6 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 								value="new"
 								checked={isNewDevice}
 								onChange={() => selectDevice('new')}
-								onClick={(e) => {
-									if (isNewDevice) e.preventDefault();
-								}}
 							/>
 							<span className="fixora-booking__device-info">
 								<strong>
@@ -437,7 +429,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 			<FixoraGlassCard className="fixora-booking__card">
 				<h2 className="fixora-booking__heading">{t('booking.details.heading')}</h2>
 
-				<div className="fixora-booking__form-grid">
+				<div className="fixora-booking__form-grid fixora-booking__form-grid--details">
 					<FixoraInput
 						label={t('booking.details.problemTitle')}
 						name="problemTitle"

@@ -4,6 +4,9 @@ import { getJwtToken } from '../auth';
 import { MAX_DEVICE_IMAGES } from '../utils/deviceImage';
 import { validateCoverFile } from './useArticleCoverUpload';
 
+/** FixoraB allowedUploadTargets — `device` is not whitelisted (BACKEND_GAPS GAP-101). */
+const UPLOAD_TARGETS = ['property', 'article'] as const;
+
 export interface DeviceImageState {
 	id: string;
 	file: File;
@@ -11,24 +14,28 @@ export interface DeviceImageState {
 }
 
 let deviceImageId = 0;
+
 function nextDeviceImageId() {
 	deviceImageId += 1;
 	return `device-image-${deviceImageId}`;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(String(reader.result));
-		reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'));
-		reader.readAsDataURL(file);
-	});
+function revokePreviewUrl(url: string) {
+	if (url.startsWith('blob:')) URL.revokeObjectURL(url);
 }
 
-async function uploadDeviceFile(file: File): Promise<string> {
-	const token = getJwtToken();
-	if (!token) throw new Error('Not authenticated');
+function uploadErrorMessage(err: unknown): string {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const anyErr = err as any;
+	return (
+		anyErr?.errors?.[0]?.message ||
+		anyErr?.response?.data?.errors?.[0]?.message ||
+		anyErr?.message ||
+		'Upload failed'
+	);
+}
 
+async function uploadDeviceFileWithTarget(file: File, target: string, token: string): Promise<string> {
 	const formData = new FormData();
 	formData.append(
 		'operations',
@@ -36,7 +43,7 @@ async function uploadDeviceFile(file: File): Promise<string> {
 			query: `mutation ImageUploader($file: Upload!, $target: String!) {
 				imageUploader(file: $file, target: $target)
 			}`,
-			variables: { file: null, target: 'device' },
+			variables: { file: null, target },
 		}),
 	);
 	formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
@@ -49,10 +56,26 @@ async function uploadDeviceFile(file: File): Promise<string> {
 			Authorization: `Bearer ${token}`,
 		},
 	});
+
 	if (response.data?.errors?.length) throw response.data;
+
 	const path: string | undefined = response.data?.data?.imageUploader;
 	if (!path) throw new Error('Upload failed');
+
 	return path.startsWith('http') ? path : path.replace(/^\//, '');
+}
+
+/** Same multipart pattern as useArticleCoverUpload — imageUploader (singular). */
+async function uploadDeviceFile(file: File, token: string): Promise<string> {
+	let lastError: unknown;
+	for (const target of UPLOAD_TARGETS) {
+		try {
+			return await uploadDeviceFileWithTarget(file, target, token);
+		} catch (err) {
+			lastError = err;
+		}
+	}
+	throw lastError;
 }
 
 export function useDeviceImageUpload(onError?: (key: string) => void, existingCount = 0) {
@@ -63,40 +86,10 @@ export function useDeviceImageUpload(onError?: (key: string) => void, existingCo
 	const existingCountRef = useRef(existingCount);
 	existingCountRef.current = Math.max(0, existingCount);
 
-	const applyFileToImage = useCallback(
-		async (file: File): Promise<DeviceImageState | null> => {
-			const err = validateCoverFile(file);
-			if (err) {
-				onError?.(err);
-				return null;
-			}
-			try {
-				const previewUrl = await readFileAsDataUrl(file);
-				return {
-					id: nextDeviceImageId(),
-					file,
-					previewUrl,
-				};
-			} catch {
-				onError?.('generic');
-				return null;
-			}
-		},
-		[onError],
-	);
-
 	const addFiles = useCallback(
-		async (files: FileList | File[]) => {
+		(files: FileList | File[]) => {
 			const list = Array.from(files);
 			if (list.length === 0) return;
-
-			const pending: DeviceImageState[] = [];
-			for (const file of list) {
-				const next = await applyFileToImage(file);
-				if (next) pending.push(next);
-			}
-
-			if (pending.length === 0) return;
 
 			setImages((prev) => {
 				const remaining = MAX_DEVICE_IMAGES - existingCountRef.current - prev.length;
@@ -105,71 +98,104 @@ export function useDeviceImageUpload(onError?: (key: string) => void, existingCo
 					return prev;
 				}
 
-				const toAdd = pending.slice(0, remaining);
-				const overflow = pending.slice(remaining);
+				const pending: DeviceImageState[] = [];
+				for (const file of list) {
+					if (pending.length >= remaining) break;
 
-				if (overflow.length > 0 || pending.length > remaining) {
+					const err = validateCoverFile(file);
+					if (err) {
+						queueMicrotask(() => onError?.(err));
+						continue;
+					}
+
+					pending.push({
+						id: nextDeviceImageId(),
+						file,
+						previewUrl: URL.createObjectURL(file),
+					});
+				}
+
+				if (pending.length === 0) return prev;
+
+				if (list.length > remaining) {
 					queueMicrotask(() => onError?.('tooMany'));
 				}
 
-				return [...prev, ...toAdd];
+				return [...prev, ...pending];
 			});
 		},
-		[applyFileToImage, onError],
+		[onError],
 	);
 
 	const replaceImage = useCallback(
-		async (id: string, file: File) => {
+		(id: string, file: File) => {
 			const err = validateCoverFile(file);
 			if (err) {
 				onError?.(err);
 				return;
 			}
-			try {
-				const previewUrl = await readFileAsDataUrl(file);
-				setImages((prev) =>
-					prev.map((image) => (image.id === id ? { ...image, file, previewUrl } : image)),
-				);
-			} catch {
-				onError?.('generic');
-			}
+
+			const previewUrl = URL.createObjectURL(file);
+			setImages((prev) =>
+				prev.map((image) => {
+					if (image.id !== id) return image;
+					revokePreviewUrl(image.previewUrl);
+					return { ...image, file, previewUrl };
+				}),
+			);
 		},
 		[onError],
 	);
 
 	const pickFiles = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const files = e.target.files;
+			const files = e.target.files ? Array.from(e.target.files) : [];
 			const replaceId = replaceTargetIdRef.current;
 			replaceTargetIdRef.current = null;
 			e.target.value = '';
-			if (!files?.length) return;
+
+			if (!files.length) return;
+
 			if (replaceId) {
-				void replaceImage(replaceId, files[0]);
+				replaceImage(replaceId, files[0]);
 				return;
 			}
-			void addFiles(files);
+
+			addFiles(files);
 		},
 		[addFiles, replaceImage],
 	);
 
 	const removeImage = useCallback((id: string) => {
-		setImages((prev) => prev.filter((image) => image.id !== id));
+		setImages((prev) => {
+			const target = prev.find((image) => image.id === id);
+			if (target) revokePreviewUrl(target.previewUrl);
+			return prev.filter((image) => image.id !== id);
+		});
 	}, []);
 
 	const clearImages = useCallback(() => {
-		setImages([]);
+		setImages((prev) => {
+			prev.forEach((image) => revokePreviewUrl(image.previewUrl));
+			return [];
+		});
 	}, []);
 
 	const uploadDeviceImages = useCallback(async (): Promise<string[]> => {
 		if (images.length === 0) return [];
+
+		const token = getJwtToken();
+		if (!token) throw new Error('Not authenticated');
+
 		setUploading(true);
 		try {
 			const paths: string[] = [];
 			for (const image of images) {
-				paths.push(await uploadDeviceFile(image.file));
+				paths.push(await uploadDeviceFile(image.file, token));
 			}
 			return paths;
+		} catch (err) {
+			throw new Error(uploadErrorMessage(err));
 		} finally {
 			setUploading(false);
 		}

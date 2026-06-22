@@ -8,6 +8,7 @@ import EastIcon from '@mui/icons-material/East';
 import { GET_DEVICE, GET_USER } from '../../../../apollo/user/query';
 import { Booking } from '../../../types/fixora/fixora';
 import DepositPaymentCard from '../../booking/DepositPaymentCard';
+import { getPrimaryDeviceImageUrl } from '../../../utils/deviceImage';
 
 export interface RequestCardProps {
 	booking: Booking;
@@ -31,6 +32,7 @@ const RequestCard = ({ booking, onPaymentComplete }: RequestCardProps) => {
 	});
 	const technician = technicianData?.getUser;
 	const technicianName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
+	const deviceImageUrl = getPrimaryDeviceImageUrl(device?.deviceImage);
 
 	const title = device ? `${t(`booking.device.categories.${device.deviceCategory}`)} ${device.deviceModel}` : booking.problemTitle;
 
@@ -41,7 +43,7 @@ const RequestCard = ({ booking, onPaymentComplete }: RequestCardProps) => {
 	return (
 		<div className="fixora-mypage__request">
 			<Link href={`/mypage/bookings/${booking._id}`} className="fixora-mypage__request-main">
-				{device?.deviceImage && <img className="fixora-mypage__request-image" src={device.deviceImage} alt="" />}
+				{deviceImageUrl && <img className="fixora-mypage__request-image" src={deviceImageUrl} alt="" />}
 				<div className="fixora-mypage__request-info">
 					<strong>{title}</strong>
 					<span>{booking.problemTitle}</span>

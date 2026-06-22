@@ -8,6 +8,7 @@ import { Booking } from '../../../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../../../utils/profileImage';
 import { formatKrw } from '../../../utils/formatCurrency';
 import { dateLocale } from '../../../utils/i18nLocale';
+import { getPrimaryDeviceImageUrl } from '../../../utils/deviceImage';
 
 const averageReviewScore = (review?: any) => {
 	if (!review) return null;
@@ -61,12 +62,12 @@ export const ClientRepairHistoryTab = ({ bookings }: RepairHistoryTabProps) => {
 					{t('clientProfile.repairHistoryTitle', { count: completed.length })}
 				</h3>
 				<div className="fixora-mypage__request-list">
-					{completed.map((booking) => (
-						<div key={booking._id} className="fixora-mypage__request">
+					{completed.map((booking) => {
+						const deviceImageUrl = getPrimaryDeviceImageUrl(booking.deviceData?.deviceImage);
+						return (
+							<div key={booking._id} className="fixora-mypage__request">
 							<div className="fixora-mypage__request-main">
-								{booking.deviceData?.deviceImage && (
-									<img className="fixora-mypage__request-image" src={booking.deviceData.deviceImage} alt="" />
-								)}
+								{deviceImageUrl && <img className="fixora-mypage__request-image" src={deviceImageUrl} alt="" />}
 								<div className="fixora-mypage__request-info">
 									<strong>{deviceTitle(booking, t)}</strong>
 									<span>{booking.problemTitle}</span>
@@ -88,7 +89,8 @@ export const ClientRepairHistoryTab = ({ bookings }: RepairHistoryTabProps) => {
 								<span className="fixora-mypage__request-view">{formatKrw(bookingPrice(booking))}</span>
 							</div>
 						</div>
-					))}
+						);
+					})}
 				</div>
 			</section>
 		</div>

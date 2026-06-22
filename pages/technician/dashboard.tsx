@@ -31,6 +31,7 @@ import { userVar } from '../../apollo/store';
 import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import { formatKrw, formatKrwCompact } from '../../libs/utils/formatCurrency';
+import { getPrimaryDeviceImageUrl } from '../../libs/utils/deviceImage';
 import {
 	buildDashboardMonthSeries,
 	buildDashboardMonthSeriesFromPayments,
@@ -444,9 +445,16 @@ const TechnicianDashboard: NextPage = () => {
 								incomingRequests.slice(0, 4).map((booking: any) => {
 									const ug = urgencyInfo(booking?.aiClassification?.repairComplexity, booking?.problemTitle, booking?.problemDescription, t);
 									const price = bookingPrice(booking);
+									const deviceImageUrl = getPrimaryDeviceImageUrl(booking?.deviceData?.deviceImage);
 									return (
 										<div key={booking._id} className="fixora-tech-request-item">
-											<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} /></div>
+											<div className="fixora-tech-request-icon">
+												{deviceImageUrl ? (
+													<img src={deviceImageUrl} alt="" />
+												) : (
+													<DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} />
+												)}
+											</div>
 											<div className="fixora-tech-request-info">
 												<div className="fixora-tech-request-top">
 													<span className="fixora-tech-request-name">{customerName(booking)}</span>
@@ -480,6 +488,7 @@ const TechnicianDashboard: NextPage = () => {
 								activeJobs.slice(0, 3).map((booking: any) => {
 									const status = jobStatusInfo(booking?.bookingStatus, t);
 									const progress = jobProgress(booking);
+									const deviceImageUrl = getPrimaryDeviceImageUrl(booking?.deviceData?.deviceImage);
 									return (
 										<div
 											key={booking._id}
@@ -489,7 +498,13 @@ const TechnicianDashboard: NextPage = () => {
 										>
 											<div className="fixora-tech-job-top">
 												<div className="fixora-tech-job-info">
-													<div className="fixora-tech-request-icon"><DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} /></div>
+													<div className="fixora-tech-request-icon">
+														{deviceImageUrl ? (
+															<img src={deviceImageUrl} alt="" />
+														) : (
+															<DeviceIcon type={booking?.deviceData?.deviceCategory || booking?.aiClassification?.deviceType} />
+														)}
+													</div>
 													<div>
 														<div className="fixora-tech-request-name">{customerName(booking)}</div>
 														<div className="fixora-tech-job-device">{deviceLabel(booking)}</div>

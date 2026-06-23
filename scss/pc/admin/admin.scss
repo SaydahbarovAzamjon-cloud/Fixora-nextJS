@@ -704,6 +704,125 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		min-width: 160px;
 		max-width: 200px;
 	}
+
+	&--filters {
+		> .fixora-admin-search.fixora-input {
+			flex: 1 1 220px;
+		}
+	}
+}
+
+.fixora-admin-toolbar-pills {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+
+	&__pill {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		height: 48px;
+		padding: 0 16px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+		font-size: 14px;
+		font-weight: 600;
+		color: $admin-text-secondary;
+		cursor: pointer;
+		transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+		white-space: nowrap;
+		box-sizing: border-box;
+
+		&:hover:not(:disabled) {
+			border-color: rgba(115, 12, 30, 0.45);
+		}
+
+		&--active {
+			border-color: var(--fixora-primary);
+			background: rgba(115, 12, 30, 0.1);
+			color: $admin-text;
+			box-shadow: var(--fixora-glow);
+		}
+
+		&--disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			border-color: rgba(138, 138, 138, 0.35);
+			color: $admin-text-muted;
+
+			&:hover {
+				opacity: 0.65;
+				border-color: rgba(138, 138, 138, 0.5);
+
+				.fixora-admin-toolbar-pills__hint {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		}
+	}
+
+	&__hint {
+		font-size: 10px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: $admin-text-muted;
+		opacity: 0;
+		transform: translateY(2px);
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+
+	&--uniform {
+		.fixora-admin-toolbar-pills__pill {
+			min-width: 120px;
+		}
+	}
+}
+
+.fixora-admin-modal__field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 16px;
+
+	> span {
+		font-size: 12px;
+		font-weight: 600;
+		color: $admin-text-muted;
+		letter-spacing: 0.02em;
+	}
+}
+
+.fixora-admin-input {
+	width: 100%;
+	padding: 12px 14px;
+	border-radius: 12px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-surface);
+	color: $admin-text;
+	font-size: 14px;
+	font-family: inherit;
+	line-height: 1.5;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+	&::placeholder {
+		color: $admin-text-muted;
+	}
+
+	&:focus {
+		border-color: rgba(115, 12, 30, 0.55);
+		box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+	}
+
+	&--textarea {
+		min-height: 96px;
+		resize: vertical;
+	}
 }
 
 .fixora-admin-select {
@@ -1293,6 +1412,20 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		align-items: center;
 		gap: 8px;
 		min-width: 0;
+
+		&:hover .fixora-admin-device-card__avatar:not(.fixora-admin-device-card__avatar--empty) {
+			transform: scale(1.06);
+		}
+	}
+
+	&__avatar {
+		transition: transform 0.2s ease;
+
+		&--empty {
+			background: rgba(115, 12, 30, 0.18);
+			color: $admin-text-muted;
+			border: 1px dashed var(--fixora-border-subtle);
+		}
 	}
 
 	&__person-name {
@@ -2412,6 +2545,11 @@ $admin-text-secondary: var(--fixora-text-secondary);
 			gap: 16px;
 			align-items: flex-start;
 			margin-bottom: 16px;
+
+			.fixora-admin-article-cell__thumb {
+				width: 96px;
+				min-height: 96px;
+			}
 		}
 
 		&__cover {
@@ -2460,10 +2598,38 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 		&__content {
 			border-top: 1px solid var(--fixora-border-subtle);
-			padding-top: 16px;
+			margin-top: 4px;
+			padding: 16px;
+			border-radius: 12px;
+			background: rgba(115, 12, 30, 0.1);
+			border: 1px solid var(--fixora-border-subtle);
 			font-size: 14px;
 			color: $admin-text-secondary;
 			line-height: 1.6;
+
+			.fixora-tviewer--dark {
+				.fixora-tviewer__inner {
+					background: transparent;
+					padding: 0;
+				}
+
+				.toastui-editor-contents {
+					color: $admin-text-secondary;
+					background: transparent !important;
+				}
+
+				.toastui-editor-contents p,
+				.toastui-editor-contents li,
+				.toastui-editor-contents h1,
+				.toastui-editor-contents h2,
+				.toastui-editor-contents h3,
+				.toastui-editor-contents h4,
+				.toastui-editor-contents span,
+				.toastui-editor-contents div {
+					color: $admin-text;
+					background: transparent;
+				}
+			}
 		}
 	}
 
@@ -2502,23 +2668,32 @@ $admin-text-secondary: var(--fixora-text-secondary);
 /* ── Moderation articles table ── */
 .fixora-admin-article-cell {
 	display: flex;
-	align-items: flex-start;
+	align-items: stretch;
 	gap: 12px;
 	min-width: 0;
 	max-width: 340px;
 
 	&__thumb {
+		width: 72px;
+		flex-shrink: 0;
+		align-self: stretch;
+		min-height: 52px;
 		border-radius: 10px;
 		overflow: hidden;
-		flex-shrink: 0;
 		border: 1px solid var(--fixora-border-subtle);
 		background: var(--fixora-surface);
+		display: flex;
 
 		img {
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
 			display: block;
+			transition: transform 0.25s ease;
+		}
+
+		&:hover img {
+			transform: scale(1.08);
 		}
 	}
 
@@ -2563,6 +2738,14 @@ $admin-text-secondary: var(--fixora-text-secondary);
 }
 
 .fixora-admin-author-cell {
+	.fixora-admin-table-user__avatar {
+		transition: transform 0.2s ease;
+	}
+
+	&:hover .fixora-admin-table-user__avatar {
+		transform: scale(1.06);
+	}
+
 	&__text {
 		display: flex;
 		flex-direction: column;

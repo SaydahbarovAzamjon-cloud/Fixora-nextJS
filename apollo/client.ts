@@ -47,7 +47,7 @@ function createIsomorphicLink() {
 			uri: process.env.REACT_APP_API_GRAPHQL_URL,
 		});
 
-		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
+		const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
 		if (graphQLErrors) {
 			graphQLErrors.map(({ message, locations, path }) => {
 				const isAuthMutation =
@@ -58,13 +58,25 @@ function createIsomorphicLink() {
 				const isRoleError = isRoleRestrictedError(message);
 				const isAuthError = isMissingTokenError(message);
 
-				if (isRoleError || isAuthError) {
+				const suppressAlert = operation.getContext().suppressErrorAlert;
+				const isLookupMiss =
+					path?.[0] === 'getUser' &&
+					(message === 'No data found!' || /no data found/i.test(message));
+
+				if (isRoleError || isAuthError || isLookupMiss) {
 					console.debug(`[GraphQL auth]: ${message}`);
 				} else {
 					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
 				}
 
-				if (!message.includes('input') && !isAuthMutation && !isRoleError && !isAuthError) {
+				if (
+					!suppressAlert &&
+					!isLookupMiss &&
+					!message.includes('input') &&
+					!isAuthMutation &&
+					!isRoleError &&
+					!isAuthError
+				) {
 					sweetErrorAlert(message);
 				}
 			});

@@ -110,7 +110,7 @@ const AdminSettingsPage: NextPage = () => {
 			});
 			const saved = result.data?.updateUserByAdmin as AdminUser | undefined;
 			if (saved) {
-				syncUserVarFromGraphqlUser(saved);
+				syncUserVarFromGraphqlUser({ ...saved, _id: userId });
 				avatar.clearDraftAfterSave(saved.userProfileImage);
 			}
 			await sweetTopSmallSuccessAlert(t('settings.saved'), 1200);

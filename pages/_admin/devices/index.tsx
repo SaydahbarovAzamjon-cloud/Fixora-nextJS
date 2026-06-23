@@ -117,38 +117,24 @@ const AdminDevicesPage: NextPage = () => {
 
 
 	const { data, loading } = useQuery(GET_ALL_DEVICES_BY_ADMIN, {
-
 		variables: {
-
 			input: {
-
 				page: 1,
-
 				limit: 50,
-
 				search: {
-
 					text: debouncedSearch || undefined,
-
 					deviceCategory: categoryFilter || undefined,
-
 					deviceStatus: statusFilter || undefined,
-
 				},
-
 			},
-
 		},
-
 		fetchPolicy: 'cache-and-network',
-
 		errorPolicy: 'all',
-
 	});
 
-
-
 	const list: AdminDevice[] = data?.getAllDevicesByAdmin?.list ?? [];
+	const showInitialLoading = loading && !data?.getAllDevicesByAdmin;
+	const showEmpty = !loading && list.length === 0;
 
 	const ownerIds = list.map((d) => d.userId);
 
@@ -161,8 +147,6 @@ const AdminDevicesPage: NextPage = () => {
 	const technicianIds = list.map((d) => technicianId(d._id)).filter(Boolean) as string[];
 
 	const { user: technicianUser } = useUserLookup(technicianIds);
-
-
 
 	return (
 
@@ -228,17 +212,16 @@ const AdminDevicesPage: NextPage = () => {
 
 
 
-				{loading && <div className="fixora-admin-empty">{t('common.loading')}</div>}
-
-				{!loading && list.length === 0 && <div className="fixora-admin-empty">{t('devices.empty')}</div>}
+				{showInitialLoading && <div className="fixora-admin-empty">{t('common.loading')}</div>}
+				{showEmpty && <div className="fixora-admin-empty">{t('devices.empty')}</div>}
 
 
 
 				<div className="fixora-admin-device-grid">
 
 					{list.map((device) => {
-
 						const techId = technicianId(device._id);
+						const technician = techId ? technicianUser(techId) : undefined;
 
 						return (
 
@@ -287,13 +270,9 @@ const AdminDevicesPage: NextPage = () => {
 									/>
 
 									<AdminDevicePersonRow
-
 										label={t('devices.technician')}
-
-										user={techId ? technicianUser(techId) : undefined}
-
+										user={technician}
 										emptyLabel={t('devices.noTechnician')}
-
 									/>
 
 								</div>

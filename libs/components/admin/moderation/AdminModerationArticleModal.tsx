@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'next-i18next';
-import { useMutation, useQuery } from '@apollo/client';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { X } from 'lucide-react';
 import { GET_ADMIN_ARTICLE } from '../../../../apollo/admin/query';
-import { REMOVE_ARTICLE_BY_ADMIN, UPDATE_ARTICLE_BY_ADMIN } from '../../../../apollo/admin/mutation';
+import { UPDATE_ARTICLE_BY_ADMIN } from '../../../../apollo/admin/mutation';
 import type { AdminArticle } from '../../../types/admin/admin';
+import { deleteArticleByAdmin } from '../../../utils/adminArticleActions';
 import { displayUserName } from '../../../hooks/useUserLookup';
 import { resolveProfileImageUrl } from '../../../utils/profileImage';
 import { resolveArticleImageUrl } from '../../../utils/articleImage';
@@ -47,6 +48,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 }) => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
+	const client = useApolloClient();
 
 	const { data, loading } = useQuery(GET_ADMIN_ARTICLE, {
 		variables: { articleId: articleId as string },
@@ -54,8 +56,8 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 		fetchPolicy: 'network-only',
 	});
 
-	const [removeArticle, { loading: removing }] = useMutation(REMOVE_ARTICLE_BY_ADMIN);
 	const [updateArticle, { loading: updating }] = useMutation(UPDATE_ARTICLE_BY_ADMIN);
+	const [deleting, setDeleting] = useState(false);
 
 	const article: AdminArticle | undefined = data?.getArticle;
 
@@ -81,16 +83,26 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 		}
 	};
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		if (!articleId || !window.confirm(t('moderation.articles.modal.confirmDelete'))) return;
-		run(() => removeArticle({ variables: { articleId } }));
+		setDeleting(true);
+		try {
+			await deleteArticleByAdmin(client, articleId);
+			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
+			onUpdated();
+			onClose();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		} finally {
+			setDeleting(false);
+		}
 	};
 
 	const handleHide = () => {
 		if (!article?._id || !window.confirm(t('moderation.articles.modal.confirmHide'))) return;
 		run(() =>
 			updateArticle({
-				variables: { input: { _id: article._id, articleStatus: 'DELETE' } },
+				variables: { input: { _id: article._id, articleStatus: 'DRAFT' } },
 			}),
 		);
 	};
@@ -103,6 +115,8 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 			}),
 		);
 	};
+
+	const isHidden = article?.articleStatus === 'DELETE' || article?.articleStatus === 'DRAFT';
 
 	const author = article?.authorData;
 	const authorName = displayUserName(author);
@@ -145,11 +159,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 									decoding="async"
 								/>
 							) : (
-								<AdminModerationArticleThumb
-									image={null}
-									title={article.articleTitle}
-									size={96}
-								/>
+								<AdminModerationArticleThumb image={null} title={article.articleTitle} />
 							)}
 							<div className="fixora-admin-modal--article__meta">
 								<h4 className="fixora-admin-modal--article__article-title">{article.articleTitle}</h4>
@@ -194,7 +204,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 						)}
 
 						<div className="fixora-admin-modal--article__content">
-							<TViewer markdown={article.articleContent} />
+							<TViewer markdown={article.articleContent} dark />
 						</div>
 					</div>
 				)}
@@ -204,16 +214,16 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 						type="button"
 						className="fixora-admin-btn fixora-admin-btn--outline"
 						onClick={onClose}
-						disabled={removing || updating}
+						disabled={deleting || updating}
 					>
 						{t('moderation.articles.modal.close')}
 					</button>
-					{article?.articleStatus === 'DELETE' ? (
+					{isHidden ? (
 						<button
 							type="button"
 							className="fixora-admin-btn fixora-admin-btn--secondary"
 							onClick={handleRestore}
-							disabled={removing || updating || !article}
+							disabled={deleting || updating || !article}
 						>
 							{t('moderation.articles.modal.restore')}
 						</button>
@@ -222,7 +232,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 							type="button"
 							className="fixora-admin-btn fixora-admin-btn--secondary"
 							onClick={handleHide}
-							disabled={removing || updating || !article}
+							disabled={deleting || updating || !article}
 						>
 							{t('moderation.articles.modal.hide')}
 						</button>
@@ -231,7 +241,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 						type="button"
 						className="fixora-admin-btn fixora-admin-btn--danger-outline"
 						onClick={handleDelete}
-						disabled={removing || updating || !articleId}
+						disabled={deleting || updating || !articleId}
 					>
 						{t('moderation.articles.modal.delete')}
 					</button>

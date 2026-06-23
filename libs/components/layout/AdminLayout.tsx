@@ -6,8 +6,10 @@ import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
 import { fixoraDark } from '../../../scss/MaterialTheme';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { isAdminUser } from '../../utils/userRole';
-import { useReactiveVar } from '@apollo/client';
+import { useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
+import { GET_ADMIN_USER } from '../../../apollo/admin/query';
+import { syncUserVarFromGraphqlUser } from '../../auth/syncUserVar';
 import AdminSidebar from '../admin/AdminSidebar';
 import AdminForbidden from '../admin/AdminForbidden';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
@@ -39,6 +41,16 @@ const withAdminLayout = <P extends object>(
 			updateUserInfo(jwt);
 			setAuthChecked(true);
 		}, [router.asPath, router]);
+
+		useQuery(GET_ADMIN_USER, {
+			variables: { userId: user._id },
+			skip: !authChecked || !user._id,
+			fetchPolicy: 'cache-and-network',
+			onCompleted: (data) => {
+				const profile = data?.getUser;
+				if (profile?._id) syncUserVarFromGraphqlUser(profile);
+			},
+		});
 
 		if (!authChecked) return null;
 

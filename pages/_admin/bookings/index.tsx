@@ -10,7 +10,7 @@ import AdminHeader from '../../../libs/components/admin/AdminHeader';
 import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar';
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
 import AdminPagination from '../../../libs/components/admin/shared/AdminPagination';
-import AdminSelect from '../../../libs/components/admin/shared/AdminSelect';
+import AdminToolbarPills from '../../../libs/components/admin/shared/AdminToolbarPills';
 import { GET_ALL_BOOKINGS_BY_ADMIN, GET_ADMIN_USER } from '../../../apollo/admin/query';
 import type { AdminBooking } from '../../../libs/types/admin/admin';
 import type { BookingStatus, BookingType } from '../../../libs/types/fixora/fixora';
@@ -110,17 +110,20 @@ const AdminBookingsPage: NextPage = () => {
 				</div>
 
 				<div className="fixora-admin-table-wrap">
-					<div className="fixora-admin-table-toolbar">
+					<div className="fixora-admin-table-toolbar fixora-admin-table-toolbar--filters">
 						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('bookings.searchPlaceholder')} />
-						<AdminSelect
-							value={typeFilter}
-							onChange={(e) => setTypeFilter(e.target.value as BookingType | '')}
+						<AdminToolbarPills
+							activeId={typeFilter}
+							onChange={(id) => setTypeFilter(id as BookingType | '')}
 							options={[
-								{ value: '', label: t('bookings.allTypes') },
-								{ value: 'SHOP_VISIT', label: t('bookings.shopVisit') },
-								{ value: 'ON_SITE', label: t('bookings.onSite') },
+								{ id: 'SHOP_VISIT', label: t('bookings.shopVisit') },
+								{
+									id: 'ON_SITE',
+									label: t('bookings.onSite'),
+									disabled: true,
+									tooltip: t('bookings.onSiteSoon'),
+								},
 							]}
-							aria-label={t('bookings.allTypes')}
 						/>
 					</div>
 

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import {
@@ -22,8 +24,14 @@ const ToastViewerComponent = dynamic(() => import('../../libs/components/communi
 	ssr: false,
 });
 
+const HIDDEN_ARTICLE_STATUSES = new Set(['DELETE', 'DRAFT']);
+
+const isPublicArticle = (article: Article | null | undefined) =>
+	!!article && !HIDDEN_ARTICLE_STATUSES.has(article.articleStatus);
+
 const PostDetailPage: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const { id: articleId } = router.query;
 	const [article, setArticle] = useState<Article | null>(null);
@@ -197,11 +205,27 @@ const PostDetailPage: NextPage = () => {
 		}
 	};
 
-	if (articleLoading || !article) {
+	if (articleLoading) {
 		return (
 			<div className="fixora-post-detail-page">
 				<div className="fixora-post-detail">
-					<div className="fixora-post-detail__loading">Loading article...</div>
+					<div className="fixora-post-detail__loading">{t('community.loadingArticle')}</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (!article || !isPublicArticle(article)) {
+		return (
+			<div className="fixora-post-detail-page">
+				<div className="fixora-post-detail">
+					<div className="fixora-post-detail__unavailable">
+						<h2>{t('community.articleUnavailable')}</h2>
+						<p>{t('community.articleUnavailableHint')}</p>
+						<button type="button" className="fixora-btn fixora-btn--primary" onClick={() => router.push('/community')}>
+							{t('community.backToCommunity')}
+						</button>
+					</div>
 				</div>
 			</div>
 		);
@@ -245,3 +269,9 @@ const PostDetailPage: NextPage = () => {
 };
 
 export default withLayoutFull(PostDetailPage);
+
+export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
+	props: {
+		...(await serverSideTranslations(locale ?? 'en', ['common'])),
+	},
+});

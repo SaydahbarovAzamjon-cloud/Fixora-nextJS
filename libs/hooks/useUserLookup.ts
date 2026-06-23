@@ -35,6 +35,7 @@ export function useUserLookup(userIds: string[]) {
 					variables: { userId },
 					fetchPolicy: 'cache-first',
 					errorPolicy: 'ignore',
+					context: { suppressErrorAlert: true },
 				}),
 			),
 		)

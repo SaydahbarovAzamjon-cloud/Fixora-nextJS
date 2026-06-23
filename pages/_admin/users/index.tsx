@@ -10,6 +10,7 @@ import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
 import AdminPagination from '../../../libs/components/admin/shared/AdminPagination';
 import AdminSelect from '../../../libs/components/admin/shared/AdminSelect';
+import AdminToolbarPills from '../../../libs/components/admin/shared/AdminToolbarPills';
 import AdminUserBadgeStack from '../../../libs/components/admin/users/AdminUserBadgeStack';
 import AdminUserActionsMenu from '../../../libs/components/admin/users/AdminUserActionsMenu';
 import AdminUserStatusMenu from '../../../libs/components/admin/users/AdminUserStatusMenu';
@@ -78,18 +79,17 @@ const AdminUsersPage: NextPage = () => {
 			<AdminHeader title={t('users.title')} subtitle={t('users.subtitle')} />
 			<div className="fixora-admin-page">
 				<div className="fixora-admin-table-wrap">
-					<div className="fixora-admin-table-toolbar">
+					<div className="fixora-admin-table-toolbar fixora-admin-table-toolbar--filters">
 						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
-						<AdminSelect
-							value={roleFilter}
-							onChange={(e) => setRoleFilter(e.target.value as AdminUserType | '')}
+						<AdminToolbarPills
+							className="fixora-admin-toolbar-pills--uniform"
+							activeId={roleFilter}
+							onChange={(id) => setRoleFilter(id as AdminUserType | '')}
 							options={[
-								{ value: '', label: t('users.allRoles') },
-								{ value: 'USER', label: t('users.roles.USER') },
-								{ value: 'TECHNICIAN', label: t('users.roles.TECHNICIAN') },
-								{ value: 'ADMIN', label: t('users.roles.ADMIN') },
+								{ id: 'ADMIN', label: t('users.roles.ADMIN') },
+								{ id: 'TECHNICIAN', label: t('users.roles.TECHNICIAN') },
+								{ id: 'USER', label: t('users.roles.CLIENT') },
 							]}
-							aria-label={t('users.allRoles')}
 						/>
 						<AdminSelect
 							value={statusFilter}

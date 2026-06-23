@@ -3,6 +3,7 @@ import { initializeApollo } from '../../apollo/client';
 import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
 import { sweetMixinErrorAlert } from '../sweetAlert';
+import { readStoredProfileImage } from './syncUserVar';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
 
 export function getJwtToken(): any {
@@ -128,7 +129,9 @@ export const updateUserInfo = (jwtToken: any) => {
 	if (!jwtToken) return false;
 
 	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
-	const profileImage = claims.userProfileImage ?? claims.memberImage ?? '';
+	const userId = claims._id ?? '';
+	const storedImage = userId ? readStoredProfileImage(userId) : null;
+	const profileImage = storedImage ?? claims.userProfileImage ?? claims.memberImage ?? '';
 	userVar({
 		_id: claims._id ?? '',
 		memberType: claims.userType ?? claims.memberType ?? '',

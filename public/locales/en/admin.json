@@ -420,8 +420,8 @@
 				"hide": "Hide",
 				"restore": "Restore",
 				"delete": "Delete",
-				"confirmDelete": "Permanently remove this article?",
-				"confirmHide": "Hide this article from public view?",
+				"confirmDelete": "Delete this article?",
+				"confirmHide": "Hide this article?",
 				"confirmRestore": "Restore this article to published status?"
 			}
 		},

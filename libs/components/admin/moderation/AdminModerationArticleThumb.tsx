@@ -5,24 +5,15 @@ import { resolveArticleImageUrl } from '../../../utils/articleImage';
 interface AdminModerationArticleThumbProps {
 	image?: string | null;
 	title: string;
-	size?: 80 | 96;
 }
 
-const AdminModerationArticleThumb: React.FC<AdminModerationArticleThumbProps> = ({
-	image,
-	title,
-	size = 80,
-}) => {
+const AdminModerationArticleThumb: React.FC<AdminModerationArticleThumbProps> = ({ image, title }) => {
 	const [failed, setFailed] = useState(false);
 	const coverUrl = resolveArticleImageUrl(image);
 	const showImage = !!coverUrl && !failed;
 
 	return (
-		<div
-			className="fixora-admin-article-cell__thumb"
-			style={{ width: size, height: size }}
-			aria-hidden
-		>
+		<div className="fixora-admin-article-cell__thumb" aria-hidden>
 			{showImage ? (
 				<img
 					src={coverUrl}
@@ -33,7 +24,7 @@ const AdminModerationArticleThumb: React.FC<AdminModerationArticleThumbProps> = 
 				/>
 			) : (
 				<span className="fixora-admin-article-cell__thumb-fallback" title={title}>
-					<ImageIcon size={size === 96 ? 28 : 24} />
+					<ImageIcon size={22} />
 				</span>
 			)}
 		</div>

@@ -416,8 +416,8 @@
 				"hide": "숨기기",
 				"restore": "복원",
 				"delete": "삭제",
-				"confirmDelete": "이 게시글을 영구 삭제하시겠습니까?",
-				"confirmHide": "이 게시글을 공개에서 숨기시겠습니까?",
+				"confirmDelete": "이 게시글을 삭제하시겠습니까?",
+				"confirmHide": "이 게시글을 숨기시겠습니까?",
 				"confirmRestore": "이 게시글을 게시 상태로 복원하시겠습니까?"
 			}
 		},

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { useMutation, useQuery } from '@apollo/client';
+import { useApolloClient, useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
 import AdminPagination from '../shared/AdminPagination';
 import AdminStatusBadge from '../shared/AdminStatusBadge';
@@ -8,8 +8,8 @@ import AdminModerationArticleThumb from './AdminModerationArticleThumb';
 import AdminModerationArticleActions from './AdminModerationArticleActions';
 import AdminModerationArticleModal from './AdminModerationArticleModal';
 import { GET_ALL_ARTICLES_BY_ADMIN } from '../../../../apollo/admin/query';
-import { REMOVE_ARTICLE_BY_ADMIN } from '../../../../apollo/admin/mutation';
 import type { AdminArticle } from '../../../types/admin/admin';
+import { deleteArticleByAdmin } from '../../../utils/adminArticleActions';
 import { displayUserName } from '../../../hooks/useUserLookup';
 import { resolveProfileImageUrl } from '../../../utils/profileImage';
 import { dateLocale } from '../../../utils/i18nLocale';
@@ -33,6 +33,7 @@ const articleStatusTone = (status: string) => {
 
 const AdminModerationArticlesTab: React.FC = () => {
 	const { t } = useTranslation('admin');
+	const client = useApolloClient();
 	const router = useRouter();
 	const [page, setPage] = useState(1);
 	const [viewArticleId, setViewArticleId] = useState<string | null>(null);
@@ -42,8 +43,6 @@ const AdminModerationArticlesTab: React.FC = () => {
 		fetchPolicy: 'cache-and-network',
 	});
 
-	const [removeArticle] = useMutation(REMOVE_ARTICLE_BY_ADMIN);
-
 	const articles: AdminArticle[] = data?.getAllArticlesByAdmin?.list ?? [];
 	const total = data?.getAllArticlesByAdmin?.metaCounter?.[0]?.total ?? 0;
 	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -51,7 +50,7 @@ const AdminModerationArticlesTab: React.FC = () => {
 	const handleDelete = async (articleId: string) => {
 		if (!window.confirm(t('moderation.articles.modal.confirmDelete'))) return;
 		try {
-			await removeArticle({ variables: { articleId } });
+			await deleteArticleByAdmin(client, articleId);
 			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
 			await refetch();
 		} catch (err) {

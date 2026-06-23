@@ -50,6 +50,7 @@ export const UPDATE_ARTICLE_BY_ADMIN = gql`
 			_id
 			articleTitle
 			articleStatus
+			articleCategory
 			updatedAt
 		}
 	}
@@ -113,6 +114,58 @@ export const UPDATE_ADMIN_PLATFORM_SETTINGS = gql`
 			defaultCurrency
 			defaultTimezone
 			moderationSlaHours
+		}
+	}
+`;
+
+export const ADMIN_RESET_PASSWORD = gql`
+	mutation AdminResetPassword($input: AdminResetPasswordInput!) {
+		adminResetPassword(input: $input)
+	}
+`;
+
+export const SET_TECHNICIAN_BADGE_LEVEL = gql`
+	${ADMIN_USER_FIELDS}
+	mutation SetTechnicianBadgeLevel($userId: String!, $badgeLevel: BadgeLevel!) {
+		setTechnicianBadgeLevel(userId: $userId, badgeLevel: $badgeLevel) {
+			...AdminMutationUserFields
+		}
+	}
+`;
+
+export const REVOKE_TECHNICIAN_VERIFICATION = gql`
+	${ADMIN_USER_FIELDS}
+	mutation RevokeTechnicianVerification($userId: String!, $reason: String) {
+		revokeTechnicianVerification(userId: $userId, reason: $reason) {
+			...AdminMutationUserFields
+		}
+	}
+`;
+
+export const WARN_USER = gql`
+	mutation WarnUser($input: WarnUserInput!) {
+		warnUser(input: $input) {
+			_id
+			action
+			reason
+			category
+			createdAt
+		}
+	}
+`;
+
+export const ADD_VERIFICATION_ADMIN_NOTE = gql`
+	${ADMIN_USER_FIELDS}
+	mutation AddVerificationAdminNote($userId: String!, $note: String!) {
+		addVerificationAdminNote(userId: $userId, note: $note) {
+			...AdminMutationUserFields
+			verificationAdminNotes
+			verificationTimeline {
+				action
+				adminId
+				createdAt
+				note
+			}
 		}
 	}
 `;

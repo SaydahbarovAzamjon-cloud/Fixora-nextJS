@@ -1,0 +1,234 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+@import 'breakpoints';
+
+#mobile-wrap {
+	.auth-page {
+		min-height: calc(100dvh - var(--fixora-safe-top) - var(--fixora-safe-bottom));
+		align-items: flex-start;
+		justify-content: flex-start;
+		padding:
+			calc(12px + var(--fixora-safe-top))
+			var(--fixora-mobile-gutter)
+			calc(24px + var(--fixora-safe-bottom));
+		overflow-x: hidden;
+		overflow-y: auto;
+		@include fixora-scrollbar;
+
+		&::before,
+		&::after {
+			width: 200px;
+			height: 200px;
+			opacity: 0.65;
+		}
+
+		&::before {
+			top: -60px;
+			left: -60px;
+		}
+
+		&::after {
+			bottom: -60px;
+			right: -60px;
+		}
+
+		.auth-page__inner {
+			max-width: 100%;
+			gap: 16px;
+		}
+	}
+
+	.auth-brand {
+		margin-bottom: 0;
+
+		.fixora-logo--lg .fixora-logo__image {
+			max-height: 56px;
+		}
+	}
+
+	.auth-card {
+		.fixora-glass-card {
+			padding: 20px 16px;
+		}
+	}
+
+	.auth-heading {
+		margin-bottom: 18px;
+
+		h1 {
+			font-size: 22px;
+		}
+
+		p {
+			font-size: 13px;
+		}
+	}
+
+	.auth-divider {
+		margin: 16px 0;
+		gap: 12px;
+	}
+
+	.auth-form {
+		gap: 14px;
+
+		&__row {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 10px;
+		}
+
+		&__link {
+			@include fixora-tap-target;
+			@include fixora-touch-active;
+			justify-content: flex-start;
+			min-height: 44px;
+			text-align: left;
+		}
+
+		&__checkbox {
+			font-size: 12px;
+			gap: 12px;
+
+			input[type='checkbox'] {
+				width: 18px;
+				height: 18px;
+				margin-top: 2px;
+			}
+		}
+
+		.fixora-btn--primary {
+			min-height: 48px;
+			@include fixora-touch-active;
+		}
+	}
+
+	.auth-footer {
+		margin-top: 16px;
+		font-size: 13px;
+
+		button,
+		a {
+			@include fixora-tap-target;
+			@include fixora-touch-active;
+			display: inline-flex;
+		}
+	}
+
+	.auth-social {
+		gap: 12px;
+
+		.fixora-kakao-btn {
+			min-height: 48px;
+			@include fixora-touch-active;
+		}
+
+		&__row {
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		&__oauth {
+			width: 100%;
+			min-height: 48px;
+			@include fixora-touch-active;
+
+			&:active:not(:disabled) {
+				border-color: var(--fixora-primary);
+				background: var(--fixora-surface-hover);
+			}
+		}
+	}
+
+	.auth-role {
+		gap: 12px;
+
+		&__card {
+			width: 100%;
+			padding: 22px 18px;
+			@include fixora-touch-active;
+
+			&:active {
+				border-color: var(--fixora-primary);
+				box-shadow: var(--fixora-glow);
+			}
+
+			svg {
+				font-size: 36px;
+			}
+
+			h3 {
+				font-size: 17px;
+			}
+		}
+	}
+
+	.auth-tech {
+		gap: 14px;
+
+		&__step {
+			font-size: 11px;
+		}
+
+		&__photo,
+		&__upload {
+			width: 100%;
+			min-height: 120px;
+			padding: 20px 16px;
+			@include fixora-touch-active;
+
+			&:active {
+				border-color: var(--fixora-primary);
+				background: var(--fixora-primary-soft);
+			}
+
+			svg {
+				font-size: 32px;
+			}
+		}
+
+		&__upload {
+			min-height: 140px;
+			padding: 24px 16px;
+
+			svg {
+				font-size: 40px;
+			}
+
+			strong {
+				font-size: 15px;
+			}
+
+			span {
+				font-size: 12px;
+				word-break: break-word;
+			}
+		}
+
+		&__photo-preview,
+		&__upload-preview {
+			max-height: 180px;
+		}
+
+		&__file-name {
+			font-size: 12px;
+			padding: 0 4px;
+		}
+
+		&__pending {
+			padding: 8px 0 0;
+
+			svg {
+				font-size: 48px;
+			}
+
+			h2 {
+				font-size: 20px;
+			}
+
+			p {
+				font-size: 13px;
+			}
+		}
+	}
+}

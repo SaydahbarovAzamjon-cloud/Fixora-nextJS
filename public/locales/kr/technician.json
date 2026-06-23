@@ -15,6 +15,8 @@
     "myArticles": "내 글",
     "settings": "설정",
     "help": "도움말 및 지원",
+    "more": "더보기",
+    "closeMenu": "메뉴 닫기",
     "mainMenu": "메인 메뉴",
     "technicianBadge": "홈",
     "proTechnician": "프로 기술자",
@@ -206,6 +208,7 @@
   },
   "messages": {
     "searchPlaceholder": "대화 검색...",
+    "back": "채팅 목록으로",
     "noConversations": "아직 대화 없음",
     "selectConversation": "대화를 선택하여 채팅을 시작하세요",
     "online": "온라인",

@@ -1,8 +1,11 @@
+import type { GetServerSidePropsContext } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-/** Shared SSR props for all `/_admin/*` pages. */
-export async function adminPageProps(locale?: string) {
+/** Shared `getServerSideProps` for all `/_admin/*` pages. */
+export async function adminPageProps({ locale }: GetServerSidePropsContext) {
 	return {
-		...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+		props: {
+			...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+		},
 	};
 }

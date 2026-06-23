@@ -1,0 +1,74 @@
+@import '/scss/variables.scss';
+@import '/scss/pc/fixora-scrollbar.scss';
+@import 'breakpoints';
+@import 'mixins';
+
+#mobile-wrap {
+	display: flex;
+	flex-direction: column;
+	min-height: 100dvh;
+	width: 100%;
+	background: var(--fixora-bg-ambient);
+	background-color: var(--fixora-bg);
+	color: var(--fixora-text-primary);
+	padding-top: var(--fixora-safe-top);
+	padding-bottom: var(--fixora-safe-bottom);
+	@include fixora-scrollbar;
+
+	#top {
+		position: sticky;
+		top: 0;
+		z-index: 1100;
+		flex-shrink: 0;
+	}
+
+	#main {
+		flex: 1 1 auto;
+		width: 100%;
+		min-width: 0;
+		overflow-x: hidden;
+	}
+
+	#footer {
+		flex-shrink: 0;
+		width: 100%;
+	}
+
+	.container {
+		@include fixora-mobile-container;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.top {
+		width: 100%;
+	}
+
+	.info-box span {
+		color: var(--fixora-text-primary);
+		font-family: $font;
+		font-size: 24px;
+		font-weight: 500;
+		line-height: 1.5;
+
+		&.white {
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	.video-frame {
+		margin: 20px 0;
+		width: 100%;
+		height: 300px;
+		background: var(--fixora-bg);
+		box-shadow: var(--fixora-glow);
+	}
+}
+
+.fixora-technician-mobile {
+	#top {
+		position: sticky;
+		top: 0;
+		z-index: 1100;
+	}
+}

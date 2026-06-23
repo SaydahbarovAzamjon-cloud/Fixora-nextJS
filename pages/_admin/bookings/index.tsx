@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
 import { Smartphone, Laptop, Tablet, Watch } from 'lucide-react';
 import withAdminLayout from '../../../libs/components/layout/AdminLayout';
 import { adminPageProps } from '../../../libs/i18n/adminPageProps';
@@ -9,11 +10,12 @@ import AdminHeader from '../../../libs/components/admin/AdminHeader';
 import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar';
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
 import AdminPagination from '../../../libs/components/admin/shared/AdminPagination';
-import { GET_ALL_BOOKINGS_BY_ADMIN } from '../../../apollo/admin/query';
+import AdminSelect from '../../../libs/components/admin/shared/AdminSelect';
+import { GET_ALL_BOOKINGS_BY_ADMIN, GET_ADMIN_USER } from '../../../apollo/admin/query';
 import type { AdminBooking } from '../../../libs/types/admin/admin';
 import type { BookingStatus, BookingType } from '../../../libs/types/fixora/fixora';
 import { displayUserName, useUserLookup } from '../../../libs/hooks/useUserLookup';
-import { bookingStatusTone, BOOKING_STATUS_DOT } from '../../../libs/utils/adminBadges';
+import { bookingStatusTone, bookingStatusDotClass } from '../../../libs/utils/adminBadges';
 import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { BOOKING_STATUSES, useBookingStatusCounts } from '../../../libs/hooks/useBookingStatusCounts';
 
@@ -34,6 +36,8 @@ const deviceIcon = (category?: string) => {
 
 const AdminBookingsPage: NextPage = () => {
 	const { t } = useTranslation('admin');
+	const router = useRouter();
+	const filterUserId = typeof router.query.userId === 'string' ? router.query.userId : undefined;
 	const [page, setPage] = useState(1);
 	const [search, setSearch] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -47,9 +51,15 @@ const AdminBookingsPage: NextPage = () => {
 
 	useEffect(() => {
 		setPage(1);
-	}, [debouncedSearch, statusFilter, typeFilter]);
+	}, [debouncedSearch, statusFilter, typeFilter, filterUserId]);
 
 	const statusCounts = useBookingStatusCounts();
+
+	const { data: filterUserData } = useQuery(GET_ADMIN_USER, {
+		variables: { userId: filterUserId },
+		skip: !filterUserId,
+	});
+	const filterIsTechnician = filterUserData?.getUser?.userType === 'TECHNICIAN';
 
 	const { data, loading } = useQuery(GET_ALL_BOOKINGS_BY_ADMIN, {
 		variables: {
@@ -60,10 +70,16 @@ const AdminBookingsPage: NextPage = () => {
 					text: debouncedSearch || undefined,
 					bookingStatus: statusFilter || undefined,
 					bookingType: typeFilter || undefined,
+					...(filterUserId
+						? filterIsTechnician
+							? { technicianId: filterUserId }
+							: { userId: filterUserId }
+						: {}),
 				},
 			},
 		},
 		fetchPolicy: 'cache-and-network',
+		skip: Boolean(filterUserId && !filterUserData?.getUser),
 	});
 
 	const list: AdminBooking[] = data?.getAllBookingsByAdmin?.list ?? [];
@@ -86,8 +102,7 @@ const AdminBookingsPage: NextPage = () => {
 							onClick={() => setStatusFilter((prev) => (prev === status ? '' : status))}
 						>
 							<span
-								className="fixora-admin-status-pills__dot"
-								style={{ background: BOOKING_STATUS_DOT[status] }}
+								className={`fixora-admin-status-pills__dot ${bookingStatusDotClass(status)}`}
 							/>
 							{t(`bookings.status.${status}`)} {statusCounts[status]}
 						</button>
@@ -97,15 +112,16 @@ const AdminBookingsPage: NextPage = () => {
 				<div className="fixora-admin-table-wrap">
 					<div className="fixora-admin-table-toolbar">
 						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('bookings.searchPlaceholder')} />
-						<select
-							className="fixora-admin-select"
+						<AdminSelect
 							value={typeFilter}
 							onChange={(e) => setTypeFilter(e.target.value as BookingType | '')}
-						>
-							<option value="">{t('bookings.allTypes')}</option>
-							<option value="SHOP_VISIT">{t('bookings.shopVisit')}</option>
-							<option value="ON_SITE">{t('bookings.onSite')}</option>
-						</select>
+							options={[
+								{ value: '', label: t('bookings.allTypes') },
+								{ value: 'SHOP_VISIT', label: t('bookings.shopVisit') },
+								{ value: 'ON_SITE', label: t('bookings.onSite') },
+							]}
+							aria-label={t('bookings.allTypes')}
+						/>
 					</div>
 
 					<table className="fixora-admin-table">
@@ -144,14 +160,12 @@ const AdminBookingsPage: NextPage = () => {
 									<td>{displayUserName(booking.customerData)}</td>
 									<td>{techName(booking.technicianId)}</td>
 									<td>
-										<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+										<span className="fixora-admin-inline-icon">
 											{deviceIcon(booking.deviceData?.deviceCategory)}
 											{booking.deviceData?.deviceModel || '—'}
 										</span>
 									</td>
-									<td style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-										{booking.problemTitle}
-									</td>
+									<td className="fixora-admin-cell-ellipsis">{booking.problemTitle}</td>
 									<td>
 										<AdminStatusBadge
 											label={t(`bookings.status.${booking.bookingStatus}`)}

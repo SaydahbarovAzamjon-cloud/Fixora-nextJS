@@ -1,9 +1,22 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 
+const viewportBootstrapScript = `
+(function () {
+  var mq = window.matchMedia('(max-width: 639px)');
+  function apply() {
+    document.documentElement.setAttribute('data-fixora-viewport', mq.matches ? 'mobile' : 'desktop');
+  }
+  apply();
+  if (mq.addEventListener) mq.addEventListener('change', apply);
+  else mq.addListener(apply);
+})();
+`;
+
 export default function Document() {
 	return (
 		<Html lang="en">
 			<Head>
+				<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 				<meta name="robots" content="index,follow" />
 				<link rel="icon" type="image/png" href="/img/logo/favicon.png" />
 
@@ -22,6 +35,7 @@ export default function Document() {
 				/>
 			</Head>
 			<body>
+				<script dangerouslySetInnerHTML={{ __html: viewportBootstrapScript }} />
 				<Main />
 				<NextScript />
 			</body>

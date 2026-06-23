@@ -1,0 +1,62 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.fixora-community-page {
+		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+	}
+
+	.fixora-community {
+		max-width: 100%;
+	}
+
+	.fixora-community__title {
+		font-size: 22px;
+	}
+
+	.fixora-community__header {
+		gap: 12px;
+	}
+
+	.fixora-community__write-btn,
+	.fixora-community__filter-chip {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+	}
+
+	.fixora-community__featured {
+		border-radius: 14px;
+	}
+
+	.fixora-community__featured__media {
+		height: 160px;
+	}
+
+	.fixora-community__feed-card {
+		flex-direction: column;
+
+		&__media {
+			flex: none;
+			max-width: none;
+			min-height: 150px;
+		}
+	}
+
+	.fixora-post-detail-page {
+		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+	}
+
+	.fixora-post-detail__hero-media {
+		max-height: 220px;
+	}
+
+	.fixora-post-detail__actions button,
+	.fixora-post-detail__comment-submit {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+	}
+
+	.fixora-community-write-page {
+		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+	}
+}

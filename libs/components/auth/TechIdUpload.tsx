@@ -13,7 +13,14 @@ const TechIdUpload = () => {
 	const router = useRouter();
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [fileName, setFileName] = useState('');
+	const [filePreview, setFilePreview] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		return () => {
+			if (filePreview) URL.revokeObjectURL(filePreview);
+		};
+	}, [filePreview]);
 
 	// Restore the saved draft only after mount so SSR and the first client
 	// render match (sessionStorage is unavailable during SSR).
@@ -35,6 +42,11 @@ const TechIdUpload = () => {
 	const handleFile = (file: File | undefined) => {
 		if (!file) return;
 		setFileName(file.name);
+		setFilePreview((prev) => {
+			if (prev) URL.revokeObjectURL(prev);
+			if (file.type.startsWith('image/')) return URL.createObjectURL(file);
+			return null;
+		});
 		persistFile(file);
 	};
 
@@ -68,16 +80,23 @@ const TechIdUpload = () => {
 					onChange={(e) => handleFile(e.target.files?.[0])}
 				/>
 				<div
-					className="auth-tech__upload"
+					className={`auth-tech__upload${filePreview ? ' auth-tech__upload--has-image' : ''}`}
 					role="button"
 					tabIndex={0}
 					onClick={() => fileRef.current?.click()}
 					onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
 				>
-					<CloudUploadOutlined />
-					<strong>{t('tech.idUpload')}</strong>
-					<span>{fileName || t('tech.idHint')}</span>
+					{filePreview ? (
+						<img src={filePreview} alt="" className="auth-tech__upload-preview" />
+					) : (
+						<>
+							<CloudUploadOutlined />
+							<strong>{t('tech.idUpload')}</strong>
+							<span>{fileName || t('tech.idHint')}</span>
+						</>
+					)}
 				</div>
+				{fileName && !filePreview && <p className="auth-tech__file-name">{fileName}</p>}
 				<FixoraButton variant="primary" fullWidth disabled={loading || !fileName} onClick={handleSubmit}>
 					{t('tech.submitVerification')}
 					<ArrowForward fontSize="small" />

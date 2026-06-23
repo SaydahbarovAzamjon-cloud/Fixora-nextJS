@@ -325,6 +325,33 @@ See also [`PAYOUT_API.md`](PAYOUT_API.md).
 
 ---
 
+## Admin user detail (GAP-078, 101–112)
+
+> Full contract: [`BACKEND_ADMIN.md`](BACKEND_ADMIN.md) § Admin user detail
+
+| Operation | Type | Purpose |
+|-----------|------|---------|
+| `getAdminUserDetail(userId)` | Query | Aggregated `/_admin/users/[id]` payload |
+| `adminResetPassword(input)` | Mutation | Secure admin password reset (GAP-109) |
+| `setTechnicianBadgeLevel(userId, badgeLevel)` | Mutation | Premium badge control (GAP-102) |
+| `revokeTechnicianVerification(userId, reason)` | Mutation | Revoke verification (GAP-103) |
+| `warnUser(input)` | Mutation | Account warning + moderation log (GAP-104) |
+| `getUserModerationHistory(userId, input)` | Query | Moderation history |
+| `getUserLoginHistory(userId, input)` | Query | Login audit trail (GAP-105) |
+| `addVerificationAdminNote(userId, note)` | Mutation | Verification note + timeline (GAP-106) |
+
+**Filters:** `getAllCommentsByAdmin` → `search.authorId` (GAP-107). `getStoryReports` → `userId` = story owner (GAP-108).
+
+**Upload:** `imageUploader` target `device` (GAP-112).
+
+**Password rule:** `updateUserByAdmin` rejects `userPassword` — use `adminResetPassword` or user `changePassword`.
+
+**Notifications (GAP-078):** Admin bell uses shared `getNotifications`.
+
+**Verification (GAP-110/111):** `approveTechnician` / `rejectTechnician` allow `PENDING` and `UNDER_REVIEW`.
+
+---
+
 ## Message + WebSocket
 
 | Operation | Auth | Notes |

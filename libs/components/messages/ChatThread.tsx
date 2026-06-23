@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'next-i18next';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SendIcon from '@mui/icons-material/Send';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
@@ -28,6 +29,7 @@ interface ChatThreadProps {
 	onSend: (payload: SendMessagePayload) => void | Promise<void>;
 	sending?: boolean;
 	contextBar?: React.ReactNode;
+	onBack?: () => void;
 }
 
 const EMOJIS = [
@@ -51,6 +53,7 @@ const ChatThread = ({
 	onSend,
 	sending,
 	contextBar,
+	onBack,
 }: ChatThreadProps) => {
 	const { t } = useTranslation('common');
 	const authUser = useReactiveVar(userVar);
@@ -149,6 +152,11 @@ const ChatThread = ({
 	return (
 		<div className="fixora-messages__thread">
 			<div className="fixora-messages__thread-header">
+				{onBack && (
+					<button type="button" className="fixora-messages__thread-back" onClick={onBack} aria-label={t('messages.back')}>
+						<ArrowBackIcon fontSize="small" />
+					</button>
+				)}
 				<UserProfileLink userId={resolvedPeerId} userType={peer.userType} className="fixora-messages__profile-link fixora-messages__profile-link--avatar">
 					<span className="fixora-messages__avatar">
 						<img src={resolveProfileImageUrl(peer.userProfileImage)} alt="" />

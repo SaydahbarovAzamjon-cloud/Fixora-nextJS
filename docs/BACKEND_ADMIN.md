@@ -193,6 +193,85 @@ query AdminGlobalSearch($query: String!, $limit: Int) {
 
 ---
 
+## GAP-078 — Admin notifications
+
+`AdminNotificationBell` uses shared **`getNotifications`** (Bearer ADMIN). No dedicated admin query required — mark **DONE** with shared feed.
+
+---
+
+## Admin user detail — `/_admin/users/[id]` (GAP-101…112)
+
+### GAP-101 — `getAdminUserDetail`
+
+```graphql
+query GetAdminUserDetail($userId: String!) {
+  getAdminUserDetail(userId: $userId) {
+    user { _id userType userEmail userNickname verificationStatus badgeLevel verificationTimeline { action note createdAt } }
+    bookingStats { total completed active totalSpent }
+    recentBookings { _id problemTitle bookingStatus }
+    recentPayments { _id paymentAmount paymentStatus }
+    articles { _id articleTitle articleStatus }
+    stories { _id caption }
+    technicianReviews { _id }
+    userReviews { _id }
+    clientProfile { totalBookings totalSpent }
+    analytics { totalJobs completionRate }
+    moderationHistory { action reason createdAt }
+    loginHistory { success authProvider createdAt }
+    commentsByUser { _id commentContent }
+    reportsReceived { _id reason status }
+  }
+}
+```
+
+### GAP-109 — `adminResetPassword`
+
+```graphql
+mutation AdminResetPassword($input: AdminResetPasswordInput!) {
+  adminResetPassword(input: $input)
+}
+```
+
+- **Only** admin password change path. `updateUserByAdmin` **rejects** `userPassword` → use this mutation.
+- Bumps `refreshTokenVersion`; writes moderation log `PASSWORD_RESET`.
+
+### GAP-102 / GAP-103 — Badge + revoke
+
+```graphql
+mutation SetTechnicianBadgeLevel($userId: String!, $badgeLevel: BadgeLevel!) {
+  setTechnicianBadgeLevel(userId: $userId, badgeLevel: $badgeLevel) { _id badgeLevel isVerified }
+}
+
+mutation RevokeTechnicianVerification($userId: String!, $reason: String) {
+  revokeTechnicianVerification(userId: $userId, reason: $reason) { _id verificationStatus }
+}
+```
+
+### GAP-104 / GAP-105 / GAP-106 — Moderation + audit
+
+```graphql
+mutation WarnUser($input: WarnUserInput!) { warnUser(input: $input) { _id action reason } }
+query GetUserModerationHistory($userId: String!, $input: UserModerationHistoryInquiry!) { ... }
+query GetUserLoginHistory($userId: String!, $input: LoginHistoryInquiry!) { ... }
+mutation AddVerificationAdminNote($userId: String!, $note: String!) { addVerificationAdminNote(userId: $userId, note: $note) { verificationAdminNotes } }
+```
+
+User embed: `verificationAdminNotes`, `verificationTimeline[]`.
+
+### GAP-107 — Comments by author
+
+`getAllCommentsByAdmin` → `search.authorId` maps to MongoDB `memberId`.
+
+### GAP-108 — Story reports by story owner
+
+`getStoryReports` → `input.userId` filters reports where **story owner** matches (via `$lookup` on `stories`).
+
+### GAP-112 — Device image upload
+
+`imageUploader` / `imagesUploader` target **`device`** whitelisted → `uploads/device/`.
+
+---
+
 ## Pre-existing admin operations (unchanged)
 
 `getAllUsersByAdmin`, `getAllBookingsByAdmin`, `getAllDevicesByAdmin`, `getAllPaymentsByAdmin`, `getAllArticlesByAdmin`, `getTechnicianVerificationQueue`, `approveTechnician`, `rejectTechnician`, `getStoryReports`, `getStory`, `removeStory`, `reviewStoryReport`, `warnTechnicianForStory`, `updateUserByAdmin`, `updateArticleByAdmin`, `removeArticleByAdmin`, `removeCommentByAdmin`, `refundPayment`

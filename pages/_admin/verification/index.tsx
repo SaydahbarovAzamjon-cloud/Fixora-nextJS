@@ -8,6 +8,7 @@ import { adminPageProps } from '../../../libs/i18n/adminPageProps';
 import AdminHeader from '../../../libs/components/admin/AdminHeader';
 import AdminFilterTabs from '../../../libs/components/admin/shared/AdminFilterTabs';
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
+import AdminUserBadgeStack from '../../../libs/components/admin/users/AdminUserBadgeStack';
 import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar';
 import { GET_TECHNICIAN_VERIFICATION_QUEUE } from '../../../apollo/admin/query';
 import { APPROVE_TECHNICIAN, REJECT_TECHNICIAN } from '../../../apollo/admin/mutation';
@@ -15,8 +16,8 @@ import type { AdminUser, VerificationStatus } from '../../../libs/types/admin/ad
 import { displayUserName } from '../../../libs/hooks/useUserLookup';
 import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import { buildVerificationCompleteness } from '../../../libs/utils/adminVerification';
+import { runAdminVerificationApprove, runAdminVerificationReject } from '../../../libs/utils/adminVerificationActions';
 import { verificationStatusTone } from '../../../libs/utils/adminBadges';
-import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 import { dateLocale } from '../../../libs/utils/i18nLocale';
 import { useRouter } from 'next/router';
 
@@ -80,25 +81,30 @@ const AdminVerificationPage: NextPage = () => {
 
 	const handleApprove = async () => {
 		if (!selected) return;
-		try {
-			await approveTechnician({ variables: { userId: selected._id } });
-			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
-			await refetch();
-		} catch (err) {
-			await sweetErrorHandling(err);
-		}
+		await runAdminVerificationApprove({
+			user: selected,
+			approve: (vars) => approveTechnician({ variables: vars }),
+			t,
+			onSuccess: async () => {
+				setSelectedId(null);
+				await refetch();
+			},
+		});
 	};
 
 	const handleReject = async () => {
 		if (!selected) return;
-		try {
-			await rejectTechnician({ variables: { userId: selected._id, reason: rejectReason || undefined } });
-			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
-			setRejectReason('');
-			await refetch();
-		} catch (err) {
-			await sweetErrorHandling(err);
-		}
+		await runAdminVerificationReject({
+			user: selected,
+			reject: (vars) => rejectTechnician({ variables: vars }),
+			reason: rejectReason,
+			t,
+			onSuccess: async () => {
+				setRejectReason('');
+				setSelectedId(null);
+				await refetch();
+			},
+		});
 	};
 
 	const completeness = selected ? buildVerificationCompleteness(selected) : [];
@@ -109,7 +115,7 @@ const AdminVerificationPage: NextPage = () => {
 			<div className="fixora-admin-page">
 				<AdminFilterTabs tabs={tabs} activeId={activeTab} onChange={(id) => setActiveTab(id as FilterTab)} />
 
-				<div className="fixora-admin-search" style={{ marginBottom: 16, maxWidth: '100%' }}>
+				<div className="fixora-admin-search fixora-admin-toolbar-row--filters">
 					<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
 				</div>
 
@@ -129,21 +135,22 @@ const AdminVerificationPage: NextPage = () => {
 									onClick={() => setSelectedId(tech._id)}
 								>
 									<div className="fixora-admin-table-user__avatar">{initial}</div>
-									<div style={{ flex: 1, minWidth: 0 }}>
+									<div className="fixora-admin-verification__list-body">
 										<div className="fixora-admin-table-user__name">{name}</div>
-										<div style={{ fontSize: 12, color: 'var(--fixora-text-muted)' }}>
+										<div className="fixora-admin-verification__list-meta">
 											{tech.shopName} · {tech.specialty}
 										</div>
-										<div style={{ fontSize: 11, color: 'var(--fixora-text-muted)', marginTop: 4 }}>
+										<div className="fixora-admin-verification__list-meta fixora-admin-verification__list-meta--spaced">
 											{tech.userLocation}
 										</div>
 									</div>
-									<div style={{ textAlign: 'right' }}>
+									<div className="fixora-admin-verification__list-aside">
 										<AdminStatusBadge
 											label={tech.verificationStatus}
 											tone={verificationStatusTone(tech.verificationStatus)}
 										/>
-										<div style={{ fontSize: 11, color: 'var(--fixora-text-muted)', marginTop: 8 }}>
+										<AdminUserBadgeStack user={tech} compact />
+										<div className="fixora-admin-verification__list-date">
 											{new Date(tech.createdAt).toLocaleDateString(dateLocale(router.locale), {
 												year: 'numeric',
 												month: '2-digit',
@@ -161,55 +168,52 @@ const AdminVerificationPage: NextPage = () => {
 							<div className="fixora-admin-empty">{t('verification.empty')}</div>
 						) : (
 							<>
-								<div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 16 }}>
-									<div className="fixora-admin-table-user__avatar" style={{ width: 56, height: 56, fontSize: 20 }}>
+								<div className="fixora-admin-verification__profile">
+									<div className="fixora-admin-table-user__avatar fixora-admin-verification__profile-avatar">
 										<img src={resolveProfileImageUrl(selected.userProfileImage)} alt="" />
 									</div>
 									<div>
-										<h3 style={{ margin: '0 0 8px', fontSize: 18 }}>{displayUserName(selected)}</h3>
-										<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+										<h3 className="fixora-admin-verification__profile-name">{displayUserName(selected)}</h3>
+										<div className="fixora-admin-verification__badges">
 											<AdminStatusBadge
 												label={selected.verificationStatus}
 												tone={verificationStatusTone(selected.verificationStatus)}
 											/>
+											<AdminUserBadgeStack user={selected} compact />
 											<AdminStatusBadge label={t('verification.newAccount')} tone="neutral" />
 										</div>
 									</div>
 								</div>
 
-								<div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, marginBottom: 16 }}>
+								<div className="fixora-admin-verification__contact">
 									{selected.userEmail && (
-										<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+										<span className="fixora-admin-verification__contact-row">
 											<Mail size={14} /> {selected.userEmail}
 										</span>
 									)}
 									{selected.userPhoneNumber && (
-										<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+										<span className="fixora-admin-verification__contact-row">
 											<Phone size={14} /> {selected.userPhoneNumber}
 										</span>
 									)}
 									{selected.userLocation && (
-										<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+										<span className="fixora-admin-verification__contact-row">
 											<MapPin size={14} /> {selected.userLocation}
 										</span>
 									)}
 								</div>
 
-								<p style={{ fontSize: 12, color: 'var(--fixora-text-muted)', marginBottom: 8 }}>
+								<p className="fixora-admin-verification__list-meta fixora-admin-verification__profile-meta">
 									{t('verification.fields.shop')}: {selected.shopName || '—'} · {t('verification.fields.specialty')}:{' '}
 									{selected.specialty || '—'} · {t('verification.fields.experience')}: {selected.yearsExperience ?? 0}y
 								</p>
 
-								{selected.userBio && (
-									<p style={{ fontSize: 13, color: 'var(--fixora-text-secondary)', marginBottom: 16 }}>{selected.userBio}</p>
-								)}
+								{selected.userBio && <p className="fixora-admin-verification__bio">{selected.userBio}</p>}
 
-								<h4 style={{ margin: '0 0 8px', fontSize: 14 }}>{t('verification.documents')}</h4>
+								<h4 className="fixora-admin-verification__section-title">{t('verification.documents')}</h4>
 								<div className="fixora-admin-verification__docs">
 									{(selected.verificationDocuments ?? []).length === 0 && (
-										<div className="fixora-admin-empty" style={{ gridColumn: '1 / -1', padding: 20 }}>
-											—
-										</div>
+										<div className="fixora-admin-empty fixora-admin-verification__docs-empty">—</div>
 									)}
 									{(selected.verificationDocuments ?? []).map((doc) => (
 										<a
@@ -231,17 +235,23 @@ const AdminVerificationPage: NextPage = () => {
 									))}
 								</div>
 
-								<h4 style={{ margin: '16px 0 8px', fontSize: 14 }}>{t('verification.completenessTitle')}</h4>
+								<h4 className="fixora-admin-verification__section-title fixora-admin-verification__section-title--spaced">
+									{t('verification.completenessTitle')}
+								</h4>
 								<div className="fixora-admin-verification__checklist">
 									{completeness.map((item) => (
 										<div key={item.key} className="fixora-admin-verification__check-item">
-											{item.done ? <Check size={14} color="#52c41a" /> : <X size={14} color="#8a8a8a" />}
+											{item.done ? (
+												<Check size={14} className="fixora-admin-check-icon--done" />
+											) : (
+												<X size={14} className="fixora-admin-check-icon--pending" />
+											)}
 											{t(item.labelKey)}
 										</div>
 									))}
 								</div>
 
-								{(selected.verificationStatus === 'UNDER_REVIEW' || selected.verificationStatus === 'PENDING') && (
+								{(selected.verificationStatus === 'PENDING' || selected.verificationStatus === 'UNDER_REVIEW') && (
 									<>
 										<div className="fixora-admin-verification__actions">
 											<button
@@ -263,12 +273,16 @@ const AdminVerificationPage: NextPage = () => {
 										</div>
 										<input
 											type="text"
-											className="fixora-admin-search__input"
-											style={{ marginTop: 10, width: '100%' }}
+											className="fixora-admin-verification__reject-input"
 											placeholder={t('verification.rejectReason')}
 											value={rejectReason}
 											onChange={(e) => setRejectReason(e.target.value)}
 										/>
+										{selected.verificationStatus === 'PENDING' && (
+											<p className="fixora-admin-verification__pending-notice fixora-admin-verification__pending-notice--compact">
+												{t('verification.pendingRejectNote')}
+											</p>
+										)}
 									</>
 								)}
 							</>

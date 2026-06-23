@@ -1,0 +1,205 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.fixora-search-page {
+		padding: 16px 0 calc(24px + var(--fixora-safe-bottom));
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+	}
+
+	.fixora-search-hero {
+		padding: 0 0 12px;
+
+		&__title {
+			font-size: 22px;
+		}
+	}
+
+	.fixora-search-categories {
+		overflow-x: auto;
+		flex-wrap: nowrap;
+		padding-bottom: 4px;
+		@include fixora-scrollbar;
+
+		.fixora-search-category {
+			flex: 0 0 auto;
+			@include fixora-touch-active;
+		}
+	}
+
+	.fixora-search-chip,
+	.fixora-search__view-toggle-btn,
+	.fixora-search__view-toggle-btn--active {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+	}
+
+	.fixora-search__filters-toggle {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		margin-bottom: 12px;
+		padding: 12px 14px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+		color: var(--fixora-text-primary);
+		font-family: $font;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+
+		svg {
+			color: var(--fixora-primary);
+		}
+	}
+
+	.fixora-search__sidebar--drawer {
+		display: flex;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 1200;
+		width: min(320px, calc(100vw - 48px));
+		height: 100dvh;
+		margin: 0;
+		padding:
+			calc(12px + var(--fixora-safe-top))
+			var(--fixora-mobile-gutter)
+			calc(16px + var(--fixora-safe-bottom));
+		background: var(--fixora-surface-elevated);
+		border-right: 1px solid var(--fixora-border);
+		box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35);
+		overflow-y: auto;
+		transform: translateX(-110%);
+		transition: transform 0.22s ease-out;
+		@include fixora-scrollbar;
+
+		&.fixora-search__sidebar--open {
+			transform: translateX(0);
+		}
+	}
+
+	.fixora-search__filters-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 1199;
+		margin: 0;
+		padding: 0;
+		border: none;
+		cursor: pointer;
+		background: rgba(0, 0, 0, 0.55);
+		backdrop-filter: blur(2px);
+	}
+
+	.fixora-search__filters-drawer-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 14px;
+
+		strong {
+			font-size: 16px;
+			color: var(--fixora-text-primary);
+		}
+	}
+
+	.fixora-search__filters-close {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		border: none;
+		background: transparent;
+		color: var(--fixora-text-primary);
+		cursor: pointer;
+	}
+
+	.fixora-search__layout:not(.fixora-search__layout--map-expanded) .fixora-search__sidebar:not(.fixora-search__sidebar--drawer) {
+		display: none;
+	}
+
+	.fixora-search__results-header {
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.fixora-result-card {
+		@include fixora-touch-active;
+	}
+
+	.fixora-tech-profile-page,
+	.fixora-tech-list-page {
+		padding: 12px 0 calc(80px + var(--fixora-safe-bottom));
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+	}
+
+	.fixora-pp-visitor-wrap {
+		padding-bottom: calc(72px + var(--fixora-safe-bottom));
+	}
+
+	.fixora-pp-header {
+		&__actions {
+			flex-direction: column;
+			width: 100%;
+
+			.fixora-pp-btn {
+				width: 100%;
+				min-height: 48px;
+				@include fixora-touch-active;
+			}
+		}
+
+		&__name {
+			font-size: 22px;
+		}
+	}
+
+	.fixora-pp-tabs {
+		overflow-x: auto;
+		flex-wrap: nowrap;
+		@include fixora-scrollbar;
+
+		.fixora-pp-tab {
+			flex: 0 0 auto;
+			@include fixora-tap-target;
+			@include fixora-touch-active;
+		}
+	}
+
+	.fixora-pp-row {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.fixora-pp-mobile-sticky-cta {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1000;
+		display: flex;
+		gap: 10px;
+		padding:
+			10px var(--fixora-mobile-gutter)
+			calc(10px + var(--fixora-safe-bottom));
+		background: linear-gradient(180deg, transparent 0%, rgba(20, 15, 23, 0.92) 24%, rgba(20, 15, 23, 0.98) 100%);
+		border-top: 1px solid var(--fixora-border-subtle);
+		backdrop-filter: blur(8px);
+
+		.fixora-pp-btn {
+			flex: 1;
+			min-height: 48px;
+			@include fixora-touch-active;
+		}
+	}
+}

@@ -1,6 +1,6 @@
 export const TECHNICIAN_PORTAL_HOME = '/technician/dashboard';
 
-const TECHNICIAN_ALLOWED_ROUTE_PREFIXES = ['/technician', '/login', '/register', '/account'] as const;
+import { isAdminRoute } from './adminRoutes';
 
 /** Customer-only routes — technicians are redirected to the technician portal. */
 export function isCustomerOnlyRoute(pathname: string): boolean {
@@ -13,7 +13,8 @@ export function isCustomerOnlyRoute(pathname: string): boolean {
 }
 
 export function isTechnicianAllowedRoute(pathname: string): boolean {
-	return TECHNICIAN_ALLOWED_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+	if (isAdminRoute(pathname)) return true;
+	return ['/technician', '/login', '/register', '/account'].some((prefix) => pathname.startsWith(prefix));
 }
 
 /** Logged-in technicians may only use the technician portal (+ auth routes). */
@@ -39,7 +40,8 @@ export function redirectTechnicianToPortal(pathname: string, userId?: string | n
 }
 
 /** Layout scope for route transitions — forces a clean remount between public and technician trees. */
-export function getRouteLayoutScope(pathname: string): 'technician' | 'public' {
+export function getRouteLayoutScope(pathname: string): 'technician' | 'admin' | 'public' {
 	if (pathname.startsWith('/technician')) return 'technician';
+	if (isAdminRoute(pathname)) return 'admin';
 	return 'public';
 }

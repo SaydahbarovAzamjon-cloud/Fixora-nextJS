@@ -14,6 +14,7 @@ const ADMIN_USER_FIELDS = gql`
 		averageRating
 		reviewCount
 		isVerified
+		isBlocked
 		verificationStatus
 		verificationDocuments
 		verificationRejectionReason
@@ -21,8 +22,16 @@ const ADMIN_USER_FIELDS = gql`
 		specialty
 		userLocation
 		userBio
+		userSlug
 		yearsExperience
 		profileComplete
+		completedJobsCount
+		followersCount
+		followingCount
+		userLikes
+		userArticles
+		lastLoginAt
+		deletedAt
 		services {
 			title
 			basePrice
@@ -137,6 +146,8 @@ export const GET_ALL_ARTICLES_BY_ADMIN = gql`
 			list {
 				_id
 				articleTitle
+				articleExcerpt
+				articleImage
 				articleStatus
 				articleCategory
 				articleViews
@@ -149,6 +160,29 @@ export const GET_ALL_ARTICLES_BY_ADMIN = gql`
 			}
 			metaCounter {
 				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_ARTICLE = gql`
+	${ADMIN_USER_FIELDS}
+	query GetAdminArticle($articleId: String!) {
+		getArticle(articleId: $articleId) {
+			_id
+			articleTitle
+			articleExcerpt
+			articleImage
+			articleContent
+			articleStatus
+			articleCategory
+			articleViews
+			articleLikes
+			articleComments
+			createdAt
+			updatedAt
+			authorData {
+				...AdminUserFields
 			}
 		}
 	}
@@ -218,6 +252,50 @@ export const GET_ADMIN_USER = gql`
 	query GetAdminUser($userId: String!) {
 		getUser(userId: $userId) {
 			...AdminUserFields
+		}
+	}
+`;
+
+export const GET_ADMIN_USER_BOOKINGS = gql`
+	query GetAdminUserBookings($input: AllBookingsInquiry!) {
+		getAllBookingsByAdmin(input: $input) {
+			list {
+				_id
+				bookingStatus
+				bookingType
+				problemTitle
+				estimatedPrice
+				finalPrice
+				createdAt
+				technicianId
+				userId
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_USER_PAYMENTS = gql`
+	query GetAdminUserPayments($input: AllPaymentsInquiry!) {
+		getAllPaymentsByAdmin(input: $input) {
+			list {
+				_id
+				bookingId
+				userId
+				technicianId
+				paymentAmount
+				paymentMethod
+				paymentStatus
+				paymentType
+				transactionId
+				paidAt
+				createdAt
+			}
+			metaCounter {
+				total
+			}
 		}
 	}
 `;
@@ -303,7 +381,7 @@ export const GET_ALL_COMMENTS_BY_ADMIN = gql`
 				authorData {
 					_id
 					userNickname
-					userImage
+					userProfileImage
 				}
 			}
 			metaCounter {
@@ -320,6 +398,124 @@ export const GET_ADMIN_PLATFORM_SETTINGS = gql`
 			defaultCurrency
 			defaultTimezone
 			moderationSlaHours
+		}
+	}
+`;
+
+export const GET_ADMIN_USER_DETAIL = gql`
+	${ADMIN_USER_FIELDS}
+	query GetAdminUserDetail($userId: String!) {
+		getAdminUserDetail(userId: $userId) {
+			user {
+				...AdminUserFields
+				verificationAdminNotes
+				verificationTimeline {
+					action
+					adminId
+					createdAt
+					note
+				}
+			}
+			bookingStats {
+				active
+				completed
+				total
+				totalSpent
+			}
+			recentBookings {
+				_id
+				bookingStatus
+				problemTitle
+				estimatedPrice
+				finalPrice
+				createdAt
+			}
+			recentPayments {
+				_id
+				bookingId
+				paymentAmount
+				paymentMethod
+				paymentStatus
+				paymentType
+				transactionId
+				createdAt
+			}
+			articles {
+				_id
+				articleTitle
+				articleViews
+				articleLikes
+				createdAt
+			}
+			stories {
+				_id
+				caption
+				viewCount
+				createdAt
+			}
+			technicianReviews {
+				_id
+				reviewContent
+				createdAt
+			}
+			userReviews {
+				_id
+				reviewContent
+				createdAt
+			}
+			clientProfile {
+				totalBookings
+				completedBookings
+				reviewsWritten
+				totalSpent
+				savedTechniciansCount
+			}
+			analytics {
+				completedJobsCount
+				reviewCount
+				averageRating
+			}
+			commentsByUser {
+				_id
+				commentContent
+				commentStatus
+				createdAt
+				articleTitle
+			}
+			reportsReceived {
+				_id
+				reason
+				status
+				comment
+				storyId
+				createdAt
+			}
+			loginHistory {
+				_id
+				authProvider
+				createdAt
+				ipAddress
+				success
+				userAgent
+			}
+			moderationHistory {
+				_id
+				action
+				category
+				reason
+				createdAt
+				adminData {
+					_id
+					userNickname
+					userFullName
+				}
+			}
+			verificationTimeline {
+				action
+				adminId
+				createdAt
+				note
+			}
 		}
 	}
 `;

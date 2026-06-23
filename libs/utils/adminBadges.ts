@@ -1,5 +1,5 @@
-import type { BookingStatus } from '../fixora/fixora';
-import type { BadgeTone } from '../../components/admin/shared/AdminStatusBadge';
+import type { BookingStatus } from '../types/fixora/fixora';
+import type { BadgeTone } from '../components/admin/shared/AdminStatusBadge';
 
 export function bookingStatusTone(status: BookingStatus): BadgeTone {
 	switch (status) {
@@ -81,3 +81,27 @@ export const BOOKING_STATUS_DOT: Record<string, string> = {
 	CANCELLED: '#ff4d4f',
 	REJECTED: '#8a8a8a',
 };
+
+/** Burgundy-aligned chart palette for admin dashboards */
+export const ADMIN_CHART_COLORS = [
+	'#52c41a',
+	'#e85a6f',
+	'#730c1e',
+	'#faad14',
+	'#ff4d4f',
+	'#8a8a8a',
+] as const;
+
+export const ADMIN_CHART_THEME = {
+	grid: 'rgba(115, 12, 30, 0.15)',
+	tick: '#8a8a8a',
+	bar: '#e85a6f',
+	line: '#730c1e',
+	tooltipBg: '#2a1518',
+	tooltipBorder: 'rgba(115, 12, 30, 0.45)',
+} as const;
+
+export function bookingStatusDotClass(status: string): string {
+	const key = status.toLowerCase();
+	return `fixora-admin-status-dot--${key}`;
+}

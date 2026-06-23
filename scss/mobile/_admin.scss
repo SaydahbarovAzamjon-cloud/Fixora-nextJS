@@ -1,0 +1,46 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+@media (max-width: $fixora-bp-tablet) {
+	.fixora-admin-layout {
+		.fixora-admin-mobile-menu {
+			@include fixora-tap-target;
+			top: calc(12px + var(--fixora-safe-top));
+			left: calc(12px + var(--fixora-safe-left));
+		}
+
+		.fixora-admin-main {
+			padding-top: calc(56px + var(--fixora-safe-top));
+		}
+
+		.fixora-admin-page {
+			padding: 12px var(--fixora-mobile-gutter) calc(20px + var(--fixora-safe-bottom));
+		}
+
+		.fixora-admin-table-wrap {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			@include fixora-scrollbar;
+		}
+
+		.fixora-admin-table {
+			min-width: 640px;
+		}
+
+		.fixora-admin-stat-card,
+		.fixora-admin-filter-tabs__tab,
+		.fixora-admin-btn,
+		.fixora-admin-verification__actions .fixora-admin-btn {
+			@include fixora-touch-active;
+		}
+
+		.fixora-admin-verification__actions .fixora-admin-btn {
+			min-height: 44px;
+		}
+
+		.fixora-admin-header__search {
+			min-width: 0;
+			flex: 1;
+		}
+	}
+}

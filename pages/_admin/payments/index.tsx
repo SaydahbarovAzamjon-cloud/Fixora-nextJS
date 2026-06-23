@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
 import withAdminLayout from '../../../libs/components/layout/AdminLayout';
 import { adminPageProps } from '../../../libs/i18n/adminPageProps';
@@ -10,13 +10,16 @@ import AdminSearchBar from '../../../libs/components/admin/shared/AdminSearchBar
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
 import AdminPagination from '../../../libs/components/admin/shared/AdminPagination';
 import AdminStatCard from '../../../libs/components/admin/shared/AdminStatCard';
-import { GET_ALL_PAYMENTS_BY_ADMIN, GET_ADMIN_PAYMENT_SUMMARY } from '../../../apollo/admin/query';
+import AdminSelect from '../../../libs/components/admin/shared/AdminSelect';
+import { GET_ALL_PAYMENTS_BY_ADMIN, GET_ADMIN_PAYMENT_SUMMARY, GET_ADMIN_USER } from '../../../apollo/admin/query';
+import { REFUND_PAYMENT } from '../../../apollo/admin/mutation';
 import type { AdminPayment } from '../../../libs/types/admin/admin';
 import type { PaymentMethod, PaymentStatus, PaymentType } from '../../../libs/types/fixora/fixora';
 import { useUserLookup } from '../../../libs/hooks/useUserLookup';
 import { paymentStatusTone } from '../../../libs/utils/adminBadges';
 import { formatKrw } from '../../../libs/utils/formatCurrency';
 import { dateLocale } from '../../../libs/utils/i18nLocale';
+import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 import { TrendingUp } from 'lucide-react';
 
 const PAGE_SIZE = 10;
@@ -24,6 +27,7 @@ const PAGE_SIZE = 10;
 const AdminPaymentsPage: NextPage = () => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
+	const filterUserId = typeof router.query.userId === 'string' ? router.query.userId : undefined;
 	const [page, setPage] = useState(1);
 	const [search, setSearch] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -38,7 +42,7 @@ const AdminPaymentsPage: NextPage = () => {
 
 	useEffect(() => {
 		setPage(1);
-	}, [debouncedSearch, statusFilter, methodFilter, typeFilter]);
+	}, [debouncedSearch, statusFilter, methodFilter, typeFilter, filterUserId]);
 
 	const { data: summaryData } = useQuery(GET_ADMIN_PAYMENT_SUMMARY, {
 		fetchPolicy: 'cache-and-network',
@@ -46,7 +50,13 @@ const AdminPaymentsPage: NextPage = () => {
 
 	const summary = summaryData?.getAdminPaymentSummary;
 
-	const { data, loading } = useQuery(GET_ALL_PAYMENTS_BY_ADMIN, {
+	const { data: filterUserData } = useQuery(GET_ADMIN_USER, {
+		variables: { userId: filterUserId },
+		skip: !filterUserId,
+	});
+	const filterIsTechnician = filterUserData?.getUser?.userType === 'TECHNICIAN';
+
+	const { data, loading, refetch } = useQuery(GET_ALL_PAYMENTS_BY_ADMIN, {
 		variables: {
 			input: {
 				page,
@@ -56,11 +66,19 @@ const AdminPaymentsPage: NextPage = () => {
 					paymentStatus: statusFilter || undefined,
 					paymentMethod: methodFilter || undefined,
 					paymentType: typeFilter || undefined,
+					...(filterUserId
+						? filterIsTechnician
+							? { technicianId: filterUserId }
+							: { userId: filterUserId }
+						: {}),
 				},
 			},
 		},
 		fetchPolicy: 'cache-and-network',
+		skip: Boolean(filterUserId && !filterUserData?.getUser),
 	});
+
+	const [refundPayment, { loading: refunding }] = useMutation(REFUND_PAYMENT);
 
 	const list: AdminPayment[] = data?.getAllPaymentsByAdmin?.list ?? [];
 	const total = data?.getAllPaymentsByAdmin?.metaCounter?.[0]?.total ?? 0;
@@ -69,11 +87,21 @@ const AdminPaymentsPage: NextPage = () => {
 	const payerIds = list.map((p) => p.userId);
 	const { name: payerName } = useUserLookup(payerIds);
 
+	const handleRefund = async (paymentId: string) => {
+		try {
+			await refundPayment({ variables: { paymentId } });
+			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
+			await refetch();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
+	};
+
 	return (
 		<>
 			<AdminHeader title={t('payments.title')} subtitle={t('payments.subtitle')} />
 			<div className="fixora-admin-page">
-				<div className="fixora-admin-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+				<div className="fixora-admin-stats-grid fixora-admin-stats-grid--4">
 					<AdminStatCard
 						icon={<TrendingUp size={18} />}
 						label={t('payments.summary.revenue')}
@@ -106,36 +134,39 @@ const AdminPaymentsPage: NextPage = () => {
 				<div className="fixora-admin-table-wrap">
 					<div className="fixora-admin-table-toolbar">
 						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('payments.searchPlaceholder')} />
-						<select
-							className="fixora-admin-select"
+						<AdminSelect
 							value={statusFilter}
 							onChange={(e) => setStatusFilter(e.target.value as PaymentStatus | '')}
-						>
-							<option value="">{t('payments.allStatuses')}</option>
-							<option value="COMPLETED">COMPLETED</option>
-							<option value="PENDING">PENDING</option>
-							<option value="FAILED">FAILED</option>
-							<option value="REFUNDED">REFUNDED</option>
-						</select>
-						<select
-							className="fixora-admin-select"
+							options={[
+								{ value: '', label: t('payments.allStatuses') },
+								{ value: 'COMPLETED', label: 'COMPLETED' },
+								{ value: 'PENDING', label: 'PENDING' },
+								{ value: 'FAILED', label: 'FAILED' },
+								{ value: 'REFUNDED', label: 'REFUNDED' },
+							]}
+							aria-label={t('payments.allStatuses')}
+						/>
+						<AdminSelect
 							value={methodFilter}
 							onChange={(e) => setMethodFilter(e.target.value as PaymentMethod | '')}
-						>
-							<option value="">{t('payments.allMethods')}</option>
-							<option value="KAKAOPAY">KAKAOPAY</option>
-							<option value="CARD">CARD</option>
-							<option value="CASH">CASH</option>
-						</select>
-						<select
-							className="fixora-admin-select"
+							options={[
+								{ value: '', label: t('payments.allMethods') },
+								{ value: 'KAKAOPAY', label: 'KAKAOPAY' },
+								{ value: 'CARD', label: 'CARD' },
+								{ value: 'CASH', label: 'CASH' },
+							]}
+							aria-label={t('payments.allMethods')}
+						/>
+						<AdminSelect
 							value={typeFilter}
 							onChange={(e) => setTypeFilter(e.target.value as PaymentType | '')}
-						>
-							<option value="">{t('payments.allTypes')}</option>
-							<option value="DEPOSIT">DEPOSIT</option>
-							<option value="FINAL">FINAL</option>
-						</select>
+							options={[
+								{ value: '', label: t('payments.allTypes') },
+								{ value: 'DEPOSIT', label: 'DEPOSIT' },
+								{ value: 'FINAL', label: 'FINAL' },
+							]}
+							aria-label={t('payments.allTypes')}
+						/>
 					</div>
 
 					<table className="fixora-admin-table">
@@ -150,19 +181,20 @@ const AdminPaymentsPage: NextPage = () => {
 								<th>{t('payments.columns.status')}</th>
 								<th>{t('payments.columns.transactionId')}</th>
 								<th>{t('payments.columns.date')}</th>
+								<th />
 							</tr>
 						</thead>
 						<tbody>
 							{loading && (
 								<tr>
-									<td colSpan={9} className="fixora-admin-empty">
+									<td colSpan={10} className="fixora-admin-empty">
 										{t('common.loading')}
 									</td>
 								</tr>
 							)}
 							{!loading && list.length === 0 && (
 								<tr>
-									<td colSpan={9} className="fixora-admin-empty">
+									<td colSpan={10} className="fixora-admin-empty">
 										{t('payments.empty')}
 									</td>
 								</tr>
@@ -195,13 +227,25 @@ const AdminPaymentsPage: NextPage = () => {
 											day: '2-digit',
 										})}
 									</td>
+									<td>
+										{payment.paymentStatus === 'COMPLETED' && (
+											<button
+												type="button"
+												className="fixora-admin-btn fixora-admin-btn--danger-outline fixora-admin-btn--sm"
+												onClick={() => handleRefund(payment._id)}
+												disabled={refunding}
+											>
+												{t('payments.actions.refund')}
+											</button>
+										)}
+									</td>
 								</tr>
 							))}
 						</tbody>
 					</table>
 
 					<div className="fixora-admin-table-footer">
-						<span>{total} payments</span>
+						<span>{t('payments.found', { count: total })}</span>
 						<AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
 					</div>
 				</div>

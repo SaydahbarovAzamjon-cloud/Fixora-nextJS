@@ -1,4 +1,4 @@
-import React, { ReactNode, SelectHTMLAttributes, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 
 export interface FixoraSelectOption {
@@ -6,14 +6,20 @@ export interface FixoraSelectOption {
 	label: string;
 }
 
-export interface FixoraSelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size' | 'onChange'> {
+export interface FixoraSelectProps {
 	label?: string;
 	icon?: ReactNode;
 	error?: boolean;
 	helperText?: string;
 	options: FixoraSelectOption[];
 	placeholder?: string;
+	id?: string;
+	className?: string;
+	value?: string;
+	disabled?: boolean;
+	name?: string;
 	onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+	'aria-label'?: string;
 }
 
 const FixoraSelect = ({
@@ -29,7 +35,7 @@ const FixoraSelect = ({
 	disabled,
 	name,
 	onChange,
-	...rest
+	'aria-label': ariaLabel,
 }: FixoraSelectProps) => {
 	const selectId = id || name;
 	const rootRef = useRef<HTMLDivElement>(null);
@@ -73,8 +79,8 @@ const FixoraSelect = ({
 					disabled={disabled}
 					aria-haspopup="listbox"
 					aria-expanded={open}
+					aria-label={ariaLabel}
 					onClick={() => !disabled && setOpen((prev) => !prev)}
-					{...rest}
 				>
 					{icon && <span className="fixora-input__icon">{icon}</span>}
 					<span className={`fixora-select__value${!selectedLabel ? ' fixora-select__value--placeholder' : ''}`}>

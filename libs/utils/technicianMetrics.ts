@@ -369,11 +369,14 @@ export function buildDailyEarningsSeries(
 }
 
 export function buildDashboardWeekSeries(completed: TechnicianBooking[]) {
-	return buildWeekSeries(completed, (label, earnings, jobs) => ({ label, earnings, jobs }), 'revenue').map((p) => ({
-		label: (p as RevenueJobsPoint).day,
-		earnings: (p as RevenueJobsPoint).revenue,
-		jobs: (p as RevenueJobsPoint).jobs,
-	}));
+	return buildWeekSeries(completed, (day, revenue, jobs) => ({ day, revenue, jobs }), 'revenue').map((p) => {
+		const point = p as RevenueJobsPoint;
+		return {
+			label: point.day,
+			earnings: point.revenue,
+			jobs: point.jobs,
+		};
+	});
 }
 
 export function buildDashboardMonthSeries(completed: TechnicianBooking[]) {

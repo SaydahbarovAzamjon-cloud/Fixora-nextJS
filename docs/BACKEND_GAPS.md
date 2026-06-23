@@ -16,12 +16,13 @@
 
 | Phase | Fokus | Gap IDs | FixoraB status |
 |-------|--------|---------|----------------|
-| **0** | Contract sync + admin API tayyor | 070–077 | ✅ FixoraF wired (2026-06-22) |
-| **1** | Payout + client reviews (P0) | 010–014, 031 | ✅ FixoraF wired |
-| **2** | Response time + schedule + search (P1) | 001, 020, 030, 040, 099 | ✅ FixoraF wired |
-| **3** | Analytics, discovery, article (P2) | 002–004, 021, 080–086, 097, 100, 003 | ✅ FixoraF wired |
-| **4** | Notif, messages, settings, social (P3) | 060–063, 087–089, 090–096, 098, 032 | ✅ FixoraF wired |
+| **0** | Contract sync + admin API tayyor | 070–077 | ✅ FixoraB done — FixoraF ulanishi kutilmoqda |
+| **1** | Payout + client reviews (P0) | 010–014, 031 | ✅ FixoraB done |
+| **2** | Response time + schedule + search (P1) | 001, 020, 030, 040, 099 | ✅ FixoraB done |
+| **3** | Analytics, discovery, article (P2) | 002–004, 021, 080–086, 097, 100, 003 | ✅ FixoraB done |
+| **4** | Notif, messages, settings, social (P3) | 060–063, 087–089, 090–096, 098, 032 | ✅ FixoraB done |
 | **5** | Post-MVP | 041, 051 | ⏸ DECISIONS kerak · GAP-050 ✅ |
+| **Admin user mgmt** | `/_admin/users/[id]` | 078, 101–112 | ✅ FixoraF wired |
 
 ---
 
@@ -47,14 +48,16 @@
 - [x] [`docs/schema.gql`](schema.gql) — `apps/fixora-api/src/graphql/schema.gql` nusxasi
 - [x] Full gaps registry (this file)
 
-### FixoraF (this repo) ✅ — 2026-06-22
+### FixoraF (this repo) ✅ — 2026-06-23
 
-- [x] Docs sync (`schema.gql`, `FRONTEND_API.md`, `FIXORAF_SYNC.md`, `PAYOUT_API.md`, …)
-- [x] Phase 0 — Admin GAP-071…077 wired
-- [x] Phase 1 — Earnings + `getUserReviews`
-- [x] Phase 2 — Analytics, schedule, response time
-- [x] Phase 3 — Discovery, articles, export
-- [x] Phase 4 — Messages, notifications, settings, social
+- [x] `getAdminUserDetail` — `useAdminUserDetail` single query
+- [x] Admin user actions — `adminResetPassword`, `setTechnicianBadgeLevel`, `revokeTechnicianVerification`, `warnUser`, `addVerificationAdminNote`
+- [x] User detail sections — login history, moderation, comments, reports, verification timeline
+- [x] Verification queue — PENDING approve/reject (GAP-110/111)
+- [x] Device upload — `imageUploader` target `device` (GAP-112)
+- [x] Customer settings — security, notifications, payment methods (GAP-090/092/093)
+- [x] Customer settings — email/slug, app preferences, delete account (GAP-094/095/096)
+- [x] Navbar notification dropdown — `deleteNotification`
 
 **Skipped (by design):** GAP-041 ON_SITE, GAP-051 real KakaoPay, GAP-050 Apple OAuth UI stays Coming Soon
 
@@ -196,6 +199,26 @@ Contract: [`PAYOUT_API.md`](PAYOUT_API.md)
 
 ---
 
+### Admin user detail (GAP-078, 101–112)
+
+| ID | UI | Backend | Status | FixoraB |
+|----|-----|---------|--------|---------|
+| GAP-078 | Admin notification bell | Shared `getNotifications` | `DONE` | ✅ |
+| GAP-101 | Aggregated user detail | `getAdminUserDetail` | `DONE` | ✅ |
+| GAP-102 | Grant/remove Premium | `setTechnicianBadgeLevel` | `DONE` | ✅ |
+| GAP-103 | Revoke verification | `revokeTechnicianVerification` | `DONE` | ✅ |
+| GAP-104 | Send warning | `warnUser`, `getUserModerationHistory` | `DONE` | ✅ |
+| GAP-105 | Login audit | `getUserLoginHistory` | `DONE` | ✅ |
+| GAP-106 | Verification timeline | `verificationTimeline`, `addVerificationAdminNote` | `DONE` | ✅ |
+| GAP-107 | Comments by user | `getAllCommentsByAdmin` + `authorId` | `DONE` | ✅ |
+| GAP-108 | Reports received | `getStoryReports` + `userId` (story owner) | `DONE` | ✅ |
+| GAP-109 | Admin reset password | `adminResetPassword`; block `userPassword` on admin update | `DONE` | ✅ |
+| GAP-110 | Approve from PENDING | `approveTechnician` extended | `DONE` | ✅ |
+| GAP-111 | Reject from PENDING | `rejectTechnician` extended | `DONE` | ✅ |
+| GAP-112 | Device image upload | `allowedUploadTargets` + `device` | `DONE` | ✅ |
+
+---
+
 ## O‘zgarishlar tarixi
 
 | Sana | O‘zgarish |
@@ -204,4 +227,4 @@ Contract: [`PAYOUT_API.md`](PAYOUT_API.md)
 | 2026-06-22 | Phase 1 — GAP-010…014, GAP-031 | `PayoutModule`, `getUserReviews` | FixoraB |
 | 2026-06-22 | Phase 2 — GAP-001, 020, 030, 040, 099 | `AnalyticsModule`, `ScheduleModule`, `avgResponseMinutes` | FixoraB |
 | 2026-06-22 | Phase 4 — GAP-060…063, 087…089, 090…096, 098, 032 | SettingsModule, messages, notifications, social | FixoraB |
-| 2026-06-22 | GAP-050 Apple OAuth | Unblock `loginWithOAuth(APPLE)`; `fixora-web` AppleSignInButton | FixoraB |
+| 2026-06-23 | GAP-078, 101–112 | FixoraF wired — admin user detail, settings, device upload |

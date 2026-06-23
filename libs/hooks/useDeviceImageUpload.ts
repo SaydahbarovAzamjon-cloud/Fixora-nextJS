@@ -4,8 +4,8 @@ import { getJwtToken } from '../auth';
 import { MAX_DEVICE_IMAGES } from '../utils/deviceImage';
 import { validateCoverFile } from './useArticleCoverUpload';
 
-/** FixoraB allowedUploadTargets — `device` is not whitelisted (BACKEND_GAPS GAP-101). */
-const UPLOAD_TARGETS = ['property', 'article'] as const;
+/** FixoraB allowedUploadTargets — `device` whitelisted (GAP-112). */
+const UPLOAD_TARGETS = ['device', 'property', 'article'] as const;
 
 export interface DeviceImageState {
 	id: string;

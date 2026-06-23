@@ -48,6 +48,7 @@ import {
 } from '../../utils/technicianProfileDisplay';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 export type TechnicianPublicProfileVariant = 'owner' | 'visitor';
 
@@ -101,6 +102,7 @@ const reviewDeviceLabel = (r: TechnicianReview): string | undefined => {
 const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = ({ technicianId, variant }) => {
 	const router = useRouter();
 	const { t, i18n } = useTranslation('common');
+	const device = useDeviceDetect();
 	const authUser = useReactiveVar(userVar);
 	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const [activeTab, setActiveTab] = useState<TabId>('overview');
@@ -661,6 +663,17 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 					)
 				)}
 			</div>
+
+			{variant === 'visitor' && !isOwner && device === 'mobile' && (
+				<div className="fixora-pp-mobile-sticky-cta">
+					<button className="fixora-pp-btn fixora-pp-btn--secondary" type="button" onClick={messageHandler}>
+						<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> {t('technicianProfile.pp.messageMe')}
+					</button>
+					<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={bookServiceHandler}>
+						<BuildOutlined style={{ fontSize: 16 }} /> {t('technicianProfile.sidebar.bookCta')}
+					</button>
+				</div>
+			)}
 		</div>
 	);
 };

@@ -17,15 +17,18 @@ export interface NotificationDropdownProps {
 	notifications: Notification[];
 	onItemClick: (notification: Notification) => void;
 	onViewAll: () => void;
+	onDelete?: (notification: Notification) => void;
 	viewAllHref?: string;
 }
 
 const NotificationDropdownItem = ({
 	notification,
 	onClick,
+	onDelete,
 }: {
 	notification: Notification;
 	onClick: () => void;
+	onDelete?: () => void;
 }) => {
 	const { t } = useTranslation('common');
 	const { data } = useQuery(GET_BOOKING, {
@@ -39,23 +42,35 @@ const NotificationDropdownItem = ({
 	const showSender = shouldShowNotificationSender(notification);
 
 	return (
-		<button
-			type="button"
-			className={`fixora-notif-dropdown__item ${!notification.isRead ? 'fixora-notif-dropdown__item--unread' : ''}`}
-			onClick={onClick}
-		>
-			<NotificationVisualIcon notification={notification} bookingStatus={data?.getBooking?.bookingStatus} />
-			<span className="fixora-notif-dropdown__body">
-				{showSender && notification.userId && (
-					<NotificationSender userId={notification.userId} className="fixora-notif-dropdown__sender" />
-				)}
-				<span className="fixora-notif-dropdown__text">{text}</span>
-				<Moment fromNow className="fixora-notif-dropdown__time">
-					{notification.createdAt}
-				</Moment>
-			</span>
-			{!notification.isRead && <span className="fixora-notif-dropdown__dot" />}
-		</button>
+		<div className={`fixora-notif-dropdown__row ${!notification.isRead ? 'fixora-notif-dropdown__row--unread' : ''}`}>
+			<button type="button" className="fixora-notif-dropdown__item" onClick={onClick}>
+				<NotificationVisualIcon notification={notification} bookingStatus={data?.getBooking?.bookingStatus} />
+				<span className="fixora-notif-dropdown__body">
+					{showSender && notification.userId && (
+						<NotificationSender userId={notification.userId} className="fixora-notif-dropdown__sender" />
+					)}
+					<span className="fixora-notif-dropdown__text">{text}</span>
+					<Moment fromNow className="fixora-notif-dropdown__time">
+						{notification.createdAt}
+					</Moment>
+				</span>
+				{!notification.isRead && <span className="fixora-notif-dropdown__dot" />}
+			</button>
+			{onDelete && (
+				<button
+					type="button"
+					className="fixora-notif-dropdown__delete"
+					title={t('notifications.delete')}
+					aria-label={t('notifications.delete')}
+					onClick={(e) => {
+						e.stopPropagation();
+						onDelete();
+					}}
+				>
+					×
+				</button>
+			)}
+		</div>
 	);
 };
 
@@ -63,6 +78,7 @@ const NotificationDropdown = ({
 	notifications,
 	onItemClick,
 	onViewAll,
+	onDelete,
 	viewAllHref = '/notifications',
 }: NotificationDropdownProps) => {
 	const { t } = useTranslation('common');
@@ -82,6 +98,7 @@ const NotificationDropdown = ({
 							key={notification._id}
 							notification={notification}
 							onClick={() => onItemClick(notification)}
+							onDelete={onDelete ? () => onDelete(notification) : undefined}
 						/>
 					))
 				)}

@@ -6,6 +6,11 @@
 $font: 'Poppins', sans-serif;
 $font-technician: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
+/* Mobile breakpoints — DECISIONS MOB-03 */
+$fixora-bp-tablet: 992px;
+$fixora-bp-sm-tablet: 768px;
+$fixora-bp-phone: 639px;
+
 :root {
 	/* Dark theme — premium burgundy (MVP customer default) */
 	--fixora-primary: #730c1e;
@@ -34,6 +39,13 @@ $font-technician: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 	--fixora-success: #52c41a;
 	--fixora-glow: 0 0 24px rgba(115, 12, 30, 0.18);
 	--fixora-primary-soft: rgba(115, 12, 30, 0.12);
+
+	/* Mobile layout — PM-01 */
+	--fixora-safe-top: env(safe-area-inset-top, 0px);
+	--fixora-safe-bottom: env(safe-area-inset-bottom, 0px);
+	--fixora-safe-left: env(safe-area-inset-left, 0px);
+	--fixora-safe-right: env(safe-area-inset-right, 0px);
+	--fixora-mobile-gutter: 16px;
 
 	/* Light theme placeholders (Phase 4 — not active in MVP) */
 	--fixora-light-bg: #f5f5f7;

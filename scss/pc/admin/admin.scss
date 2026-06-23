@@ -1,4 +1,11 @@
-/** Fixora Admin Console — burgundy dark theme (P3-15) */
+/** Fixora Admin Console — burgundy dark theme (P3-15e parity) */
+
+@import '/scss/pc/homepage/fixora-card-surface.scss';
+
+@mixin fixora-admin-card-surface {
+	@include fixora-home-card-surface;
+	border-radius: 14px;
+}
 
 $admin-sidebar-width: 260px;
 $admin-bg: var(--fixora-bg);
@@ -13,7 +20,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 .fixora-admin-layout {
 	display: flex;
 	min-height: 100vh;
-	background: $admin-bg;
+	background: var(--fixora-bg-ambient);
 	color: $admin-text;
 }
 
@@ -40,7 +47,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	z-index: 100;
 	display: flex;
 	flex-direction: column;
-	background: $admin-surface;
+	background: linear-gradient(180deg, #1c080d 0%, #210207 45%, #140f17 100%);
 	border-right: 1px solid $admin-border;
 	padding: 20px 12px 16px;
 
@@ -115,9 +122,9 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 		&--active {
 			background: var(--fixora-primary-soft);
-			border-color: rgba(115, 12, 30, 0.45);
-			color: $admin-primary;
-			box-shadow: inset 3px 0 0 $admin-primary;
+			border-color: rgba(115, 12, 30, 0.5);
+			color: $admin-text;
+			font-weight: 600;
 		}
 	}
 
@@ -223,7 +230,8 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 24px;
-	padding: 24px 32px 0;
+	padding: 24px 32px 20px;
+	border-bottom: 1px solid $admin-border;
 	flex-wrap: wrap;
 
 	&__titles {
@@ -255,30 +263,53 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 	&__bell {
 		position: relative;
-		width: 40px;
-		height: 40px;
-		border-radius: 10px;
-		border: 1px solid $admin-border;
-		background: $admin-surface-elevated;
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border);
+		@include fixora-admin-card-surface;
 		color: $admin-text-secondary;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
 		&:hover {
-			border-color: rgba(115, 12, 30, 0.45);
+			border-color: rgba(115, 12, 30, 0.55);
+			box-shadow: var(--fixora-glow);
+			color: $admin-text;
 		}
 	}
 
-	&__bell-dot {
+	&__bell-count {
 		position: absolute;
-		top: 8px;
-		right: 8px;
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
+		top: 6px;
+		right: 6px;
+		min-width: 16px;
+		height: 16px;
+		padding: 0 4px;
+		border-radius: 999px;
 		background: #ff4d4f;
+		color: #fff;
+		font-size: 10px;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+	}
+
+	&__notif-wrap {
+		position: relative;
+	}
+
+	&__notif-dropdown {
+		position: absolute;
+		top: calc(100% + 8px);
+		right: 0;
+		z-index: 120;
+		min-width: 320px;
 	}
 
 	&__user {
@@ -287,12 +318,18 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		gap: 8px;
 		padding: 6px 12px 6px 6px;
 		border-radius: 999px;
-		border: 1px solid $admin-border;
-		background: $admin-surface-elevated;
+		border: 1px solid var(--fixora-border);
+		@include fixora-admin-card-surface;
 		color: $admin-text;
 		font-size: 13px;
 		font-weight: 500;
 		cursor: pointer;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:hover {
+			border-color: rgba(115, 12, 30, 0.55);
+			box-shadow: var(--fixora-glow);
+		}
 	}
 
 	&__avatar {
@@ -307,6 +344,54 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		align-items: center;
 		justify-content: center;
 	}
+
+	&__user-wrap {
+		position: relative;
+	}
+
+	&__user-menu {
+		position: absolute;
+		top: calc(100% + 8px);
+		right: 0;
+		z-index: 120;
+		min-width: 200px;
+		@include fixora-admin-card-surface;
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+		padding: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__user-menu-item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		padding: 10px 12px;
+		border: none;
+		border-radius: 8px;
+		background: transparent;
+		color: $admin-text;
+		font-size: 13px;
+		font-weight: 500;
+		text-align: left;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: var(--fixora-primary-soft);
+		}
+
+		&--danger {
+			color: #ff7875;
+
+			&:hover {
+				background: rgba(255, 77, 79, 0.12);
+			}
+		}
+	}
 }
 
 /* ── Search ── */
@@ -319,38 +404,16 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		max-width: 360px;
 	}
 
-	&__icon {
-		position: absolute;
-		left: 14px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: $admin-text-muted;
-		pointer-events: none;
+	&.fixora-input {
+		gap: 0;
+	}
+
+	&__field {
+		width: 100%;
 	}
 
 	&__input {
-		width: 100%;
-		height: 40px;
-		padding: 0 14px 0 40px;
-		border-radius: 10px;
-		border: 1px solid $admin-border;
-		background: $admin-surface-elevated;
-		color: $admin-text;
-		font-size: 13px;
-		outline: none;
-
-		&::placeholder {
-			color: $admin-text-muted;
-		}
-
-		&:focus {
-			border-color: rgba(115, 12, 30, 0.55);
-		}
-
-		&:disabled {
-			opacity: 0.55;
-			cursor: not-allowed;
-		}
+		padding-left: 0;
 	}
 
 	&__dropdown {
@@ -359,10 +422,9 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		left: 0;
 		right: 0;
 		z-index: 50;
-		background: $admin-surface-elevated;
-		border: 1px solid $admin-border;
-		border-radius: 10px;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+		@include fixora-admin-card-surface;
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 		max-height: 280px;
 		overflow-y: auto;
 	}
@@ -399,20 +461,58 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 }
 
-/* ── Stat cards ── */
-
 /* ── Cards & panels ── */
 .fixora-admin-card {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	padding: 20px;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 16px;
+		gap: 12px;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 15px;
+		font-weight: 600;
+		color: $admin-text;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__sub {
+		margin: 4px 0 0;
+		font-size: 12px;
+		color: $admin-text-muted;
+	}
+
+	&__hint {
+		margin: 0 0 14px;
+		font-size: 13px;
+		color: $admin-text-muted;
+		line-height: 1.5;
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 16px;
+	}
+
+	&__footer--split {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 16px;
+	}
 }
 
 .fixora-admin-stat-card {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	padding: 18px 20px;
 	display: flex;
 	flex-direction: column;
@@ -464,6 +564,31 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	grid-template-columns: repeat(3, 1fr);
 	gap: 16px;
 	margin-bottom: 20px;
+
+	&--4 {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+.fixora-admin-toolbar-row {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 12px;
+}
+
+.fixora-admin-toolbar-row--filters {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+	padding: 0;
+	background: transparent;
+	border: none;
+
+	&.fixora-admin-table-toolbar {
+		border-bottom: none;
+	}
 }
 
 .fixora-admin-charts-grid {
@@ -498,11 +623,19 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
+		transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+		&:hover {
+			background: var(--fixora-primary-soft);
+			border-color: rgba(115, 12, 30, 0.4);
+			color: $admin-text;
+		}
 
 		&--active {
-			background: var(--fixora-primary-soft);
-			border-color: rgba(115, 12, 30, 0.5);
-			color: $admin-primary;
+			background: rgba(115, 12, 30, 0.08);
+			border-color: var(--fixora-primary);
+			color: $admin-text;
+			font-weight: 600;
 		}
 	}
 
@@ -546,9 +679,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 /* ── Table ── */
 .fixora-admin-table-wrap {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	overflow: hidden;
 }
 
@@ -560,26 +691,41 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	border-bottom: 1px solid $admin-border;
 	flex-wrap: wrap;
 
-	.fixora-admin-search {
+	> .fixora-admin-search.fixora-input {
 		flex: 1;
 		min-width: 200px;
-		max-width: none;
+		max-width: 420px;
+		width: auto;
+	}
+
+	> .fixora-admin-fixora-select {
+		width: auto;
+		flex: 0 0 auto;
+		min-width: 160px;
+		max-width: 200px;
 	}
 }
 
 .fixora-admin-select {
-	height: 40px;
-	padding: 0 32px 0 12px;
-	border-radius: 10px;
-	border: 1px solid $admin-border;
-	background: $admin-surface-elevated;
+	height: 48px;
+	padding: 0 36px 0 14px;
+	border-radius: 12px;
+	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-surface);
 	color: $admin-text;
-	font-size: 13px;
+	font-size: 14px;
 	cursor: pointer;
 	appearance: none;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
-	background-position: right 10px center;
+	background-position: right 12px center;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+	&:focus {
+		border-color: rgba(115, 12, 30, 0.55);
+		box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+	}
 }
 
 .fixora-admin-table {
@@ -611,8 +757,32 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 
 	tr:hover td {
-		background: rgba(115, 12, 30, 0.04);
+		background: rgba(115, 12, 30, 0.08);
 	}
+}
+
+.fixora-admin-cell-ellipsis {
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fixora-admin-cell-ellipsis--wide {
+	max-width: 280px;
+}
+
+.fixora-admin-inline-icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.fixora-admin-rating {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	color: #faad14;
 }
 
 .fixora-admin-table-footer {
@@ -649,6 +819,11 @@ $admin-text-secondary: var(--fixora-text-secondary);
 			height: 100%;
 			object-fit: cover;
 		}
+
+		&--sm {
+			width: 28px;
+			height: 28px;
+		}
 	}
 
 	&__name {
@@ -670,19 +845,21 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	gap: 8px;
 
 	&__btn {
-		width: 32px;
-		height: 32px;
-		border-radius: 8px;
-		border: 1px solid $admin-border;
-		background: transparent;
+		width: 36px;
+		height: 36px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
 		color: $admin-text-secondary;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 
 		&:hover:not(:disabled) {
-			border-color: $admin-primary;
+			border-color: var(--fixora-primary);
+			background: var(--fixora-primary-soft);
 			color: $admin-primary;
 		}
 
@@ -706,37 +883,59 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	padding: 10px 20px;
-	border-radius: 10px;
-	font-size: 13px;
+	padding: 12px 20px;
+	border-radius: 12px;
+	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
 	border: 1px solid transparent;
-	transition: background 0.15s, border-color 0.15s;
+	transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
 	&--primary {
 		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
 		color: #fff;
-		&:hover { background: linear-gradient(135deg, #8e1428 0%, #730c1e 100%); }
+		&:hover:not(:disabled) {
+			background: linear-gradient(135deg, #8e1428 0%, #730c1e 100%);
+			box-shadow: var(--fixora-glow);
+		}
+	}
+
+	&--secondary {
+		background: var(--fixora-surface-elevated);
+		border-color: var(--fixora-border);
+		color: $admin-text-secondary;
+		&:hover:not(:disabled) {
+			border-color: rgba(115, 12, 30, 0.55);
+			color: $admin-text;
+			box-shadow: var(--fixora-glow);
+		}
 	}
 
 	&--outline {
 		background: transparent;
-		border-color: $admin-border;
+		border-color: var(--fixora-border);
 		color: $admin-text-secondary;
-		&:hover { border-color: $admin-primary; color: $admin-primary; }
+		&:hover:not(:disabled) {
+			border-color: $admin-primary;
+			color: $admin-primary;
+			background: var(--fixora-primary-soft);
+		}
 	}
 
 	&--danger-outline {
 		background: transparent;
 		border-color: rgba(255, 77, 79, 0.45);
 		color: #ff4d4f;
-		&:hover { background: rgba(255, 77, 79, 0.08); }
+		&:hover:not(:disabled) {
+			background: rgba(255, 77, 79, 0.1);
+			box-shadow: 0 0 16px rgba(255, 77, 79, 0.12);
+		}
 	}
 
 	&--sm {
-		padding: 6px 14px;
+		padding: 8px 14px;
 		font-size: 12px;
+		border-radius: 10px;
 	}
 
 	&:disabled {
@@ -784,32 +983,157 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		align-items: flex-start;
 		gap: 12px;
 		padding: 14px 16px;
-		border-radius: 12px;
-		border: 1px solid $admin-border;
-		background: $admin-surface;
+		border-radius: 14px;
+		border: 1px solid var(--fixora-border-subtle);
+		@include fixora-admin-card-surface;
 		cursor: pointer;
 		text-align: left;
 		width: 100%;
 		color: inherit;
-		transition: border-color 0.15s;
-
-		&:hover {
-			border-color: rgba(115, 12, 30, 0.4);
-		}
 
 		&--active {
-			border-color: $admin-primary;
-			box-shadow: 0 0 0 1px rgba(115, 12, 30, 0.35);
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-glow);
 		}
 	}
 
+	&__list-body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__list-meta {
+		font-size: 12px;
+		color: $admin-text-muted;
+	}
+
+	&__list-meta--spaced {
+		margin-top: 4px;
+	}
+
+	&__list-aside {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 6px;
+		text-align: right;
+	}
+
+	&__list-date {
+		font-size: 11px;
+		color: $admin-text-muted;
+		margin-top: 8px;
+	}
+
 	&__detail {
-		background: $admin-surface;
-		border: 1px solid $admin-border;
-		border-radius: 14px;
+		@include fixora-admin-card-surface;
 		padding: 20px;
 		max-height: calc(100vh - 220px);
 		overflow-y: auto;
+	}
+
+	&__profile {
+		display: flex;
+		gap: 14px;
+		align-items: flex-start;
+		margin-bottom: 16px;
+	}
+
+	&__profile-avatar {
+		width: 56px;
+		height: 56px;
+		font-size: 20px;
+	}
+
+	&__profile-name {
+		margin: 0 0 8px;
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	&__profile-meta {
+		margin-bottom: 12px;
+		line-height: 1.6;
+	}
+
+	&__badges {
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	&__contact {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		font-size: 13px;
+		margin-bottom: 16px;
+	}
+
+	&__contact-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__section-title {
+		margin: 0 0 8px;
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	&__section-title--spaced {
+		margin: 16px 0 8px;
+	}
+
+	&__bio {
+		font-size: 13px;
+		color: $admin-text-secondary;
+		margin-bottom: 16px;
+	}
+
+	&__pending-notice {
+		margin: 16px 0 0;
+		padding: 12px 14px;
+		border-radius: 10px;
+		border: 1px solid rgba(250, 173, 20, 0.35);
+		background: rgba(250, 173, 20, 0.08);
+		color: #ffc53d;
+		font-size: 13px;
+		line-height: 1.5;
+
+		&--compact {
+			margin-top: 12px;
+		}
+	}
+
+	&__pending-hint {
+		margin-top: 8px;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+
+	&__reject-input {
+		margin-top: 10px;
+		width: 100%;
+		height: 48px;
+		padding: 0 16px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+		color: $admin-text;
+		font-size: 14px;
+		outline: none;
+
+		&:focus {
+			border-color: rgba(115, 12, 30, 0.55);
+			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+		}
+	}
+
+	&__docs-empty {
+		grid-column: 1 / -1;
+		padding: 20px;
 	}
 
 	&__docs {
@@ -844,7 +1168,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	&__checklist {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 8px;
+		gap: 10px 16px;
 		margin-top: 12px;
 	}
 
@@ -852,6 +1176,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		padding: 4px 0;
 		font-size: 12px;
 		color: $admin-text-secondary;
 	}
@@ -877,16 +1202,22 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		gap: 8px;
 		padding: 8px 14px;
 		border-radius: 999px;
-		border: 1px solid $admin-border;
-		background: $admin-surface;
+		border: 1px solid var(--fixora-border-subtle);
+		@include fixora-admin-card-surface;
 		font-size: 12px;
 		font-weight: 600;
 		color: $admin-text-secondary;
 		cursor: pointer;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:hover {
+			border-color: rgba(115, 12, 30, 0.45);
+		}
 
 		&--active {
-			border-color: rgba(115, 12, 30, 0.5);
-			background: var(--fixora-primary-soft);
+			border-color: var(--fixora-primary);
+			background: rgba(115, 12, 30, 0.08);
+			box-shadow: var(--fixora-glow);
 		}
 	}
 
@@ -905,10 +1236,9 @@ $admin-text-secondary: var(--fixora-text-secondary);
 }
 
 .fixora-admin-device-card {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	padding: 18px;
+	border-radius: 14px;
 
 	&__top {
 		display: flex;
@@ -930,6 +1260,54 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		margin-bottom: 4px;
 	}
 
+	&__issue {
+		font-size: 13px;
+		color: $admin-text-secondary;
+		margin: 0 0 12px;
+		line-height: 1.45;
+	}
+
+	&__people {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		margin-bottom: 4px;
+	}
+
+	&__person {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__person-label {
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: $admin-text-muted;
+	}
+
+	&__person-body {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	&__person-name {
+		font-size: 13px;
+		color: $admin-text;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		&--muted {
+			color: $admin-text-muted;
+			font-style: italic;
+		}
+	}
+
 	&__footer {
 		display: flex;
 		justify-content: space-between;
@@ -942,17 +1320,139 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 /* ── Moderation ── */
 .fixora-admin-moderation-card {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	padding: 20px;
 	margin-bottom: 16px;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 12px;
+		gap: 12px;
+	}
+
+	&__author {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+
+	&__caption {
+		font-size: 14px;
+		color: $admin-text-secondary;
+		margin-bottom: 12px;
+	}
+
+	&__stats {
+		display: flex;
+		gap: 16px;
+		font-size: 12px;
+		color: $admin-text-muted;
+		margin-bottom: 12px;
+	}
+
+	&__reports {
+		color: #e85a6f;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
 
 	&__actions {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 10px;
 		margin-top: 16px;
+	}
+}
+
+/* ── Settings profile avatar ── */
+.fixora-admin-profile-avatar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 4px;
+
+	&__trigger {
+		position: relative;
+		width: 88px;
+		height: 88px;
+		border-radius: 50%;
+		border: 1px solid var(--fixora-border);
+		@include fixora-admin-card-surface;
+		padding: 0;
+		cursor: pointer;
+		overflow: hidden;
+		flex-shrink: 0;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:hover:not(:disabled) {
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-glow);
+		}
+
+		&--dragging {
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-glow);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	&__image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	&__placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $admin-text-muted;
+	}
+
+	&__badge {
+		position: absolute;
+		right: 4px;
+		bottom: 4px;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--fixora-primary);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 2px solid rgba(0, 0, 0, 0.35);
+	}
+
+	&__meta {
+		min-width: 0;
+	}
+
+	&__title {
+		margin: 0 0 4px;
+		font-size: 14px;
+		font-weight: 600;
+		color: $admin-text;
+	}
+
+	&__hint {
+		margin: 0;
+		font-size: 12px;
+		line-height: 1.5;
+		color: $admin-text-muted;
+	}
+
+	&__input {
+		display: none;
 	}
 }
 
@@ -968,6 +1468,28 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
+
+	&--after-avatar {
+		margin-top: 16px;
+	}
+
+	.fixora-input__field {
+		background: var(--fixora-surface);
+		border: 1px solid var(--fixora-border-subtle);
+	}
+
+	.fixora-input__control {
+		border: none;
+		box-shadow: none;
+		background: transparent;
+
+		&:-webkit-autofill,
+		&:-webkit-autofill:hover,
+		&:-webkit-autofill:focus {
+			-webkit-box-shadow: 0 0 0 1000px var(--fixora-surface) inset !important;
+			-webkit-text-fill-color: $admin-text;
+		}
+	}
 }
 
 .fixora-admin-field {
@@ -975,21 +1497,112 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	flex-direction: column;
 	gap: 6px;
 
+	&--full {
+		grid-column: 1 / -1;
+	}
+
 	label {
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 500;
 		color: $admin-text-secondary;
 	}
 
-	input, select {
-		height: 44px;
-		padding: 0 14px;
-		border-radius: 10px;
-		border: 1px solid $admin-border;
-		background: $admin-surface-elevated;
+	input,
+	select,
+	textarea {
+		height: 48px;
+		padding: 0 16px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
 		color: $admin-text;
 		font-size: 14px;
+		outline: none;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:focus {
+			border-color: rgba(115, 12, 30, 0.55);
+			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
 	}
+
+	textarea {
+		height: auto;
+		min-height: 88px;
+		padding: 12px 16px;
+		resize: vertical;
+	}
+
+	&__helper {
+		margin: 8px 0 0;
+		font-size: 12px;
+		color: $admin-text-muted;
+	}
+}
+
+.fixora-admin-list-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+	gap: 12px;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__main {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		min-width: 0;
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+.fixora-admin-activity-entry {
+	padding: 10px 0;
+	border-bottom: 1px solid var(--fixora-border-subtle);
+	font-size: 13px;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&__message {
+		color: $admin-text;
+	}
+
+	&__meta {
+		font-size: 11px;
+		color: $admin-text-muted;
+		margin-top: 4px;
+	}
+}
+
+.fixora-admin-empty--chart {
+	height: 200px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.fixora-admin-check-icon--done {
+	color: var(--fixora-success);
+}
+
+.fixora-admin-check-icon--pending {
+	color: $admin-text-muted;
 }
 
 .fixora-admin-empty {
@@ -1001,9 +1614,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 /* ── Chart card ── */
 .fixora-admin-chart-card {
-	background: $admin-surface;
-	border: 1px solid $admin-border;
-	border-radius: 14px;
+	@include fixora-admin-card-surface;
 	padding: 20px;
 
 	&__header {
@@ -1045,8 +1656,18 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		border-radius: 50%;
 
 		&--primary { background: $admin-primary; }
-		&--blue { background: #69b1ff; }
+		&--accent { background: #e85a6f; }
+		&--blue { background: #8b4a5a; }
 	}
+}
+
+.fixora-admin-status-dot {
+	&--pending { background: #faad14; }
+	&--accepted { background: #52c41a; }
+	&--in_progress { background: #e85a6f; }
+	&--completed { background: #52c41a; }
+	&--cancelled { background: #ff4d4f; }
+	&--rejected { background: #8a8a8a; }
 }
 
 /* ── Activity list ── */
@@ -1089,7 +1710,8 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 /* ── Responsive ── */
 @media (max-width: 1279px) {
-	.fixora-admin-stats-grid {
+	.fixora-admin-stats-grid,
+	.fixora-admin-stats-grid--4 {
 		grid-template-columns: repeat(2, 1fr);
 	}
 
@@ -1154,6 +1776,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 
 	.fixora-admin-stats-grid,
+	.fixora-admin-stats-grid--4,
 	.fixora-admin-two-col,
 	.fixora-admin-device-grid,
 	.fixora-admin-form-grid {
@@ -1176,4 +1799,827 @@ $admin-text-secondary: var(--fixora-text-secondary);
 /* Hide legacy admin light theme */
 #pc-wrap.admin {
 	display: none !important;
+}
+
+/* ── Avatar ── */
+.fixora-admin-avatar {
+	border-radius: 50%;
+	overflow: hidden;
+	flex-shrink: 0;
+	background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&--sm {
+		width: 28px;
+		height: 28px;
+	}
+
+	&--md {
+		width: 36px;
+		height: 36px;
+	}
+
+	&--lg {
+		width: 56px;
+		height: 56px;
+	}
+
+	&__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&__initials {
+		color: #fff;
+		font-weight: 700;
+		font-size: 12px;
+	}
+
+	&--md &__initials {
+		font-size: 14px;
+	}
+
+	&--lg &__initials {
+		font-size: 20px;
+	}
+}
+
+/* ── Forbidden / 404 ── */
+.fixora-admin-forbidden {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--fixora-bg-ambient);
+	padding: 24px;
+}
+
+.fixora-admin-forbidden__card {
+	@include fixora-admin-card-surface;
+	padding: 40px 32px;
+	max-width: 420px;
+	width: 100%;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.fixora-admin-forbidden__icon {
+	color: #ff4d4f;
+}
+
+.fixora-admin-forbidden__title {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.fixora-admin-forbidden__text {
+	margin: 0;
+	font-size: 14px;
+	color: $admin-text-muted;
+}
+
+.fixora-admin-not-found {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 48px 24px;
+	gap: 12px;
+}
+
+.fixora-admin-not-found__icon {
+	color: $admin-primary;
+	opacity: 0.85;
+}
+
+.fixora-admin-not-found__code {
+	margin: 0;
+	font-size: 48px;
+	font-weight: 800;
+	color: $admin-primary;
+	line-height: 1;
+}
+
+.fixora-admin-not-found__title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.fixora-admin-not-found__text {
+	margin: 0 0 8px;
+	font-size: 14px;
+	color: $admin-text-muted;
+	max-width: 360px;
+}
+
+.fixora-admin-fixora-select {
+	min-width: 160px;
+
+	.fixora-select__trigger {
+		min-height: 48px;
+	}
+}
+
+.fixora-not-found-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--fixora-bg-ambient);
+	padding: 24px;
+}
+
+.fixora-not-found-page__card {
+	@include fixora-admin-card-surface;
+	padding: 40px 32px;
+	max-width: 420px;
+	width: 100%;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.fixora-not-found-page__icon {
+	color: var(--fixora-primary);
+}
+
+.fixora-not-found-page__code {
+	margin: 0;
+	font-size: 48px;
+	font-weight: 800;
+	color: var(--fixora-primary);
+	line-height: 1;
+}
+
+.fixora-not-found-page__title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--fixora-text-primary);
+}
+
+.fixora-not-found-page__text {
+	margin: 0;
+	font-size: 14px;
+	color: var(--fixora-text-muted);
+}
+
+/* ── User management (P3-16) ── */
+.fixora-admin-user-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+
+	&--compact {
+		gap: 4px;
+	}
+}
+
+.fixora-admin-table-user--link {
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
+	padding: 0;
+	width: 100%;
+
+	&:hover .fixora-admin-table-user__name {
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-admin-actions-menu {
+	position: relative;
+
+	&__trigger {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		border: 1px solid var(--fixora-border);
+		@include fixora-admin-card-surface;
+		color: $admin-text-secondary;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:hover {
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-glow);
+			color: $admin-text;
+		}
+	}
+
+	&__dropdown {
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		z-index: 120;
+		min-width: 220px;
+		@include fixora-admin-card-surface;
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+		padding: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		padding: 10px 12px;
+		border: none;
+		border-radius: 8px;
+		background: transparent;
+		color: $admin-text;
+		font-size: 13px;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover:not(:disabled) {
+			background: var(--fixora-primary-soft);
+		}
+
+		&:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+
+		&--danger {
+			color: #ff7875;
+		}
+	}
+}
+
+.fixora-admin-status-menu {
+	position: relative;
+	display: inline-flex;
+
+	&__trigger {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 8px;
+
+		&:hover:not(:disabled) {
+			opacity: 0.9;
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+	}
+
+	&__chevron {
+		color: $admin-text-muted;
+		flex-shrink: 0;
+	}
+
+	&__dropdown {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		z-index: 120;
+		min-width: 140px;
+		@include fixora-admin-card-surface;
+		border: 1px solid var(--fixora-border);
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+		padding: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__item {
+		width: 100%;
+		padding: 8px 12px;
+		border: none;
+		border-radius: 8px;
+		background: transparent;
+		color: $admin-text;
+		font-size: 13px;
+		text-align: left;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--fixora-primary-soft);
+		}
+
+		&--active {
+			color: var(--fixora-primary);
+			font-weight: 600;
+		}
+	}
+}
+
+.fixora-admin-user-detail {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.fixora-admin-user-detail-header {
+	@include fixora-admin-card-surface;
+	padding: 20px 24px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+
+	&__main {
+		display: flex;
+		gap: 16px;
+		align-items: flex-start;
+	}
+
+	&__name {
+		margin: 0 0 4px;
+		font-size: 22px;
+		font-weight: 700;
+	}
+
+	&__nickname {
+		margin: 0 0 10px;
+		font-size: 13px;
+		color: $admin-text-muted;
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		align-items: center;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+}
+
+.fixora-admin-user-section-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 4px 0;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: transparent;
+
+	&__item {
+		padding: 8px 14px;
+		border-radius: 999px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+		color: $admin-text-secondary;
+		font-size: 13px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: border-color 0.15s ease, color 0.15s ease;
+
+		&--active,
+		&:hover {
+			border-color: var(--fixora-primary);
+			color: $admin-text;
+		}
+
+		&--active {
+			background: var(--fixora-primary-soft);
+		}
+	}
+}
+
+.fixora-admin-user-detail__sections {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.fixora-admin-user-section {
+	@include fixora-admin-card-surface;
+	padding: 20px 24px;
+	scroll-margin-top: 80px;
+
+	&__title {
+		margin: 0 0 16px;
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	&__subtitle {
+		margin: 20px 0 10px;
+		font-size: 14px;
+		font-weight: 600;
+		color: $admin-text-secondary;
+	}
+
+	&__bio {
+		margin: 0 0 16px;
+		font-size: 14px;
+		color: $admin-text-secondary;
+		line-height: 1.5;
+	}
+
+	&__status {
+		margin: 0 0 12px;
+		font-size: 14px;
+	}
+}
+
+.fixora-admin-user-kv {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px 24px;
+	margin: 0;
+
+	&__row {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+
+		dt {
+			font-size: 12px;
+			color: $admin-text-muted;
+			font-weight: 500;
+		}
+
+		dd {
+			margin: 0;
+			font-size: 14px;
+			color: $admin-text;
+		}
+	}
+}
+
+.fixora-admin-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 12px;
+
+	&--compact {
+		margin-bottom: 16px;
+	}
+
+	&__item {
+		padding: 12px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: rgba(255, 255, 255, 0.02);
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	&__label {
+		font-size: 11px;
+		color: $admin-text-muted;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+}
+
+.fixora-admin-user-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	&__item {
+		padding: 12px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: rgba(255, 255, 255, 0.02);
+
+		p {
+			margin: 0 0 6px;
+			font-size: 14px;
+		}
+
+		time,
+		span {
+			font-size: 12px;
+			color: $admin-text-muted;
+		}
+	}
+}
+
+.fixora-admin-gap-notice {
+	margin-top: 16px;
+	padding: 12px 14px;
+	border-radius: 10px;
+	border: 1px dashed rgba(250, 173, 20, 0.35);
+	background: rgba(250, 173, 20, 0.06);
+
+	p {
+		margin: 0;
+		font-size: 12px;
+		color: #ffc53d;
+		line-height: 1.5;
+
+		& + p {
+			margin-top: 6px;
+		}
+	}
+}
+
+.fixora-admin-muted {
+	color: $admin-text-muted;
+	font-size: 14px;
+}
+
+.fixora-admin-table-wrap--nested {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+.fixora-admin-modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	background: rgba(0, 0, 0, 0.55);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.fixora-admin-modal {
+	@include fixora-admin-card-surface;
+	width: 100%;
+	max-width: 420px;
+	padding: 24px;
+
+	&--article {
+		max-width: 720px;
+		max-height: 90vh;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+
+		&__header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 20px 24px 12px;
+			border-bottom: 1px solid var(--fixora-border-subtle);
+		}
+
+		&__body {
+			padding: 20px 24px;
+			overflow-y: auto;
+			flex: 1;
+			min-height: 0;
+		}
+
+		&__footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			padding: 16px 24px;
+			border-top: 1px solid var(--fixora-border-subtle);
+		}
+
+		&__cover-row {
+			display: flex;
+			gap: 16px;
+			align-items: flex-start;
+			margin-bottom: 16px;
+		}
+
+		&__cover {
+			width: 96px;
+			height: 96px;
+			border-radius: 12px;
+			object-fit: cover;
+			flex-shrink: 0;
+			border: 1px solid var(--fixora-border-subtle);
+		}
+
+		&__meta {
+			flex: 1;
+			min-width: 0;
+		}
+
+		&__article-title {
+			margin: 0 0 10px;
+			font-size: 18px;
+			font-weight: 600;
+			line-height: 1.35;
+		}
+
+		&__badges {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin: 10px 0;
+		}
+
+		&__stats {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			font-size: 12px;
+			color: $admin-text-muted;
+			margin-top: 8px;
+		}
+
+		&__excerpt {
+			margin: 0 0 14px;
+			font-size: 14px;
+			color: $admin-text-secondary;
+			line-height: 1.5;
+		}
+
+		&__content {
+			border-top: 1px solid var(--fixora-border-subtle);
+			padding-top: 16px;
+			font-size: 14px;
+			color: $admin-text-secondary;
+			line-height: 1.6;
+		}
+	}
+
+	&__title {
+		margin: 0 0 12px;
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	&__body {
+		margin: 0 0 16px;
+		font-size: 14px;
+		color: $admin-text-secondary;
+		line-height: 1.5;
+	}
+
+	&__input {
+		width: 100%;
+		height: 48px;
+		padding: 0 14px;
+		margin-bottom: 16px;
+		border-radius: 12px;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+		color: $admin-text;
+		font-size: 14px;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 10px;
+	}
+}
+
+/* ── Moderation articles table ── */
+.fixora-admin-article-cell {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	min-width: 0;
+	max-width: 340px;
+
+	&__thumb {
+		border-radius: 10px;
+		overflow: hidden;
+		flex-shrink: 0;
+		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-surface);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+	}
+
+	&__thumb-fallback {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $admin-text-muted;
+		background: rgba(115, 12, 30, 0.12);
+	}
+
+	&__body {
+		min-width: 0;
+		flex: 1;
+	}
+
+	&__title {
+		margin: 0 0 4px;
+		font-size: 14px;
+		font-weight: 600;
+		color: $admin-text;
+		line-height: 1.35;
+	}
+
+	&__excerpt {
+		margin: 0;
+		font-size: 12px;
+		color: $admin-text-muted;
+		line-height: 1.45;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+
+		&--empty {
+			font-style: italic;
+			opacity: 0.75;
+		}
+	}
+}
+
+.fixora-admin-author-cell {
+	&__text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	&__name {
+		font-size: 13px;
+		font-weight: 500;
+		color: $admin-text;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	&__handle {
+		font-size: 12px;
+		color: $admin-text-muted;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.fixora-admin-table-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+
+	&__btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		border: 1px solid var(--fixora-border);
+		@include fixora-admin-card-surface;
+		color: $admin-text-secondary;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+
+		&:hover:not(:disabled) {
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-glow);
+			color: $admin-text;
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+
+		&--danger:hover:not(:disabled) {
+			border-color: rgba(255, 120, 117, 0.65);
+			color: #ff7875;
+		}
+	}
 }

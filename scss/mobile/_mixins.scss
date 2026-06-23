@@ -1,0 +1,27 @@
+@import '/scss/variables.scss';
+
+@mixin fixora-mobile-container {
+	width: 100%;
+	max-width: calc(100% - 2 * var(--fixora-mobile-gutter));
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: var(--fixora-safe-left);
+	padding-right: var(--fixora-safe-right);
+}
+
+@mixin fixora-tap-target {
+	min-width: 44px;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@mixin fixora-touch-active {
+	-webkit-tap-highlight-color: transparent;
+
+	&:active {
+		opacity: 0.85;
+		transform: scale(0.97);
+	}
+}

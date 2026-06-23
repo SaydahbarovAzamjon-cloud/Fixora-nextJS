@@ -1,0 +1,41 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.fixora-booking-page {
+		max-width: 100%;
+		padding-bottom: calc(16px + var(--fixora-safe-bottom));
+
+		&__title {
+			font-size: 22px;
+			margin-bottom: 14px;
+		}
+	}
+
+	.fixora-booking {
+		gap: 16px;
+	}
+
+	.fixora-booking__device-option,
+	.fixora-booking__type-option,
+	.fixora-booking__slot {
+		min-height: 48px;
+		@include fixora-touch-active;
+	}
+
+	.fixora-booking__form-grid,
+	.fixora-booking__type-options {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-booking__actions .fixora-btn--primary,
+	.fixora-deposit-payment__pay-btn {
+		min-height: 48px;
+		width: 100%;
+		@include fixora-touch-active;
+	}
+
+	.fixora-deposit-payment {
+		padding-bottom: var(--fixora-safe-bottom);
+	}
+}

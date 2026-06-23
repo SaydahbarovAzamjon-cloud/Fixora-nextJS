@@ -45,8 +45,14 @@ async function runPaymentFlow(
 	paymentType: 'DEPOSIT' | 'FINAL',
 	paymentMethod: PaymentMethod,
 	loadPayments: (bookingId: string) => Promise<Payment[]>,
-	initiatePayment: ReturnType<typeof useMutation>[0],
-	confirmPayment: ReturnType<typeof useMutation>[0],
+	initiatePayment: (options: {
+		variables: { input: { bookingId: string; paymentMethod: PaymentMethod; paymentType: 'DEPOSIT' | 'FINAL' } };
+	}) => Promise<{ data?: { initiatePayment?: { _id?: string } } | null }>,
+	confirmPayment: (options: {
+		variables: { input: { paymentId: string; transactionId: string } };
+		refetchQueries?: Array<{ query: unknown; variables?: Record<string, unknown> }>;
+		awaitRefetchQueries?: boolean;
+	}) => Promise<{ data?: { confirmPayment?: Payment } | null }>,
 	refetchTechnicianPayments: boolean,
 ): Promise<Payment | null> {
 	const existing = await loadPayments(bookingId);
@@ -69,7 +75,8 @@ async function runPaymentFlow(
 				},
 			},
 		});
-		paymentId = initiateResult.data?.initiatePayment?._id as string | undefined;
+		const initiateData = initiateResult.data;
+		paymentId = initiateData?.initiatePayment?._id;
 		if (!paymentId) throw new Error('Payment initiation failed');
 	}
 
@@ -91,7 +98,7 @@ async function runPaymentFlow(
 		refetchQueries,
 		awaitRefetchQueries: true,
 	});
-	return (confirmResult.data?.confirmPayment as Payment) ?? null;
+	return confirmResult.data?.confirmPayment ?? null;
 }
 
 export function useBookingPayment() {
@@ -132,8 +139,8 @@ export function useBookingPayment() {
 					'DEPOSIT',
 					paymentMethod,
 					loadPayments,
-					initiatePayment,
-					confirmPayment,
+					initiatePayment as Parameters<typeof runPaymentFlow>[4],
+					confirmPayment as Parameters<typeof runPaymentFlow>[5],
 					refetchTechnicianPayments,
 				);
 			} catch (err) {
@@ -169,8 +176,8 @@ export function useBookingPayment() {
 					'FINAL',
 					paymentMethod,
 					loadPayments,
-					initiatePayment,
-					confirmPayment,
+					initiatePayment as Parameters<typeof runPaymentFlow>[4],
+					confirmPayment as Parameters<typeof runPaymentFlow>[5],
 					refetchTechnicianPayments,
 				);
 			} catch (err) {

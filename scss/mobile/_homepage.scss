@@ -1,0 +1,270 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.home-page {
+		padding-bottom: calc(24px + var(--fixora-safe-bottom));
+	}
+
+	.fixora-home-section {
+		padding: 20px 0;
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+
+		&__head {
+			margin-bottom: 14px;
+			gap: 8px;
+
+			h2 {
+				font-size: 18px;
+			}
+		}
+
+		&__view-all {
+			@include fixora-tap-target;
+			@include fixora-touch-active;
+			font-size: 13px;
+			flex-shrink: 0;
+		}
+	}
+
+	.fixora-home-arrow {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		width: 40px;
+		height: 40px;
+	}
+
+	.fixora-home-technicians {
+		.container {
+			padding: 16px 14px;
+			border-radius: 14px;
+		}
+
+		&__wrapper {
+			gap: 8px;
+		}
+
+		&__swiper--mobile .fixora-home-technicians__slide {
+			width: 240px !important;
+		}
+	}
+
+	.fixora-tech-card {
+		@include fixora-touch-active;
+	}
+
+	.fixora-home-how {
+		&__title {
+			font-size: 18px;
+			margin-bottom: 20px;
+			padding: 0 4px;
+		}
+
+		&__steps {
+			flex-direction: column;
+			align-items: center;
+			gap: 24px;
+		}
+
+		&__step {
+			width: 100%;
+			max-width: 280px;
+		}
+
+		&__arrow {
+			display: none;
+		}
+	}
+
+	.fixora-home-tips {
+		.container {
+			padding: 16px 14px;
+			border-radius: 14px;
+		}
+
+		&__grid {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 14px;
+		}
+	}
+
+	.fixora-tip-card {
+		@include fixora-touch-active;
+		padding: 14px;
+
+		&__body {
+			flex-direction: column;
+		}
+
+		&__thumb {
+			width: 100%;
+			height: 140px;
+		}
+	}
+
+	.fixora-home-testimonials {
+		padding: 20px 0 24px;
+
+		&__arrow {
+			display: none;
+		}
+
+		&__carousel {
+			gap: 0;
+		}
+
+		&__swiper {
+			padding: 16px 0 12px;
+		}
+
+		&__slide {
+			width: 88% !important;
+			opacity: 1;
+			filter: none;
+			visibility: visible;
+			pointer-events: auto;
+
+			&:not(.swiper-slide-active) {
+				opacity: 0.35;
+				filter: blur(1px) brightness(0.8);
+			}
+
+			&.swiper-slide-active .fixora-home-testimonials__slide-inner {
+				transform: scale(1) translateY(0);
+			}
+
+			&.swiper-slide-prev .fixora-home-testimonials__slide-inner,
+			&.swiper-slide-next .fixora-home-testimonials__slide-inner {
+				transform: scale(0.92) translateY(4px);
+			}
+		}
+
+		&__slide-inner {
+			padding: 0 6px;
+			transform: scale(0.92) translateY(4px);
+		}
+	}
+
+	.fixora-hero {
+		padding: 20px var(--fixora-mobile-gutter) 32px;
+
+		&__scene {
+			&::before,
+			&::after {
+				opacity: 0.5;
+			}
+		}
+
+		&__float-device,
+		&__device-backdrop {
+			display: none;
+		}
+
+		&__content {
+			gap: 14px;
+		}
+
+		&__eyebrow {
+			font-size: 11px;
+			letter-spacing: 0.1em;
+		}
+
+		&__title {
+			font-size: 30px;
+			line-height: 1.12;
+		}
+
+		&__subtitle {
+			font-size: 14px;
+			padding: 0 4px;
+		}
+
+		&__search-bar {
+			padding: 6px 6px 6px 14px;
+			border-radius: 14px;
+			max-width: 100%;
+		}
+
+		&__search-input {
+			font-size: 13px;
+		}
+
+		&__search-submit {
+			width: 44px;
+			height: 44px;
+			@include fixora-touch-active;
+		}
+
+		&__categories {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 10px;
+			width: 100%;
+		}
+
+		&__category {
+			justify-content: center;
+			padding: 12px 10px;
+			font-size: 12px;
+			@include fixora-touch-active;
+
+			&:active {
+				border-color: var(--fixora-primary);
+				transform: scale(0.98);
+			}
+		}
+
+		&__cta-wrap {
+			width: 100%;
+			max-width: 100%;
+
+			.fixora-hero__cta {
+				width: 100%;
+				justify-content: center;
+				min-height: 48px;
+				@include fixora-touch-active;
+			}
+		}
+
+		&__trust {
+			width: 100%;
+			margin-top: 8px;
+		}
+
+		&__trust-viewport {
+			mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+			-webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+		}
+
+		&__trust-item {
+			@include fixora-touch-active;
+		}
+	}
+
+	.fixora-home-stories {
+		padding: 16px 0 8px;
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+
+		&__title {
+			font-size: 16px;
+			margin-bottom: 12px;
+		}
+
+		&__row {
+			gap: 14px;
+			@include fixora-scrollbar;
+		}
+
+		.fixora-pp-story {
+			@include fixora-touch-active;
+		}
+	}
+}

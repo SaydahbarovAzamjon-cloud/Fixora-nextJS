@@ -15,6 +15,7 @@ import { Booking, Conversation, ConversationPeer } from '../../libs/types/fixora
 import { sweetErrorHandling } from '../../libs/sweetAlert';
 import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
 import usePeerMessages from '../../libs/hooks/usePeerMessages';
+import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { dedupeConversationsByPeer, resolvePeerBookingId } from '../../libs/utils/messageHelpers';
 import { compressMessageImage } from '../../libs/utils/compressMessageImage';
@@ -28,6 +29,8 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 const MessagesPage: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const screenDevice = useDeviceDetect();
+	const isMobile = screenDevice === 'mobile';
 	const apolloClient = useApolloClient();
 
 	const queryPeerId = router.query.peerId as string | undefined;
@@ -253,7 +256,7 @@ const MessagesPage: NextPage = () => {
 
 	return (
 		<div className="fixora-messages-page">
-			<div className="container fixora-messages">
+			<div className={`container fixora-messages${isMobile && selected ? ' fixora-messages--thread-open' : ''}`}>
 				<ConversationList
 					conversations={conversations}
 					selectedPeerId={selected?.peerId}
@@ -269,6 +272,7 @@ const MessagesPage: NextPage = () => {
 					currentUserImage={user?.memberImage}
 					onSend={sendHandler}
 					sending={sending}
+					onBack={isMobile && selected ? () => setSelected(null) : undefined}
 					contextBar={booking ? <ChatBookingContextBar booking={booking} device={device} /> : undefined}
 				/>
 

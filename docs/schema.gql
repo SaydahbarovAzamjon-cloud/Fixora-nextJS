@@ -17,6 +17,7 @@ input ABSearch {
 }
 
 input ACISearch {
+  authorId: String
   commentStatus: CommentStatus
   text: String
 }
@@ -138,6 +139,12 @@ type AdminReportsKpi {
   value: Float!
 }
 
+input AdminResetPasswordInput {
+  newPassword: String!
+  notifyUser: Boolean
+  userId: String!
+}
+
 type AdminSearchHit {
   _id: String!
   label: String!
@@ -149,6 +156,31 @@ type AdminTechniciansKpi {
   trendPercent: Float!
   value: Float!
   verifiedCount: Int!
+}
+
+type AdminUserBookingStats {
+  active: Int!
+  completed: Int!
+  total: Int!
+  totalSpent: Float!
+}
+
+type AdminUserDetail {
+  analytics: TechnicianAnalytics
+  articles: [Article!]!
+  bookingStats: AdminUserBookingStats!
+  clientProfile: PublicClientProfile
+  commentsByUser: [Comment!]!
+  loginHistory: [LoginHistoryItem!]!
+  moderationHistory: [UserModerationEntry!]!
+  recentBookings: [Booking!]!
+  recentPayments: [Payment!]!
+  reportsReceived: [StoryReport!]!
+  stories: [Story!]!
+  technicianReviews: [Review!]
+  user: User!
+  userReviews: [Review!]
+  verificationTimeline: [VerificationAuditEntry!]!
 }
 
 type AiClassification {
@@ -715,6 +747,31 @@ input LikedTechniciansInquiry {
   sort: String
 }
 
+input LoginHistoryInquiry {
+  direction: Direction
+  limit: Int!
+  page: Int!
+}
+
+type LoginHistoryItem {
+  _id: String!
+  authProvider: AuthProvider!
+  createdAt: DateTime!
+  ipAddress: String
+  success: Boolean!
+  userAgent: String
+  userId: String!
+}
+
+type LoginHistoryMeta {
+  total: Int!
+}
+
+type LoginHistoryPage {
+  list: [LoginHistoryItem!]!
+  metaCounter: [LoginHistoryMeta!]!
+}
+
 input LoginInput {
   userEmail: String!
   userPassword: String!
@@ -787,9 +844,26 @@ input MessagesInquiry {
   sort: String
 }
 
+enum ModerationAction {
+  BADGE_CHANGE
+  PASSWORD_RESET
+  SUSPEND
+  VERIFICATION_REVOKE
+  WARN
+}
+
+enum ModerationCategory {
+  ABUSE
+  FRAUD
+  OTHER
+  SPAM
+}
+
 type Mutation {
   acceptBooking(bookingId: String!): Booking!
   addProgressUpdate(input: AddProgressUpdateInput!): Booking!
+  addVerificationAdminNote(note: String!, userId: String!): User!
+  adminResetPassword(input: AdminResetPasswordInput!): Boolean!
   approveTechnician(userId: String!): User!
   cancelBooking(bookingId: String!): Booking!
   changePassword(input: ChangePasswordInput!): Boolean!
@@ -840,8 +914,10 @@ type Mutation {
   requestPayout(input: RequestPayoutInput!): Payout!
   resetPassword(input: ResetPasswordInput!): PasswordResetRequestResult!
   reviewStoryReport(input: ReviewStoryReportInput!): StoryReport!
+  revokeTechnicianVerification(reason: String, userId: String!): User!
   saveArticle(articleId: String!): Article!
   sendMessage(input: SendMessageInput!): Message!
+  setTechnicianBadgeLevel(badgeLevel: BadgeLevel!, userId: String!): User!
   signup(input: UserInput!): User!
   submitTechnicianVerification: User!
   subscribe(input: String!): Follower!
@@ -864,6 +940,7 @@ type Mutation {
   uploadMessageImage(file: Upload!): String!
   verify2FASetup(input: VerifyTwoFactorInput!): Boolean!
   warnTechnicianForStory(input: WarnTechnicianInput!): String!
+  warnUser(input: WarnUserInput!): UserModerationEntry!
 }
 
 input MyArticlesInquiry {
@@ -1111,6 +1188,7 @@ type Query {
   getAdminPaymentSummary: AdminPaymentSummary!
   getAdminPlatformSettings: AdminPlatformSettings!
   getAdminRecentActivity(limit: Int! = 20): [AdminActivityItem!]!
+  getAdminUserDetail(userId: String!): AdminUserDetail!
   getAllArticlesByAdmin(input: AllArticlesInquiry!): Articles!
   getAllBookingsByAdmin(input: AllBookingsInquiry!): Bookings!
   getAllCommentsByAdmin(input: AllCommentsInquiry!): Comments!
@@ -1157,6 +1235,8 @@ type Query {
   getUserFollowers(input: FollowInquiry!): Followers!
   getUserFollowings(input: FollowInquiry!): Followings!
   getUserLikedTechnicians(input: LikedTechniciansInquiry!): Users!
+  getUserLoginHistory(input: LoginHistoryInquiry!, userId: String!): LoginHistoryPage!
+  getUserModerationHistory(input: UserModerationHistoryInquiry!, userId: String!): UserModerationEntries!
   getUserPreferences: UserPreferences!
   getUserReviews(input: UserReviewsInquiry!): Reviews!
   getWalletBalance: WalletBalance!
@@ -1355,7 +1435,10 @@ type StoryReports {
 }
 
 input StoryReportsInquiry {
+  limit: Int
+  page: Int
   status: ReportStatus
+  userId: String
 }
 
 input TISearch {
@@ -1558,9 +1641,11 @@ type User {
   userStatus: UserStatus!
   userType: UserType!
   userViews: Int!
+  verificationAdminNotes: String
   verificationDocuments: [String!]
   verificationRejectionReason: String
   verificationStatus: VerificationStatus!
+  verificationTimeline: [VerificationAuditEntry!]
   workingHours: UserWorkingHours
   yearsExperience: Int!
 }
@@ -1572,6 +1657,31 @@ input UserInput {
   userPassword: String!
   userPhoneNumber: String!
   userType: UserType!
+}
+
+type UserModerationEntries {
+  list: [UserModerationEntry!]!
+  metaCounter: [UserModerationMeta!]!
+}
+
+type UserModerationEntry {
+  _id: String!
+  action: ModerationAction!
+  adminData: User
+  adminId: String!
+  category: ModerationCategory
+  createdAt: DateTime!
+  reason: String!
+  userId: String!
+}
+
+input UserModerationHistoryInquiry {
+  limit: Int!
+  page: Int!
+}
+
+type UserModerationMeta {
+  total: Int!
 }
 
 type UserPreferences {
@@ -1671,6 +1781,21 @@ input UsersInquiry {
   sort: String
 }
 
+enum VerificationAuditAction {
+  APPROVED
+  NOTE
+  REJECTED
+  REVOKED
+  SUBMITTED
+}
+
+type VerificationAuditEntry {
+  action: VerificationAuditAction!
+  adminId: String
+  createdAt: DateTime!
+  note: String
+}
+
 enum VerificationStatus {
   APPROVED
   NONE
@@ -1695,4 +1820,10 @@ type WalletBalance {
 input WarnTechnicianInput {
   reason: String!
   storyId: String!
+}
+
+input WarnUserInput {
+  category: ModerationCategory
+  reason: String!
+  userId: String!
 }

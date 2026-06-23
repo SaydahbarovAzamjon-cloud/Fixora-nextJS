@@ -26,13 +26,23 @@ import {
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
-		...(await serverSideTranslations(locale ?? 'en', ['common'])),
+		...(await serverSideTranslations(locale ?? 'en', ['common', 'technician'])),
 	},
 });
 
 const parseSettingsSection = (section: string | string[] | undefined): ClientSettingsSection => {
 	const value = Array.isArray(section) ? section[0] : section;
-	const allowed: ClientSettingsSection[] = ['menu', 'profile', 'security', 'payment', 'notifications', 'location'];
+	const allowed: ClientSettingsSection[] = [
+		'menu',
+		'profile',
+		'account',
+		'security',
+		'payment',
+		'notifications',
+		'preferences',
+		'location',
+		'delete',
+	];
 	return allowed.includes(value as ClientSettingsSection) ? (value as ClientSettingsSection) : 'menu';
 };
 

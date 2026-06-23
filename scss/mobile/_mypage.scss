@@ -1,0 +1,123 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.fixora-mypage-page {
+		padding: 12px 0 calc(24px + var(--fixora-safe-bottom));
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+	}
+
+	.fixora-mypage {
+		gap: 14px;
+	}
+
+	.fixora-mypage__header {
+		flex-direction: column;
+		align-items: stretch;
+		padding: 16px;
+		gap: 16px;
+	}
+
+	.fixora-mypage__identity {
+		width: 100%;
+	}
+
+	.fixora-mypage__stats {
+		width: 100%;
+		justify-content: space-around;
+		gap: 12px;
+	}
+
+	.fixora-mypage__stat strong {
+		font-size: 18px;
+	}
+
+	.fixora-mypage__tabs {
+		overflow-x: auto;
+		flex-wrap: nowrap;
+		gap: 4px;
+		padding-bottom: 2px;
+		@include fixora-scrollbar;
+
+		&::-webkit-scrollbar {
+			height: 4px;
+		}
+	}
+
+	.fixora-mypage__tab {
+		flex: 0 0 auto;
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		padding: 10px 14px;
+		font-size: 13px;
+		white-space: nowrap;
+	}
+
+	.fixora-mypage__request,
+	.fixora-mypage__following,
+	.fixora-mypage__saved-card,
+	.fixora-mypage__device-card {
+		@include fixora-touch-active;
+	}
+
+	.fixora-mypage__request {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.fixora-mypage__request-main {
+		width: 100%;
+	}
+
+	.fixora-mypage__request-actions {
+		width: 100%;
+		flex-direction: column;
+		gap: 8px;
+
+		.fixora-btn,
+		a {
+			width: 100%;
+			min-height: 44px;
+		}
+	}
+
+	.fixora-notifications-page {
+		padding: 12px 0 calc(24px + var(--fixora-safe-bottom));
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+		}
+	}
+
+	.fixora-notifications {
+		max-height: none;
+		padding: 14px;
+		border-radius: 14px;
+	}
+
+	.fixora-notifications__item {
+		@include fixora-touch-active;
+		min-height: 56px;
+	}
+
+	.fixora-notifications__mark-read,
+	.fixora-notifications__mark-all,
+	.fixora-notifications__load-more {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+	}
+
+	.fixora-booking-detail-page {
+		padding-bottom: calc(24px + var(--fixora-safe-bottom));
+
+		.container {
+			@include fixora-mobile-container;
+		}
+	}
+}

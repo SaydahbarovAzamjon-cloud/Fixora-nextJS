@@ -1,0 +1,79 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+/* PM-12 — mobile QA: touch targets, active states, landscape */
+
+#mobile-wrap {
+	// Replace hover-only affordances with touch feedback
+	.fixora-home-arrow:active,
+	.fixora-tip-card:active,
+	.fixora-tech-card:active,
+	.fixora-result-card:active,
+	.fixora-community__feed-card:active {
+		opacity: 0.92;
+		transform: scale(0.99);
+	}
+
+	// Pagination tap targets
+	.MuiPaginationItem-root {
+		min-width: 40px;
+		min-height: 40px;
+	}
+
+	// Prevent horizontal page scroll
+	body {
+		overflow-x: hidden;
+	}
+
+	// Form inputs — 16px prevents iOS zoom on focus
+	input,
+	textarea,
+	select {
+		font-size: 16px;
+	}
+}
+
+@media (max-width: $fixora-bp-phone) and (orientation: landscape) {
+	#mobile-wrap {
+		.fixora-hero {
+			padding-top: 12px;
+			padding-bottom: 20px;
+
+			&__title {
+				font-size: 24px;
+			}
+		}
+
+		.fixora-messages-page {
+			height: auto;
+			min-height: calc(100dvh - 48px);
+		}
+
+		.fixora-technician-mobile .fixora-msg-page {
+			height: calc(100dvh - 100px);
+			min-height: 240px;
+		}
+
+		.fixora-tech-mobile-nav {
+			padding-top: 4px;
+			padding-bottom: calc(4px + var(--fixora-safe-bottom));
+
+			&__item {
+				flex-direction: row;
+				gap: 6px;
+				font-size: 11px;
+			}
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#mobile-wrap {
+		.fixora-nav-mobile__drawer,
+		.fixora-search__sidebar--drawer,
+		.fixora-tech-mobile-more__sheet {
+			animation: none;
+			transition: none;
+		}
+	}
+}

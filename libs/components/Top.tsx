@@ -10,13 +10,15 @@ import Link from 'next/link';
 import { FixoraLogo } from './brand';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import { Logout } from '@mui/icons-material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 import { isTechnicianUser } from '../utils/userRole';
 import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute';
-import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../apollo/user/notification';
+import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
@@ -37,6 +39,7 @@ const Top = () => {
 	const [logoutAnchor, setLogoutAnchor] = useState<null | HTMLElement>(null);
 	const logoutOpen = Boolean(logoutAnchor);
 	const [notifOpen, setNotifOpen] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
 	const notifRef = useRef<HTMLDivElement>(null);
 	const navPollMs = useRealtimePollInterval(30000);
 
@@ -77,6 +80,7 @@ const Top = () => {
 	);
 
 	const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
+	const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -110,6 +114,21 @@ const Top = () => {
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, [notifOpen]);
 
+	useEffect(() => {
+		if (!menuOpen) return;
+		const previousOverflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.body.style.overflow = previousOverflow;
+		};
+	}, [menuOpen]);
+
+	useEffect(() => {
+		const closeMenu = () => setMenuOpen(false);
+		router.events.on('routeChangeStart', closeMenu);
+		return () => router.events.off('routeChangeStart', closeMenu);
+	}, [router.events]);
+
 	/** HANDLERS **/
 	const langChoice = useCallback(
 		async (locale: string) => {
@@ -129,6 +148,15 @@ const Top = () => {
 		}
 	}, [router.pathname]);
 
+	const handleNotificationDelete = async (notification: Notification) => {
+		try {
+			await deleteNotification({ variables: { notificationId: notification._id } });
+			await Promise.all([refetchNotifications(), refetchUnreadCount()]);
+		} catch {
+			/* ignore */
+		}
+	};
+
 	const handleNotificationClick = async (notification: Notification) => {
 		setNotifOpen(false);
 		if (!notification.isRead) {
@@ -145,53 +173,62 @@ const Top = () => {
 
 	const homeHref = isTechnician ? '/technician/dashboard' : '/';
 
-	const navLinks = (
+	const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+	const linkClass = (active: boolean, drawer = false) =>
+		drawer
+			? `fixora-nav-mobile__drawer-link${active ? ' fixora-nav-mobile__drawer-link--active' : ''}`
+			: `fixora-nav__link${active ? ' fixora-nav__link--active' : ''}`;
+
+	const renderNavLinks = (drawer = false, onNavigate?: () => void) => (
 		<>
 			{!isTechnician && (
-				<Link href={'/'} className={`fixora-nav__link ${isActive('/') ? 'fixora-nav__link--active' : ''}`}>
+				<Link href={'/'} className={linkClass(isActive('/'), drawer)} onClick={onNavigate}>
 					{t('nav.home')}
 				</Link>
 			)}
 			<Link
 				href={'/technicians'}
-				className={`fixora-nav__link ${isActive('/technicians') ? 'fixora-nav__link--active' : ''}`}
+				className={linkClass(isActive('/technicians'), drawer)}
+				onClick={onNavigate}
 			>
 				{t('nav.technicians')}
 			</Link>
-			<Link
-				href={'/search'}
-				className={`fixora-nav__link ${isActive('/search') ? 'fixora-nav__link--active' : ''}`}
-			>
+			<Link href={'/search'} className={linkClass(isActive('/search'), drawer)} onClick={onNavigate}>
 				{t('nav.services')}
 			</Link>
 			<Link
 				href={'/community?articleCategory=FREE'}
-				className={`fixora-nav__link ${isActive('/community') ? 'fixora-nav__link--active' : ''}`}
+				className={linkClass(isActive('/community'), drawer)}
+				onClick={onNavigate}
 			>
 				{t('nav.community')}
 			</Link>
-			{user?._id && (
-				isTechnician ? (
+			{user?._id &&
+				(isTechnician ? (
 					<Link
 						href={'/technician/dashboard'}
-						className={`fixora-nav__link ${isActive('/technician') ? 'fixora-nav__link--active' : ''}`}
+						className={linkClass(isActive('/technician'), drawer)}
+						onClick={onNavigate}
 					>
 						{t('nav.dashboard')}
 					</Link>
 				) : (
 					<Link
 						href={CLIENT_MY_PAGE}
-						className={`fixora-nav__link ${isClientMyPageRoute(router.pathname) ? 'fixora-nav__link--active' : ''}`}
+						className={linkClass(isClientMyPageRoute(router.pathname), drawer)}
+						onClick={onNavigate}
 					>
 						{t('nav.myPage')}
 					</Link>
-				)
-			)}
+				))}
 		</>
 	);
 
-	const langToggle = (
-		<div className="fixora-nav__lang">
+	const navLinks = renderNavLinks();
+
+	const langToggle = (compact = false) => (
+		<div className={compact ? 'fixora-nav-mobile__lang' : 'fixora-nav__lang'}>
 			{LANGS.map((code, idx) => (
 				<React.Fragment key={code}>
 					{idx > 0 && <span className="fixora-nav__lang-divider">|</span>}
@@ -208,29 +245,119 @@ const Top = () => {
 	);
 
 	if (device == 'mobile') {
+		const messagesHref = isTechnician ? '/technician/messages' : '/messages';
+		const notificationsHref = isTechnician ? '/technician/notifications' : '/notifications';
+
 		return (
-			<Stack className={'top fixora-nav--mobile'}>
-				<Link href={homeHref} onClick={goHome} className="fixora-nav__logo-link">
-					<FixoraLogo size="md" className="fixora-nav__logo" />
-				</Link>
-				<NavSearchInput compact />
-				<div className="fixora-nav__links">{navLinks}</div>
-				{user?._id && (
-					<button
-						type="button"
-						className={'fixora-nav__avatar'}
-						onClick={(event) => setLogoutAnchor(event.currentTarget)}
-					>
-						<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
-					</button>
+			<>
+				<Stack className={'top fixora-nav--mobile'}>
+					<div className="fixora-nav-mobile__bar">
+						<button
+							type="button"
+							className="fixora-nav-mobile__menu-btn"
+							onClick={() => setMenuOpen(true)}
+							aria-label={t('nav.openMenu')}
+							aria-expanded={menuOpen}
+						>
+							<MenuIcon />
+						</button>
+
+						<Link href={homeHref} onClick={goHome} className="fixora-nav-mobile__logo-link fixora-nav__logo-link">
+							<FixoraLogo size="md" className="fixora-nav__logo" />
+						</Link>
+
+						<div className="fixora-nav-mobile__actions">
+							{langToggle(true)}
+
+							{user?._id ? (
+								<>
+									<Link href={messagesHref} className="fixora-nav-mobile__icon-link">
+										<ChatBubbleOutlineIcon className="fixora-nav__bell" />
+										{unreadMessages > 0 && <span className="fixora-nav__badge">{unreadMessages}</span>}
+									</Link>
+									<Link href={notificationsHref} className="fixora-nav-mobile__icon-link">
+										<NotificationsOutlinedIcon className="fixora-nav__bell" />
+										{unreadNotifications > 0 && (
+											<span className="fixora-nav__badge">{unreadNotifications}</span>
+										)}
+									</Link>
+									<button
+										type="button"
+										className="fixora-nav-mobile__avatar"
+										onClick={(event) => setLogoutAnchor(event.currentTarget)}
+									>
+										<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+									</button>
+								</>
+							) : (
+								<>
+									<Link href={'/login'} className="fixora-nav-mobile__login">
+										{t('nav.login')}
+									</Link>
+									<Link href={'/search'} className="fixora-nav-mobile__cta">
+										{t('nav.findTechnician')}
+									</Link>
+								</>
+							)}
+						</div>
+					</div>
+				</Stack>
+
+				{menuOpen && (
+					<>
+						<button
+							type="button"
+							className="fixora-nav-mobile__backdrop"
+							onClick={closeMenu}
+							aria-label={t('nav.closeMenu')}
+						/>
+						<aside className="fixora-nav-mobile__drawer" role="dialog" aria-modal="true" aria-label={t('nav.menu')}>
+							<div className="fixora-nav-mobile__drawer-head">
+								<p className="fixora-nav-mobile__drawer-title">{t('nav.menu')}</p>
+								<button
+									type="button"
+									className="fixora-nav-mobile__drawer-close"
+									onClick={closeMenu}
+									aria-label={t('nav.closeMenu')}
+								>
+									<CloseIcon />
+								</button>
+							</div>
+
+							<div className="fixora-nav-mobile__drawer-search">
+								<NavSearchInput compact />
+							</div>
+
+							<nav className="fixora-nav-mobile__drawer-nav">
+								{renderNavLinks(true, closeMenu)}
+							</nav>
+
+							{user?._id && (
+								<div className="fixora-nav-mobile__drawer-footer">
+									<button
+										type="button"
+										className="fixora-nav-mobile__drawer-logout"
+										onClick={() => {
+											closeMenu();
+											logOut();
+										}}
+									>
+										<Logout fontSize="small" />
+										{t('nav.logout')}
+									</button>
+								</div>
+							)}
+						</aside>
+					</>
 				)}
+
 				<Menu anchorEl={logoutAnchor} open={logoutOpen} onClose={() => setLogoutAnchor(null)} sx={{ mt: '5px' }}>
 					<MenuItem onClick={() => logOut()}>
 						<Logout fontSize="small" style={{ marginRight: '10px' }} />
 						{t('nav.logout')}
 					</MenuItem>
 				</Menu>
-			</Stack>
+			</>
 		);
 	}
 
@@ -251,7 +378,7 @@ const Top = () => {
 					<NavSearchInput />
 
 					<Box component={'div'} className={'fixora-nav__actions'}>
-						{langToggle}
+						{langToggle()}
 
 						{user?._id ? (
 							<>
@@ -272,6 +399,7 @@ const Top = () => {
 										<NotificationDropdown
 											notifications={recentNotifications}
 											onItemClick={handleNotificationClick}
+											onDelete={handleNotificationDelete}
 											onViewAll={() => setNotifOpen(false)}
 											viewAllHref={isTechnician ? '/technician/notifications' : '/notifications'}
 										/>

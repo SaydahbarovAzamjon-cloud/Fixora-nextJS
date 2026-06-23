@@ -4,7 +4,7 @@
 > Update after each task: `⬜ Todo` · `🔄 In Progress` · `✅ Done` · `⏸ Blocked`  
 > **Cursor and Codex:** keep this in sync with `AI_HANDOFF.md`.
 
-**Last updated:** 2026-06-21
+**Last updated:** 2026-06-23
 
 **Roadmap order:** Phase 0 → 1 → 2 (desktop pages) → **3 (mobile)** → 4 (migration) → 5 (light theme)
 
@@ -63,18 +63,18 @@
 
 | ID | Task | Status | Depends on | Notes |
 |----|------|--------|------------|-------|
-| PM-01 | Mobile foundation | ⬜ Todo | P3-02 ✅ | Breakpoints (992 / 768 / 639), `scss/mobile/` Fixora tokens, shared mixins from `scss/pc/`, safe-area vars |
-| PM-02 | Global shell — navbar + footer | ⬜ Todo | PM-01, P3-04 ✅ | `Top.tsx` mobile: EN\|KR, Log in, Find Technician, bell, avatar, opaque bar, hamburger/drawer if needed |
-| PM-03 | Auth mobile | ⬜ Todo | PM-02, P3-03 ✅ | Single-column per `auth-flow-wireframe.png`; upload previews, role cards, onboarding steps |
-| PM-04 | Homepage mobile | ⬜ Todo | PM-02, P3-04 ✅ | Hero typography/padding, category chips, trust marquee, sections stack, testimonials 1-col |
-| PM-05 | Search + Technician Profile mobile | ⬜ Todo | PM-02, P3-05 | Filters drawer, result cards, profile gallery + CTA sticky bottom |
-| PM-06 | Booking flow mobile | ⬜ Todo | PM-02, P3-06 | Stepper, device form, KakaoPay CTA, deposit summary |
-| PM-07 | Messages mobile | ⬜ Todo | PM-02, P3-07 | Conversation list + thread full-screen; phone hidden until ACCEPTED |
-| PM-08 | My Page + Notifications mobile | ⬜ Todo | PM-02, P3-08 ✅ | Tabs, booking cards, notification list |
-| PM-09 | Community + Post Detail mobile | ⬜ Todo | PM-02, P3-10 | Feed cards, article detail, comments |
-| PM-10 | Technician dashboard mobile | ⬜ Todo | PM-02, P3-09 | Sidebar → drawer/bottom nav; requests/jobs cards |
-| PM-11 | Admin mobile (minimal) | ⬜ Todo | PM-02, P3-15 | Read-only tables OK; verification queue usable on phone |
-| PM-12 | Mobile QA pass | ⬜ Todo | PM-03–PM-11 | Touch targets ≥44px, `:active` states, no hover-only UX, landscape, iOS/Android smoke |
+| PM-01 | Mobile foundation | ✅ Done | Breakpoints 992/768/639 in `scss/variables.scss`; `scss/mobile/_breakpoints.scss`, `_mixins.scss`, `_foundation.scss`, `_footer.scss`; Nestar legacy removed from `main.scss` |
+| PM-02 | Global shell — navbar + footer | ✅ Done | `Top.tsx` hamburger drawer; EN\|KR, Log in, Find Technician (guest); bell/chat/avatar (auth); `scss/mobile/_navbar.scss` |
+| PM-03 | Auth mobile | ✅ Done | `scss/mobile/_auth.scss`; upload image previews in tech onboarding/id |
+| PM-04 | Homepage mobile | ✅ Done | `scss/mobile/_homepage.scss` — hero, sections, testimonials, stories |
+| PM-05 | Search + Technician Profile mobile | ✅ Done | Filter drawer on `/search`; sticky book CTA on profile; `scss/mobile/_search.scss` |
+| PM-06 | Booking flow mobile | ✅ Done | `scss/mobile/_booking.scss` — touch targets, single-column forms |
+| PM-07 | Messages mobile | ✅ Done | Full-screen list/thread toggle; back button; `scss/mobile/_messages.scss` |
+| PM-08 | My Page + Notifications mobile | ✅ Done | `scss/mobile/_mypage.scss` — scrollable tabs, booking cards |
+| PM-09 | Community + Post Detail mobile | ✅ Done | `scss/mobile/_community.scss` — feed cards, post detail |
+| PM-10 | Technician dashboard mobile | ✅ Done | `TechnicianMobileBottomNav` + header; `scss/mobile/_technician.scss` incl. `/technician/messages` list/thread toggle |
+| PM-11 | Admin mobile (minimal) | ✅ Done | `scss/mobile/_admin.scss` — table scroll, touch targets |
+| PM-12 | Mobile QA pass | ✅ Done | `scss/mobile/_qa.scss` — touch/active, landscape, iOS input zoom fix; viewport `matchMedia` hook + `_document` bootstrap |
 
 **Execution order:** PM-01 → PM-02 → then **PM-03 → PM-04 → … → PM-11** (same order as P3 routes).  
 **Early start OK:** PM-01, PM-02, PM-03, PM-04 can begin before P3-10 — PM-05+ blocked until matching P3-xx is ✅ Done.
@@ -94,6 +94,12 @@
 | P3-15b | Technician verification queue | ✅ Done | `/_admin/verification` — GAP-074 for extra filters |
 | P3-15c | Users + Bookings lists | ✅ Done | `/_admin/users`, `/_admin/bookings` |
 | P3-15d | Community moderation | ✅ Done | `/_admin/moderation` — GAP-075 for comments tab |
+| P3-15e | Admin design system parity | ✅ Done | Customer burgundy tokens + card surfaces across all `/_admin/*`; GAP-078 notifications |
+| P3-16 | Admin user management rework | ✅ Done | `/_admin/users/[id]` privileged dashboard; row actions; badges; GAP-101…109 |
+| P3-16a | Route + list actions + badges | ✅ Done | `AdminUserActionsMenu`, `AdminUserBadgeStack` |
+| P3-16b | User detail shell + wired sections | ✅ Done | Overview, Performance, Financial, Content, Verification |
+| P3-16c | Action modals + deep links | ✅ Done | Suspend/activate/delete; bookings/payments `?userId=` |
+| P3-16d | GAP docs + badge parity | ✅ Done | Verification queue + dashboard widgets |
 
 ---
 
@@ -119,10 +125,10 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** **PM-01** mobile foundation OR desktop QA pass (FixoraB API required)
+**Next task:** **P3-13** Apollo migration (remaining) OR **Phase 5** polish — **Phase 3 mobile PM-01…PM-12 ✅** · **production build ✅**
 
 **Backend wiring:** Phase 0–4 ✅ — `docs/FIXORAF_SYNC.md`
 
-**Desktop gap checklist (Phase 2):** P3-14 ✅ · P3-07b ✅ · Backend gaps wired ✅ · **PM-01+ deferred** until user approves mobile phase
+**Desktop gap checklist (Phase 2):** P3-14 ✅ · P3-07b ✅ · Backend gaps wired ✅ · **Phase 3 mobile PM-01…PM-12 ✅**
 
 See `AI_HANDOFF.md` for last agent and session notes.

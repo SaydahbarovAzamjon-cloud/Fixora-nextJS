@@ -6,7 +6,10 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Stack, Pagination } from '@mui/material';
+import TuneIcon from '@mui/icons-material/Tune';
+import CloseIcon from '@mui/icons-material/Close';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import SearchHero from '../../libs/components/search/SearchHero';
 import SearchCategoryRow from '../../libs/components/search/SearchCategoryRow';
 import SearchFilters from '../../libs/components/search/SearchFilters';
@@ -51,7 +54,10 @@ const SearchPage: NextPage = () => {
 	const [locationLabel, setLocationLabel] = useState('');
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [mapExpanded, setMapExpanded] = useState(false);
+	const [filtersOpen, setFiltersOpen] = useState(false);
 	const [selectedMapTechnicianId, setSelectedMapTechnicianId] = useState<string | null>(null);
+	const device = useDeviceDetect();
+	const isMobile = device === 'mobile';
 	const user = useReactiveVar(userVar);
 
 	/** APOLLO REQUESTS **/
@@ -119,6 +125,21 @@ const SearchPage: NextPage = () => {
 	const total = data?.getTechnicians?.metaCounter?.[0]?.total ?? 0;
 
 	useEffect(() => {
+		if (!filtersOpen) return;
+		const previousOverflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.body.style.overflow = previousOverflow;
+		};
+	}, [filtersOpen]);
+
+	useEffect(() => {
+		const closeFilters = () => setFiltersOpen(false);
+		router.events.on('routeChangeStart', closeFilters);
+		return () => router.events.off('routeChangeStart', closeFilters);
+	}, [router.events]);
+
+	useEffect(() => {
 		if (!router.query.input) return;
 		try {
 			const parsed = JSON.parse(router.query.input as string) as TechniciansInquiry;
@@ -162,7 +183,31 @@ const SearchPage: NextPage = () => {
 				)}
 
 				<Stack className={`fixora-search__layout${mapExpanded ? ' fixora-search__layout--map-expanded' : ''}`}>
-					<Stack className="fixora-search__sidebar">
+					{isMobile && filtersOpen && (
+						<button
+							type="button"
+							className="fixora-search__filters-backdrop"
+							onClick={() => setFiltersOpen(false)}
+							aria-label={t('search.filters.close')}
+						/>
+					)}
+
+					<Stack
+						className={`fixora-search__sidebar${isMobile ? ' fixora-search__sidebar--drawer' : ''}${filtersOpen ? ' fixora-search__sidebar--open' : ''}`}
+					>
+						{isMobile && (
+							<div className="fixora-search__filters-drawer-head">
+								<strong>{t('search.filters.title')}</strong>
+								<button
+									type="button"
+									className="fixora-search__filters-close"
+									onClick={() => setFiltersOpen(false)}
+									aria-label={t('search.filters.close')}
+								>
+									<CloseIcon />
+								</button>
+							</div>
+						)}
 						<LocationCard
 							locationLabel={locationLabel || t('search.location.placeholder')}
 							searchFilter={searchFilter}
@@ -176,6 +221,17 @@ const SearchPage: NextPage = () => {
 					</Stack>
 
 					<Stack className="fixora-search__results">
+						{isMobile && !mapExpanded && (
+							<button
+								type="button"
+								className="fixora-search__filters-toggle"
+								onClick={() => setFiltersOpen(true)}
+							>
+								<TuneIcon fontSize="small" />
+								{t('search.filters.title')}
+							</button>
+						)}
+
 						<SearchResultsHeader
 							total={total}
 							searchFilter={searchFilter}

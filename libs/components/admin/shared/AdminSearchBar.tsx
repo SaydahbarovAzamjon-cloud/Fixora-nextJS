@@ -10,16 +10,18 @@ interface AdminSearchBarProps {
 }
 
 const AdminSearchBar: React.FC<AdminSearchBarProps> = ({ value, onChange, placeholder, className = '', disabled }) => (
-	<div className={`fixora-admin-search ${className}`.trim()}>
-		<Search size={16} className="fixora-admin-search__icon" />
-		<input
-			type="search"
-			className="fixora-admin-search__input"
-			placeholder={placeholder}
-			value={value}
-			onChange={(e) => onChange(e.target.value)}
-			disabled={disabled}
-		/>
+	<div className={`fixora-admin-search fixora-input ${className}`.trim()}>
+		<div className="fixora-input__field fixora-admin-search__field">
+			<Search size={16} className="fixora-input__icon" />
+			<input
+				type="search"
+				className="fixora-input__control fixora-admin-search__input"
+				placeholder={placeholder}
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				disabled={disabled}
+			/>
+		</div>
 	</div>
 );
 

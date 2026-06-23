@@ -9,6 +9,7 @@ import { isAdminUser } from '../../utils/userRole';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import AdminSidebar from '../admin/AdminSidebar';
+import AdminForbidden from '../admin/AdminForbidden';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 const adminTheme = createTheme(fixoraDark as ThemeOptions);
@@ -26,7 +27,7 @@ const withAdminLayout = <P extends object>(
 		const router = useRouter();
 		const user = useReactiveVar(userVar);
 		const device = useDeviceDetect();
-		const [loading, setLoading] = React.useState(true);
+		const [authChecked, setAuthChecked] = useState(false);
 		const [sidebarOpen, setSidebarOpen] = useState(false);
 
 		useEffect(() => {
@@ -36,16 +37,23 @@ const withAdminLayout = <P extends object>(
 				return;
 			}
 			updateUserInfo(jwt);
-			setLoading(false);
-		}, [router.asPath]);
+			setAuthChecked(true);
+		}, [router.asPath, router]);
 
-		useEffect(() => {
-			if (!loading && user?._id && !isAdminUser(user)) {
-				router.replace('/').then();
-			}
-		}, [loading, user, router]);
+		if (!authChecked) return null;
 
-		if (loading || !user?._id || !isAdminUser(user)) return null;
+		const jwt = getJwtToken();
+		if (!jwt) return null;
+
+		if (user?._id && !isAdminUser(user)) {
+			return (
+				<ThemeProvider theme={adminTheme}>
+					<AdminForbidden />
+				</ThemeProvider>
+			);
+		}
+
+		if (!user?._id) return null;
 
 		const headTitle = pageMeta?.title ? `Fixora Admin — ${pageMeta.title}` : 'Fixora Admin Console';
 

@@ -19,6 +19,7 @@ import { logOut } from '../../auth';
 import { FixoraLogo } from '../brand';
 import { useAdminBadges } from '../../hooks/useAdminBadges';
 import { displayUserName } from '../../hooks/useUserLookup';
+import AdminAvatar from './AdminAvatar';
 
 const ICON_SIZE = 18;
 
@@ -41,7 +42,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
 	const { verificationCount, moderationCount } = useAdminBadges();
 
 	const displayName = displayUserName(user as Parameters<typeof displayUserName>[0]) || t('nav.admin');
-	const initials = displayName.charAt(0).toUpperCase();
+	const profileImage = user?.memberImage || (user as { userProfileImage?: string | null })?.userProfileImage;
 
 	const navItems: NavItem[] = [
 		{ id: 'dashboard', icon: <LayoutDashboard size={ICON_SIZE} />, labelKey: 'nav.dashboard', route: '/_admin' },
@@ -109,7 +110,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
 
 			<div className="fixora-admin-sidebar__footer">
 				<div className="fixora-admin-sidebar__profile">
-					<div className="fixora-admin-sidebar__avatar">{initials}</div>
+					<AdminAvatar image={profileImage} name={displayName} size="md" className="fixora-admin-sidebar__avatar" />
 					<div className="fixora-admin-sidebar__profile-info">
 						<span className="fixora-admin-sidebar__profile-name">{displayName}</span>
 						<span className="fixora-admin-sidebar__profile-role">{t('nav.superAdmin')}</span>

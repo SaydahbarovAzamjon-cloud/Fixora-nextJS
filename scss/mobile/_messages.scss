@@ -1,0 +1,79 @@
+@import '/scss/variables.scss';
+@import 'mixins';
+
+#mobile-wrap {
+	.fixora-messages-page {
+		padding: 12px 0 calc(16px + var(--fixora-safe-bottom));
+		height: calc(100dvh - 64px);
+		box-sizing: border-box;
+
+		.container {
+			@include fixora-mobile-container;
+			max-width: 100%;
+			height: 100%;
+		}
+	}
+
+	.fixora-messages {
+		flex-direction: column;
+		gap: 0;
+		height: 100%;
+		min-height: 0;
+		max-height: none;
+	}
+
+	.fixora-messages__sidebar,
+	.fixora-messages__thread,
+	.fixora-messages__details {
+		border-radius: 14px;
+	}
+
+	.fixora-messages__sidebar,
+	.fixora-messages__thread {
+		flex: 1 1 auto;
+		width: 100%;
+		min-height: 0;
+	}
+
+	.fixora-messages__details {
+		display: none;
+	}
+
+	.fixora-messages:not(.fixora-messages--thread-open) .fixora-messages__thread {
+		display: none;
+	}
+
+	.fixora-messages--thread-open .fixora-messages__sidebar {
+		display: none;
+	}
+
+	.fixora-messages__conversation,
+	.fixora-messages__thread-back,
+	.fixora-messages__send-btn,
+	.fixora-messages__attach,
+	.fixora-messages__emoji-btn {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+	}
+
+	.fixora-messages__thread-header {
+		gap: 8px;
+	}
+
+	.fixora-messages__thread-back {
+		flex-shrink: 0;
+		border: none;
+		background: transparent;
+		color: var(--fixora-text-primary);
+		cursor: pointer;
+		padding: 0;
+	}
+
+	.fixora-messages__expand {
+		display: none;
+	}
+
+	.fixora-messages__composer {
+		padding-bottom: calc(8px + var(--fixora-safe-bottom));
+	}
+}

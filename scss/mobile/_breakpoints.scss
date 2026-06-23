@@ -1,0 +1,25 @@
+@import '/scss/variables.scss';
+
+@mixin fixora-below-tablet {
+	@media (max-width: $fixora-bp-tablet) {
+		@content;
+	}
+}
+
+@mixin fixora-below-sm-tablet {
+	@media (max-width: $fixora-bp-sm-tablet) {
+		@content;
+	}
+}
+
+@mixin fixora-below-phone {
+	@media (max-width: $fixora-bp-phone) {
+		@content;
+	}
+}
+
+@mixin fixora-above-phone {
+	@media (min-width: #{$fixora-bp-phone + 1}) {
+		@content;
+	}
+}

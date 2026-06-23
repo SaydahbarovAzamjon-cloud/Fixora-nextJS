@@ -9,17 +9,18 @@ import { adminPageProps } from '../../../libs/i18n/adminPageProps';
 import AdminHeader from '../../../libs/components/admin/AdminHeader';
 import AdminFilterTabs from '../../../libs/components/admin/shared/AdminFilterTabs';
 import AdminStatusBadge from '../../../libs/components/admin/shared/AdminStatusBadge';
-import { GET_ALL_ARTICLES_BY_ADMIN, GET_ALL_COMMENTS_BY_ADMIN, GET_STORY, GET_STORY_REPORTS } from '../../../apollo/admin/query';
+import AdminModerationArticlesTab from '../../../libs/components/admin/moderation/AdminModerationArticlesTab';
+import { GET_ALL_COMMENTS_BY_ADMIN, GET_STORY, GET_STORY_REPORTS } from '../../../apollo/admin/query';
 import {
-	REMOVE_ARTICLE_BY_ADMIN,
 	REMOVE_COMMENT_BY_ADMIN,
 	REMOVE_STORY,
 	REVIEW_STORY_REPORT,
 	WARN_TECHNICIAN_FOR_STORY,
 	UPDATE_USER_BY_ADMIN,
 } from '../../../apollo/admin/mutation';
-import type { AdminArticle, AdminComment, StoryReport } from '../../../libs/types/admin/admin';
+import type { AdminComment, StoryReport } from '../../../libs/types/admin/admin';
 import { displayUserName } from '../../../libs/hooks/useUserLookup';
+import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import { dateLocale } from '../../../libs/utils/i18nLocale';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 
@@ -51,25 +52,23 @@ const StoryReportCard: React.FC<{ report: StoryReport; onDone: () => void }> = (
 
 	return (
 		<div className="fixora-admin-moderation-card">
-			<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-				<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+			<div className="fixora-admin-moderation-card__header">
+				<div className="fixora-admin-moderation-card__author">
 					<div className="fixora-admin-table-user__avatar">
 						{displayUserName(story?.userData).charAt(0)}
 					</div>
 					<strong>{displayUserName(story?.userData)}</strong>
 				</div>
 				{story?.expiresAt && (
-					<span style={{ fontSize: 12, color: 'var(--fixora-text-muted)' }}>
+					<span className="fixora-admin-verification__list-meta">
 						{new Date(story.expiresAt).toLocaleString(dateLocale(router.locale))}
 					</span>
 				)}
 			</div>
-			{story?.caption && (
-				<p style={{ fontSize: 14, color: 'var(--fixora-text-secondary)', marginBottom: 12 }}>{story.caption}</p>
-			)}
-			<div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--fixora-text-muted)', marginBottom: 12 }}>
+			{story?.caption && <p className="fixora-admin-moderation-card__caption">{story.caption}</p>}
+			<div className="fixora-admin-moderation-card__stats">
 				<span>{t('moderation.views', { count: story?.viewCount ?? 0 })}</span>
-				<span style={{ color: '#e85a6f', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+				<span className="fixora-admin-moderation-card__reports">
 					<AlertTriangle size={12} /> {t('moderation.reports', { count: story?.reportCount ?? 1 })}
 				</span>
 			</div>
@@ -143,15 +142,6 @@ const AdminModerationPage: NextPage = () => {
 		fetchPolicy: 'cache-and-network',
 	});
 
-	const { data: articlesData, loading: articlesLoading, refetch: refetchArticles } = useQuery(
-		GET_ALL_ARTICLES_BY_ADMIN,
-		{
-			variables: { input: { page: 1, limit: 50, search: {} } },
-			skip: tab !== 'articles',
-			fetchPolicy: 'cache-and-network',
-		},
-	);
-
 	const { data: commentsData, loading: commentsLoading, refetch: refetchComments } = useQuery(
 		GET_ALL_COMMENTS_BY_ADMIN,
 		{
@@ -161,11 +151,9 @@ const AdminModerationPage: NextPage = () => {
 		},
 	);
 
-	const [removeArticle] = useMutation(REMOVE_ARTICLE_BY_ADMIN);
 	const [removeComment] = useMutation(REMOVE_COMMENT_BY_ADMIN);
 
 	const reports: StoryReport[] = reportsData?.getStoryReports?.list ?? [];
-	const articles: AdminArticle[] = articlesData?.getAllArticlesByAdmin?.list ?? [];
 	const comments: AdminComment[] = commentsData?.getAllCommentsByAdmin?.list ?? [];
 	const reportCount = reportsData?.getStoryReports?.metaCounter?.[0]?.total ?? 0;
 
@@ -174,16 +162,6 @@ const AdminModerationPage: NextPage = () => {
 		{ id: 'articles', label: t('moderation.tabs.articles') },
 		{ id: 'comments', label: t('moderation.tabs.comments') },
 	];
-
-	const handleRemoveArticle = async (articleId: string) => {
-		try {
-			await removeArticle({ variables: { articleId } });
-			await sweetTopSmallSuccessAlert(t('common.success'), 1200);
-			await refetchArticles();
-		} catch (err) {
-			await sweetErrorHandling(err);
-		}
-	};
 
 	const handleRemoveComment = async (commentId: string) => {
 		try {
@@ -210,76 +188,7 @@ const AdminModerationPage: NextPage = () => {
 					</>
 				)}
 
-				{tab === 'articles' && (
-					<div className="fixora-admin-table-wrap">
-						<table className="fixora-admin-table">
-							<thead>
-								<tr>
-									<th>{t('moderation.articles.columns.title')}</th>
-									<th>{t('moderation.articles.columns.author')}</th>
-									<th>{t('moderation.articles.columns.category')}</th>
-									<th>{t('moderation.articles.columns.status')}</th>
-									<th>{t('moderation.articles.columns.views')}</th>
-									<th>{t('moderation.articles.columns.likes')}</th>
-									<th>{t('moderation.articles.columns.comments')}</th>
-									<th>{t('moderation.articles.columns.created')}</th>
-									<th />
-								</tr>
-							</thead>
-							<tbody>
-								{articlesLoading && (
-									<tr>
-										<td colSpan={9} className="fixora-admin-empty">
-											{t('common.loading')}
-										</td>
-									</tr>
-								)}
-								{!articlesLoading && articles.length === 0 && (
-									<tr>
-										<td colSpan={9} className="fixora-admin-empty">
-											{t('moderation.articles.empty')}
-										</td>
-									</tr>
-								)}
-								{articles.map((article) => (
-									<tr key={article._id}>
-										<td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-											{article.articleTitle}
-										</td>
-										<td>{displayUserName(article.authorData)}</td>
-										<td>
-											{article.articleCategory && (
-												<AdminStatusBadge label={article.articleCategory} tone="neutral" />
-											)}
-										</td>
-										<td>
-											<AdminStatusBadge label={article.articleStatus} tone="success" />
-										</td>
-										<td>{article.articleViews.toLocaleString()}</td>
-										<td>{article.articleLikes}</td>
-										<td>{article.articleComments}</td>
-										<td>
-											{new Date(article.createdAt).toLocaleDateString(dateLocale(router.locale), {
-												year: 'numeric',
-												month: '2-digit',
-												day: '2-digit',
-											})}
-										</td>
-										<td>
-											<button
-												type="button"
-												className="fixora-admin-btn fixora-admin-btn--danger-outline fixora-admin-btn--sm"
-												onClick={() => handleRemoveArticle(article._id)}
-											>
-												{t('moderation.actions.remove')}
-											</button>
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				)}
+				{tab === 'articles' && <AdminModerationArticlesTab />}
 
 				{tab === 'comments' && (
 					<div className="fixora-admin-table-wrap">
@@ -311,8 +220,20 @@ const AdminModerationPage: NextPage = () => {
 								)}
 								{comments.map((comment) => (
 									<tr key={comment._id}>
-										<td style={{ maxWidth: 280 }}>{comment.commentContent}</td>
-										<td>{comment.authorData?.userNickname ?? '—'}</td>
+										<td className="fixora-admin-cell-ellipsis fixora-admin-cell-ellipsis--wide">{comment.commentContent}</td>
+										<td>
+											<div className="fixora-admin-table-user">
+												<div className="fixora-admin-table-user__avatar">
+													<img
+														src={resolveProfileImageUrl(comment.authorData?.userProfileImage)}
+														alt=""
+													/>
+												</div>
+												<span className="fixora-admin-table-user__name">
+													{comment.authorData?.userNickname ?? '—'}
+												</span>
+											</div>
+										</td>
 										<td>{comment.articleTitle ?? comment.commentRefId}</td>
 										<td>
 											<AdminStatusBadge label={comment.commentStatus} tone="neutral" />

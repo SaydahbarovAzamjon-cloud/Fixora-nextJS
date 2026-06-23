@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-22 |
+| **Last updated** | 2026-06-23 |
 | **Last agent** | Cursor |
-| **Last session** | **Backend wiring Phase 0–4** — synced FixoraB docs; wired admin (GAP-071…077), earnings/payout, analytics/schedule, discovery/articles, messages/notifications/settings/social; removed mock/workaround layers per `FIXORAF_SYNC.md`. |
-| **Next agent should start with** | **PM-01** mobile foundation OR desktop QA pass with FixoraB running |
+| **Last session** | **GAP-078, 101–112 FixoraF wiring** — `getAdminUserDetail`, admin mutations, user detail sections, PENDING verification, device upload, client settings, notification delete |
+| **Next agent should start with** | **P3-13** Apollo legacy migration or manual QA on `/_admin/users/[id]` |
 
 ---
 
@@ -43,6 +43,7 @@
 | `docs/design/technician/` | `technician-dashboard-full.png` |
 | `docs/design/admin/` | Reference screenshots implemented — see `admin/README.md` |
 | Admin console (P3-15) | ✅ `/_admin/*` — dashboard, verification, users, bookings, payments, devices, moderation, settings |
+| Admin design parity (P3-15e) | ✅ Customer-facing burgundy design system — matches Technicians/Search/My Page card surfaces |
 
 ---
 

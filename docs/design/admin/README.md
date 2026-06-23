@@ -7,6 +7,7 @@
 - **Theme:** Dark burgundy Fixora tokens (`scss/variables.scss`) — matches customer app
 - **Layout:** Reference screenshots 1:1 (sidebar, header, tables, verification detail panel)
 - **Base:** New `AdminLayout` + `AdminSidebar` + `AdminHeader` (replaced legacy Nestar `LayoutAdmin`)
+- **P3-15e:** Full design parity with customer pages — `fixora-home-card-surface`, ambient background, Fixora UI kit inputs/buttons
 
 ## MVP Screens
 

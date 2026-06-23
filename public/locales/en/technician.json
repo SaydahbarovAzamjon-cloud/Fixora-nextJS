@@ -15,6 +15,8 @@
     "myArticles": "My Articles",
     "settings": "Settings",
     "help": "Help & Support",
+    "more": "More",
+    "closeMenu": "Close menu",
     "mainMenu": "MAIN MENU",
     "technicianBadge": "Home",
     "proTechnician": "Pro Technician",
@@ -206,6 +208,7 @@
   },
   "messages": {
     "searchPlaceholder": "Search conversations...",
+    "back": "Back to chats",
     "noConversations": "No conversations yet",
     "selectConversation": "Select a conversation to start chatting",
     "online": "Online",

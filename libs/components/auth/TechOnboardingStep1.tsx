@@ -18,7 +18,14 @@ const TechOnboardingStep1 = () => {
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [photoFileName, setPhotoFileName] = useState('');
+	const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 	const [errors, setErrors] = useState<Record<string, string>>({});
+
+	useEffect(() => {
+		return () => {
+			if (photoPreview) URL.revokeObjectURL(photoPreview);
+		};
+	}, [photoPreview]);
 
 	// Restore the saved draft only after mount so SSR and the first client
 	// render match (sessionStorage is unavailable during SSR).
@@ -35,6 +42,10 @@ const TechOnboardingStep1 = () => {
 		if (!file) return;
 		if (!file.type.startsWith('image/')) return;
 		setPhotoFileName(file.name);
+		setPhotoPreview((prev) => {
+			if (prev) URL.revokeObjectURL(prev);
+			return URL.createObjectURL(file);
+		});
 		const current = loadTechDraft();
 		saveTechDraft({
 			fullName: current?.fullName ?? fullName,
@@ -79,14 +90,20 @@ const TechOnboardingStep1 = () => {
 					onChange={(e) => handlePhoto(e.target.files?.[0])}
 				/>
 				<div
-					className="auth-tech__photo"
+					className={`auth-tech__photo${photoPreview ? ' auth-tech__photo--has-image' : ''}`}
 					role="button"
 					tabIndex={0}
 					onClick={() => fileRef.current?.click()}
 					onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
 				>
-					<AddAPhotoOutlined />
-					<span>{photoFileName || t('tech.photoUpload')}</span>
+					{photoPreview ? (
+						<img src={photoPreview} alt="" className="auth-tech__photo-preview" />
+					) : (
+						<>
+							<AddAPhotoOutlined />
+							<span>{photoFileName || t('tech.photoUpload')}</span>
+						</>
+					)}
 				</div>
 				<div className="auth-form">
 					<FixoraInput

@@ -22,11 +22,11 @@ const FILTER_TO_ARTICLE_CATEGORY: Record<
 	Exclude<CommunityCategoryId, 'all'>,
 	ArticleCategory
 > = {
-	repair_guides: 'FREE',
-	quick_tips: 'RECOMMEND',
+	repair_guides: 'REPAIR_GUIDE',
+	quick_tips: 'QUICK_TIP',
 	troubleshooting: 'NEWS',
-	success_stories: 'HUMOR',
-	expert_articles: 'RECOMMEND',
+	success_stories: 'CASE_STUDY',
+	expert_articles: 'TECHNIQUE',
 };
 
 const ARTICLE_CATEGORY_TO_FILTER: Record<ArticleCategory, Exclude<CommunityCategoryId, 'all'>> = {
@@ -34,6 +34,10 @@ const ARTICLE_CATEGORY_TO_FILTER: Record<ArticleCategory, Exclude<CommunityCateg
 	RECOMMEND: 'quick_tips',
 	NEWS: 'troubleshooting',
 	HUMOR: 'success_stories',
+	REPAIR_GUIDE: 'repair_guides',
+	QUICK_TIP: 'quick_tips',
+	CASE_STUDY: 'success_stories',
+	TECHNIQUE: 'expert_articles',
 };
 
 export function communityFilterToArticleCategory(

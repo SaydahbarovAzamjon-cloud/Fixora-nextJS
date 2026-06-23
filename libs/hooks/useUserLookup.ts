@@ -1,5 +1,5 @@
-import { useQueries } from '@apollo/client';
-import { useMemo } from 'react';
+import { useApolloClient } from '@apollo/client';
+import { useEffect, useMemo, useState } from 'react';
 import { GET_ADMIN_USER } from '../../apollo/admin/query';
 import type { AdminUser } from '../types/admin/admin';
 
@@ -9,26 +9,61 @@ export function displayUserName(user?: Pick<AdminUser, 'userFullName' | 'userNic
 }
 
 export function useUserLookup(userIds: string[]) {
-	const uniqueIds = useMemo(() => [...new Set(userIds.filter(Boolean))], [userIds]);
+	const client = useApolloClient();
+	const idsKey = useMemo(() => {
+		const unique = [...new Set(userIds.filter(Boolean))].sort();
+		return unique.join('|');
+	}, [userIds.join('|')]);
+	const [map, setMap] = useState<Map<string, AdminUser>>(() => new Map());
+	const [loading, setLoading] = useState(false);
 
-	const results = useQueries({
-		queries: uniqueIds.map((userId) => ({
-			query: GET_ADMIN_USER,
-			variables: { userId },
-			skip: !userId,
-		})),
-	});
+	useEffect(() => {
+		if (!idsKey) {
+			setMap(new Map());
+			setLoading(false);
+			return;
+		}
 
-	const map = useMemo(() => {
-		const out = new Map<string, AdminUser>();
-		results.forEach((result, index) => {
-			const user = result.data?.getUser as AdminUser | undefined;
-			if (user?._id) out.set(uniqueIds[index], user);
-		});
-		return out;
-	}, [results, uniqueIds]);
+		const uniqueIds = idsKey.split('|');
+		let cancelled = false;
+		setLoading(true);
 
-	const loading = results.some((r) => r.loading);
+		Promise.allSettled(
+			uniqueIds.map((userId) =>
+				client.query({
+					query: GET_ADMIN_USER,
+					variables: { userId },
+					fetchPolicy: 'cache-first',
+					errorPolicy: 'ignore',
+				}),
+			),
+		)
+			.then((results) => {
+				if (cancelled) return;
+				const out = new Map<string, AdminUser>();
+				results.forEach((result, index) => {
+					if (result.status !== 'fulfilled') return;
+					const user = result.value.data?.getUser as AdminUser | undefined;
+					if (user?._id) out.set(uniqueIds[index], user);
+				});
+				setMap(out);
+			})
+			.catch(() => {
+				if (!cancelled) setMap(new Map());
+			})
+			.finally(() => {
+				if (!cancelled) setLoading(false);
+			});
 
-	return { map, loading, name: (id: string) => displayUserName(map.get(id) ?? { _id: id }) };
+		return () => {
+			cancelled = true;
+		};
+	}, [client, idsKey]);
+
+	return {
+		map,
+		loading,
+		name: (id: string) => displayUserName(map.get(id) ?? { _id: id }),
+		user: (id: string) => map.get(id),
+	};
 }

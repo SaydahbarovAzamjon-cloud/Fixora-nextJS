@@ -20,6 +20,7 @@ export interface AdminUser {
 	averageRating: number;
 	reviewCount?: number;
 	isVerified: boolean;
+	isBlocked?: boolean;
 	verificationStatus: VerificationStatus;
 	verificationDocuments?: string[];
 	verificationRejectionReason?: string;
@@ -27,10 +28,20 @@ export interface AdminUser {
 	specialty?: string;
 	userLocation?: string;
 	userBio?: string;
+	userSlug?: string;
 	yearsExperience?: number;
+	completedJobsCount?: number;
+	followersCount?: number;
+	followingCount?: number;
+	userLikes?: number;
+	userArticles?: number;
+	lastLoginAt?: string;
+	deletedAt?: string;
 	services?: { title: string; basePrice: number }[];
 	workingHours?: { days: string[]; startTime?: string; endTime?: string };
 	profileComplete?: boolean;
+	verificationAdminNotes?: string;
+	verificationTimeline?: VerificationAuditEntry[];
 	createdAt: string;
 	updatedAt?: string;
 }
@@ -153,12 +164,16 @@ export interface AllArticlesInquiry {
 export interface AdminArticle {
 	_id: string;
 	articleTitle: string;
+	articleExcerpt?: string;
+	articleImage?: string;
+	articleContent?: string;
 	articleStatus: ArticleStatus;
 	articleCategory?: ArticleCategory;
 	articleViews: number;
 	articleLikes: number;
 	articleComments: number;
 	createdAt: string;
+	updatedAt?: string;
 	authorData?: AdminUser;
 }
 
@@ -240,7 +255,7 @@ export interface AdminComment {
 	commentRefId: string;
 	createdAt: string;
 	articleTitle?: string;
-	authorData?: { _id: string; userNickname?: string; userImage?: string };
+	authorData?: { _id: string; userNickname?: string; userProfileImage?: string };
 }
 
 export interface AdminSearchHit {
@@ -259,6 +274,54 @@ export interface StoryReport {
 	status: string;
 	createdAt: string;
 	reporterData?: AdminUser;
+}
+
+export interface AdminUserBookingStats {
+	active: number;
+	completed: number;
+	total: number;
+	totalSpent: number;
+}
+
+export interface LoginHistoryItem {
+	_id: string;
+	userId: string;
+	authProvider: string;
+	createdAt: string;
+	ipAddress?: string | null;
+	userAgent?: string | null;
+	success: boolean;
+}
+
+export type ModerationAction = 'WARN' | 'SUSPEND' | 'VERIFICATION_REVOKE' | 'BADGE_CHANGE' | 'PASSWORD_RESET';
+export type ModerationCategory = 'SPAM' | 'ABUSE' | 'FRAUD' | 'OTHER';
+
+export interface UserModerationEntry {
+	_id: string;
+	userId: string;
+	adminId: string;
+	action: ModerationAction;
+	reason: string;
+	category?: ModerationCategory | null;
+	createdAt: string;
+	adminData?: Pick<AdminUser, '_id' | 'userNickname' | 'userFullName'>;
+}
+
+export type VerificationAuditAction = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'REVOKED' | 'NOTE';
+
+export interface VerificationAuditEntry {
+	action: VerificationAuditAction;
+	adminId?: string | null;
+	createdAt: string;
+	note?: string | null;
+}
+
+export interface AdminUserComment {
+	_id: string;
+	commentContent: string;
+	commentStatus: string;
+	createdAt: string;
+	articleTitle?: string;
 }
 
 export interface AdminStory {

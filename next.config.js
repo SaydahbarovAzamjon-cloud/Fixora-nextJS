@@ -25,6 +25,16 @@ const nextConfig = {
 				destination: '/login',
 				permanent: false,
 			},
+			{ source: '/admin', destination: '/_admin', permanent: false },
+			{ source: '/admin/dashboard', destination: '/_admin', permanent: false },
+			{ source: '/admin/verification', destination: '/_admin/verification', permanent: false },
+			{ source: '/admin/users', destination: '/_admin/users', permanent: false },
+			{ source: '/admin/bookings', destination: '/_admin/bookings', permanent: false },
+			{ source: '/admin/payments', destination: '/_admin/payments', permanent: false },
+			{ source: '/admin/devices', destination: '/_admin/devices', permanent: false },
+			{ source: '/admin/moderation', destination: '/_admin/moderation', permanent: false },
+			{ source: '/admin/settings', destination: '/_admin/settings', permanent: false },
+			{ source: '/admin/:path*', destination: '/_admin/:path*', permanent: false },
 		];
 	},
 };

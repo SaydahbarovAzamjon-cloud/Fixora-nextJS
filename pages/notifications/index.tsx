@@ -8,7 +8,7 @@ import Moment from 'react-moment';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DoneIcon from '@mui/icons-material/Done';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
-import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ } from '../../apollo/user/notification';
+import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { userVar } from '../../apollo/store';
 import { Notification } from '../../libs/types/fixora/fixora';
 import { FixoraButton } from '../../libs/components/ui';
@@ -35,10 +35,12 @@ const NotificationListItem = ({
 	notification,
 	onOpen,
 	onMarkRead,
+	onDelete,
 }: {
 	notification: Notification;
 	onOpen: () => void;
 	onMarkRead: () => void;
+	onDelete: () => void;
 }) => {
 	const { t } = useTranslation('common');
 	const { data } = useQuery(GET_BOOKING, {
@@ -75,6 +77,9 @@ const NotificationListItem = ({
 					<DoneIcon fontSize="small" />
 				</button>
 			)}
+			<button type="button" className="fixora-notifications__delete" title={t('notifications.delete')} onClick={onDelete}>
+				×
+			</button>
 		</div>
 	);
 };
@@ -103,6 +108,7 @@ const NotificationsPage: NextPage = () => {
 
 	const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
 	const [markAllNotificationsRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
+	const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -133,6 +139,15 @@ const NotificationsPage: NextPage = () => {
 		try {
 			await markAllNotificationsRead();
 			setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+		} catch {
+			/* ignore */
+		}
+	};
+
+	const deleteNotificationById = async (notification: Notification) => {
+		try {
+			await deleteNotification({ variables: { notificationId: notification._id } });
+			setNotifications((prev) => prev.filter((n) => n._id !== notification._id));
 		} catch {
 			/* ignore */
 		}
@@ -176,6 +191,7 @@ const NotificationsPage: NextPage = () => {
 						notification={notification}
 						onOpen={() => openNotification(notification)}
 						onMarkRead={() => markAsRead(notification)}
+						onDelete={() => deleteNotificationById(notification)}
 					/>
 				))}
 			</div>

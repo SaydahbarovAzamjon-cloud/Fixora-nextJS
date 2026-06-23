@@ -16,7 +16,17 @@
 	"header": {
 		"searchPlaceholder": "Search anything...",
 		"searchEmpty": "No results found",
-		"notifications": "Notifications"
+		"notifications": "Notifications",
+		"settings": "Settings",
+		"logout": "Log out"
+	},
+	"errors": {
+		"forbiddenTitle": "403 — Not Authorized",
+		"forbiddenText": "You do not have permission to access the Fixora Admin Console.",
+		"backToHome": "Back to Home",
+		"notFoundTitle": "Page Not Found",
+		"notFoundText": "This admin page does not exist.",
+		"backToDashboard": "Back to Dashboard"
 	},
 	"gap": {
 		"backendRequired": "Backend API required",
@@ -84,6 +94,12 @@
 		"approve": "Approve",
 		"reject": "Reject",
 		"rejectReason": "Rejection reason (optional)",
+		"pendingNotice": "This technician registered but has not submitted verification yet (incomplete profile). You can reject to dismiss them from the queue.",
+		"pendingApproveNote": "Approve is available for incomplete PENDING profiles when documents are not required.",
+		"pendingRejectNote": "Reject dismisses incomplete applications and moves them to Rejected.",
+		"errors": {
+			"pendingActionBlocked": "Verification action failed for this status. Refresh and try again."
+		},
 		"documents": "Verification Documents",
 		"completenessTitle": "Profile Completeness",
 		"badges": "Badges",
@@ -121,12 +137,20 @@
 			"status": "Status",
 			"badge": "Badge",
 			"rating": "Rating",
-			"joined": "Joined"
+			"joined": "Joined",
+			"actions": "Actions"
 		},
 		"roles": {
 			"USER": "USER",
-			"TECHNICIAN": "TECHNICIAN",
-			"ADMIN": "ADMIN"
+			"CLIENT": "Client",
+			"TECHNICIAN": "Technician",
+			"ADMIN": "Admin"
+		},
+		"statusMenu": {
+			"label": "Change status",
+			"confirmBlock": "Suspend this user?",
+			"confirmDelete": "Soft-delete this user?",
+			"updated": "Status updated"
 		},
 		"statuses": {
 			"ACTIVE": "ACTIVE",
@@ -139,6 +163,135 @@
 			"PREMIUM_PRO": "Pro"
 		},
 		"empty": "No users found"
+	},
+	"userDetail": {
+		"title": "User Management",
+		"subtitle": "Privileged admin view — not the public profile",
+		"notFound": "User not found",
+		"viewPublicProfile": "View Public Profile",
+		"sectionsNav": "Profile sections",
+		"sections": {
+			"overview": "Overview",
+			"performance": "Performance",
+			"financial": "Financial",
+			"content": "Content",
+			"verification": "Verification",
+			"moderation": "Moderation",
+			"activity": "Activity"
+		},
+		"badges": {
+			"VERIFIED": "Verified",
+			"PREMIUM_PRO": "Premium Pro",
+			"SUSPENDED": "Suspended",
+			"BLOCKED": "Blocked"
+		},
+		"actions": {
+			"menu": "User actions",
+			"viewProfile": "View Profile",
+			"viewBookings": "View Bookings",
+			"viewPayments": "View Payments",
+			"viewReviews": "View Reviews",
+			"verifyTechnician": "Verify Technician",
+			"removeVerification": "Remove Verification",
+			"grantPremium": "Grant Premium",
+			"removePremium": "Remove Premium",
+			"sendWarning": "Send Warning",
+			"suspend": "Suspend",
+			"activate": "Activate",
+			"resetPassword": "Reset Password",
+			"deleteAccount": "Delete Account"
+		},
+		"modals": {
+			"suspendTitle": "Suspend user?",
+			"suspendBody": "Suspend {{name}}? They will not be able to access the platform.",
+			"deleteTitle": "Soft delete account?",
+			"deleteBody": "Mark {{name}} as deleted? This is a soft delete (userStatus DELETE).",
+			"resetTitle": "Reset password",
+			"resetBody": "Set a new password for this user. They should change it after login.",
+			"newPassword": "New password",
+			"passwordMin": "Password must be at least 8 characters.",
+			"warningTitle": "Send warning",
+			"warningBody": "Send a formal warning to {{name}}.",
+			"warningReason": "Reason",
+			"warningReasonRequired": "Warning reason is required.",
+			"removeVerificationTitle": "Remove verification",
+			"removeVerificationBody": "Revoke verification for {{name}}?",
+			"revokeReason": "Reason (optional)",
+			"grantPremiumTitle": "Grant Premium",
+			"grantPremiumBody": "Grant Premium Pro badge to {{name}}?",
+			"removePremiumTitle": "Remove Premium",
+			"removePremiumBody": "Remove Premium Pro badge from {{name}}?"
+		},
+		"overview": {
+			"email": "Email",
+			"phone": "Phone",
+			"location": "Location",
+			"joined": "Join date",
+			"lastLogin": "Last login",
+			"status": "Account status",
+			"verification": "Verification status",
+			"premium": "Premium status"
+		},
+		"performance": {
+			"totalBookings": "Total bookings",
+			"completed": "Completed",
+			"cancelled": "Cancelled",
+			"successRate": "Success rate",
+			"rating": "Average rating",
+			"reviews": "Reviews",
+			"followers": "Followers",
+			"following": "Following",
+			"recentReviews": "Recent reviews"
+		},
+		"financial": {
+			"totalRevenue": "Total revenue",
+			"deposits": "Deposit payments",
+			"finals": "Final payments",
+			"refunds": "Refunds",
+			"transactions": "Transaction history",
+			"empty": "No payments found for this user"
+		},
+		"content": {
+			"articles": "Articles",
+			"stories": "Stories",
+			"likesReceived": "Likes received",
+			"articlesList": "Articles",
+			"storiesList": "Stories",
+			"noArticles": "No articles found",
+			"viewsLikes": "{{views}} views · {{likes}} likes",
+			"storyViews": "{{count}} views",
+			"commentsByUser": "Comments by user",
+			"reportsReceived": "Reports received",
+			"noComments": "No comments",
+			"noReports": "No reports"
+		},
+		"verification": {
+			"status": "Current status",
+			"timeline": "Verification timeline",
+			"addNote": "Add note",
+			"notePlaceholder": "Internal admin note…",
+			"latestNote": "Latest note",
+			"noTimeline": "No verification events yet"
+		},
+		"moderation": {
+			"accountStatus": "Account status",
+			"isBlocked": "Blocked flag",
+			"deletedAt": "Deleted at",
+			"openModeration": "Open moderation console",
+			"history": "Moderation history",
+			"noHistory": "No warnings or moderation actions"
+		},
+		"activity": {
+			"lastLogin": "Last login",
+			"accountCreated": "Account created",
+			"lastUpdated": "Last updated",
+			"loginHistory": "Login history",
+			"noLoginHistory": "No login events recorded",
+			"ip": "IP",
+			"success": "Success",
+			"failed": "Failed"
+		},
+		"gaps": {}
 	},
 	"bookings": {
 		"title": "Bookings",
@@ -196,7 +349,11 @@
 			"transactionId": "Transaction ID",
 			"date": "Date"
 		},
-		"empty": "No payments found"
+		"empty": "No payments found",
+		"found": "{{count}} payments",
+		"actions": {
+			"refund": "Refund"
+		}
 	},
 	"devices": {
 		"title": "Devices",
@@ -205,6 +362,9 @@
 		"allCategories": "All Categories",
 		"allStatuses": "All Statuses",
 		"owner": "Owner: {{name}}",
+		"client": "Client",
+		"technician": "Technician",
+		"noTechnician": "Not assigned",
 		"empty": "No devices found",
 		"status": {
 			"ACTIVE": "ACTIVE",
@@ -232,6 +392,7 @@
 		},
 		"articles": {
 			"columns": {
+				"article": "Article",
 				"title": "Title",
 				"author": "Author",
 				"category": "Category",
@@ -239,9 +400,30 @@
 				"views": "Views",
 				"likes": "Likes",
 				"comments": "Comments",
-				"created": "Created"
+				"created": "Created",
+				"actions": "Actions"
 			},
-			"empty": "No articles found"
+			"noExcerpt": "No excerpt provided",
+			"empty": "No articles found",
+			"actions": {
+				"view": "View article",
+				"edit": "Open on site",
+				"delete": "Delete",
+				"moderate": "Moderate"
+			},
+			"modal": {
+				"title": "Article moderation",
+				"close": "Close",
+				"created": "Created",
+				"likes": "{{count}} likes",
+				"comments": "{{count}} comments",
+				"hide": "Hide",
+				"restore": "Restore",
+				"delete": "Delete",
+				"confirmDelete": "Permanently remove this article?",
+				"confirmHide": "Hide this article from public view?",
+				"confirmRestore": "Restore this article to published status?"
+			}
 		},
 		"comments": {
 			"columns": {
@@ -272,10 +454,23 @@
 		"subtitle": "Admin profile and platform configuration",
 		"profile": {
 			"title": "Admin Profile",
+			"photoTitle": "Profile Photo",
+			"photoHint": "Click or drag an image. Preview updates before you save.",
+			"changePhoto": "Change profile photo",
+			"invalidType": "Only PNG, JPG, or WebP images are allowed.",
+			"tooLarge": "Image must be 5 MB or smaller.",
+			"uploadFailed": "Could not upload profile photo. Try again.",
 			"fullName": "Full Name",
 			"email": "Email",
+			"changePasswordTitle": "Change Password",
+			"changePasswordHint": "Use your current password. Do not use the profile save button for passwords.",
+			"currentPassword": "Current Password",
 			"newPassword": "New Password",
-			"passwordPlaceholder": "Enter new password",
+			"confirmPassword": "Confirm New Password",
+			"changePassword": "Update Password",
+			"passwordSaved": "Password updated successfully",
+			"passwordLength": "Password must be 5–12 characters",
+			"passwordMismatch": "New passwords do not match",
 			"save": "Save Profile"
 		},
 		"preferences": {
@@ -305,7 +500,12 @@
 		"page": "Page",
 		"of": "of",
 		"noResults": "No results",
-		"success": "Success"
+		"success": "Success",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"ok": "OK",
+		"yes": "Yes",
+		"no": "No"
 	},
 	"bookingStatus": {
 		"PENDING": "Pending",

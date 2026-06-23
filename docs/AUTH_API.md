@@ -130,7 +130,7 @@ Same token fields as `signup`. Rejects accounts with `authProvider !== EMAIL` or
 |----------|----------------|
 | `GOOGLE` | OAuth authorization code or ID token |
 | `KAKAO` | Authorization code or access token |
-| `APPLE` | ID token (API: may return `APPLE_LOGIN_COMING_SOON`) |
+| `APPLE` | Apple ID token from Sign In with Apple (requires `APPLE_CLIENT_ID` in `.env`) |
 
 ### Return: `OAuthLoginResult`
 
@@ -351,6 +351,8 @@ None (uses `@AuthUser` id).
 | **Operation** | `mutation approveTechnician(userId: String!): User!` |
 | **Auth** | Bearer + **`UserType.ADMIN`** |
 
+**Preconditions (GAP-110):** `verificationStatus` is `UNDER_REVIEW` **or** `PENDING` (fast-track incomplete onboarding). Appends `verificationTimeline` entry `APPROVED`.
+
 ### Effect (AUTH-05 / AUTH-06)
 
 | Field | Value |
@@ -365,6 +367,8 @@ None (uses `@AuthUser` id).
 |--|--|
 | **Operation** | `mutation rejectTechnician(userId: String!, reason: String): User!` |
 | **Auth** | Bearer + **`UserType.ADMIN`** |
+
+**Preconditions (GAP-111):** `verificationStatus` is `UNDER_REVIEW` **or** `PENDING`. Does **not** require prior `submitTechnicianVerification`. Appends `verificationTimeline` entry `REJECTED`.
 
 ### Effect
 
@@ -393,10 +397,11 @@ Technician may re-upload docs and call `submitTechnicianVerification` again from
 | `sort` | `String` | Optional |
 | `direction` | `Direction` | Optional |
 | `search.text` | `String` | Optional nickname filter |
+| `search.verificationStatus` | `VerificationStatus` | Optional — omit for All tab; `UNDER_REVIEW` for pending review queue |
 
 ### Return: `Users`
 
-`list` of technicians with `verificationStatus: UNDER_REVIEW`, plus `metaCounter`.
+`list` of technicians matching filter (default: all with `PENDING`, `UNDER_REVIEW`, `APPROVED`, or `REJECTED`), plus `metaCounter`.
 
 ---
 

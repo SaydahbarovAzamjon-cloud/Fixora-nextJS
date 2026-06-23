@@ -12,6 +12,7 @@ import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import TechnicianSidebar from '../technician/TechnicianSidebar';
 import Header from '../technician/Header';
+import TechnicianMobileBottomNav from '../technician/TechnicianMobileBottomNav';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -63,9 +64,11 @@ const withTechnicianLayout = (Component: any) => {
 						<meta name={'title'} content={`Fixora - Technician Dashboard`} />
 					</Head>
 					<Stack id="mobile-wrap" className="fixora-technician-mobile">
-						<Stack id={'main'}>
+						<Header activePage={activePage} />
+						<Stack id={'main'} className="fixora-technician-main">
 							<Component {...props} />
 						</Stack>
+						<TechnicianMobileBottomNav activePage={activePage} />
 					</Stack>
 				</ThemeProvider>
 			);

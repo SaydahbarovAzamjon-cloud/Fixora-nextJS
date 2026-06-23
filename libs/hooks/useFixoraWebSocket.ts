@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useApolloClient, useReactiveVar } from '@apollo/client';
+import type { DocumentNode } from 'graphql';
 import { userVar } from '../../apollo/store';
 import { getJwtToken } from '../auth';
 import { GET_MY_CONVERSATIONS, GET_MESSAGES } from '../../apollo/user/message';
@@ -42,7 +43,7 @@ const useFixoraWebSocket = () => {
 		};
 
 		const refetchBookings = () => {
-			const include: object[] = [];
+			const include: DocumentNode[] = [];
 			if (isCustomerUser(user)) include.push(GET_MY_BOOKINGS);
 			if (isTechnicianUser(user)) {
 				include.push(GET_TECHNICIAN_BOOKINGS, GET_INCOMING_REQUESTS);

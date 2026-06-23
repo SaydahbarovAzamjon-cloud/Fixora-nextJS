@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CallOutlined from '@mui/icons-material/CallOutlined';
 import VideocamOutlined from '@mui/icons-material/VideocamOutlined';
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined';
@@ -24,6 +25,7 @@ import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import { compressMessageImage } from '../../../libs/utils/compressMessageImage';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 import useRealtimePollInterval from '../../../libs/hooks/useRealtimePollInterval';
+import useDeviceDetect from '../../../libs/hooks/useDeviceDetect';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -83,6 +85,8 @@ const Messages: NextPage = () => {
 	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const screenDevice = useDeviceDetect();
+	const isMobile = screenDevice === 'mobile';
 
 	const queryPeerId = router.query.peerId as string | undefined;
 	const queryBookingId = router.query.bookingId as string | undefined;
@@ -288,7 +292,7 @@ const Messages: NextPage = () => {
 	const myName = user?.memberFullName || user?.memberNick || 'Me';
 
 	return (
-		<div className="fixora-msg-page">
+		<div className={`fixora-msg-page${isMobile && selected ? ' fixora-msg-page--thread-open' : ''}`}>
 			{/* Conversation list */}
 			<div className="fixora-msg-left">
 				<div className="fixora-msg-search-wrap">
@@ -365,6 +369,16 @@ const Messages: NextPage = () => {
 				{activeConversation ? (
 					<>
 						<div className="fixora-msg-chat__header">
+							{isMobile && (
+								<button
+									type="button"
+									className="fixora-msg-chat__back"
+									onClick={() => setSelected(null)}
+									aria-label={t('messages.back')}
+								>
+									<ArrowBackIcon fontSize="small" />
+								</button>
+							)}
 							<UserProfileLink userId={activeConversation.peerId} userType="USER" className="fixora-profile-link fixora-msg-conv__profile-link">
 								<div className="fixora-msg-conv__avatar-wrap">
 									<Avatar image={activeConversation.peer?.userProfileImage} name={activeName} className="fixora-msg-chat__avatar" />

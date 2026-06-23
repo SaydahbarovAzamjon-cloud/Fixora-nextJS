@@ -10,7 +10,10 @@ export function getUserProfileHref(
 	if (!userId) return null;
 
 	const isSelf = !!currentUserId && userId === currentUserId;
-	const viewerIsTechnician = isTechnicianUser({ userType: currentUserType, memberType: currentUserType });
+	const viewerIsTechnician = isTechnicianUser({
+		userType: currentUserType ?? undefined,
+		memberType: currentUserType ?? undefined,
+	});
 
 	if (isSelf && viewerIsTechnician) return '/technician/profile';
 	if (isSelf) return CLIENT_MY_PAGE;

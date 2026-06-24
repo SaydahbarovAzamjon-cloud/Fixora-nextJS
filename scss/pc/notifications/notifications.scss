@@ -142,7 +142,8 @@
 		background: rgba(236, 72, 153, 0.12);
 	}
 
-	&--review {
+	&--review,
+	&--warning {
 		color: #f59e0b;
 		background: rgba(245, 158, 11, 0.12);
 	}
@@ -343,7 +344,8 @@
 		background: rgba(236, 72, 153, 0.12);
 	}
 
-	&--review {
+	&--review,
+	&--warning {
 		color: #f59e0b;
 		background: rgba(245, 158, 11, 0.12);
 	}
@@ -354,6 +356,21 @@
 		color: var(--fixora-primary);
 		background: rgba(115, 12, 30, 0.12);
 	}
+}
+
+.fixora-notif-dropdown__title {
+	display: block;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	line-height: 1.3;
+}
+
+.fixora-notif-dropdown__text--warning {
+	color: var(--fixora-text-secondary);
+	line-height: 1.45;
+	white-space: normal;
+	word-break: break-word;
 }
 
 .fixora-notif-dropdown__sender,

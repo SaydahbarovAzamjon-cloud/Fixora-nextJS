@@ -491,6 +491,7 @@
     "coverLabel": "COVER IMAGE",
     "coverDropTitle": "Drop image here or click to upload",
     "coverDropHint": "PNG, JPG, WebP · Max 5MB · 1200×630px recommended",
+    "coverFrameSize": "Preview frame height",
     "replaceImage": "Replace",
     "removeImage": "Remove",
     "unknownType": "Unknown type",

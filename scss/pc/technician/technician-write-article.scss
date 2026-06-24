@@ -275,11 +275,49 @@ $border-input: $tech-input-border;
 	overflow: hidden;
 	border: 1px solid $border;
 
+	&__frame {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		min-height: 180px;
+		padding: 12px;
+		box-sizing: border-box;
+		background: rgba(0, 0, 0, 0.24);
+		border-bottom: 1px solid $border;
+	}
+
 	&__img {
 		width: 100%;
-		height: 200px;
-		object-fit: cover;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+		object-position: center;
 		display: block;
+	}
+
+	&__frame-control {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 12px 14px;
+		background: $bg-input;
+		border-top: 1px solid $border;
+	}
+
+	&__frame-label {
+		color: $text-dimmer;
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	&__frame-slider {
+		width: 100%;
+		accent-color: $orange;
+		cursor: pointer;
 	}
 
 	&__meta {

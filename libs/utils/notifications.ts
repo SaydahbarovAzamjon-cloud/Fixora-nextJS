@@ -14,6 +14,7 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { BookingStatus, Notification } from '../types/fixora/fixora';
 import { ownerMyPageHref } from './clientMyPageRoute';
 
@@ -33,7 +34,8 @@ export type NotificationVisualKind =
 	| 'COMMENT_LIKE'
 	| 'NEW_COMMENT'
 	| 'NEW_REVIEW'
-	| 'ADMIN';
+	| 'ADMIN'
+	| 'ADMIN_WARNING';
 
 export interface NotificationVisualMeta {
 	Icon: React.ElementType;
@@ -57,6 +59,7 @@ export const NOTIFICATION_VISUAL_META: Record<NotificationVisualKind, Notificati
 	NEW_COMMENT: { Icon: ModeCommentOutlinedIcon, tone: 'comment' },
 	NEW_REVIEW: { Icon: StarOutlineIcon, tone: 'review' },
 	ADMIN: { Icon: CampaignOutlinedIcon, tone: 'admin' },
+	ADMIN_WARNING: { Icon: WarningAmberOutlinedIcon, tone: 'warning' },
 };
 
 /** @deprecated use getNotificationVisualKind */
@@ -77,6 +80,14 @@ const ACCEPTED_PATTERN = /accept|qabul|수락|approved/i;
 const COMPLETED_PATTERN = /complet|tugat|완료|finished|pickup|ready for/i;
 const CANCELLED_PATTERN = /cancel|bekor|취소/i;
 const IN_PROGRESS_PATTERN = /in progress|progress|started|jarayon|진행/i;
+const ADMIN_WARNING_TITLE_PATTERN = /account warning|official warning|admin warning|계정 경고|공식 경고/i;
+
+export const isAdminWarningNotification = (notification: Notification): boolean => {
+	const title = (notification.notificationTitle ?? '').trim();
+	if (!title) return false;
+	if (ADMIN_WARNING_TITLE_PATTERN.test(title)) return true;
+	return /\bwarning\b/i.test(title);
+};
 
 export const detectBookingStatusFromText = (notification: Notification): BookingStatus | null => {
 	const text = notificationTextBlob(notification);
@@ -112,6 +123,10 @@ export const getNotificationVisualKind = (
 	notification: Notification,
 	bookingStatus?: BookingStatus | null,
 ): NotificationVisualKind => {
+	if (isAdminWarningNotification(notification)) {
+		return 'ADMIN_WARNING';
+	}
+
 	const text = notificationTextBlob(notification);
 
 	switch (notification.notificationType) {
@@ -166,6 +181,10 @@ export const getNotificationDisplayText = (
 	kind: NotificationVisualKind,
 	t: (key: string, options?: Record<string, string>) => string,
 ): string => {
+	if (kind === 'ADMIN_WARNING') {
+		return notification.notificationDescription?.trim() || notification.notificationTitle?.trim() || '';
+	}
+
 	if (notification.notificationType === 'MESSAGE') {
 		return t('notifications.types.message');
 	}
@@ -199,6 +218,7 @@ export const getNotificationText = (notification: Notification, t: (key: string)
 	getNotificationDisplayText(notification, getNotificationVisualKind(notification), t);
 
 export const shouldShowNotificationSender = (notification: Notification) =>
+	isAdminWarningNotification(notification) ||
 	['BOOKING', 'REVIEW', 'FOLLOW', 'LIKE', 'COMMENT'].includes(notification.notificationType);
 
 /** Customer bell/page: booking flow only — no like/follow/comment/review/message. */

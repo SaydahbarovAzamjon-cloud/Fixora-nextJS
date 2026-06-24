@@ -798,6 +798,16 @@
 			color: var(--fixora-text-muted);
 		}
 
+		.ftwa-cover-preview {
+			&__frame {
+				background: var(--fixora-primary-soft-bg);
+			}
+
+			&__frame-label {
+				color: var(--fixora-text-muted);
+			}
+		}
+
 		.ftwa-counter {
 			color: var(--fixora-text-muted);
 		}

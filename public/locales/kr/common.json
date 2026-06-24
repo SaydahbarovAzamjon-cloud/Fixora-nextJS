@@ -102,6 +102,7 @@
   "technicians.sections.newTechnicians": "신규 기술자",
   "technicians.sections.verified": "검증된 전문가",
   "homepage.testimonials.title": "고객 후기",
+  "homepage.testimonials.loading": "고객 후기를 불러오는 중…",
   "homepage.testimonials.prev": "이전 후기",
   "homepage.testimonials.next": "다음 후기",
   "homepage.testimonials.items.t1.text": "20분 만에 iPhone을 고쳤어요. 놀라운 서비스!",

@@ -12,6 +12,7 @@ import StarRounded from '@mui/icons-material/StarRounded';
 import ChatBubbleRounded from '@mui/icons-material/ChatBubbleRounded';
 import PaidRounded from '@mui/icons-material/PaidRounded';
 import CampaignRounded from '@mui/icons-material/CampaignRounded';
+import WarningAmberRounded from '@mui/icons-material/WarningAmberRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import NotificationsNoneOutlined from '@mui/icons-material/NotificationsNoneOutlined';
@@ -24,13 +25,14 @@ import {
 } from '../../../apollo/user/notification';
 import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
+import { isAdminWarningNotification } from '../../../libs/utils/notifications';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
 });
 
-type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert';
+type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert' | 'warning';
 type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'alerts';
 
 interface CatMeta {
@@ -106,6 +108,13 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		filter: 'alerts',
 		action: () => null,
 	},
+	warning: {
+		gradient: 'linear-gradient(135deg, #F59E0B 0%, #FACC15 100%)',
+		color: '#F59E0B',
+		icon: <WarningAmberRounded style={ICON_SX} />,
+		filter: 'alerts',
+		action: () => null,
+	},
 };
 
 const FILTER_KEYS: Record<FilterId, string> = {
@@ -121,6 +130,8 @@ const FILTER_KEYS: Record<FilterId, string> = {
 const BOOKING_REQUEST_PATTERN = /request|requested|new booking/i;
 
 const detectCat = (n: any): NotifCat => {
+	if (isAdminWarningNotification(n)) return 'warning';
+
 	const type = (n.notificationType ?? '').toUpperCase();
 	const text = `${n.notificationTitle ?? ''} ${n.notificationDescription ?? ''}`;
 	switch (type) {
@@ -233,10 +244,11 @@ const Notifications: NextPage = () => {
 		const meta = CAT_META[cat];
 		const action = meta.action(n);
 		const isIssue = cat === 'request' || cat === 'status';
+		const isWarning = cat === 'warning';
 		return (
 			<div
 				key={n._id}
-				className={`fixora-notif-card ${!n.isRead ? 'fixora-notif-card--unread' : ''}`}
+				className={`fixora-notif-card ${!n.isRead ? 'fixora-notif-card--unread' : ''}${isWarning ? ' fixora-notif-card--warning' : ''}`}
 				onClick={() => handleOpen(n)}
 			>
 				<div className="fixora-notif-card__icon" style={{ background: meta.gradient }}>
@@ -244,28 +256,55 @@ const Notifications: NextPage = () => {
 				</div>
 				<div className="fixora-notif-card__body">
 					<div className="fixora-notif-card__title">{n.notificationTitle}</div>
-					<div className="fixora-notif-card__subrow">
-						<NotifSender userId={n.userId} />
-						{n.notificationDescription && (
-							<span className={`fixora-notif-card__issue ${isIssue ? 'fixora-notif-card__issue--alert' : ''}`}>
-								{n.notificationDescription}
-							</span>
-						)}
-						<div className="fixora-notif-card__meta">
-							<span className="fixora-notif-card__time">{timeAgo(n.createdAt)}</span>
-							<button
-								type="button"
-								className="fixora-notif-card__delete"
-								title={t('notifications.delete')}
-								onClick={(e) => {
-									e.stopPropagation();
-									handleDelete(n._id);
-								}}
-							>
-								<CloseRounded style={{ fontSize: 15 }} />
-							</button>
+					{isWarning ? (
+						<>
+							{n.userId && (
+								<div className="fixora-notif-card__warning-from">
+									<NotifSender userId={n.userId} />
+								</div>
+							)}
+							{n.notificationDescription?.trim() && (
+								<p className="fixora-notif-card__warning-message">{n.notificationDescription.trim()}</p>
+							)}
+							<div className="fixora-notif-card__meta fixora-notif-card__meta--inline">
+								<span className="fixora-notif-card__time">{timeAgo(n.createdAt)}</span>
+								<button
+									type="button"
+									className="fixora-notif-card__delete"
+									title={t('notifications.delete')}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDelete(n._id);
+									}}
+								>
+									<CloseRounded style={{ fontSize: 15 }} />
+								</button>
+							</div>
+						</>
+					) : (
+						<div className="fixora-notif-card__subrow">
+							<NotifSender userId={n.userId} />
+							{n.notificationDescription && (
+								<span className={`fixora-notif-card__issue ${isIssue ? 'fixora-notif-card__issue--alert' : ''}`}>
+									{n.notificationDescription}
+								</span>
+							)}
+							<div className="fixora-notif-card__meta">
+								<span className="fixora-notif-card__time">{timeAgo(n.createdAt)}</span>
+								<button
+									type="button"
+									className="fixora-notif-card__delete"
+									title={t('notifications.delete')}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDelete(n._id);
+									}}
+								>
+									<CloseRounded style={{ fontSize: 15 }} />
+								</button>
+							</div>
 						</div>
-					</div>
+					)}
 					{action && (
 						<button
 							className="fixora-notif-card__action"

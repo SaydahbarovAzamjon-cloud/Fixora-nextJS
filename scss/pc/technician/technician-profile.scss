@@ -945,7 +945,7 @@
 	}
 
 	&__title {
-		color: #F0F0F0;
+		color: var(--fixora-text-primary);
 		font-size: 18px;
 		font-weight: 700;
 		margin: 0;
@@ -954,7 +954,7 @@
 	&__close {
 		background: transparent;
 		border: none;
-		color: #909090;
+		color: var(--fixora-text-muted);
 		cursor: pointer;
 		display: flex;
 		padding: 4px;
@@ -973,7 +973,7 @@
 	}
 
 	&__section-label {
-		color: #B0B0B0;
+		color: var(--fixora-text-secondary);
 		font-size: 13px;
 		font-weight: 600;
 		margin-bottom: 12px;
@@ -1055,7 +1055,7 @@
 	}
 
 	&__hint {
-		color: #707070;
+		color: var(--fixora-text-muted);
 		font-size: 12px;
 		margin-top: 10px;
 	}
@@ -1065,10 +1065,10 @@
 		margin-top: 18px;
 		min-height: 80px;
 		padding: 12px 14px;
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: var(--fixora-surface);
+		border: 1px solid var(--fixora-border-subtle);
 		border-radius: 12px;
-		color: #F0F0F0;
+		color: var(--fixora-text-primary);
 		font-size: 14px;
 		font-family: inherit;
 		resize: vertical;
@@ -1076,16 +1076,18 @@
 
 		&:focus {
 			outline: none;
-			border-color: rgba(115, 12, 30, 0.5);
+			border-color: var(--fixora-primary);
+			box-shadow: var(--fixora-focus-ring);
 		}
 
 		&::placeholder {
-			color: #6A6A6A;
+			color: var(--fixora-text-muted);
+			opacity: 1;
 		}
 	}
 
 	&__counter {
-		color: #707070;
+		color: var(--fixora-text-muted);
 		font-size: 12px;
 		text-align: right;
 		margin-top: 6px;

@@ -8,6 +8,7 @@ import { GET_BOOKING } from '../../../apollo/user/query';
 import {
 	getNotificationDisplayText,
 	getNotificationVisualKind,
+	isAdminWarningNotification,
 	shouldShowNotificationSender,
 } from '../../utils/notifications';
 import NotificationVisualIcon from './NotificationVisualIcon';
@@ -54,16 +55,22 @@ const NotificationDropdownItem = ({
 	const kind = getNotificationVisualKind(notification, data?.getBooking?.bookingStatus);
 	const text = getDisplayText?.(notification) ?? getNotificationDisplayText(notification, kind, t);
 	const showSender = shouldShowNotificationSender(notification) && !shouldSkipBooking;
+	const isWarning = isAdminWarningNotification(notification);
 
 	return (
 		<div className={`fixora-notif-dropdown__row ${!notification.isRead ? 'fixora-notif-dropdown__row--unread' : ''}`}>
 			<button type="button" className="fixora-notif-dropdown__item" onClick={onClick}>
 				<NotificationVisualIcon notification={notification} bookingStatus={data?.getBooking?.bookingStatus} />
 				<span className="fixora-notif-dropdown__body">
+					{isWarning && notification.notificationTitle && (
+						<span className="fixora-notif-dropdown__title">{notification.notificationTitle}</span>
+					)}
 					{showSender && notification.userId && (
 						<NotificationSender userId={notification.userId} className="fixora-notif-dropdown__sender" />
 					)}
-					<span className="fixora-notif-dropdown__text">{text}</span>
+					<span className={`fixora-notif-dropdown__text${isWarning ? ' fixora-notif-dropdown__text--warning' : ''}`}>
+						{text}
+					</span>
 					<Moment fromNow className="fixora-notif-dropdown__time">
 						{notification.createdAt}
 					</Moment>

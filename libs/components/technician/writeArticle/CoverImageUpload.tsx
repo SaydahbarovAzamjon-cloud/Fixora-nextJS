@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import CloseOutlined from '@mui/icons-material/CloseOutlined';
@@ -36,13 +36,31 @@ const CoverImageUpload: React.FC<CoverImageUploadProps> = ({
 	onOpenPicker,
 }) => {
 	const { t } = useTranslation('technician');
+	const [frameHeight, setFrameHeight] = useState(280);
 
 	return (
 		<WriteArticleCard>
 			<label className="ftwa-label">{t('writeArticle.coverLabel')}</label>
 			{hasImage && previewUrl ? (
 				<div className="ftwa-cover-preview">
-					<img src={previewUrl} alt="" className="ftwa-cover-preview__img" />
+					<div className="ftwa-cover-preview__frame" style={{ height: frameHeight }}>
+						<img src={previewUrl} alt="" className="ftwa-cover-preview__img" />
+					</div>
+					<div className="ftwa-cover-preview__frame-control">
+						<label className="ftwa-cover-preview__frame-label" htmlFor="ftwa-cover-frame-height">
+							{t('writeArticle.coverFrameSize')}
+						</label>
+						<input
+							id="ftwa-cover-frame-height"
+							className="ftwa-cover-preview__frame-slider"
+							type="range"
+							min={180}
+							max={480}
+							step={10}
+							value={frameHeight}
+							onChange={(e) => setFrameHeight(Number(e.target.value))}
+						/>
+					</div>
 					{cover && (
 						<div className="ftwa-cover-preview__meta">
 							<div className="ftwa-cover-preview__name">{cover.file.name}</div>

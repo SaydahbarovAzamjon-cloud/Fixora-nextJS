@@ -102,6 +102,7 @@
   "technicians.sections.newTechnicians": "New Technicians",
   "technicians.sections.verified": "Verified Experts",
   "homepage.testimonials.title": "What our customers say",
+  "homepage.testimonials.loading": "Loading customer reviews…",
   "homepage.testimonials.prev": "Previous testimonials",
   "homepage.testimonials.next": "Next testimonials",
   "homepage.testimonials.items.t1.text": "Fixed my iPhone in 20 minutes. Amazing service!",

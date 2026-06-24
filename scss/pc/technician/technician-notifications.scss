@@ -649,6 +649,36 @@
 		}
 	}
 
+	&--warning {
+		&::after {
+			background: linear-gradient(120deg, #f59e0b, #facc15, #f59e0b);
+		}
+	}
+
+	&__warning-from {
+		margin-top: 2px;
+	}
+
+	&__warning-message {
+		margin: 6px 0 0;
+		padding: 10px 12px;
+		border-radius: 10px;
+		border: 1px solid rgba(245, 158, 11, 0.28);
+		background: rgba(245, 158, 11, 0.08);
+		color: #f5f5f5;
+		font-size: 13px;
+		line-height: 1.5;
+		white-space: normal;
+		word-break: break-word;
+	}
+
+	&__meta--inline {
+		margin-top: 8px;
+		margin-left: 0;
+		width: 100%;
+		justify-content: flex-end;
+	}
+
 	&__meta {
 		display: flex;
 		align-items: center;

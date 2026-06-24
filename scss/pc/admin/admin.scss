@@ -129,6 +129,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 
 	&__nav-icon {
+		position: relative;
 		display: flex;
 		align-items: center;
 		flex-shrink: 0;

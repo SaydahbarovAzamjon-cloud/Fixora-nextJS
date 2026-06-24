@@ -10,6 +10,12 @@ import Link from 'next/link';
 import { FixoraLogo } from './brand';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Logout } from '@mui/icons-material';
@@ -28,6 +34,9 @@ import NavThemeToggle from './nav/NavThemeToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 
 const LANGS = ['en', 'kr'] as const;
+const NAV_ICON_SIZE = 18;
+
+const formatNavBadge = (count: number) => (count > 99 ? '99+' : count);
 
 const Top = () => {
 	const device = useDeviceDetect();
@@ -181,48 +190,73 @@ const Top = () => {
 			? `fixora-nav-mobile__drawer-link${active ? ' fixora-nav-mobile__drawer-link--active' : ''}`
 			: `fixora-nav__link${active ? ' fixora-nav__link--active' : ''}`;
 
+	const renderNavLink = (
+		href: string,
+		label: string,
+		icon: React.ReactNode,
+		active: boolean,
+		drawer = false,
+		onNavigate?: () => void,
+	) => (
+		<Link
+			key={href}
+			href={href}
+			className={linkClass(active, drawer)}
+			onClick={onNavigate}
+		>
+			<span className="fixora-nav__link-icon" aria-hidden="true">
+				{icon}
+			</span>
+			<span className="fixora-nav__link-label">{label}</span>
+		</Link>
+	);
+
 	const renderNavLinks = (drawer = false, onNavigate?: () => void) => (
 		<>
-			{!isTechnician && (
-				<Link href={'/'} className={linkClass(isActive('/'), drawer)} onClick={onNavigate}>
-					{t('nav.home')}
-				</Link>
+			{!isTechnician &&
+				renderNavLink('/', t('nav.home'), <HomeOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />, isActive('/'), drawer, onNavigate)}
+			{renderNavLink(
+				'/technicians',
+				t('nav.technicians'),
+				<HandymanOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />,
+				isActive('/technicians'),
+				drawer,
+				onNavigate,
 			)}
-			<Link
-				href={'/technicians'}
-				className={linkClass(isActive('/technicians'), drawer)}
-				onClick={onNavigate}
-			>
-				{t('nav.technicians')}
-			</Link>
-			<Link href={'/search'} className={linkClass(isActive('/search'), drawer)} onClick={onNavigate}>
-				{t('nav.services')}
-			</Link>
-			<Link
-				href={'/community?articleCategory=FREE'}
-				className={linkClass(isActive('/community'), drawer)}
-				onClick={onNavigate}
-			>
-				{t('nav.community')}
-			</Link>
+			{renderNavLink(
+				'/search',
+				t('nav.services'),
+				<SearchOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />,
+				isActive('/search'),
+				drawer,
+				onNavigate,
+			)}
+			{renderNavLink(
+				'/community?articleCategory=FREE',
+				t('nav.community'),
+				<GroupsOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />,
+				isActive('/community'),
+				drawer,
+				onNavigate,
+			)}
 			{user?._id &&
-				(isTechnician ? (
-					<Link
-						href={'/technician/dashboard'}
-						className={linkClass(isActive('/technician'), drawer)}
-						onClick={onNavigate}
-					>
-						{t('nav.dashboard')}
-					</Link>
-				) : (
-					<Link
-						href={CLIENT_MY_PAGE}
-						className={linkClass(isClientMyPageRoute(router.pathname), drawer)}
-						onClick={onNavigate}
-					>
-						{t('nav.myPage')}
-					</Link>
-				))}
+				(isTechnician
+					? renderNavLink(
+							'/technician/dashboard',
+							t('nav.dashboard'),
+							<BuildOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />,
+							isActive('/technician'),
+							drawer,
+							onNavigate,
+						)
+					: renderNavLink(
+							CLIENT_MY_PAGE,
+							t('nav.myPage'),
+							<PersonOutlineOutlinedIcon sx={{ fontSize: NAV_ICON_SIZE }} />,
+							isClientMyPageRoute(router.pathname),
+							drawer,
+							onNavigate,
+						))}
 		</>
 	);
 
@@ -274,14 +308,20 @@ const Top = () => {
 							{user?._id ? (
 								<>
 									<Link href={messagesHref} className="fixora-nav-mobile__icon-link">
-										<ChatBubbleOutlineIcon className="fixora-nav__bell" />
-										{unreadMessages > 0 && <span className="fixora-nav__badge">{unreadMessages}</span>}
+										<span className="fixora-nav__icon-wrap">
+											<ChatBubbleOutlineIcon className="fixora-nav__bell" />
+											{unreadMessages > 0 && (
+												<span className="fixora-nav__badge">{formatNavBadge(unreadMessages)}</span>
+											)}
+										</span>
 									</Link>
 									<Link href={notificationsHref} className="fixora-nav-mobile__icon-link">
-										<NotificationsOutlinedIcon className="fixora-nav__bell" />
-										{unreadNotifications > 0 && (
-											<span className="fixora-nav__badge">{unreadNotifications}</span>
-										)}
+										<span className="fixora-nav__icon-wrap">
+											<NotificationsOutlinedIcon className="fixora-nav__bell" />
+											{unreadNotifications > 0 && (
+												<span className="fixora-nav__badge">{formatNavBadge(unreadNotifications)}</span>
+											)}
+										</span>
 									</Link>
 									<button
 										type="button"
@@ -386,8 +426,12 @@ const Top = () => {
 						{user?._id ? (
 							<>
 								<Link href={isTechnician ? '/technician/messages' : '/messages'} className={'fixora-nav__icon-link'}>
-									<ChatBubbleOutlineIcon className={'fixora-nav__bell'} />
-									{unreadMessages > 0 && <span className={'fixora-nav__badge'}>{unreadMessages}</span>}
+									<span className="fixora-nav__icon-wrap">
+										<ChatBubbleOutlineIcon className={'fixora-nav__bell'} />
+										{unreadMessages > 0 && (
+											<span className={'fixora-nav__badge'}>{formatNavBadge(unreadMessages)}</span>
+										)}
+									</span>
 								</Link>
 								<div className={'fixora-nav__icon-link'} ref={notifRef}>
 									<button
@@ -395,8 +439,12 @@ const Top = () => {
 										className={'fixora-nav__icon-btn'}
 										onClick={() => setNotifOpen((prev) => !prev)}
 									>
-										<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
-										{unreadNotifications > 0 && <span className={'fixora-nav__badge'}>{unreadNotifications}</span>}
+										<span className="fixora-nav__icon-wrap">
+											<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
+											{unreadNotifications > 0 && (
+												<span className={'fixora-nav__badge'}>{formatNavBadge(unreadNotifications)}</span>
+											)}
+										</span>
 									</button>
 									{notifOpen && (
 										<NotificationDropdown

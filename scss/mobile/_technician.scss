@@ -138,18 +138,20 @@
 
 	&__badge {
 		position: absolute;
-		top: 2px;
+		top: -4px;
 		right: calc(50% - 18px);
-		min-width: 16px;
-		height: 16px;
+		min-width: 17px;
+		height: 17px;
 		padding: 0 4px;
 		border-radius: 999px;
-		background: var(--fixora-primary);
+		background: var(--fixora-nav-badge-bg);
 		color: #fff;
 		font-size: 9px;
 		font-weight: 700;
-		line-height: 16px;
+		line-height: 17px;
 		text-align: center;
+		box-shadow: var(--fixora-nav-badge-shadow);
+		pointer-events: none;
 	}
 
 	&__icon-wrap {

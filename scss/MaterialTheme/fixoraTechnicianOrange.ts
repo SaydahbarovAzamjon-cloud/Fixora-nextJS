@@ -41,6 +41,7 @@ export const fixoraTechnicianOrange = {
 					height: '100%',
 				},
 				body: {
+					fontFamily: '"Plus Jakarta Sans", "Manrope", "Inter", sans-serif',
 					backgroundColor: '#0D0D0D',
 					color: '#FFFFFF',
 					height: '100%',

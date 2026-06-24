@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
-import GridViewOutlined from '@mui/icons-material/GridViewOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import MailOutline from '@mui/icons-material/MailOutline';
 import WorkOutlineOutlined from '@mui/icons-material/WorkOutlineOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
@@ -49,7 +49,7 @@ const TechnicianSidebar: React.FC = () => {
 	const avatarSrc = profileDraft ?? user?.memberImage;
 
 	const navItems: NavItem[] = [
-		{ id: 'dashboard', icon: <GridViewOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.dashboard', route: '/technician/dashboard' },
+		{ id: 'dashboard', icon: <BuildOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.dashboard', route: '/technician/dashboard' },
 		{ id: 'requests', icon: <MailOutline style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.requests', route: '/technician/requests', badge: badges.requests },
 		{ id: 'jobs', icon: <WorkOutlineOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.jobs', route: '/technician/jobs', badge: badges.jobs },
 		{ id: 'messages', icon: <ChatBubbleOutlineOutlined style={{ fontSize: ICON_SIZE }} />, labelKey: 'nav.messages', route: '/technician/messages', badge: badges.messages },
@@ -70,6 +70,7 @@ const TechnicianSidebar: React.FC = () => {
 
 	const renderNavItem = (item: NavItem) => {
 		const active = isActive(item.route);
+		const badgeCount = item.badge != null && item.badge > 0 ? item.badge : 0;
 		return (
 			<button
 				key={item.id}
@@ -77,11 +78,15 @@ const TechnicianSidebar: React.FC = () => {
 				onClick={() => router.push(item.route)}
 				type="button"
 			>
-				<span className="fixora-technician-sidebar__nav-icon">{item.icon}</span>
+				<span className="fixora-technician-sidebar__nav-icon">
+					{item.icon}
+					{badgeCount > 0 && (
+						<span className="fixora-nav__badge">
+							{badgeCount > 99 ? '99+' : badgeCount}
+						</span>
+					)}
+				</span>
 				<span className="fixora-technician-sidebar__nav-label">{t(item.labelKey)}</span>
-				{item.badge != null && item.badge > 0 && (
-					<span className="fixora-technician-sidebar__nav-badge">{item.badge}</span>
-				)}
 			</button>
 		);
 	};

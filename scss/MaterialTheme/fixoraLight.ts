@@ -42,6 +42,7 @@ export const fixoraLight = {
 					height: '100%',
 				},
 				body: {
+					fontFamily: '"Plus Jakarta Sans", "Manrope", "Inter", sans-serif',
 					backgroundColor: '#FFFFFF',
 					color: '#111827',
 					height: '100%',

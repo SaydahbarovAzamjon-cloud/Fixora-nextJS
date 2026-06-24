@@ -103,11 +103,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '', onNavigate 
 							className={`fixora-admin-sidebar__nav-item${active ? ' fixora-admin-sidebar__nav-item--active' : ''}`}
 							onClick={() => navigate(item.route)}
 						>
-							<span className="fixora-admin-sidebar__nav-icon">{item.icon}</span>
+							<span className="fixora-admin-sidebar__nav-icon">
+								{item.icon}
+								{item.badge != null && item.badge > 0 && (
+									<span className="fixora-nav__badge">
+										{item.badge > 99 ? '99+' : item.badge}
+									</span>
+								)}
+							</span>
 							<span className="fixora-admin-sidebar__nav-label">{t(item.labelKey)}</span>
-							{item.badge != null && item.badge > 0 && (
-								<span className="fixora-admin-sidebar__nav-badge">{item.badge}</span>
-							)}
 							{active && <ChevronRight size={14} className="fixora-admin-sidebar__nav-chevron" />}
 						</button>
 					);

@@ -118,8 +118,12 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				title={t('nav.messages')}
 				onClick={() => router.push('/technician/messages')}
 			>
-				<ChatBubbleOutlineOutlined style={{ fontSize: 18 }} />
-				{badges.messages > 0 && <span className="fixora-tech-header__badge">{badges.messages}</span>}
+				<span className="fixora-nav__icon-wrap">
+					<ChatBubbleOutlineOutlined style={{ fontSize: 18 }} />
+					{badges.messages > 0 && (
+						<span className="fixora-nav__badge">{badges.messages > 99 ? '99+' : badges.messages}</span>
+					)}
+				</span>
 			</button>
 
 			<button
@@ -127,8 +131,12 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 				title={t('nav.notifications')}
 				onClick={() => router.push('/technician/notifications')}
 			>
-				<NotificationsNoneOutlined style={{ fontSize: 19 }} />
-				{badges.notifications > 0 && <span className="fixora-tech-header__badge">{badges.notifications}</span>}
+				<span className="fixora-nav__icon-wrap">
+					<NotificationsNoneOutlined style={{ fontSize: 19 }} />
+					{badges.notifications > 0 && (
+						<span className="fixora-nav__badge">{badges.notifications > 99 ? '99+' : badges.notifications}</span>
+					)}
+				</span>
 			</button>
 
 			<button

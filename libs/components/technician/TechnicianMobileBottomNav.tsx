@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
-import GridViewOutlined from '@mui/icons-material/GridViewOutlined';
+import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import MailOutline from '@mui/icons-material/MailOutline';
 import WorkOutlineOutlined from '@mui/icons-material/WorkOutlineOutlined';
 import ChatBubbleOutlineOutlined from '@mui/icons-material/ChatBubbleOutlineOutlined';
@@ -23,7 +23,7 @@ interface TechnicianMobileBottomNavProps {
 const ICON = 20;
 
 const PRIMARY_NAV = [
-	{ id: 'dashboard', route: '/technician/dashboard', icon: <GridViewOutlined style={{ fontSize: ICON }} />, labelKey: 'nav.dashboard' },
+	{ id: 'dashboard', route: '/technician/dashboard', icon: <BuildOutlined style={{ fontSize: ICON }} />, labelKey: 'nav.dashboard' },
 	{ id: 'requests', route: '/technician/requests', icon: <MailOutline style={{ fontSize: ICON }} />, labelKey: 'nav.requests', badgeKey: 'requests' as const },
 	{ id: 'jobs', route: '/technician/jobs', icon: <WorkOutlineOutlined style={{ fontSize: ICON }} />, labelKey: 'nav.jobs', badgeKey: 'jobs' as const },
 	{ id: 'messages', route: '/technician/messages', icon: <ChatBubbleOutlineOutlined style={{ fontSize: ICON }} />, labelKey: 'nav.messages', badgeKey: 'messages' as const },
@@ -67,7 +67,9 @@ const TechnicianMobileBottomNav: React.FC<TechnicianMobileBottomNavProps> = ({ a
 						>
 							<span className="fixora-tech-mobile-nav__icon-wrap">
 								{item.icon}
-								{badge > 0 && <span className="fixora-tech-mobile-nav__badge">{badge > 9 ? '9+' : badge}</span>}
+								{badge > 0 && (
+									<span className="fixora-nav__badge">{badge > 9 ? '9+' : badge}</span>
+								)}
 							</span>
 							<span>{t(item.labelKey)}</span>
 						</button>
@@ -99,9 +101,13 @@ const TechnicianMobileBottomNav: React.FC<TechnicianMobileBottomNavProps> = ({ a
 										className={`fixora-tech-mobile-more__link${activePage === item.id ? ' fixora-tech-mobile-more__link--active' : ''}`}
 										onClick={() => navigate(item.route)}
 									>
-										{item.icon}
+										<span className="fixora-tech-mobile-nav__icon-wrap">
+											{item.icon}
+											{badge > 0 && (
+												<span className="fixora-nav__badge">{badge > 9 ? '9+' : badge}</span>
+											)}
+										</span>
 										<span>{t(item.labelKey)}</span>
-										{badge > 0 ? ` (${badge})` : ''}
 									</button>
 								);
 							})}

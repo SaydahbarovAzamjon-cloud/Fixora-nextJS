@@ -293,14 +293,11 @@ $border-orange: var(--fixora-border);
 			background: $tech-primary-soft;
 			color: $primary-orange;
 			font-weight: 600;
-
-			.fixora-technician-sidebar__nav-badge {
-				color: $primary-orange;
-			}
 		}
 	}
 
 	&__nav-icon {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -542,17 +539,20 @@ $border-orange: var(--fixora-border);
 
 	&__badge {
 		position: absolute;
-		top: -4px;
-		right: -4px;
-		background: linear-gradient(135deg, $tech-primary, $tech-primary-hover);
+		top: -5px;
+		right: -7px;
+		min-width: 17px;
+		height: 17px;
+		padding: 0 4px;
+		border-radius: 999px;
+		background: var(--fixora-nav-badge-bg);
 		color: #fff;
-		border-radius: 20px;
 		font-size: 9px;
 		font-weight: 700;
-		padding: 1px 5px;
-		line-height: 13px;
-		border: 1.5px solid var(--fixora-bg);
-		box-shadow: 0 0 8px rgba(115, 12, 30, 0.35);
+		line-height: 17px;
+		text-align: center;
+		box-shadow: var(--fixora-nav-badge-shadow);
+		pointer-events: none;
 	}
 
 	&__profile {

@@ -557,13 +557,13 @@
 			}
 
 			&:hover {
-				@include fixora-home-card-surface;
+				background: var(--fixora-primary-soft-bg);
 				border-color: var(--fixora-primary);
-				color: #fff;
+				color: var(--fixora-primary);
 				transform: scale(1.05);
 
 				svg {
-					color: #fff;
+					color: var(--fixora-primary);
 				}
 			}
 		}

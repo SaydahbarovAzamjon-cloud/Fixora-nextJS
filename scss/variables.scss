@@ -1,10 +1,10 @@
 /** FIXORA DESIGN TOKENS **/
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-$font: 'Poppins', sans-serif;
-$font-technician: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+$font-stack: 'Plus Jakarta Sans', 'Manrope', 'Inter', sans-serif;
+$font: $font-stack;
+$font-technician: $font-stack;
 
 /* Mobile breakpoints — DECISIONS MOB-03 */
 $fixora-bp-tablet: 992px;
@@ -75,6 +75,8 @@ $fixora-bp-phone: 639px;
 	--fixora-kakao-border: rgba(255, 255, 255, 0.15);
 	--fixora-kakao-border-hover: rgba(255, 255, 255, 0.3);
 	--fixora-transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+	--fixora-nav-badge-bg: linear-gradient(135deg, #ff6b4a 0%, #e11d48 52%, #c1121f 100%);
+	--fixora-nav-badge-shadow: 0 1px 4px rgba(193, 18, 31, 0.35);
 	--fixora-chart-grid: rgba(255, 255, 255, 0.05);
 	--fixora-chart-axis: #808080;
 	--fixora-chart-axis-muted: #707070;
@@ -99,21 +101,20 @@ $fixora-bp-phone: 639px;
 	--fixora-primary-dark: #e11d48;
 	--fixora-bg: #ffffff;
 	--fixora-bg-ambient:
-		radial-gradient(circle at top left, rgba(255, 120, 120, 0.1) 0%, transparent 35%),
-		radial-gradient(circle at bottom right, rgba(255, 140, 140, 0.08) 0%, transparent 40%),
-		linear-gradient(180deg, #ffffff 0%, #fff8f8 50%, #ffffff 100%);
+		radial-gradient(ellipse 90% 50% at 50% -8%, rgba(193, 18, 31, 0.05) 0%, transparent 68%),
+		linear-gradient(180deg, #ffffff 0%, #fffbfc 45%, #fff5f7 100%);
 	--fixora-surface: #ffffff;
 	--fixora-surface-elevated: #ffffff;
 	--fixora-surface-hover: #fff1f2;
-	--fixora-card-gradient: #ffffff;
-	--fixora-card-gradient-hover: #ffffff;
-	--fixora-glass-bg: #ffffff;
+	--fixora-card-gradient: linear-gradient(135deg, #ffffff 0%, #fffbfb 52%, #fff0f2 100%);
+	--fixora-card-gradient-hover: linear-gradient(135deg, #ffffff 0%, #fff5f6 48%, #ffe8eb 100%);
+	--fixora-glass-bg: linear-gradient(135deg, #ffffff 0%, #fffafa 100%);
 	--fixora-navbar-bg: rgba(255, 255, 255, 0.85);
 	--fixora-navbar-transparent-bg: rgba(255, 255, 255, 0.92);
 	--fixora-navbar-border: #f1f5f9;
 	--fixora-navbar-blur: 20px;
 	--fixora-navbar-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-	--fixora-footer-bg: linear-gradient(180deg, #fff8f8 0%, #ffffff 50%, #ffffff 100%);
+	--fixora-footer-bg: linear-gradient(180deg, #fff5f7 0%, #ffffff 100%);
 	--fixora-sidebar-bg: #ffffff;
 	--fixora-footer-ambient:
 		radial-gradient(circle at 10% 92%, rgba(255, 120, 120, 0.08) 0%, transparent 50%),
@@ -124,8 +125,8 @@ $fixora-bp-phone: 639px;
 	--fixora-border: rgba(193, 18, 31, 0.28);
 	--fixora-border-subtle: rgba(193, 18, 31, 0.18);
 	--fixora-text-primary: #111827;
-	--fixora-text-secondary: #6b7280;
-	--fixora-text-muted: #94a3b8;
+	--fixora-text-secondary: #374151;
+	--fixora-text-muted: #6b7280;
 	--fixora-error: #ff4d4f;
 	--fixora-success: #52c41a;
 	--fixora-warning: #fa8c16;
@@ -138,10 +139,10 @@ $fixora-bp-phone: 639px;
 	--fixora-card-hover-transform: translateY(-2px);
 	--fixora-focus-ring: 0 0 0 2px rgba(193, 18, 31, 0.25);
 	--fixora-input-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-	--fixora-btn-primary-bg: linear-gradient(135deg, #c1121f, #e11d48);
-	--fixora-btn-primary-bg-hover: linear-gradient(135deg, #a20e19, #c1121f);
+	--fixora-btn-primary-bg: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+	--fixora-btn-primary-bg-hover: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
 	--fixora-btn-primary-text: #ffffff;
-	--fixora-btn-primary-shadow: 0 8px 24px rgba(193, 18, 31, 0.2);
+	--fixora-btn-primary-shadow: 0 4px 14px rgba(244, 63, 94, 0.16);
 	--fixora-btn-secondary-bg: #ffffff;
 	--fixora-btn-secondary-border: #e5e7eb;
 	--fixora-select-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);

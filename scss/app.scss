@@ -1,6 +1,7 @@
 /** IMPORTS **/
 @import 'variables.scss';
 @import 'fixora-technician-theme-preserve.scss';
+@import 'pc/fixora-light-theme.scss';
 @import 'pc/fixora-scrollbar.scss';
 @import 'reset.scss';
 @import 'fixora-ui.scss';
@@ -41,6 +42,9 @@ p {
 
 body {
 	font-family: $font;
+	font-weight: 400;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 	background: var(--fixora-bg-ambient);
 	background-attachment: fixed;
 	background-color: var(--fixora-bg);

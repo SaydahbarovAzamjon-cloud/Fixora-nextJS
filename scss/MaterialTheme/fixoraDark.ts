@@ -41,6 +41,7 @@ export const fixoraDark = {
 					height: '100%',
 				},
 				body: {
+					fontFamily: '"Plus Jakarta Sans", "Manrope", "Inter", sans-serif',
 					backgroundColor: '#140F17',
 					color: '#F5F5F5',
 					height: '100%',

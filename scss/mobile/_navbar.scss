@@ -150,18 +150,20 @@
 
 	.fixora-nav__badge {
 		position: absolute;
-		top: 4px;
-		right: 2px;
-		min-width: 16px;
-		height: 16px;
+		top: -4px;
+		right: -6px;
+		min-width: 17px;
+		height: 17px;
 		padding: 0 4px;
 		border-radius: 999px;
-		background: var(--fixora-primary);
+		background: var(--fixora-nav-badge-bg);
 		color: #fff;
 		font-size: 10px;
 		font-weight: 700;
-		line-height: 16px;
+		line-height: 17px;
 		text-align: center;
+		box-shadow: var(--fixora-nav-badge-shadow);
+		pointer-events: none;
 	}
 
 	.fixora-nav-mobile__backdrop {
@@ -247,6 +249,10 @@
 	.fixora-nav-mobile__drawer-link {
 		@include fixora-tap-target;
 		@include fixora-touch-active;
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
 		justify-content: flex-start;
 		width: 100%;
 		padding: 12px 14px;
@@ -257,9 +263,23 @@
 		text-decoration: none;
 		transition: background 0.15s ease, color 0.15s ease;
 
+		.fixora-nav__link-icon {
+			width: 20px;
+			height: 20px;
+
+			svg {
+				font-size: 20px;
+			}
+		}
+
 		&--active {
 			color: var(--fixora-primary);
 			background: var(--fixora-primary-soft);
+			font-weight: 600;
+
+			.fixora-nav__link-icon {
+				color: var(--fixora-primary);
+			}
 		}
 
 		&:active {

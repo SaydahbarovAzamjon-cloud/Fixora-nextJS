@@ -18,7 +18,7 @@ import { Comment } from '../../libs/types/comment/comment';
 import { CommentGroup } from '../../libs/enums/comment.enum';
 import { Messages, REACT_APP_API_URL } from '../../libs/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { GET_COMMENTS, GET_MEMBER, GET_PROPERTIES } from '../../apollo/user/query';
+import { GET_COMMENTS, GET_USER, GET_PROPERTIES } from '../../apollo/user/query';
 import { CREATE_COMMENT, LIKE_TARGET_PROPERTY } from '../../apollo/user/mutation';
 import { T } from '../../libs/types/common';
 
@@ -66,29 +66,39 @@ import { T } from '../../libs/types/common';
     data: getMemberData,
     error: getMemberError,
     refetch: getMemberRefetch,
-    } = useQuery(GET_MEMBER, {
+    } = useQuery(GET_USER, {
         fetchPolicy: 'network-only',
-        variables: { input: agentId },
+        variables: { userId: agentId },
         skip: !agentId,
         onCompleted: (data: T) => {
-        setAgent(data?.getMember);
+        const user = data?.getUser;
+        if (!user) return;
+        const agentMember = {
+            _id: user._id,
+            memberType: user.userType,
+            memberNick: user.userNickname,
+            memberFullName: user.userFullName,
+            memberImage: user.userProfileImage,
+            memberPhone: user.userPhoneNumber,
+        } as Member;
+        setAgent(agentMember);
         setSearchFilter({
             ...searchFilter,
             search: {
-            memberId: data?.getMember?._id,
+            memberId: user._id,
         },
         });
 
         setCommentInquiry({
             ...commentInquiry,
             search: {
-            commentRefId: data?.getMember?._id,
+            commentRefId: user._id,
         },
         });
 
         setInsertCommentData({
             ...insertCommentData,
-            commentRefId: data?.getMember?._id,
+            commentRefId: user._id,
         });
         },
     });

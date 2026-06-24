@@ -9,8 +9,9 @@ import AgentCard from '../../libs/components/common/AgentCard';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Member } from '../../libs/types/member/member';
+import { TechniciansInquiry } from '../../libs/types/fixora/fixora';
 import { useMutation, useQuery } from '@apollo/client';
-import { LIKE_TARGET_MEMBER } from '../../apollo/user/mutation';
+import { LIKE_TARGET_USER } from '../../apollo/user/mutation';
 import { GET_AGENTS } from '../../apollo/user/query';
 import { T } from '../../libs/types/common';
 import { Message } from '../../libs/enums/common.enum';
@@ -38,7 +39,7 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 	const [searchText, setSearchText] = useState<string>('');
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const [likeTargetUser] = useMutation(LIKE_TARGET_USER);
 
 	const {
 		loading: getAgentsLoading, 
@@ -88,11 +89,11 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 				setFilterSortName('Oldest order');
 				break;
 			case 'likes':
-				setSearchFilter({ ...searchFilter, sort: 'memberLikes', direction: 'DESC' });
+				setSearchFilter({ ...searchFilter, sort: 'userLikes', direction: 'DESC' });
 				setFilterSortName('Likes');
 				break;
 			case 'views':
-				setSearchFilter({ ...searchFilter, sort: 'memberViews', direction: 'DESC' });
+				setSearchFilter({ ...searchFilter, sort: 'userViews', direction: 'DESC' });
 				setFilterSortName('Views');
 				break;
 		}
@@ -113,9 +114,9 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 			if(!id) return;
 			if(!user._id) throw new Error(Message.error2);
 
-			await likeTargetMember({
+			await likeTargetUser({
 				variables: {
-					input: id,
+					userId: id,
 				},
 			});
 

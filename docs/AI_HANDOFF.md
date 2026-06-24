@@ -5,9 +5,9 @@
 | Field | Value |
 |-------|-------|
 | **Last updated** | 2026-06-24 |
-| **Last agent** | Cursor |
-| **Last session** | **Admin panel bugfixes** — `/_admin/users` hides `DELETE` users from default/all lists (visible only when status filter = DELETE); `/_admin/verification` layout updated so right detail card aligns with left search row in a single top line |
-| **Next agent should start with** | **Manual QA** — verify admin users delete-filter behavior + verification top-row alignment; then continue **P3-13** Apollo legacy migration |
+| **Last agent** | Codex |
+| **Last session** | **P3-13 complete — Phase 4 done** — Apollo migrated to Fixora schema: `getTechnicians` for legacy agents, `getUser` for member profiles, `getArticles`/`likeTargetArticle`/`createArticle` for community legacy components, `getUserFollowers/Followings` + `authorData` aliases; utils handlers renamed; board-article types re-export Fixora `Article`; `yarn build` ✅ |
+| **Next agent should start with** | **Phase 5** — `P4-01` AI classification hint on booking form, or `P4-05` light theme tokens |
 
 ---
 
@@ -94,7 +94,7 @@ Full checklist: `TASK_BOARD.md`
 |------|-------|
 | KakaoPay sandbox | Production gateway only — **deposit UI wired** to mock `initiatePayment`/`confirmPayment` (P3-06b) |
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
-| Apollo still on legacy nestar ops | P3-13 — migrate to `FRONTEND_API.md` names |
+| Apollo still on legacy nestar ops | ✅ P3-13 Done — MVP uses Fixora ops; `/property` pages retain legacy property queries (no FixoraB equivalent) |
 | Admin mockup | None — build incrementally (P3-15) |
 | Light theme mockup | None — Phase 5 (P4-05+) |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |

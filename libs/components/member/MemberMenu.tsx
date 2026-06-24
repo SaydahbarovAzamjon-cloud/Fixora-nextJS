@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Member } from '../../types/member/member';
 import { REACT_APP_API_URL } from '../../config';
 import { useQuery } from '@apollo/client';
-import { GET_MEMBER } from '../../../apollo/user/query';
+import { GET_USER } from '../../../apollo/user/query';
 import { T } from '../../types/common';
 
 interface MemberMenuProps {
@@ -30,13 +30,29 @@ const MemberMenu = (props: MemberMenuProps) => {
     error: getMemberError,
     refetch:
       getMemberRefetch,
-  } = useQuery(GET_MEMBER, {
+  } = useQuery(GET_USER, {
     fetchPolicy: 'network-only',
-    variables: { input: memberId },
+    variables: { userId: memberId },
     skip: !memberId,
     notifyOnNetworkStatusChange: true,
     onCompleted: (data: T) => {
-      setMember(data?.getMember);
+      const user = data?.getUser;
+      if (!user) return;
+      setMember({
+        _id: user._id,
+        memberType: user.userType,
+        memberStatus: user.userStatus,
+        memberNick: user.userNickname,
+        memberFullName: user.userFullName,
+        memberImage: user.userProfileImage,
+        memberPhone: user.userPhoneNumber,
+        memberDesc: user.userBio,
+        memberProperties: user.userArticles,
+        memberArticles: user.userArticles,
+        memberFollowers: user.followersCount,
+        memberFollowings: user.followingCount,
+        meFollowed: user.meFollowed,
+      } as Member);
     },
   });
 

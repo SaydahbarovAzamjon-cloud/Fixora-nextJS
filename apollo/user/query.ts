@@ -4,35 +4,37 @@ import { gql } from '@apollo/client';
  *         MEMBER         *
  *************************/
 
+/** @deprecated Legacy name — calls Fixora `getTechnicians` with member-field aliases for `/agent` UI. */
 export const GET_AGENTS = gql`
-	query GetAgents($input: AgentsInquiry!) {
-		getAgents(input: $input) {
+	query GetAgents($input: TechniciansInquiry!) {
+		getAgents: getTechnicians(input: $input) {
 			list {
 				_id
-				memberType
-				memberStatus
-				memberAuthType
-				memberPhone
-				memberNick
-				memberFullName
-				memberImage
-				memberAddress
-				memberDesc
-				memberWarnings
-				memberBlocks
-				memberProperties
-				memberRank
-				memberPoints
-				memberLikes
-				memberViews
-				deletedAt
+				memberType: userType
+				memberStatus: userStatus
+				memberAuthType: authProvider
+				memberPhone: userPhoneNumber
+				memberNick: userNickname
+				memberFullName: userFullName
+				memberImage: userProfileImage
+				memberAddress: userLocation
+				memberDesc: userBio
+				memberProperties: userArticles
+				memberRank: userRank
+				memberPoints: userRank
+				memberLikes: userLikes
+				memberViews: userViews
 				createdAt
 				updatedAt
-				accessToken
 				meLiked {
 					memberId
 					likeRefId
 					myFavorite
+				}
+				meFollowed {
+					followingId
+					followerId
+					myFollowing
 				}
 			}
 			metaCounter {
@@ -42,29 +44,28 @@ export const GET_AGENTS = gql`
 	}
 `;
 
+/** @deprecated Legacy name — calls Fixora `getUser` with member-field aliases. Prefer `GET_USER`. */
 export const GET_MEMBER = gql(`
 query GetMember($input: String!) {
-    getMember(memberId: $input) {
+    getMember: getUser(userId: $input) {
         _id
-        memberType
-        memberStatus
-        memberAuthType
-        memberPhone
-        memberNick
-        memberFullName
-        memberImage
-        memberAddress
-        memberDesc
-        memberProperties
-        memberArticles
-        memberPoints
-        memberLikes
-        memberViews
-        memberFollowings
-				memberFollowers
-        memberRank
-        memberWarnings
-        memberBlocks
+        memberType: userType
+        memberStatus: userStatus
+        memberAuthType: authProvider
+        memberPhone: userPhoneNumber
+        memberNick: userNickname
+        memberFullName: userFullName
+        memberImage: userProfileImage
+        memberAddress: userLocation
+        memberDesc: userBio
+        memberProperties: userArticles
+        memberArticles: userArticles
+        memberPoints: userRank
+        memberLikes: userLikes
+        memberViews: userViews
+        memberFollowings: followingCount
+				memberFollowers: followersCount
+        memberRank: userRank
         deletedAt
         createdAt
         updatedAt
@@ -80,6 +81,7 @@ query GetMember($input: String!) {
 
 /**************************
  *        PROPERTY        *
+ *  Legacy Nestar — not in FixoraB schema; retained for `/property` pages only.
  *************************/
 
 export const GET_PROPERTY = gql`
@@ -361,11 +363,12 @@ export const GET_VISITED = gql`
 
 /**************************
  *      BOARD-ARTICLE     *
+ *  @deprecated Prefer `GET_ARTICLE` / `GET_ARTICLES` from `apollo/user/article.ts` or below.
  *************************/
 
 export const GET_BOARD_ARTICLE = gql`
 	query GetBoardArticle($input: String!) {
-		getBoardArticle(articleId: $input) {
+		getBoardArticle: getArticle(articleId: $input) {
 			_id
 			articleCategory
 			articleStatus
@@ -375,28 +378,21 @@ export const GET_BOARD_ARTICLE = gql`
 			articleViews
 			articleLikes
 			articleComments
-			memberId
+			memberId: userId
 			createdAt
 			updatedAt
-			memberData {
+			memberData: authorData {
 				_id
-				memberType
-				memberStatus
-				memberAuthType
-				memberPhone
-				memberNick
-				memberFullName
-				memberImage
-				memberAddress
-				memberDesc
-				memberWarnings
-				memberBlocks
-				memberProperties
-				memberRank
-				memberPoints
-				memberLikes
-				memberViews
-				deletedAt
+				memberType: userType
+				memberNick: userNickname
+				memberFullName: userFullName
+				memberImage: userProfileImage
+				memberAddress: userLocation
+				memberDesc: userBio
+				memberRank: userRank
+				memberPoints: userRank
+				memberLikes: userLikes
+				memberViews: userViews
 				createdAt
 				updatedAt
 			}
@@ -464,28 +460,13 @@ export const GET_COMMENTS = gql`
 				memberId
 				createdAt
 				updatedAt
-				memberData {
+				memberData: authorData {
 					_id
-					memberType
-					memberStatus
-					memberAuthType
-					memberPhone
-					memberNick
-					memberFullName
-					memberImage
-					memberAddress
-					memberDesc
-					memberWarnings
-					memberBlocks
-					memberProperties
-					memberRank
-					memberPoints
-					memberLikes
-					memberViews
-					deletedAt
-					createdAt
-					updatedAt
-					accessToken
+					memberType: userType
+					memberNick: userNickname
+					memberFullName: userFullName
+					memberImage: userProfileImage
+					memberDesc: userBio
 				}
 			}
 			metaCounter {
@@ -498,9 +479,10 @@ export const GET_COMMENTS = gql`
 /**************************
  *         FOLLOW        *
  *************************/
+/** @deprecated Legacy response key — prefer `GET_USER_FOLLOWERS`. */
 export const GET_MEMBER_FOLLOWERS = gql`
 	query GetMemberFollowers($input: FollowInquiry!) {
-		getMemberFollowers(input: $input) {
+		getMemberFollowers: getUserFollowers(input: $input) {
 			list {
 				_id
 				followingId
@@ -519,27 +501,23 @@ export const GET_MEMBER_FOLLOWERS = gql`
 				}
 				followerData {
 					_id
-					memberType
-					memberStatus
-					memberAuthType
-					memberPhone
-					memberNick
-					memberFullName
-					memberImage
-					memberAddress
-					memberDesc
-					memberProperties
-					memberArticles
-					memberPoints
-					memberLikes
-					memberViews
-					memberComments
-					memberFollowings
-					memberFollowers
-					memberRank
-					memberWarnings
-					memberBlocks
-					deletedAt
+					memberType: userType
+					memberStatus: userStatus
+					memberAuthType: authProvider
+					memberPhone: userPhoneNumber
+					memberNick: userNickname
+					memberFullName: userFullName
+					memberImage: userProfileImage
+					memberAddress: userLocation
+					memberDesc: userBio
+					memberProperties: userArticles
+					memberArticles: userArticles
+					memberPoints: userRank
+					memberLikes: userLikes
+					memberViews: userViews
+					memberFollowings: followingCount
+					memberFollowers: followersCount
+					memberRank: userRank
 					createdAt
 					updatedAt
 				}
@@ -663,6 +641,7 @@ export const GET_USER = gql`
 			isOnline
 			isVerified
 			userType
+			userStatus
 			verificationStatus
 			averageRating
 			reviewCount
@@ -804,9 +783,10 @@ export const GET_ARTICLES = gql`
 	}
 `;
 
+/** @deprecated Legacy response key — prefer `GET_USER_FOLLOWINGS`. */
 export const GET_MEMBER_FOLLOWINGS = gql`
 	query GetMemberFollowings($input: FollowInquiry!) {
-		getMemberFollowings(input: $input) {
+		getMemberFollowings: getUserFollowings(input: $input) {
 			list {
 				_id
 				followingId
@@ -815,30 +795,119 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 				updatedAt
 				followingData {
 					_id
-					memberType
-					memberStatus
-					memberAuthType
-					memberPhone
-					memberNick
-					memberFullName
-					memberImage
-					memberAddress
-					memberDesc
-					memberProperties
-					memberArticles
-					memberPoints
-					memberLikes
-					memberViews
-					memberComments
-					memberFollowings
-					memberFollowers
-					memberRank
-					memberWarnings
-					memberBlocks
-					deletedAt
+					memberType: userType
+					memberStatus: userStatus
+					memberAuthType: authProvider
+					memberPhone: userPhoneNumber
+					memberNick: userNickname
+					memberFullName: userFullName
+					memberImage: userProfileImage
+					memberAddress: userLocation
+					memberDesc: userBio
+					memberProperties: userArticles
+					memberArticles: userArticles
+					memberPoints: userRank
+					memberLikes: userLikes
+					memberViews: userViews
+					memberFollowings: followingCount
+					memberFollowers: followersCount
+					memberRank: userRank
 					createdAt
 					updatedAt
-					accessToken
+				}
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+				meFollowed {
+					followingId
+					followerId
+					myFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_USER_FOLLOWERS = gql`
+	query GetUserFollowers($input: FollowInquiry!) {
+		getUserFollowers(input: $input) {
+			list {
+				_id
+				followingId
+				followerId
+				createdAt
+				updatedAt
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+				meFollowed {
+					followingId
+					followerId
+					myFollowing
+				}
+				followerData {
+					_id
+					userType
+					userStatus
+					authProvider
+					userPhoneNumber
+					userNickname
+					userFullName
+					userProfileImage
+					userLocation
+					userBio
+					userArticles
+					userLikes
+					userViews
+					followingCount
+					followersCount
+					userRank
+					createdAt
+					updatedAt
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_USER_FOLLOWINGS = gql`
+	query GetUserFollowings($input: FollowInquiry!) {
+		getUserFollowings(input: $input) {
+			list {
+				_id
+				followingId
+				followerId
+				createdAt
+				updatedAt
+				followingData {
+					_id
+					userType
+					userStatus
+					authProvider
+					userPhoneNumber
+					userNickname
+					userFullName
+					userProfileImage
+					userLocation
+					userBio
+					userArticles
+					userLikes
+					userViews
+					followingCount
+					followersCount
+					userRank
+					createdAt
+					updatedAt
 				}
 				meLiked {
 					memberId

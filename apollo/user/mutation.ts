@@ -109,24 +109,22 @@ export const LIKE_TARGET_USER = gql`
 
 export const LIKE_TARGET_MEMBER = gql`
 	mutation LikeTargetMember($input: String!) {
-		likeTargetMember(memberId: $input) {
+		likeTargetMember: likeTargetUser(userId: $input) {
 			_id
-			memberType
-			memberStatus
-			memberAuthType
-			memberPhone
-			memberNick
-			memberFullName
-			memberImage
-			memberAddress
-			memberDesc
-			memberWarnings
-			memberBlocks
-			memberProperties
-			memberRank
-			memberPoints
-			memberLikes
-			memberViews
+			memberType: userType
+			memberStatus: userStatus
+			memberAuthType: authProvider
+			memberPhone: userPhoneNumber
+			memberNick: userNickname
+			memberFullName: userFullName
+			memberImage: userProfileImage
+			memberAddress: userLocation
+			memberDesc: userBio
+			memberProperties: userArticles
+			memberRank: userRank
+			memberPoints: userRank
+			memberLikes: userLikes
+			memberViews: userViews
 			deletedAt
 			createdAt
 			updatedAt
@@ -231,8 +229,8 @@ export const LIKE_TARGET_PROPERTY = gql`
  *************************/
 
 export const CREATE_BOARD_ARTICLE = gql`
-	mutation CreateBoardArticle($input: BoardArticleInput!) {
-		createBoardArticle(input: $input) {
+	mutation CreateBoardArticle($input: ArticleInput!) {
+		createBoardArticle: createArticle(input: $input) {
 			_id
 			articleCategory
 			articleStatus
@@ -241,7 +239,7 @@ export const CREATE_BOARD_ARTICLE = gql`
 			articleImage
 			articleViews
 			articleLikes
-			memberId
+			memberId: userId
 			createdAt
 			updatedAt
 		}
@@ -249,8 +247,8 @@ export const CREATE_BOARD_ARTICLE = gql`
 `;
 
 export const UPDATE_BOARD_ARTICLE = gql`
-	mutation UpdateBoardArticle($input: BoardArticleUpdate!) {
-		updateBoardArticle(input: $input) {
+	mutation UpdateBoardArticle($input: ArticleUpdate!) {
+		updateBoardArticle: updateArticle(input: $input) {
 			_id
 			articleCategory
 			articleStatus
@@ -259,7 +257,7 @@ export const UPDATE_BOARD_ARTICLE = gql`
 			articleImage
 			articleViews
 			articleLikes
-			memberId
+			memberId: userId
 			createdAt
 			updatedAt
 		}
@@ -268,7 +266,7 @@ export const UPDATE_BOARD_ARTICLE = gql`
 
 export const LIKE_TARGET_BOARD_ARTICLE = gql`
 	mutation LikeTargetBoardArticle($input: String!) {
-		likeTargetBoardArticle(articleId: $input) {
+		likeTargetBoardArticle: likeTargetArticle(articleId: $input) {
 			_id
 			articleCategory
 			articleStatus
@@ -277,7 +275,7 @@ export const LIKE_TARGET_BOARD_ARTICLE = gql`
 			articleImage
 			articleViews
 			articleLikes
-			memberId
+			memberId: userId
 			createdAt
 			updatedAt
 		}
@@ -440,4 +438,4 @@ export const CREATE_REVIEW = gql`
 	}
 `;
 
-export { INCREMENT_ARTICLE_VIEW, SAVE_ARTICLE, UNSAVE_ARTICLE } from './article';
+export { INCREMENT_ARTICLE_VIEW, SAVE_ARTICLE, UNSAVE_ARTICLE, CREATE_ARTICLE, UPDATE_ARTICLE, LIKE_TARGET_ARTICLE } from './article';

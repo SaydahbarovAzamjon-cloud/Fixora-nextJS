@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Stack, Typography } from '@mui/material';
-import { BoardArticle } from '../../types/board-article/board-article';
+import { Article } from '../../types/fixora/fixora';
 import Moment from 'react-moment';
 import { REACT_APP_API_URL } from '../../config';
 import { useReactiveVar } from '@apollo/client';
@@ -14,7 +14,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { CLIENT_MY_PAGE } from '../../utils/clientMyPageRoute';
 
 interface CommunityCardProps {
-	boardArticle: BoardArticle;
+	boardArticle: Article;
 	size?: string;
 	likeArticleHandler: any;
 }
@@ -24,6 +24,8 @@ const CommunityCard = (props: CommunityCardProps) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const authorId = boardArticle?.authorData?._id ?? boardArticle?.memberData?._id;
+	const authorName = boardArticle?.authorData?.userNickname ?? boardArticle?.memberData?.memberNick;
 	const imagePath: string = boardArticle?.articleImage
 		? boardArticle.articleImage.startsWith('http')
 			? boardArticle.articleImage
@@ -31,7 +33,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 		: '/img/community/communityImg.png';
 
 	/** HANDLERS **/
-	const chooseArticleHandler = (e: React.SyntheticEvent, boardArticle: BoardArticle) => {
+	const chooseArticleHandler = (e: React.SyntheticEvent, boardArticle: Article) => {
 		router.push(
 			{
 				pathname: '/community/detail',
@@ -65,10 +67,10 @@ const CommunityCard = (props: CommunityCardProps) => {
 							className="desc"
 							onClick={(e:any) => {
 								e.stopPropagation();
-								goMemberPage(boardArticle?.memberData?._id as string);
+								goMemberPage(authorId as string);
 							}}
 						>
-							{boardArticle?.memberData?.memberNick}
+							{authorName}
 						</Typography>
 						<Typography className="title">{boardArticle?.articleTitle}</Typography>
 					</Stack>

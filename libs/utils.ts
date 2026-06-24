@@ -18,28 +18,34 @@ export const likeTargetPropertyHandler = async (likeTargetProperty: any, id: str
 	}
 };
 
-export const likeTargetBoardArticleHandler = async (likeTargetBoardArticle: any, id: string) => {
+export const likeTargetArticleHandler = async (likeTargetArticle: any, id: string) => {
 	try {
-		await likeTargetBoardArticle({
+		await likeTargetArticle({
 			variables: {
 				input: id,
 			},
 		});
 	} catch (err: any) {
-		console.log('ERROR, likeTargetBoardArticleHandler:', err.message);
+		console.log('ERROR, likeTargetArticleHandler:', err.message);
 		sweetMixinErrorAlert(err.message).then();
 	}
 };
 
-export const likeTargetMemberHandler = async (likeTargetMember: any, id: string) => {
+/** @deprecated Use `likeTargetArticleHandler` */
+export const likeTargetBoardArticleHandler = likeTargetArticleHandler;
+
+export const likeTargetUserHandler = async (likeTargetUser: any, id: string) => {
 	try {
-		await likeTargetMember({
+		await likeTargetUser({
 			variables: {
-				input: id,
+				userId: id,
 			},
 		});
 	} catch (err: any) {
-		console.log('ERROR, likeTargetMemberHandler:', err.message);
+		console.log('ERROR, likeTargetUserHandler:', err.message);
 		sweetMixinErrorAlert(err.message).then();
 	}
 };
+
+/** @deprecated Use `likeTargetUserHandler` */
+export const likeTargetMemberHandler = likeTargetUserHandler;

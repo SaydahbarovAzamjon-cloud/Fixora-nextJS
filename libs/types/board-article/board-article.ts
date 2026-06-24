@@ -1,24 +1,12 @@
-import { BoardArticleCategory, BoardArticleStatus } from '../../enums/board-article.enum';
-import { Member } from '../member/member';
-import { MeLiked, TotalCounter } from '../property/property';
+/**
+ * @deprecated Use types from `libs/types/fixora/fixora.ts`.
+ */
+import { TotalCounter } from '../property/property';
+import type { Article, ArticleCategory, ArticleStatus } from '../fixora/fixora';
 
-export interface BoardArticle {
-	_id: string;
-	articleCategory: BoardArticleCategory;
-	articleStatus: BoardArticleStatus;
-	articleTitle: string;
-	articleContent: string;
-	articleImage: string;
-	articleViews: number;
-	articleLikes: number;
-	articleComments: number;
-	memberId: string;
-	createdAt: Date;
-	updatedAt: Date;
-	/** from aggregation **/
-	meLiked?: MeLiked[];
-	memberData?: Member;
-}
+export type BoardArticle = Article;
+export type BoardArticleCategory = ArticleCategory;
+export type BoardArticleStatus = ArticleStatus;
 
 export interface BoardArticles {
 	list: BoardArticle[];

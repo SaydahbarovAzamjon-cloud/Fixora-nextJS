@@ -3,11 +3,10 @@ import Link from 'next/link';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Stack, Typography } from '@mui/material';
 import CommunityCard from './CommunityCard';
-import { BoardArticle } from '../../types/board-article/board-article';
+import { Article } from '../../types/fixora/fixora';
 import { useQuery } from '@apollo/client';
-import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
+import { GET_ARTICLES } from '../../../apollo/user/query';
 import { T } from '../../types/common';
-import { BoardArticleCategory } from '../../enums/board-article.enum';
 
 const CommunityBoards = () => {
 	const device = useDeviceDetect();
@@ -16,8 +15,8 @@ const CommunityBoards = () => {
 		sort: 'articleViews',
 		direction: 'DESC',
 	});
-	const [newsArticles, setNewsArticles] = useState<BoardArticle[]>([]);
-	const [freeArticles, setFreeArticles] = useState<BoardArticle[]>([]);
+	const [newsArticles, setNewsArticles] = useState<Article[]>([]);
+	const [freeArticles, setFreeArticles] = useState<Article[]>([]);
 
 	/** APOLLO REQUESTS **/
 	const {
@@ -25,12 +24,12 @@ const CommunityBoards = () => {
 		data: getNewsArticlesData,
 		error: getNewsArticlesError,
 		refetch: getNewsArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLES, {
+	} = useQuery(GET_ARTICLES, {
 		fetchPolicy: 'network-only',
-		variables: { input: { ...searchCommunity, limit: 6, search: { articleCategory: BoardArticleCategory.NEWS } } },
+		variables: { input: { ...searchCommunity, limit: 6, search: { articleCategory: 'NEWS' } } },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setNewsArticles(data?.getBoardArticles?.list);
+			setNewsArticles(data?.getArticles?.list);
 		},
 	});
 
@@ -39,12 +38,12 @@ const {
 	data: getFreeArticlesData,
 	error: getFreeArticlesError,
 	refetch: getFreeArticlesRefetch,
-} = useQuery(GET_BOARD_ARTICLES, {
+} = useQuery(GET_ARTICLES, {
 	fetchPolicy: 'network-only',
-	variables: { input: { ...searchCommunity, limit: 3, search: { articleCategory: BoardArticleCategory.FREE } } },
+	variables: { input: { ...searchCommunity, limit: 3, search: { articleCategory: 'FREE' } } },
 	notifyOnNetworkStatusChange: true,
 	onCompleted: (data: T) => {
-    setFreeArticles(data?.getBoardArticles?.list);
+    setFreeArticles(data?.getArticles?.list);
 },
 });
 

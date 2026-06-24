@@ -368,6 +368,17 @@ export interface Article {
 	updatedAt?: string;
 	deletedAt?: string | null;
 	authorData?: ArticleAuthor;
+	/**
+	 * Legacy compatibility alias used by older community/member cards.
+	 * Apollo queries map `authorData` -> `memberData` during P3-13 migration.
+	 */
+	memberData?: {
+		_id: string;
+		memberNick?: string;
+		memberFullName?: string;
+		memberImage?: string;
+		memberDesc?: string;
+	};
 	meLiked?: MeLiked[];
 	meSaved?: MeSaved[];
 }

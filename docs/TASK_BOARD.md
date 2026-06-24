@@ -87,7 +87,7 @@
 |----|------|--------|-------|
 | P3-11 | Rename UI copy: Property → Device | ✅ Done | Legacy `common.json` keys retargeted; MVP routes already Fixora-branded |
 | P3-12 | Rename UI copy: Agent → Technician | ✅ Done | Same i18n pass (`Agents` → Technicians, etc.) |
-| P3-13 | Update Apollo queries for Fixora schema | 🔄 In Progress | MVP: `likeTargetUser` on search/technicians; `getUserFollowers` on tech notifications; duplicate Apollo WS removed. Legacy routes unchanged. |
+| P3-13 | Update Apollo queries for Fixora schema | ✅ Done | MVP + legacy compat: `getUser`/`getTechnicians`/`getArticles`/`getUserFollowers`/`likeTargetUser`/`likeTargetArticle`; legacy `/member`/`/agent`/`/mypage` components migrated to native Fixora ops where applicable; Nestar `/property` queries retained with schema note (no FixoraB equivalent); `yarn build` ✅ |
 | P3-14 | ON_SITE "Coming Soon" UI | ✅ Done | `BookingServiceTypeOptions` on profile + booking form; ON_SITE disabled badge (BIZ-01) |
 | P3-15 | Admin UI (incremental) | ✅ Done | Reference screenshots + burgundy theme; see `/_admin/*` |
 | P3-15a | Admin shell + menu | ✅ Done | `AdminLayout`, `AdminSidebar`, `AdminHeader` |
@@ -125,7 +125,7 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** **P3-13** Apollo migration (remaining) OR **Phase 5** polish — **Phase 3 mobile PM-01…PM-12 ✅** · **production build ✅**
+**Next task:** **Phase 5** polish (`P4-01`…`P4-07`) — **Phase 4 Migration ✅** · **Phase 3 mobile PM-01…PM-12 ✅** · **production build ✅**
 
 **Backend wiring:** Phase 0–4 ✅ — `docs/FIXORAF_SYNC.md`
 

@@ -1,9 +1,7 @@
-import { BoardArticleStatus } from '../../enums/board-article.enum';
+/**
+ * @deprecated Use `ArticleUpdate` from `libs/types/fixora/fixora.ts`.
+ */
+import { ArticleStatus, ArticleUpdate } from '../fixora/fixora';
 
-export interface BoardArticleUpdate {
-	_id: string;
-	articleStatus?: BoardArticleStatus;
-	articleTitle?: string;
-	articleContent?: string;
-	articleImage?: string;
-}
+export type BoardArticleStatus = ArticleStatus;
+export type BoardArticleUpdate = ArticleUpdate;

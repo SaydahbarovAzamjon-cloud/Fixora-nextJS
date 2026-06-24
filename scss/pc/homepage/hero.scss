@@ -105,9 +105,14 @@
 
 		&__scene {
 			position: absolute;
-			inset: 0;
+			top: 0;
+			left: 0;
+			right: 0;
+			/* Fixed visual band — do not grow when results/classification expand hero height */
+			height: clamp(640px, 68vh, 780px);
 			overflow: hidden;
 			z-index: 0;
+			pointer-events: none;
 
 			/* workshop silhouettes in the far corners */
 			&::before,

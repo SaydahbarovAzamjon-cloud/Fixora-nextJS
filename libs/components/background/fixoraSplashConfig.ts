@@ -1,7 +1,8 @@
 import type { FixoraThemeMode } from '../../theme/fixoraThemeMode';
 
 export const FIXORA_SPLASH_DARK_PALETTE = ['#FF6B35', '#FF7A45', '#FF8C42'] as const;
-export const FIXORA_SPLASH_LIGHT_PALETTE = ['#FF8A65', '#FF7043', '#FFAB91'] as const;
+/** Hero light PNG glow + brand rose — avoid orange-heavy splash on light mode */
+export const FIXORA_SPLASH_LIGHT_PALETTE = ['#E11D48', '#F43F5E', '#F472B6', '#FB7185'] as const;
 
 export type FixoraSplashIntensity = 'desktop' | 'mobile';
 
@@ -25,6 +26,6 @@ export function getFixoraSplashProps(mode: FixoraThemeMode, intensity: FixoraSpl
 		TRANSPARENT: true,
 		RAINBOW_MODE: false,
 		colorPalette: [...(isLight ? FIXORA_SPLASH_LIGHT_PALETTE : FIXORA_SPLASH_DARK_PALETTE)],
-		colorIntensity: isLight ? 0.22 : 0.14,
+		colorIntensity: isLight ? 0.26 : 0.14,
 	} as const;
 }

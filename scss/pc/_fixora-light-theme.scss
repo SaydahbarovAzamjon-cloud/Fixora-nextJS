@@ -26,6 +26,7 @@
 
 			&__device-backdrop {
 				opacity: 1;
+				overflow: hidden;
 
 				&::before,
 				&::after {
@@ -34,24 +35,26 @@
 				}
 			}
 
+			/* Baked-in glow in light PNG — avoid extra ring that reads as a frame */
 			&__device-glow {
-				display: block;
-				background: radial-gradient(
-					ellipse,
-					rgba(225, 29, 72, 0.14) 0%,
-					rgba(225, 29, 72, 0.06) 45%,
-					transparent 70%
-				);
-				filter: blur(30px);
-				animation: fixora-hero-glow-pulse 4s ease-in-out infinite;
-				opacity: 1;
+				display: none;
 			}
 
 			&__device-img {
-				opacity: 0.85;
-				filter: drop-shadow(0 32px 56px rgba(193, 18, 31, 0.12));
-				mask-image: radial-gradient(ellipse 92% 95% at 50% 50%, #000 62%, transparent 96%);
-				-webkit-mask-image: radial-gradient(ellipse 92% 95% at 50% 50%, #000 62%, transparent 96%);
+				opacity: 1;
+				filter: none;
+				border: none;
+				outline: none;
+				box-shadow: none;
+				/* Fade all four edges so the PNG rectangle melts into splash/hero bg */
+				-webkit-mask-image:
+					linear-gradient(to bottom, transparent 0%, #000 11%, #000 84%, transparent 100%),
+					linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%);
+				-webkit-mask-composite: source-in;
+				mask-image:
+					linear-gradient(to bottom, transparent 0%, #000 11%, #000 84%, transparent 100%),
+					linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%);
+				mask-composite: intersect;
 			}
 
 			&__particle {

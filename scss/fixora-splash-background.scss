@@ -17,7 +17,12 @@
 	}
 
 	&--light &__surface {
-		background: linear-gradient(180deg, #fff8f5 0%, #ffefe7 52%, #ffe4d6 100%);
+		background: linear-gradient(
+			180deg,
+			#fffafb 0%,
+			#fff5f7 45%,
+			#ffeff3 100%
+		);
 	}
 
 	&__fluid {

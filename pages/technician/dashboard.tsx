@@ -26,10 +26,12 @@ import AddRounded from '@mui/icons-material/AddRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
 import { GET_INCOMING_REQUESTS, GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
-import { GET_USER, GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
+import { GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { EXPORT_EARNINGS_REPORT } from '../../apollo/user/payout';
 import { EarningsReportPeriod } from '../../libs/types/fixora/fixora';
 import { userVar } from '../../apollo/store';
+import { useTechnicianSelfProfile } from '../../libs/hooks/useTechnicianSelfProfile';
+import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../../libs/apollo/technicianQueryContext';
 import AddScheduleModal, { NewScheduleItem } from '../../libs/components/technician/AddScheduleModal';
 import { CREATE_SCHEDULE_ITEM, DELETE_SCHEDULE_ITEM, GET_MY_SCHEDULE } from '../../apollo/user/schedule';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
@@ -203,12 +205,16 @@ const TechnicianDashboard: NextPage = () => {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: technicianBookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'network-only',
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: paymentsData } = useQuery(GET_MY_PAYMENTS, {
@@ -216,13 +222,11 @@ const TechnicianDashboard: NextPage = () => {
 		variables: { input: { page: 1, limit: 200, search: {} } },
 		fetchPolicy: 'network-only',
 		pollInterval: 30000,
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
-	const { data: userData, refetch: refetchUser } = useQuery(GET_USER, {
-		skip: !user?._id,
-		variables: { userId: user?._id },
-		fetchPolicy: 'network-only',
-	});
+	const { profile: technicianUser, refetch: refetchUser } = useTechnicianSelfProfile(user?._id);
 
 	const {
 		data: scheduleData,
@@ -233,6 +237,8 @@ const TechnicianDashboard: NextPage = () => {
 		skip: !user?._id,
 		variables: { input: scheduleInput },
 		fetchPolicy: 'network-only',
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: reviewsData } = useQuery(GET_TECHNICIAN_REVIEWS, {
@@ -247,12 +253,13 @@ const TechnicianDashboard: NextPage = () => {
 			},
 		},
 		fetchPolicy: 'network-only',
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const incomingRequests = useMemo(() => incomingRequestsData?.getIncomingRequests?.list ?? [], [incomingRequestsData]);
 	const bookings = useMemo(() => technicianBookingsData?.getTechnicianBookings?.list ?? [], [technicianBookingsData]);
 	const payments = useMemo(() => paymentsData?.getMyPayments?.list ?? [], [paymentsData]);
-	const technicianUser = useMemo(() => userData?.getUser ?? null, [userData]);
 	const reviews = useMemo(() => reviewsData?.getTechnicianReviews?.list ?? [], [reviewsData]);
 	const customSchedule = useMemo(() => scheduleData?.getMySchedule?.list ?? [], [scheduleData]);
 	const usePaymentData = hasRealPayments(payments);
@@ -426,7 +433,7 @@ const TechnicianDashboard: NextPage = () => {
 			{/* Welcome Section */}
 			<div className="fixora-tech-dashboard__welcome">
 				<div>
-					<div className="fixora-tech-dashboard__date">
+					<div className="fixora-tech-dashboard__date" suppressHydrationWarning>
 						{new Date().toLocaleDateString(dateLocale(locale), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
 					</div>
 					<h1 className="fixora-tech-dashboard__greeting">

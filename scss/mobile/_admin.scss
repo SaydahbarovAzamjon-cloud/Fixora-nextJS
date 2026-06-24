@@ -1,36 +1,30 @@
 @import '/scss/variables.scss';
 @import 'mixins';
 
-@media (max-width: $fixora-bp-tablet) {
-	.fixora-admin-layout {
-		.fixora-admin-mobile-menu {
-			@include fixora-tap-target;
-			top: calc(12px + var(--fixora-safe-top));
-			left: calc(12px + var(--fixora-safe-left));
-		}
+$admin-mobile-topbar-height: 56px;
 
-		.fixora-admin-main {
-			padding-top: calc(56px + var(--fixora-safe-top));
+@media (max-width: $fixora-bp-tablet) {
+	.fixora-admin-layout--mobile {
+		.fixora-admin-mobile-topbar {
+			&__menu,
+			.fixora-admin-header__bell,
+			.fixora-admin-header__user--avatar-only {
+				@include fixora-tap-target;
+				@include fixora-touch-active;
+			}
 		}
 
 		.fixora-admin-page {
 			padding: 12px var(--fixora-mobile-gutter) calc(20px + var(--fixora-safe-bottom));
-		}
-
-		.fixora-admin-table-wrap {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-			@include fixora-scrollbar;
-		}
-
-		.fixora-admin-table {
-			min-width: 640px;
+			max-width: 100%;
+			box-sizing: border-box;
 		}
 
 		.fixora-admin-stat-card,
 		.fixora-admin-filter-tabs__tab,
 		.fixora-admin-btn,
-		.fixora-admin-verification__actions .fixora-admin-btn {
+		.fixora-admin-verification__actions .fixora-admin-btn,
+		.fixora-admin-sidebar__nav-item {
 			@include fixora-touch-active;
 		}
 
@@ -38,9 +32,45 @@
 			min-height: 44px;
 		}
 
-		.fixora-admin-header__search {
-			min-width: 0;
-			flex: 1;
+		.fixora-admin-search--header .fixora-input__control {
+			font-size: 16px;
+		}
+
+		.fixora-admin-header__user-menu {
+			z-index: 140;
+		}
+
+		.fixora-admin-header__notif-dropdown {
+			z-index: 140;
+		}
+	}
+}
+
+@media (max-width: $fixora-bp-phone) {
+	.fixora-admin-layout--mobile {
+		.fixora-admin-header__title {
+			font-size: 20px;
+		}
+
+		.fixora-admin-stat-card__value {
+			font-size: 22px;
+		}
+
+		.fixora-admin-table {
+			min-width: 480px;
+		}
+	}
+}
+
+@media (max-width: $fixora-bp-tablet) and (orientation: landscape) {
+	.fixora-admin-layout--mobile {
+		.fixora-admin-sidebar {
+			width: min(280px, 72vw);
+		}
+
+		.fixora-admin-verification__list {
+			max-height: 40dvh;
+			overflow-y: auto;
 		}
 	}
 }

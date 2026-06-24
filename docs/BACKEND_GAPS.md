@@ -2,7 +2,7 @@
 
 > **Maqsad:** FixoraF da dizayn/UI bor, FixoraB da logika/API yo‘q yoki qisman bo‘lgan joylarni yagona ro‘yxatda saqlash.  
 > **Kim yangilaydi:** Backend agent gap hal qilganda `Status` → `DONE` + `FRONTEND_API.md` / `docs/schema.gql` sync.  
-> **Last updated:** 2026-06-22 (Phase 4 complete)
+> **Last updated:** 2026-06-24 (GAP-113 technician self-profile workaround)
 
 **Bog‘liq hujjatlar:**
 - GraphQL: [`FRONTEND_API.md`](FRONTEND_API.md), [`docs/schema.gql`](schema.gql)
@@ -115,6 +115,10 @@ Contract: [`PAYOUT_API.md`](PAYOUT_API.md)
 | GAP-021 | Export Report | `exportEarningsReport` | `DONE` | ✅ |
 
 **Ishlaydi:** Weekly earnings, booking schedule, `updateUser.isOnline`, requests, active jobs.
+
+| ID | UI | Backend kerak | Status | Notes |
+|----|-----|---------------|--------|-------|
+| GAP-113 | Technician portal self-profile (PENDING signup) | `getUser` is public + APPROVED-only | `WORKAROUND` | FixoraF: settings always queries `GET_TECHNICIAN_SETTINGS`; server-synced `technicianSettingsCache` (localStorage) after query/mutation; JWT fallback for sparse fields until `getMyProfile` bearer query |
 
 ---
 

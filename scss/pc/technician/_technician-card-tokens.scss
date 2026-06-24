@@ -1,0 +1,62 @@
+/** Technician portal — shared tokens (alias client :root) */
+
+$tech-card-bg: var(--fixora-card-gradient);
+$tech-card-bg-hover: var(--fixora-card-gradient-hover);
+$tech-card-border: var(--fixora-border-subtle);
+$tech-card-border-hover: var(--fixora-border);
+$tech-card-shadow:
+	inset 0 1px 0 rgba(255, 255, 255, 0.04),
+	0 4px 18px rgba(0, 0, 0, 0.22);
+$tech-card-shadow-hover:
+	inset 0 1px 0 rgba(255, 255, 255, 0.05),
+	0 6px 22px rgba(115, 12, 30, 0.16);
+
+$tech-primary: var(--fixora-primary);
+$tech-primary-hover: var(--fixora-primary-hover);
+$tech-primary-dark: var(--fixora-primary-dark);
+$tech-primary-soft: var(--fixora-primary-soft);
+$tech-surface: var(--fixora-surface);
+$tech-surface-elevated: var(--fixora-surface-elevated);
+$tech-input-border: var(--fixora-border-subtle);
+$tech-shell-bg: var(--fixora-navbar-bg);
+$tech-page-bg: var(--fixora-bg);
+$tech-text-primary: var(--fixora-text-primary);
+$tech-text-secondary: var(--fixora-text-secondary);
+$tech-text-muted: var(--fixora-text-muted);
+
+@mixin fixora-tech-card-surface {
+	background: $tech-card-bg;
+	border-color: $tech-card-border;
+	box-shadow: $tech-card-shadow;
+}
+
+@mixin fixora-tech-card-surface-hover {
+	background: $tech-card-bg-hover;
+	border-color: $tech-card-border-hover;
+	box-shadow: $tech-card-shadow-hover;
+}
+
+@mixin fixora-tech-input-surface {
+	background: $tech-surface;
+	border: 1px solid $tech-input-border;
+	color: $tech-text-secondary;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+	&:focus {
+		border-color: $tech-primary;
+		box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+		outline: none;
+	}
+}
+
+@mixin fixora-tech-primary-btn {
+	background: linear-gradient(135deg, $tech-primary 0%, $tech-primary-dark 100%);
+	color: #fff;
+	border: none;
+	box-shadow: 0 4px 14px rgba(115, 12, 30, 0.25);
+
+	&:hover {
+		background: linear-gradient(135deg, $tech-primary-hover 0%, $tech-primary 100%);
+		box-shadow: 0 6px 20px rgba(115, 12, 30, 0.35);
+	}
+}

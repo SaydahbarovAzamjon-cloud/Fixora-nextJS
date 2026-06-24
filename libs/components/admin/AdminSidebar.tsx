@@ -33,9 +33,10 @@ interface NavItem {
 
 interface AdminSidebarProps {
 	className?: string;
+	onNavigate?: () => void;
 }
 
-const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '', onNavigate }) => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
@@ -77,9 +78,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
 		router.push('/login').then();
 	};
 
+	const navigate = (route: string) => {
+		onNavigate?.();
+		router.push(route);
+	};
+
 	return (
 		<aside className={`fixora-admin-sidebar ${className}`.trim()}>
-			<button type="button" className="fixora-admin-sidebar__brand" onClick={() => router.push('/_admin')}>
+			<button type="button" className="fixora-admin-sidebar__brand" onClick={() => navigate('/_admin')}>
 				<FixoraLogo size="sm" className="fixora-admin-sidebar__logo" />
 				<div className="fixora-admin-sidebar__brand-text">
 					<span className="fixora-admin-sidebar__brand-name">Fixora</span>
@@ -95,7 +101,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
 							key={item.id}
 							type="button"
 							className={`fixora-admin-sidebar__nav-item${active ? ' fixora-admin-sidebar__nav-item--active' : ''}`}
-							onClick={() => router.push(item.route)}
+							onClick={() => navigate(item.route)}
 						>
 							<span className="fixora-admin-sidebar__nav-icon">{item.icon}</span>
 							<span className="fixora-admin-sidebar__nav-label">{t(item.labelKey)}</span>

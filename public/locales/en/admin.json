@@ -11,7 +11,9 @@
 		"settings": "Settings",
 		"superAdmin": "SUPER ADMIN",
 		"admin": "Admin",
-		"logout": "Log out"
+		"logout": "Log out",
+		"openMenu": "Open menu",
+		"closeMenu": "Close menu"
 	},
 	"header": {
 		"searchPlaceholder": "Search anything...",

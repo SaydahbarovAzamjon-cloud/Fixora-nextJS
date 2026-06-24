@@ -6,6 +6,8 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton } from '../ui';
 import AuthHeading from './AuthHeading';
 import { fixoraTechnicianSignup, loadTechDraft, saveTechDraft } from '../../auth/fixoraAuth';
+import { getTechIdFile, getTechPhotoFile, setTechIdFile } from '../../auth/techOnboardingFiles';
+import { readFileAsDataUrl } from '../../utils/onboardingFileStorage';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 
 const TechIdUpload = () => {
@@ -30,24 +32,26 @@ const TechIdUpload = () => {
 		setFileName(draft.idFileName ?? '');
 	}, []);
 
-	const persistFile = (file: File) => {
+	const persistFile = (file: File, idPreviewDataUrl?: string) => {
 		const current = loadTechDraft();
 		if (!current?.email || !current?.fullName) return;
 		saveTechDraft({
 			...current,
 			idFileName: file.name,
+			...(idPreviewDataUrl ? { idPreviewDataUrl } : {}),
 		});
 	};
 
 	const handleFile = (file: File | undefined) => {
 		if (!file) return;
 		setFileName(file.name);
+		setTechIdFile(file);
 		setFilePreview((prev) => {
 			if (prev) URL.revokeObjectURL(prev);
 			if (file.type.startsWith('image/')) return URL.createObjectURL(file);
 			return null;
 		});
-		persistFile(file);
+		void readFileAsDataUrl(file).then((idPreviewDataUrl) => persistFile(file, idPreviewDataUrl)).catch(() => persistFile(file));
 	};
 
 	const handleSubmit = useCallback(async () => {
@@ -56,10 +60,41 @@ const TechIdUpload = () => {
 			await router.push('/register/technician/1');
 			return;
 		}
+		if (!fileName) return;
+		const idReady = getTechIdFile() || currentDraft.idPreviewDataUrl;
+		if (!idReady) {
+			await sweetMixinErrorAlert(t('tech.idRequired'));
+			return;
+		}
 		setLoading(true);
 		try {
-			await fixoraTechnicianSignup({ ...currentDraft, idFileName: fileName });
-			await router.push('/technician/dashboard');
+			const photoFile = getTechPhotoFile();
+			let photoDataUrl = currentDraft.photoDataUrl;
+			if (photoFile && !photoDataUrl) {
+				try {
+					photoDataUrl = await readFileAsDataUrl(photoFile);
+				} catch {
+					photoDataUrl = undefined;
+				}
+			}
+			const idFile = getTechIdFile();
+			let idPreviewDataUrl = currentDraft.idPreviewDataUrl;
+			if (idFile && !idPreviewDataUrl) {
+				try {
+					idPreviewDataUrl = await readFileAsDataUrl(idFile);
+				} catch {
+					idPreviewDataUrl = undefined;
+				}
+			}
+			const draft = {
+				...currentDraft,
+				idFileName: fileName,
+				photoDataUrl,
+				idPreviewDataUrl,
+			};
+			saveTechDraft(draft);
+			await fixoraTechnicianSignup(draft);
+			await router.push('/register/technician/pending');
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Submission failed');
 		} finally {

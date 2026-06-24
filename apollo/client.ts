@@ -5,6 +5,7 @@ import { onError } from '@apollo/client/link/error';
 import { getJwtToken } from '../libs/auth';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
+import { isNoDataFoundGraphQLError } from '../libs/utils/graphqlErrors';
 import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -59,9 +60,7 @@ function createIsomorphicLink() {
 				const isAuthError = isMissingTokenError(message);
 
 				const suppressAlert = operation.getContext().suppressErrorAlert;
-				const isLookupMiss =
-					path?.[0] === 'getUser' &&
-					(message === 'No data found!' || /no data found/i.test(message));
+				const isLookupMiss = isNoDataFoundGraphQLError(message);
 
 				if (isRoleError || isAuthError || isLookupMiss) {
 					console.debug(`[GraphQL auth]: ${message}`);

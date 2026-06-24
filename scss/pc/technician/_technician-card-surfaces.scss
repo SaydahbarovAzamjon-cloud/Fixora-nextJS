@@ -1,0 +1,91 @@
+/**
+ * Technician dashboard — unified burgundy card colors.
+ * Colors only — size, layout, spacing, and content structure unchanged.
+ */
+@import '/scss/pc/technician/_technician-card-tokens.scss';
+@import '/scss/pc/homepage/fixora-card-surface.scss';
+
+#pc-wrap-technician,
+.fixora-technician-mobile {
+	/* Shared card shells */
+	.fixora-tech-stat-card,
+	.fixora-tech-card,
+	.fixora-tech-review-card,
+	.fts-card,
+	.fts-backend-pending,
+	.fixora-ea-stat,
+	.fixora-ea-card,
+	.fixora-an-kpi,
+	.fixora-an-card,
+	.fixora-an-client,
+	.fixora-requests-detail__card,
+	.fixora-requests-detail__photos,
+	.fixora-requests-detail__description,
+	.fixora-active-jobs-list,
+	.fixora-job-detail,
+	.fixora-jobs-infocard,
+	.fixora-jobs-timeline-card,
+	.fixora-job-card,
+	.fixora-conversation-list,
+	.fixora-message-thread,
+	.fixora-notifications-list,
+	.fixora-notif-card,
+	.fixora-technician-profile-form,
+	.fixora-pp-header,
+	.fixora-pp-stories-card,
+	.fixora-pp-panel,
+	.fixora-pp-service,
+	.fixora-pp-page .fixora-tip-card,
+	.fixora-pp-port,
+	.ftma-summary__item,
+	.ftma-card,
+	.ftma-modal,
+	.ftwa-card,
+	.ftwa-modal,
+	.fth-card {
+		@include fixora-tech-card-surface;
+	}
+
+	/* Passive card hover — public profile + glass surfaces */
+	.fixora-pp-header,
+	.fixora-pp-stories-card,
+	.fixora-pp-panel,
+	.fixora-pp-service {
+		@include fixora-card-hover-passive {
+			@include fixora-tech-card-surface-hover;
+			box-shadow: $tech-card-shadow;
+		}
+	}
+
+	.fixora-pp-page .fixora-tip-card {
+		&:hover {
+			@include fixora-tech-card-surface-hover;
+		}
+	}
+
+	.fixora-pp-port {
+		&:hover {
+			@include fixora-tech-card-surface-hover;
+		}
+	}
+
+	.fixora-notif-card {
+		&:hover {
+			background: var(--fixora-card-gradient-hover);
+		}
+	}
+
+	.fixora-job-card {
+		&:hover:not(.fixora-job-card--active) {
+			@include fixora-tech-card-surface-hover;
+		}
+	}
+
+	.fixora-tech-dashboard__welcome {
+		@include fixora-card-hover-passive {
+			background: var(--fixora-card-gradient-hover);
+			border-color: var(--fixora-border);
+			box-shadow: $tech-card-shadow-hover;
+		}
+	}
+}

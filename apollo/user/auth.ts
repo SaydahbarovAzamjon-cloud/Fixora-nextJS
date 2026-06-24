@@ -74,3 +74,14 @@ export const COMPLETE_OAUTH_SIGNUP = gql`
 		}
 	}
 `;
+
+export const SUBMIT_TECHNICIAN_VERIFICATION = gql`
+	mutation SubmitTechnicianVerification {
+		submitTechnicianVerification {
+			_id
+			verificationStatus
+			verificationDocuments
+			userProfileImage
+		}
+	}
+`;

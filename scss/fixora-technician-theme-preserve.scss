@@ -1,26 +1,4 @@
 /**
- * Technician portal — restore original orange CSS tokens (excluded from burgundy migration).
+ * Technician portal — color tokens inherit from client :root (variables.scss).
+ * No theme overrides here; technician UI uses the same burgundy system as customer.
  */
-#pc-wrap-technician,
-.fixora-technician-mobile {
-	--fixora-primary: #ff6b00;
-	--fixora-primary-hover: #ff8533;
-	--fixora-primary-dark: #e55a00;
-	--fixora-bg: #0d0d0e;
-	--fixora-bg-ambient:
-		radial-gradient(140% 100% at 0% 45%, rgba(255, 107, 0, 0.12) 0%, transparent 52%),
-		radial-gradient(120% 90% at 100% 55%, rgba(255, 107, 0, 0.08) 0%, transparent 52%),
-		radial-gradient(90% 70% at 50% 0%, rgba(255, 107, 0, 0.05) 0%, transparent 55%),
-		linear-gradient(180deg, #0e0e0f 0%, #0d0d0d 100%);
-	--fixora-surface: #1a1a1a;
-	--fixora-surface-elevated: #242424;
-	--fixora-border: rgba(255, 107, 0, 0.35);
-	--fixora-border-subtle: rgba(255, 107, 0, 0.25);
-	--fixora-text-primary: #ffffff;
-	--fixora-text-secondary: #a0a0a0;
-	--fixora-text-muted: #6b6b6b;
-	--fixora-glass-bg: rgba(26, 26, 26, 0.85);
-	--fixora-surface-hover: #242424;
-	--fixora-glow: 0 0 24px rgba(255, 107, 0, 0.15);
-	--fixora-primary-soft: rgba(255, 107, 0, 0.12);
-}

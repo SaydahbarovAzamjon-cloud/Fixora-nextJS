@@ -2,6 +2,8 @@
    EARNINGS & PAYOUTS — pixel-perfect (2026)
    ============================================================ */
 
+@import 'technician-card-tokens';
+
 .fixora-ea-page {
 	padding: 4px 4px 32px;
 	display: flex;
@@ -96,10 +98,11 @@
 }
 
 .fixora-ea-stat {
-	background: #0C0C0C;
-	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: $tech-card-bg;
+	border: 1px solid $tech-card-border;
 	border-radius: 16px;
 	padding: 20px 22px;
+	box-shadow: $tech-card-shadow;
 
 	&__top {
 		display: flex;
@@ -149,10 +152,11 @@
 }
 
 .fixora-ea-card {
-	background: #0C0C0C;
-	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: $tech-card-bg;
+	border: 1px solid $tech-card-border;
 	border-radius: 18px;
 	padding: 22px 24px;
+	box-shadow: $tech-card-shadow;
 
 	&__head {
 		display: flex;

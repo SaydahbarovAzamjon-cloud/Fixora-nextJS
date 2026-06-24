@@ -129,13 +129,14 @@ export const updateUserInfo = (jwtToken: any) => {
 	if (!jwtToken) return false;
 
 	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
-	const userId = claims._id ?? '';
+	const userId = claims._id ?? (claims as { sub?: string }).sub ?? '';
 	const storedImage = userId ? readStoredProfileImage(userId) : null;
 	const profileImage = storedImage ?? claims.userProfileImage ?? claims.memberImage ?? '';
 	userVar({
-		_id: claims._id ?? '',
+		_id: userId,
 		memberType: claims.userType ?? claims.memberType ?? '',
 		userType: claims.userType ?? claims.memberType ?? '',
+		verificationStatus: claims.verificationStatus,
 		memberStatus: claims.memberStatus ?? '',
 		memberAuthType: claims.memberAuthType,
 		memberPhone: claims.memberPhone ?? '',

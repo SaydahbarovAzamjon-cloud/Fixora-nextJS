@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-23 |
+| **Last updated** | 2026-06-24 |
 | **Last agent** | Cursor |
-| **Last session** | **GAP-078, 101–112 FixoraF wiring** — `getAdminUserDetail`, admin mutations, user detail sections, PENDING verification, device upload, client settings, notification delete |
-| **Next agent should start with** | **P3-13** Apollo legacy migration or manual QA on `/_admin/users/[id]` |
+| **Last session** | **Admin panel bugfixes** — `/_admin/users` hides `DELETE` users from default/all lists (visible only when status filter = DELETE); `/_admin/verification` layout updated so right detail card aligns with left search row in a single top line |
+| **Next agent should start with** | **Manual QA** — verify admin users delete-filter behavior + verification top-row alignment; then continue **P3-13** Apollo legacy migration |
 
 ---
 

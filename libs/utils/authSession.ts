@@ -15,12 +15,17 @@ export function resolveAuthUser(): SessionUser | null {
 
 	try {
 		const claims = decodeJWT<CustomJwtPayload>(jwt);
-		if (!claims._id) return null;
+		const userId = claims._id ?? (claims as { sub?: string }).sub;
+		if (!userId) return null;
 		const role = claims.userType ?? claims.memberType;
 		return {
-			_id: claims._id,
+			_id: userId,
 			memberType: role,
 			userType: role,
+			verificationStatus: claims.verificationStatus,
+			memberFullName: claims.userFullName ?? claims.memberFullName,
+			memberNick: claims.userNickname ?? claims.memberNick,
+			memberImage: claims.userProfileImage ?? claims.memberImage,
 		};
 	} catch {
 		return null;

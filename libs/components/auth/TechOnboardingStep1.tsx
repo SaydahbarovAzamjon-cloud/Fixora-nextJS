@@ -9,6 +9,8 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
 import { loadTechDraft, saveTechDraft, validateTechStep1 } from '../../auth/fixoraAuth';
+import { setTechPhotoFile, getTechPhotoFile } from '../../auth/techOnboardingFiles';
+import { readFileAsDataUrl } from '../../utils/onboardingFileStorage';
 
 const TechOnboardingStep1 = () => {
 	const { t } = useTranslation('auth');
@@ -41,36 +43,52 @@ const TechOnboardingStep1 = () => {
 	const handlePhoto = (file: File | undefined) => {
 		if (!file) return;
 		if (!file.type.startsWith('image/')) return;
+		setTechPhotoFile(file);
 		setPhotoFileName(file.name);
 		setPhotoPreview((prev) => {
 			if (prev) URL.revokeObjectURL(prev);
 			return URL.createObjectURL(file);
 		});
 		const current = loadTechDraft();
-		saveTechDraft({
-			fullName: current?.fullName ?? fullName,
-			email: current?.email ?? email,
-			phone: current?.phone ?? phone,
-			photoFileName: file.name,
-			idFileName: current?.idFileName,
+		void readFileAsDataUrl(file).then((photoDataUrl) => {
+			saveTechDraft({
+				fullName: current?.fullName ?? fullName,
+				email: current?.email ?? email,
+				phone: current?.phone ?? phone,
+				photoFileName: file.name,
+				photoDataUrl,
+				idFileName: current?.idFileName,
+				idPreviewDataUrl: current?.idPreviewDataUrl,
+			});
 		});
 	};
 
-	const handleContinue = useCallback(() => {
+	const handleContinue = useCallback(async () => {
 		const result = validateTechStep1(fullName, email, phone);
 		if (!result.valid) {
 			setErrors(result.errors);
 			return;
 		}
 		const current = loadTechDraft();
+		const photoFile = getTechPhotoFile();
+		let photoDataUrl = current?.photoDataUrl;
+		if (photoFile && !photoDataUrl) {
+			try {
+				photoDataUrl = await readFileAsDataUrl(photoFile);
+			} catch {
+				photoDataUrl = undefined;
+			}
+		}
 		saveTechDraft({
 			fullName,
 			email,
 			phone,
 			photoFileName: photoFileName || current?.photoFileName,
+			photoDataUrl,
 			idFileName: current?.idFileName,
+			idPreviewDataUrl: current?.idPreviewDataUrl,
 		});
-		router.push('/register/technician/id');
+		await router.push('/register/technician/id');
 	}, [fullName, email, phone, photoFileName, router]);
 
 	return (

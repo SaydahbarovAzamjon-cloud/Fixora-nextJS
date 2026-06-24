@@ -27,6 +27,7 @@ const SettingsPage: React.FC = () => {
 	const {
 		user: settingsUser,
 		loading,
+		profileReady,
 		error,
 		offline,
 		refetch,
@@ -64,7 +65,7 @@ const SettingsPage: React.FC = () => {
 		);
 	}
 
-	if (loading && !settingsUser) {
+	if (!profileReady) {
 		return (
 			<div className="fts-page">
 				<div className="fts-page__skeleton fts-page__skeleton--nav" />

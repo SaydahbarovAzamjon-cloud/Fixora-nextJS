@@ -405,6 +405,8 @@ export const UPDATE_USER = gql`
 			userBio
 			userLocation
 			userProfileImage
+			verificationDocuments
+			verificationStatus
 		}
 	}
 `;

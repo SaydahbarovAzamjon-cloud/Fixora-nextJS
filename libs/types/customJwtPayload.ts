@@ -14,6 +14,7 @@ export interface CustomJwtPayload extends JwtPayload {
 	userNickname?: string;
 	userFullName?: string;
 	userType?: string;
+	verificationStatus?: string;
 	memberAddress?: string;
 	memberDesc?: string;
 	memberProperties: number;

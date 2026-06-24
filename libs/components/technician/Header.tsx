@@ -11,7 +11,8 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import { userVar, profileImageDraftVar } from '../../../apollo/store';
 import useTechnicianBadges from '../../hooks/useTechnicianBadges';
 import { logOut } from '../../auth';
-import { resolveProfileImageUrl } from '../../utils/profileImage';
+import { resolveProfileImageUrl, hasRealProfileImage } from '../../utils/profileImage';
+import { readStoredProfileImage } from '../../auth/syncUserVar';
 import LanguageToggle from '../common/LanguageToggle';
 
 interface HeaderProps {
@@ -52,7 +53,11 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 		.toUpperCase();
 
 	const pageTitleKey = PAGE_TITLE_KEYS[activePage] ?? 'nav.dashboard';
-	const avatarSrc = profileDraft ?? user?.memberImage;
+	const storedAvatar = user?._id ? readStoredProfileImage(user._id) : null;
+	const avatarSrc =
+		profileDraft ??
+		(hasRealProfileImage(user?.memberImage) ? user?.memberImage : null) ??
+		(hasRealProfileImage(storedAvatar) ? storedAvatar : null);
 
 	const handleLogout = () => {
 		logOut();

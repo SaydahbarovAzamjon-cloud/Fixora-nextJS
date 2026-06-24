@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
@@ -73,6 +73,10 @@ const AdminUsersPage: NextPage = () => {
 	const list: AdminUser[] = data?.getAllUsersByAdmin?.list ?? [];
 	const total = data?.getAllUsersByAdmin?.metaCounter?.[0]?.total ?? 0;
 	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const visibleList = useMemo(
+		() => (statusFilter === 'DELETE' ? list : list.filter((user) => user.userStatus !== 'DELETE')),
+		[list, statusFilter],
+	);
 
 	return (
 		<>
@@ -126,14 +130,14 @@ const AdminUsersPage: NextPage = () => {
 									</td>
 								</tr>
 							)}
-							{!loading && list.length === 0 && (
+							{!loading && visibleList.length === 0 && (
 								<tr>
 									<td colSpan={9} className="fixora-admin-empty">
 										{t('users.empty')}
 									</td>
 								</tr>
 							)}
-							{list.map((user) => {
+							{visibleList.map((user) => {
 								const name = displayUserName(user);
 								return (
 									<tr key={user._id}>

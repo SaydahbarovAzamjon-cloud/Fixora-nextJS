@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useTranslation } from 'next-i18next';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useApolloClient } from '@apollo/client';
 import { Check, X, Shield, Mail, Phone, MapPin } from 'lucide-react';
 import withAdminLayout from '../../../libs/components/layout/AdminLayout';
 import { adminPageProps } from '../../../libs/i18n/adminPageProps';
@@ -14,7 +14,7 @@ import { GET_TECHNICIAN_VERIFICATION_QUEUE } from '../../../apollo/admin/query';
 import { APPROVE_TECHNICIAN, REJECT_TECHNICIAN } from '../../../apollo/admin/mutation';
 import type { AdminUser, VerificationStatus } from '../../../libs/types/admin/admin';
 import { displayUserName } from '../../../libs/hooks/useUserLookup';
-import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
+import { resolveProfileImageUrl, hasRealProfileImage } from '../../../libs/utils/profileImage';
 import { buildVerificationCompleteness } from '../../../libs/utils/adminVerification';
 import { runAdminVerificationApprove, runAdminVerificationReject } from '../../../libs/utils/adminVerificationActions';
 import { verificationStatusTone } from '../../../libs/utils/adminBadges';
@@ -34,6 +34,7 @@ const TAB_STATUS: Record<FilterTab, VerificationStatus | undefined> = {
 const AdminVerificationPage: NextPage = () => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
+	const client = useApolloClient();
 	const [activeTab, setActiveTab] = useState<FilterTab>('underReview');
 	const [search, setSearch] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -79,15 +80,24 @@ const AdminVerificationPage: NextPage = () => {
 		{ id: 'rejected', label: t('verification.tabs.rejected') },
 	];
 
+	const refetchVerificationQueues = async () => {
+		await refetch();
+		await client.refetchQueries({ include: [GET_TECHNICIAN_VERIFICATION_QUEUE] });
+	};
+
 	const handleApprove = async () => {
 		if (!selected) return;
 		await runAdminVerificationApprove({
 			user: selected,
-			approve: (vars) => approveTechnician({ variables: vars }),
+			approve: (vars) =>
+				approveTechnician({
+					variables: vars,
+					refetchQueries: [{ query: GET_TECHNICIAN_VERIFICATION_QUEUE }],
+				}),
 			t,
 			onSuccess: async () => {
 				setSelectedId(null);
-				await refetch();
+				await refetchVerificationQueues();
 			},
 		});
 	};
@@ -96,13 +106,17 @@ const AdminVerificationPage: NextPage = () => {
 		if (!selected) return;
 		await runAdminVerificationReject({
 			user: selected,
-			reject: (vars) => rejectTechnician({ variables: vars }),
-			reason: rejectReason,
+			reject: (vars) =>
+				rejectTechnician({
+					variables: vars,
+					refetchQueries: [{ query: GET_TECHNICIAN_VERIFICATION_QUEUE }],
+				}),
 			t,
+			reason: rejectReason,
 			onSuccess: async () => {
 				setRejectReason('');
 				setSelectedId(null);
-				await refetch();
+				await refetchVerificationQueues();
 			},
 		});
 	};
@@ -115,11 +129,11 @@ const AdminVerificationPage: NextPage = () => {
 			<div className="fixora-admin-page">
 				<AdminFilterTabs tabs={tabs} activeId={activeTab} onChange={(id) => setActiveTab(id as FilterTab)} />
 
-				<div className="fixora-admin-search fixora-admin-toolbar-row--filters">
-					<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
-				</div>
-
 				<div className="fixora-admin-verification">
+					<div className="fixora-admin-verification__search-row">
+						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
+					</div>
+
 					<div className="fixora-admin-verification__list">
 						{loading && <div className="fixora-admin-empty">{t('common.loading')}</div>}
 						{!loading && list.length === 0 && <div className="fixora-admin-empty">{t('verification.empty')}</div>}
@@ -134,7 +148,13 @@ const AdminVerificationPage: NextPage = () => {
 									className={`fixora-admin-verification__list-item${active ? ' fixora-admin-verification__list-item--active' : ''}`}
 									onClick={() => setSelectedId(tech._id)}
 								>
-									<div className="fixora-admin-table-user__avatar">{initial}</div>
+									<div className="fixora-admin-table-user__avatar">
+										{hasRealProfileImage(tech.userProfileImage) ? (
+											<img src={resolveProfileImageUrl(tech.userProfileImage)} alt="" />
+										) : (
+											initial
+										)}
+									</div>
 									<div className="fixora-admin-verification__list-body">
 										<div className="fixora-admin-table-user__name">{name}</div>
 										<div className="fixora-admin-verification__list-meta">
@@ -170,7 +190,11 @@ const AdminVerificationPage: NextPage = () => {
 							<>
 								<div className="fixora-admin-verification__profile">
 									<div className="fixora-admin-table-user__avatar fixora-admin-verification__profile-avatar">
-										<img src={resolveProfileImageUrl(selected.userProfileImage)} alt="" />
+										{hasRealProfileImage(selected.userProfileImage) ? (
+											<img src={resolveProfileImageUrl(selected.userProfileImage)} alt="" />
+										) : (
+											displayUserName(selected).charAt(0).toUpperCase()
+										)}
 									</div>
 									<div>
 										<h3 className="fixora-admin-verification__profile-name">{displayUserName(selected)}</h3>

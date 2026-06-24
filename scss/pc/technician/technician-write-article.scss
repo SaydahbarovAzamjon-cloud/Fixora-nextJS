@@ -1,19 +1,21 @@
 /** Write Article — Technician Dashboard (Figma 1:1) **/
 
-$bg-base: #0A0A0A;
-$bg-card: #111111;
-$bg-input: #1A1A1A;
-$bg-editor: #0F0F0F;
-$orange: #FF6B00;
-$orange-light: #FF9A3C;
+@import 'technician-card-tokens';
+
+$bg-base: $tech-page-bg;
+$bg-card: $tech-card-bg;
+$bg-input: $tech-surface;
+$bg-editor: $tech-surface;
+$orange: $tech-primary;
+$orange-light: $tech-primary-hover;
 $green: #22C55E;
-$text-primary: #F0F0F0;
-$text-secondary: #E0E0E0;
-$text-muted: #808080;
-$text-dim: #606060;
-$text-dimmer: #505050;
-$border: rgba(255, 255, 255, 0.07);
-$border-input: rgba(255, 255, 255, 0.09);
+$text-primary: $tech-text-primary;
+$text-secondary: $tech-text-secondary;
+$text-muted: $tech-text-muted;
+$text-dim: var(--fixora-text-muted);
+$text-dimmer: var(--fixora-text-muted);
+$border: $tech-input-border;
+$border-input: $tech-input-border;
 
 .fixora-technician-main:has(.ftwa-page) {
 	padding: 0;
@@ -53,7 +55,7 @@ $border-input: rgba(255, 255, 255, 0.09);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 0 14px rgba(255, 107, 0, 0.4);
+		box-shadow: 0 0 14px rgba(115, 12, 30, 0.4);
 		flex-shrink: 0;
 	}
 
@@ -67,8 +69,8 @@ $border-input: rgba(255, 255, 255, 0.09);
 
 	&__badge {
 		margin-left: auto;
-		background: rgba(255, 107, 0, 0.1);
-		border: 1px solid rgba(255, 107, 0, 0.25);
+		background: rgba(115, 12, 30, 0.1);
+		border: 1px solid rgba(115, 12, 30, 0.25);
 		border-radius: 20px;
 		padding: 4px 12px;
 		color: $orange;
@@ -108,8 +110,9 @@ $border-input: rgba(255, 255, 255, 0.09);
 /* ── Card ── */
 .ftwa-card {
 	background: $bg-card;
-	border: 1px solid $border;
+	border: 1px solid $tech-card-border;
 	border-radius: 14px;
+	box-shadow: $tech-card-shadow;
 
 	&--padded {
 		padding: 18px 20px;
@@ -168,8 +171,8 @@ $border-input: rgba(255, 255, 255, 0.09);
 	transition: border-color 0.15s, box-shadow 0.15s;
 
 	&:focus {
-		border-color: rgba(255, 107, 0, 0.45);
-		box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.08);
+		border-color: $tech-primary;
+		box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
 	}
 
 	&--title {
@@ -239,15 +242,15 @@ $border-input: rgba(255, 255, 255, 0.09);
 
 	&--active {
 		border-color: $orange;
-		background: rgba(255, 107, 0, 0.05);
+		background: rgba(115, 12, 30, 0.05);
 	}
 
 	&__icon {
 		width: 48px;
 		height: 48px;
 		border-radius: 12px;
-		background: rgba(255, 107, 0, 0.1);
-		border: 1px solid rgba(255, 107, 0, 0.2);
+		background: rgba(115, 12, 30, 0.1);
+		border: 1px solid rgba(115, 12, 30, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -358,11 +361,11 @@ $border-input: rgba(255, 255, 255, 0.09);
 	}
 
 	&--active {
-		background: rgba(255, 107, 0, 0.14);
-		color: $orange;
+		background: $tech-primary-soft;
+		color: $tech-primary;
 		font-weight: 700;
-		outline: 1px solid rgba(255, 107, 0, 0.35);
-		box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+		outline: 1px solid rgba(115, 12, 30, 0.35);
+		box-shadow: 0 0 10px rgba(115, 12, 30, 0.15);
 	}
 }
 
@@ -403,7 +406,7 @@ $border-input: rgba(255, 255, 255, 0.09);
 		border-radius: 0 0 10px 10px;
 
 		&:focus-within {
-			border-color: rgba(255, 107, 0, 0.3);
+			border-color: rgba(115, 12, 30, 0.45);
 		}
 	}
 
@@ -510,8 +513,8 @@ $border-input: rgba(255, 255, 255, 0.09);
 		}
 
 		&--active {
-			background: rgba(255, 107, 0, 0.2);
-			color: $orange;
+			background: $tech-primary-soft;
+			color: $tech-primary;
 		}
 	}
 
@@ -527,8 +530,8 @@ $border-input: rgba(255, 255, 255, 0.09);
 		display: flex;
 		align-items: center;
 		gap: 5px;
-		background: rgba(255, 107, 0, 0.1);
-		border: 1px solid rgba(255, 107, 0, 0.25);
+		background: rgba(115, 12, 30, 0.1);
+		border: 1px solid rgba(115, 12, 30, 0.25);
 		border-radius: 7px;
 		padding: 4px 10px;
 		color: $orange-light;
@@ -562,8 +565,8 @@ $border-input: rgba(255, 255, 255, 0.09);
 
 	&__badge {
 		display: inline-block;
-		background: rgba(255, 107, 0, 0.1);
-		border: 1px solid rgba(255, 107, 0, 0.2);
+		background: rgba(115, 12, 30, 0.1);
+		border: 1px solid rgba(115, 12, 30, 0.2);
 		color: $orange-light;
 		border-radius: 20px;
 		padding: 2px 9px;
@@ -729,10 +732,10 @@ $border-input: rgba(255, 255, 255, 0.09);
 		font-family: inherit;
 
 		&--active {
-			background: rgba(255, 107, 0, 0.14);
+			background: rgba(115, 12, 30, 0.14);
 			color: $orange;
 			font-weight: 700;
-			outline: 1px solid rgba(255, 107, 0, 0.3);
+			outline: 1px solid rgba(115, 12, 30, 0.3);
 		}
 	}
 
@@ -770,7 +773,7 @@ $border-input: rgba(255, 255, 255, 0.09);
 
 	&--on {
 		background: linear-gradient(90deg, $orange, $orange-light);
-		box-shadow: 0 0 10px rgba(255, 107, 0, 0.35);
+		box-shadow: 0 0 10px rgba(115, 12, 30, 0.35);
 	}
 
 	&__knob {
@@ -872,11 +875,11 @@ $border-input: rgba(255, 255, 255, 0.09);
 			color: #fff;
 			font-weight: 800;
 			padding: 10px 24px;
-			box-shadow: 0 0 22px rgba(255, 107, 0, 0.4);
+			box-shadow: 0 0 22px rgba(115, 12, 30, 0.4);
 			letter-spacing: -0.01em;
 
 			&:hover:not(:disabled) {
-				box-shadow: 0 0 36px rgba(255, 107, 0, 0.65);
+				box-shadow: 0 0 36px rgba(115, 12, 30, 0.65);
 			}
 		}
 	}
@@ -908,7 +911,7 @@ $border-input: rgba(255, 255, 255, 0.09);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 
 	&:hover {
-		border-color: rgba(255, 107, 0, 0.35);
+		border-color: rgba(115, 12, 30, 0.35);
 		color: $orange;
 	}
 }
@@ -928,10 +931,11 @@ $border-input: rgba(255, 255, 255, 0.09);
 
 .ftwa-modal {
 	background: $bg-card;
-	border: 1px solid $border;
+	border: 1px solid $tech-card-border;
 	border-radius: 16px;
 	width: 100%;
 	max-width: 720px;
+	box-shadow: $tech-card-shadow;
 	max-height: 90vh;
 	overflow: hidden;
 	display: flex;

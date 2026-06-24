@@ -29,6 +29,7 @@ export const UPDATE_TECHNICIAN_SETTINGS = gql`
 	mutation UpdateTechnicianSettings($input: UserUpdate!) {
 		updateUser(input: $input) {
 			_id
+			userEmail
 			userNickname
 			userFullName
 			shopName

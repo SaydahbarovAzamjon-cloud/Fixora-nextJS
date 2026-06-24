@@ -170,7 +170,9 @@
     "byLifetimeRevenue": "By lifetime revenue",
     "jobsCount": "{{count}} jobs",
     "tooltipJobs": "Jobs",
-    "loadError": "Could not load analytics KPIs. Charts may still show booking data."
+    "loadError": "Could not load analytics KPIs. Charts may still show booking data.",
+    "noData": "No data yet — complete your first booking to see analytics here.",
+    "noClients": "No client history yet."
   },
   "earnings": {
     "title": "Earnings & Payouts",

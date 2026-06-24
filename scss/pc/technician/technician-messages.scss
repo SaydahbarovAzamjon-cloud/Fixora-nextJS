@@ -1,5 +1,7 @@
 /** MESSAGES SCREEN STYLES **/
 
+@import 'technician-card-tokens';
+
 /* ---- Emoji picker ---- */
 .fixora-msg-emoji-picker {
 	position: absolute;
@@ -103,7 +105,7 @@
 
 .fixora-conversation-list {
 	background: var(--fixora-glass-bg);
-	border: 1px solid var(--fixora-border-subtle);
+	border: 1px solid $tech-card-border;
 	border-radius: 12px;
 	padding: 20px;
 	backdrop-filter: blur(10px);
@@ -111,6 +113,7 @@
 	flex-direction: column;
 	height: 100%;
 	overflow: hidden;
+	box-shadow: $tech-card-shadow;
 }
 
 .fixora-conversations__header {
@@ -349,13 +352,14 @@
 
 .fixora-message-thread {
 	background: var(--fixora-glass-bg);
-	border: 1px solid var(--fixora-border-subtle);
+	border: 1px solid $tech-card-border;
 	border-radius: 12px;
 	backdrop-filter: blur(10px);
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 	overflow: hidden;
+	box-shadow: $tech-card-shadow;
 
 	&--empty {
 		align-items: center;
@@ -623,10 +627,10 @@
 .fixora-msg-left {
 	width: 380px;
 	flex-shrink: 0;
-	border-right: 1px solid rgba(255, 255, 255, 0.07);
+	border-right: 1px solid var(--fixora-border-subtle);
 	display: flex;
 	flex-direction: column;
-	background: #0D0D0D;
+	background: var(--fixora-bg);
 }
 
 .fixora-msg-search-wrap {
@@ -888,7 +892,7 @@
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	background: #0A0A0A;
+	background: var(--fixora-bg);
 
 	&__header {
 		display: flex;

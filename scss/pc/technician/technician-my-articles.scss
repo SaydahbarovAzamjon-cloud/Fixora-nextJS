@@ -1,9 +1,11 @@
 /** My Articles — Technician Dashboard **/
 
-$bg-card: #111111;
+@import 'technician-card-tokens';
+
+$bg-card: $tech-card-bg;
 $orange: #FF6B00;
 $green: #22C55E;
-$border: rgba(255, 255, 255, 0.07);
+$border: $tech-card-border;
 $text-primary: #F0F0F0;
 $text-muted: #808080;
 $text-dim: #606060;
@@ -99,7 +101,8 @@ $text-dim: #606060;
 	padding: 10px 16px;
 	border-radius: 10px;
 	background: $bg-card;
-	border: 1px solid $border;
+	border: 1px solid $tech-card-border;
+	box-shadow: $tech-card-shadow;
 }
 
 .ftma-summary__value {
@@ -178,6 +181,7 @@ $text-dim: #606060;
 	position: relative;
 	background: $bg-card !important;
 	border-color: $border !important;
+	box-shadow: $tech-card-shadow;
 
 	&--deleting {
 		opacity: 0.5;
@@ -395,7 +399,7 @@ $text-dim: #606060;
 
 .ftma-modal {
 	background: $bg-card;
-	border: 1px solid $border;
+	border: 1px solid $tech-card-border;
 	border-radius: 16px;
 	width: 100%;
 	max-width: 520px;
@@ -403,6 +407,7 @@ $text-dim: #606060;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	box-shadow: $tech-card-shadow;
 
 	&__header {
 		display: flex;

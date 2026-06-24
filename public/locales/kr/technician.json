@@ -170,7 +170,9 @@
     "byLifetimeRevenue": "누적 수익 기준",
     "jobsCount": "작업 {{count}}건",
     "tooltipJobs": "작업",
-    "loadError": "분석 KPI를 불러올 수 없습니다. 차트에는 예약 데이터가 표시될 수 있습니다."
+    "loadError": "분석 KPI를 불러올 수 없습니다. 차트에는 예약 데이터가 표시될 수 있습니다.",
+    "noData": "아직 데이터가 없습니다 — 첫 예약을 완료하면 분석이 표시됩니다.",
+    "noClients": "아직 고객 기록이 없습니다."
   },
   "earnings": {
     "title": "수익 및 정산",

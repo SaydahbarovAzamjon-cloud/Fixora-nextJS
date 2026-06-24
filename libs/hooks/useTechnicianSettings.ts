@@ -1,18 +1,27 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import {
 	CHANGE_PASSWORD,
+	GET_TECHNICIAN_SETTINGS,
 	UPDATE_EMAIL,
 	UPDATE_TECHNICIAN_SETTINGS,
 	UPDATE_USER_SLUG,
 } from '../../apollo/user/settings';
-import { GET_USER } from '../../apollo/user/query';
 import { profileImageDraftVar, userVar } from '../../apollo/store';
 import { getJwtToken, setJwtToken, updateStorage, updateUserInfo } from '../auth';
 import { settingsUserFromAuth } from '../auth/settingsUserFallback';
+import {
+	mergeTechnicianSettingsCache,
+	readTechnicianSettingsCache,
+	writeStoredUserEmail,
+	writeTechnicianSettingsCache,
+} from '../auth/technicianSettingsCache';
+import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../apollo/technicianQueryContext';
+import { resolveAuthUser } from '../utils/authSession';
 import { syncUserVarFromGraphqlUser } from '../auth/syncUserVar';
 import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../sweetAlert';
 import { useTranslation } from 'next-i18next';
+import { useIsClientReady } from './useIsClientReady';
 
 export interface TechnicianSettingsUser {
 	_id: string;
@@ -70,14 +79,47 @@ export const SETTINGS_HOURS = [
 const defaultDays = (): Record<string, boolean> =>
 	Object.fromEntries(SETTINGS_DAYS.map((d) => [d, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(d)]));
 
+function mergeSettingsUser(
+	graphqlUser: TechnicianSettingsUser | null,
+	cachedUser: TechnicianSettingsUser | null,
+	authUser: TechnicianSettingsUser | null,
+): TechnicianSettingsUser | null {
+	return graphqlUser ?? cachedUser ?? authUser;
+}
+
+function toSettingsUser(raw: Record<string, unknown> | null | undefined, userId: string): TechnicianSettingsUser | null {
+	if (!raw?._id && !userId) return null;
+	return {
+		_id: String(raw?._id ?? userId),
+		userEmail: (raw?.userEmail as string | null | undefined) ?? null,
+		userFullName: (raw?.userFullName as string | null | undefined) ?? null,
+		userNickname: (raw?.userNickname as string | null | undefined) ?? null,
+		userSlug: (raw?.userSlug as string | null | undefined) ?? null,
+		shopName: (raw?.shopName as string | null | undefined) ?? null,
+		userPhoneNumber: (raw?.userPhoneNumber as string | null | undefined) ?? null,
+		userLocation: (raw?.userLocation as string | null | undefined) ?? null,
+		userBio: (raw?.userBio as string | null | undefined) ?? null,
+		userProfileImage: (raw?.userProfileImage as string | null | undefined) ?? null,
+		userType: (raw?.userType as string | null | undefined) ?? null,
+		badgeLevel: (raw?.badgeLevel as string | null | undefined) ?? null,
+		workingHours: (raw?.workingHours as TechnicianSettingsUser['workingHours']) ?? null,
+	};
+}
+
 export function useTechnicianSettings(userId?: string) {
 	const { t } = useTranslation('technician');
+	const isClientReady = useIsClientReady();
 	const authUser = useReactiveVar(userVar);
-	const { data, loading, error, refetch } = useQuery(GET_USER, {
-		variables: { userId: userId! },
-		skip: !userId,
+	const sessionUser = authUser?._id ? authUser : isClientReady ? resolveAuthUser() : null;
+	const resolvedId = userId || sessionUser?._id;
+	const skipQuery = !resolvedId || !isClientReady;
+
+	const { data, loading, error, refetch } = useQuery(GET_TECHNICIAN_SETTINGS, {
+		variables: { userId: resolvedId! },
+		skip: skipQuery,
 		fetchPolicy: 'cache-and-network',
 		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const [updateUser, { loading: saving }] = useMutation(UPDATE_TECHNICIAN_SETTINGS, {
@@ -87,9 +129,28 @@ export function useTechnicianSettings(userId?: string) {
 	const [updateEmail] = useMutation(UPDATE_EMAIL);
 	const [updateUserSlug] = useMutation(UPDATE_USER_SLUG);
 
-	const graphqlUser: TechnicianSettingsUser | null = data?.getUser ?? null;
-	const user: TechnicianSettingsUser | null = graphqlUser ?? settingsUserFromAuth(authUser);
+	const graphqlUser = useMemo(
+		() => toSettingsUser(data?.getUser as Record<string, unknown> | undefined, resolvedId ?? ''),
+		[data?.getUser, resolvedId],
+	);
+
+	const cachedUser = useMemo(
+		() => (resolvedId ? readTechnicianSettingsCache(resolvedId) : null),
+		[resolvedId, graphqlUser],
+	);
+
+	const authFallbackUser = useMemo(() => settingsUserFromAuth(sessionUser), [sessionUser]);
+
+	const user = useMemo(
+		() => mergeSettingsUser(graphqlUser, cachedUser, authFallbackUser),
+		[graphqlUser, cachedUser, authFallbackUser],
+	);
+
 	const offline = !!error && !graphqlUser && !!user;
+
+	useEffect(() => {
+		if (graphqlUser?._id) writeTechnicianSettingsCache(graphqlUser);
+	}, [graphqlUser]);
 
 	const [profileForm, setProfileForm] = useState<ProfileFormState>({
 		shopName: '',
@@ -206,62 +267,66 @@ export function useTechnicianSettings(userId?: string) {
 
 	const saveUpdate = useCallback(
 		async (input: Record<string, unknown>, successMessage: string) => {
-			if (!userId) return false;
+			if (!resolvedId) return false;
 			try {
 				const result = await updateUser({
-					variables: { input: { _id: userId, ...input } },
-					refetchQueries: [{ query: GET_USER, variables: { userId } }],
+					variables: { input: { _id: resolvedId, ...input } },
+					context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
+					refetchQueries: [{ query: GET_TECHNICIAN_SETTINGS, variables: { userId: resolvedId } }],
 					awaitRefetchQueries: true,
 				});
-				const updated = result.data?.updateUser;
+				const updatedRaw = result.data?.updateUser as Record<string, unknown> | undefined;
+				const updated = toSettingsUser(updatedRaw, resolvedId);
 
-				if (updated?.accessToken) {
-					setJwtToken(updated.accessToken);
-					updateStorage({ jwtToken: updated.accessToken });
+				if (updatedRaw?.accessToken) {
+					setJwtToken(updatedRaw.accessToken as string);
+					updateStorage({ jwtToken: updatedRaw.accessToken as string });
 				}
 
-				const refetchResult = await refetch();
-				const refreshed = refetchResult.data?.getUser as TechnicianSettingsUser | undefined;
+				let profileSource: TechnicianSettingsUser | null = null;
 
-				// GraphQL getUser is source of truth; merge saved input so UI updates even if cache lags.
-				const profileSource = refreshed ?? updated;
+				try {
+					const refetchResult = await refetch();
+					profileSource =
+						toSettingsUser(refetchResult.data?.getUser as Record<string, unknown> | undefined, resolvedId) ??
+						updated;
+				} catch {
+					profileSource = updated;
+				}
+
+				if (!profileSource && updated) profileSource = updated;
+
 				if (profileSource) {
-					syncUserVarFromGraphqlUser({
+					const merged = mergeTechnicianSettingsCache(resolvedId, {
 						...profileSource,
-						...(input.userFullName !== undefined
-							? { userFullName: String(input.userFullName) }
-							: {}),
+						...(input.userFullName !== undefined ? { userFullName: String(input.userFullName) } : {}),
 						...(input.shopName !== undefined ? { shopName: String(input.shopName) } : {}),
-						...(input.userNickname !== undefined
-							? { userNickname: String(input.userNickname) }
-							: {}),
+						...(input.userNickname !== undefined ? { userNickname: String(input.userNickname) } : {}),
 						...(input.userProfileImage !== undefined
 							? { userProfileImage: (input.userProfileImage as string | null) ?? null }
 							: {}),
 						...(input.userPhoneNumber !== undefined
 							? { userPhoneNumber: String(input.userPhoneNumber) }
 							: {}),
+						...(input.userLocation !== undefined ? { userLocation: String(input.userLocation) } : {}),
 						...(input.userBio !== undefined ? { userBio: String(input.userBio) } : {}),
-					});
-					syncProfileFormFromUser({
-						...(profileSource as TechnicianSettingsUser),
-						...(input.userFullName !== undefined
-							? { userFullName: String(input.userFullName) }
-							: {}),
-						...(input.shopName !== undefined ? { shopName: String(input.shopName) } : {}),
-						...(input.userPhoneNumber !== undefined
-							? { userPhoneNumber: String(input.userPhoneNumber) }
-							: {}),
-						...(input.userLocation !== undefined
-							? { userLocation: String(input.userLocation) }
-							: {}),
-						...(input.userBio !== undefined ? { userBio: String(input.userBio) } : {}),
-						...(input.userProfileImage !== undefined
-							? { userProfileImage: (input.userProfileImage as string | null) ?? null }
+						...(input.workingHours !== undefined
+							? { workingHours: input.workingHours as TechnicianSettingsUser['workingHours'] }
 							: {}),
 					});
-				} else if (updated?.accessToken) {
-					updateUserInfo(updated.accessToken);
+
+					syncUserVarFromGraphqlUser({
+						_id: resolvedId,
+						userFullName: merged.userFullName,
+						userNickname: merged.userNickname,
+						userProfileImage: merged.userProfileImage,
+						userPhoneNumber: merged.userPhoneNumber,
+						userBio: merged.userBio,
+					});
+					if (merged.userEmail) writeStoredUserEmail(resolvedId, merged.userEmail);
+					syncProfileFormFromUser(merged);
+				} else if (updatedRaw?.accessToken) {
+					updateUserInfo(updatedRaw.accessToken as string);
 				} else {
 					const token = getJwtToken();
 					if (token) updateUserInfo(token);
@@ -279,14 +344,13 @@ export function useTechnicianSettings(userId?: string) {
 				return false;
 			}
 		},
-		[refetch, syncProfileFormFromUser, updateUser, userId],
+		[refetch, resolvedId, syncProfileFormFromUser, updateUser],
 	);
 
 	const saveProfile = useCallback(
 		async (profileImagePath?: string) => {
 			const emailChanged =
-				!!user?.userEmail &&
-				profileForm.email.trim().toLowerCase() !== user.userEmail.trim().toLowerCase();
+				profileForm.email.trim().toLowerCase() !== (user?.userEmail ?? '').trim().toLowerCase();
 
 			const input: Record<string, unknown> = {
 				shopName: profileForm.shopName.trim() || null,
@@ -301,9 +365,14 @@ export function useTechnicianSettings(userId?: string) {
 
 			if (emailChanged) {
 				try {
-					await updateEmail({
+					const emailResult = await updateEmail({
 						variables: { input: { userEmail: profileForm.email.trim() } },
 					});
+					const newEmail = emailResult.data?.updateEmail?.userEmail;
+					if (newEmail && resolvedId) {
+						writeStoredUserEmail(resolvedId, newEmail);
+						mergeTechnicianSettingsCache(resolvedId, { userEmail: newEmail });
+					}
 				} catch (err) {
 					await sweetErrorHandling(err);
 					return false;
@@ -311,16 +380,25 @@ export function useTechnicianSettings(userId?: string) {
 			}
 
 			const ok = await saveUpdate(input, t('settings.profile.saved'));
-			if (ok && emailChanged) {
+			if (ok && resolvedId) {
+				mergeTechnicianSettingsCache(resolvedId, {
+					userEmail: profileForm.email.trim(),
+					shopName: profileForm.shopName.trim() || null,
+					userFullName: profileForm.fullName.trim(),
+					userPhoneNumber: profileForm.phone.trim(),
+					userLocation: profileForm.location.trim(),
+					userBio: profileForm.bio.trim(),
+					...(profileImagePath !== undefined ? { userProfileImage: profileImagePath || null } : {}),
+				});
 				await refetch();
 			}
 			return ok;
 		},
-		[profileForm, saveUpdate, t, updateEmail, user?.userEmail, refetch],
+		[profileForm, resolvedId, saveUpdate, t, updateEmail, user?.userEmail, refetch],
 	);
 
 	const saveAccount = useCallback(async () => {
-		if (!userId) return false;
+		if (!resolvedId) return false;
 		const slug = nickname.trim().toLowerCase();
 		if (!slug) {
 			await sweetMixinErrorAlert(t('settings.account.slugRequired'));
@@ -328,8 +406,7 @@ export function useTechnicianSettings(userId?: string) {
 		}
 		try {
 			const emailChanged =
-				!!user?.userEmail &&
-				profileForm.email.trim().toLowerCase() !== user.userEmail.trim().toLowerCase();
+				profileForm.email.trim().toLowerCase() !== (user?.userEmail ?? '').trim().toLowerCase();
 
 			if (emailChanged) {
 				await updateEmail({
@@ -339,6 +416,9 @@ export function useTechnicianSettings(userId?: string) {
 
 			await updateUserSlug({ variables: { input: { userSlug: slug } } });
 			await refetch();
+			if (resolvedId) {
+				mergeTechnicianSettingsCache(resolvedId, { userSlug: slug });
+			}
 			formDirtyRef.current = false;
 			await sweetTopSmallSuccessAlert(t('settings.account.saved'), 1200);
 			return true;
@@ -346,7 +426,7 @@ export function useTechnicianSettings(userId?: string) {
 			await sweetErrorHandling(err);
 			return false;
 		}
-	}, [nickname, profileForm.email, refetch, t, updateEmail, updateUserSlug, user?.userEmail, userId]);
+	}, [nickname, profileForm.email, refetch, resolvedId, t, updateEmail, updateUserSlug, user?.userEmail]);
 
 	const saveAvailability = useCallback(async () => {
 		const selectedDays = SETTINGS_DAYS.filter((d) => availability.days[d]);
@@ -380,7 +460,8 @@ export function useTechnicianSettings(userId?: string) {
 
 	return {
 		user,
-		loading,
+		loading: skipQuery || (loading && !user),
+		profileReady: hydrated && !!user,
 		error: error && !user ? error : undefined,
 		offline,
 		refetch,

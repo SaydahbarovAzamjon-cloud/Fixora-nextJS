@@ -32,6 +32,7 @@ import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profil
 import { GET_TECHNICIAN_STORIES } from '../../../apollo/user/story';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
 import { LIKE_TARGET_ARTICLE } from '../../../apollo/user/article';
+import { useTechnicianSelfProfile } from '../../hooks/useTechnicianSelfProfile';
 import ProfileArticleCard from './ProfileArticleCard';
 import RepairStoriesRow from '../story/RepairStoriesRow';
 import BookingServiceTypeOptions from '../booking/BookingServiceTypeOptions';
@@ -114,12 +115,22 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 	const [likeArticle] = useMutation(LIKE_TARGET_ARTICLE);
 
-	const { data: userData, loading: userLoading, refetch: refetchUser } = useQuery(GET_USER, {
+	const { data: visitorUserData, loading: visitorUserLoading, refetch: refetchVisitorUser } = useQuery(GET_USER, {
 		variables: { userId: technicianId },
-		skip: !technicianId,
+		skip: !technicianId || isOwner,
 		fetchPolicy: 'network-only',
+		errorPolicy: 'all',
+		context: { suppressErrorAlert: true },
 	});
-	const profile = (userData as T)?.getUser as TechnicianProfile | undefined;
+	const {
+		profile: ownerProfile,
+		loading: ownerProfileLoading,
+		refetch: refetchOwnerProfile,
+	} = useTechnicianSelfProfile(isOwner ? technicianId : null);
+
+	const profile = (isOwner ? ownerProfile : (visitorUserData as T)?.getUser) as TechnicianProfile | undefined;
+	const userLoading = isOwner ? ownerProfileLoading : visitorUserLoading;
+	const refetchUser = isOwner ? refetchOwnerProfile : refetchVisitorUser;
 
 	const { data: ownerArticlesData } = useQuery(GET_MY_ARTICLES, {
 		variables: { input: { page: 1, limit: 6, search: {} } },

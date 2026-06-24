@@ -3,6 +3,7 @@ import { userVar } from '../../apollo/store';
 import { GET_INCOMING_REQUESTS, GET_TECHNICIAN_BOOKINGS } from '../../apollo/user/profile';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { GET_NOTIFICATIONS } from '../../apollo/user/notification';
+import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../apollo/technicianQueryContext';
 import { getJwtToken } from '../auth';
 import { isTechnicianUser } from '../utils/userRole';
 
@@ -27,6 +28,8 @@ const useTechnicianBadges = (): TechnicianBadges => {
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'cache-and-network',
 		pollInterval: 30000,
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: bookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
@@ -34,6 +37,8 @@ const useTechnicianBadges = (): TechnicianBadges => {
 		variables: { input: { page: 1, limit: 100, search: {} } },
 		fetchPolicy: 'cache-and-network',
 		pollInterval: 30000,
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: conversationsData } = useQuery(GET_MY_CONVERSATIONS, {
@@ -41,6 +46,8 @@ const useTechnicianBadges = (): TechnicianBadges => {
 		variables: { input: { page: 1, limit: 50 } },
 		fetchPolicy: 'cache-and-network',
 		pollInterval: 30000,
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const { data: notificationsData } = useQuery(GET_NOTIFICATIONS, {
@@ -48,6 +55,8 @@ const useTechnicianBadges = (): TechnicianBadges => {
 		variables: { input: { page: 1, limit: 50, search: { isRead: false } } },
 		fetchPolicy: 'cache-and-network',
 		pollInterval: 30000,
+		errorPolicy: 'all',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
 	});
 
 	const requestsList = requestsData?.getIncomingRequests?.list ?? [];

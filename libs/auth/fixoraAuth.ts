@@ -4,9 +4,16 @@ import {
 	FIXORA_LOGIN,
 	FIXORA_SIGNUP,
 	LOGIN_WITH_OAUTH,
+	SUBMIT_TECHNICIAN_VERIFICATION,
 } from '../../apollo/user/auth';
+import { UPDATE_USER } from '../../apollo/user/profile';
 import { userVar } from '../../apollo/store';
 import { updateUserInfo } from './index';
+import { clearTechOnboardingFiles, getTechIdFile, getTechPhotoFile } from './techOnboardingFiles';
+import { uploadImageFile } from '../utils/uploadImageFile';
+import { syncUserVarFromGraphqlUser } from './syncUserVar';
+import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
+import { dataUrlToFile } from '../utils/onboardingFileStorage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -84,10 +91,13 @@ export const validateOAuthCompleteInput = (
 };
 
 export interface FixoraAuthProfile {
+	_id?: string | null;
+	userEmail?: string | null;
 	userProfileImage?: string | null;
 	userNickname?: string | null;
 	userFullName?: string | null;
 	userType?: string | null;
+	verificationStatus?: string | null;
 }
 
 export function setAuthTokens(accessToken: string, refreshToken: string, profile?: FixoraAuthProfile) {
@@ -100,11 +110,26 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 		const current = userVar();
 		userVar({
 			...current,
+			...(profile._id ? { _id: profile._id } : {}),
 			...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
 			...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
 			...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
 			...(profile.userType ? { memberType: profile.userType, userType: profile.userType } : {}),
+			...(profile.verificationStatus
+				? { verificationStatus: profile.verificationStatus }
+				: profile.userType === 'TECHNICIAN'
+					? { verificationStatus: 'PENDING' }
+					: {}),
 		});
+		if (profile._id && profile.userProfileImage) {
+			syncUserVarFromGraphqlUser({
+				_id: profile._id,
+				userProfileImage: profile.userProfileImage,
+			});
+		}
+		if (profile._id && profile.userEmail) {
+			writeStoredUserEmail(profile._id, profile.userEmail);
+		}
 	}
 }
 
@@ -132,10 +157,13 @@ export const fixoraLogin = async (userEmail: string, userPassword: string): Prom
 			throw new Error('Login failed — no access token returned');
 		}
 		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			_id: user._id,
+			userEmail: user.userEmail,
 			userProfileImage: user.userProfileImage,
 			userNickname: user.userNickname,
 			userFullName: user.userFullName,
 			userType: user.userType,
+			verificationStatus: user.verificationStatus,
 		});
 		setNeedsOnboarding(false);
 	} catch (err) {
@@ -171,10 +199,13 @@ export const fixoraCustomerSignup = async (
 			throw new Error('Sign up failed — no access token returned');
 		}
 		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			_id: user._id,
+			userEmail: user.userEmail,
 			userProfileImage: user.userProfileImage,
 			userNickname: user.userNickname,
 			userFullName: user.userFullName,
 			userType: user.userType,
+			verificationStatus: user.verificationStatus,
 		});
 		setNeedsOnboarding(false);
 	} catch (err) {
@@ -200,10 +231,13 @@ export const fixoraOAuthLogin = async (
 		}
 
 		setAuthTokens(payload.accessToken, payload.refreshToken ?? '', {
+			_id: payload.user?._id,
+			userEmail: payload.user?.userEmail,
 			userProfileImage: payload.user?.userProfileImage,
 			userNickname: payload.user?.userNickname,
 			userFullName: payload.user?.userFullName,
 			userType: payload.user?.userType,
+			verificationStatus: payload.user?.verificationStatus,
 		});
 		setNeedsOnboarding(!!payload.needsOnboarding);
 
@@ -238,9 +272,11 @@ export const fixoraCompleteOAuthSignup = async (input: {
 	if (!user?.accessToken) throw new Error('OAuth signup completion failed');
 
 	setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+		_id: user._id,
 		userNickname: user.userNickname,
 		userFullName: user.userFullName,
 		userType: user.userType,
+		verificationStatus: user.verificationStatus,
 	});
 	setNeedsOnboarding(false);
 	return user.userType;
@@ -279,6 +315,29 @@ export const loadTechDraft = (): TechOnboardingDraft | null => {
 export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promise<void> => {
 	const nickname = draft.fullName.trim().replace(/\s+/g, '').slice(0, 12) || 'tech';
 	const apolloClient = await initializeApollo();
+	let photoFile = getTechPhotoFile();
+	let idFile = getTechIdFile();
+
+	if (!photoFile && draft.photoDataUrl) {
+		try {
+			photoFile = dataUrlToFile(draft.photoDataUrl, draft.photoFileName ?? 'profile.jpg');
+		} catch {
+			photoFile = null;
+		}
+	}
+	if (!idFile && draft.idPreviewDataUrl) {
+		try {
+			const mime = draft.idFileName?.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg';
+			idFile = dataUrlToFile(draft.idPreviewDataUrl, draft.idFileName ?? 'id-document', mime);
+		} catch {
+			idFile = null;
+		}
+	}
+
+	if (!idFile) {
+		throw new Error('ID document is required. Please upload your ID again.');
+	}
+
 	try {
 		const result = await apolloClient.mutate({
 			mutation: FIXORA_SIGNUP,
@@ -298,15 +357,89 @@ export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promis
 		if (!user?.accessToken) {
 			throw new Error('Technician signup failed');
 		}
-		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
-			userProfileImage: user.userProfileImage,
+
+		const token = user.accessToken as string;
+		const userId = user._id as string;
+
+		// Persist JWT before guarded mutations (updateUser, submitTechnicianVerification).
+		setAuthTokens(token, user.refreshToken ?? '', {
+			_id: userId,
+			userEmail: draft.email.trim(),
 			userNickname: user.userNickname,
-			userFullName: user.userFullName,
+			userFullName: draft.fullName.trim(),
+			userType: user.userType,
+			verificationStatus: user.verificationStatus,
+		});
+
+		let profileImagePath: string | undefined;
+		const verificationDocuments: string[] = [];
+
+		if (photoFile) {
+			profileImagePath = await uploadImageFile(photoFile, token);
+		}
+		if (idFile) {
+			verificationDocuments.push(await uploadImageFile(idFile, token));
+		}
+
+		const updateResult = await apolloClient.mutate({
+			mutation: UPDATE_USER,
+			variables: {
+				input: {
+					_id: userId,
+					userFullName: draft.fullName.trim(),
+					...(profileImagePath ? { userProfileImage: profileImagePath } : {}),
+					...(verificationDocuments.length ? { verificationDocuments } : {}),
+				},
+			},
+		});
+		const updated = updateResult.data?.updateUser;
+		if (updated?.userProfileImage) {
+			user.userProfileImage = updated.userProfileImage;
+		}
+
+		if (verificationDocuments.length > 0) {
+			try {
+				await apolloClient.mutate({
+					mutation: SUBMIT_TECHNICIAN_VERIFICATION,
+					fetchPolicy: 'network-only',
+				});
+			} catch {
+				// PENDING without submit is still reviewable by admin (GAP-110)
+			}
+		}
+
+		setAuthTokens(token, user.refreshToken ?? '', {
+			_id: userId,
+			userEmail: draft.email.trim(),
+			userProfileImage: profileImagePath ?? user.userProfileImage,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName ?? draft.fullName.trim(),
+			userType: user.userType,
+			verificationStatus: user.verificationStatus,
+		});
+		syncUserVarFromGraphqlUser({
+			_id: userId,
+			userFullName: draft.fullName.trim(),
+			userNickname: user.userNickname,
+			userProfileImage: profileImagePath ?? user.userProfileImage ?? null,
+			userPhoneNumber: draft.phone.trim(),
+		});
+		writeTechnicianSettingsCache({
+			_id: userId,
+			userEmail: draft.email.trim(),
+			userFullName: draft.fullName.trim(),
+			userNickname: user.userNickname,
+			userPhoneNumber: draft.phone.trim(),
+			userProfileImage: profileImagePath ?? user.userProfileImage ?? null,
 			userType: user.userType,
 		});
 		setNeedsOnboarding(false);
+
+		if (typeof window !== 'undefined') {
+			sessionStorage.removeItem(TECH_DRAFT_KEY);
+		}
+		clearTechOnboardingFiles();
 	} catch (err) {
 		throw new Error(getGraphQLErrorMessage(err));
 	}
-	saveTechDraft(draft);
 };

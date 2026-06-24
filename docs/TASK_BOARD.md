@@ -4,7 +4,7 @@
 > Update after each task: `⬜ Todo` · `🔄 In Progress` · `✅ Done` · `⏸ Blocked`  
 > **Cursor and Codex:** keep this in sync with `AI_HANDOFF.md`.
 
-**Last updated:** 2026-06-23
+**Last updated:** 2026-06-24
 
 **Roadmap order:** Phase 0 → 1 → 2 (desktop pages) → **3 (mobile)** → 4 (migration) → 5 (light theme)
 

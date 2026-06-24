@@ -11,7 +11,9 @@
 		"settings": "설정",
 		"superAdmin": "최고 관리자",
 		"admin": "관리자",
-		"logout": "로그아웃"
+		"logout": "로그아웃",
+		"openMenu": "메뉴 열기",
+		"closeMenu": "메뉴 닫기"
 	},
 	"header": {
 		"searchPlaceholder": "검색...",

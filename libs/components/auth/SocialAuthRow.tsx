@@ -40,8 +40,11 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 			if (/INVALID_OAUTH|Invalid or expired OAuth token/i.test(message)) {
 				return t('oauth.invalidToken');
 			}
-			if (/OAUTH_ACCOUNT_EXISTS|OAUTH_PROVIDER_MISMATCH/i.test(message)) {
-				return message;
+			if (/OAUTH_PROVIDER_MISMATCH/i.test(message)) {
+				return t('oauth.providerMismatch');
+			}
+			if (/OAUTH_ACCOUNT_EXISTS|already exist/i.test(message)) {
+				return t('oauth.accountExists');
 			}
 			if (message && !/^OAuth login failed/i.test(message) && message !== 'Request failed') {
 				return message;

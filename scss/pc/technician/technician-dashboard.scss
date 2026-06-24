@@ -1,20 +1,21 @@
 /** TECHNICIAN DASHBOARD - PIXEL PERFECT FIGMA DESIGN **/
 
-// Colors
-$bg-dark: #0A0A0A;
-$bg-surface: #0D0D0D;
-$bg-card: #111111;
-$bg-surface-light: #1A1A1A;
-$primary-orange: #FF6B00;
-$primary-orange-light: #FF9A3C;
-$text-primary: #F0F0F0;
-$text-secondary: #808080;
-$text-tertiary: #606060;
-$border-subtle: rgba(255, 255, 255, 0.07);
-$border-orange: rgba(255, 107, 0, 0.2);
+@import 'technician-card-tokens';
+
+// Colors — client tokens
+$bg-dark: $tech-page-bg;
+$bg-surface: $tech-shell-bg;
+$bg-card: $tech-card-bg;
+$bg-surface-light: $tech-surface-elevated;
+$primary-orange: $tech-primary;
+$primary-orange-light: $tech-primary-hover;
+$text-primary: $tech-text-primary;
+$text-secondary: $tech-text-muted;
+$text-tertiary: var(--fixora-text-muted);
+$border-subtle: $tech-input-border;
+$border-orange: var(--fixora-border);
 
 .fixora-technician-layout {
-	background: $bg-dark;
 	min-height: 100vh;
 	font-family: $font-technician;
 
@@ -81,7 +82,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		background-clip: content-box;
 
 		&:hover {
-			background: rgba(255, 107, 0, 0.45);
+			background: rgba(115, 12, 30, 0.45);
 			background-clip: content-box;
 		}
 	}
@@ -141,10 +142,10 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		transition: background 0.15s ease;
 
 		&:hover {
-			background: rgba(255, 107, 0, 0.08);
+			background: rgba(115, 12, 30, 0.08);
 
 			.fixora-technician-sidebar__logo-img .fixora-logo__image {
-				filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.45));
+				filter: drop-shadow(0 0 12px rgba(115, 12, 30, 0.35));
 			}
 		}
 	}
@@ -212,7 +213,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, $tech-primary, $tech-primary-hover);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -289,7 +290,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		}
 
 		&--active {
-			background: rgba(255, 107, 0, 0.14);
+			background: $tech-primary-soft;
 			color: $primary-orange;
 			font-weight: 600;
 
@@ -383,10 +384,10 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	left: 240px;
 	right: 0;
 	height: 60px;
-	background: rgba(10, 10, 10, 0.92);
+	background: var(--fixora-navbar-bg);
 	backdrop-filter: blur(16px);
 	-webkit-backdrop-filter: blur(16px);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	border-bottom: 1px solid $tech-input-border;
 	display: flex;
 	align-items: center;
 	padding: 0 24px;
@@ -410,8 +411,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		max-width: 380px;
 		display: flex;
 		align-items: center;
-		background: #141414;
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: $tech-surface;
+		border: 1px solid $tech-input-border;
 		border-radius: 10px;
 		padding: 0 12px;
 		gap: 8px;
@@ -419,9 +420,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		margin-left: 16px;
 
 		&--focused {
-			background: #1A1A1A;
-			border-color: rgba(255, 107, 0, 0.4);
-			box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+			background: $tech-surface-elevated;
+			border-color: rgba(115, 12, 30, 0.45);
+			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.12);
 		}
 	}
 
@@ -464,7 +465,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, $tech-primary, $tech-primary-hover);
 		border: none;
 		border-radius: 9px;
 		padding: 7px 14px;
@@ -472,11 +473,11 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		font-size: 12px;
 		font-weight: 700;
 		cursor: pointer;
-		box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+		box-shadow: 0 4px 14px rgba(115, 12, 30, 0.25);
 		transition: box-shadow 0.2s ease;
 
 		&:hover {
-			box-shadow: 0 0 32px rgba(255, 107, 0, 0.5);
+			box-shadow: 0 6px 22px rgba(115, 12, 30, 0.38);
 		}
 
 		span:first-child {
@@ -521,9 +522,9 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		transition: all 0.15s ease;
 
 		&:hover {
-			background: rgba(255, 107, 0, 0.1);
-			color: #FF6B00;
-			border-color: rgba(255, 107, 0, 0.3);
+			background: $tech-primary-soft;
+			color: $tech-primary;
+			border-color: rgba(115, 12, 30, 0.35);
 		}
 	}
 
@@ -531,15 +532,15 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		position: absolute;
 		top: -4px;
 		right: -4px;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, $tech-primary, $tech-primary-hover);
 		color: #fff;
 		border-radius: 20px;
 		font-size: 9px;
 		font-weight: 700;
 		padding: 1px 5px;
 		line-height: 13px;
-		border: 1.5px solid #0A0A0A;
-		box-shadow: 0 0 8px rgba(255, 107, 0, 0.5);
+		border: 1.5px solid var(--fixora-bg);
+		box-shadow: 0 0 8px rgba(115, 12, 30, 0.35);
 	}
 
 	&__profile {
@@ -573,7 +574,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		width: 28px;
 		height: 28px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, $tech-primary, $tech-primary-hover);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -664,8 +665,8 @@ $border-orange: rgba(255, 107, 0, 0.2);
 	gap: 20px;
 
 	&__welcome {
-		background: linear-gradient(135deg, #161616 0%, #111111 50%, #141008 100%);
-		border: 1px solid rgba(255, 107, 0, 0.12);
+		background: var(--fixora-card-gradient);
+		border: 1px solid var(--fixora-border);
 		border-radius: 16px;
 		padding: 28px 32px;
 		min-height: 130px;
@@ -675,6 +676,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 		gap: 24px;
 		position: relative;
 		overflow: hidden;
+		box-shadow: var(--fixora-glow);
 
 		> div:first-child {
 			min-width: 0;
@@ -688,7 +690,7 @@ $border-orange: rgba(255, 107, 0, 0.2);
 			width: 200px;
 			height: 200px;
 			border-radius: 50%;
-			background: radial-gradient(circle, rgba(255, 107, 0, 0.12) 0%, transparent 70%);
+			background: radial-gradient(circle, rgba(115, 12, 30, 0.22) 0%, transparent 70%);
 			pointer-events: none;
 		}
 	}
@@ -859,11 +861,12 @@ $border-orange: rgba(255, 107, 0, 0.2);
 
 .fixora-tech-stat-card {
 	background: $bg-card;
-	border: 1px solid $border-subtle;
+	border: 1px solid $tech-card-border;
 	border-radius: 14px;
 	padding: 18px 20px;
 	display: flex;
 	flex-direction: column;
+	box-shadow: $tech-card-shadow;
 
 	&__top {
 		display: flex;
@@ -941,10 +944,11 @@ $border-orange: rgba(255, 107, 0, 0.2);
 .fixora-technician-layout .fixora-tech-card,
 .fixora-technician-mobile .fixora-tech-card {
 	background: $bg-card;
-	border: 1px solid $border-subtle;
+	border: 1px solid $tech-card-border;
 	border-radius: 14px;
 	padding: 16px 20px;
 	outline: none;
+	box-shadow: $tech-card-shadow;
 	// Grid items default to min-width:auto, which makes recharts ResponsiveContainer
 	// measure 0 width on first layout (no axes/line render). Allow it to shrink.
 	min-width: 0;
@@ -1484,10 +1488,11 @@ $border-orange: rgba(255, 107, 0, 0.2);
 }
 
 .fixora-tech-review-card {
-	background: #161616;
-	border: 1px solid rgba(255, 255, 255, 0.06);
+	background: $tech-card-bg;
+	border: 1px solid $tech-card-border;
 	border-radius: 12px;
 	padding: 16px;
+	box-shadow: $tech-card-shadow;
 }
 
 .fixora-tech-review-header {

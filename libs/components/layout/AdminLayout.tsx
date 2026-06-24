@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { Menu } from 'lucide-react';
 import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
 import { fixoraDark } from '../../../scss/MaterialTheme';
 import { getJwtToken, updateUserInfo } from '../../auth';
@@ -11,8 +10,9 @@ import { userVar } from '../../../apollo/store';
 import { GET_ADMIN_USER } from '../../../apollo/admin/query';
 import { syncUserVarFromGraphqlUser } from '../../auth/syncUserVar';
 import AdminSidebar from '../admin/AdminSidebar';
+import AdminMobileTopBar from '../admin/AdminMobileTopBar';
 import AdminForbidden from '../admin/AdminForbidden';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import useAdminMobileLayout from '../../hooks/useAdminMobileLayout';
 
 const adminTheme = createTheme(fixoraDark as ThemeOptions);
 
@@ -28,7 +28,7 @@ const withAdminLayout = <P extends object>(
 	const Wrapped = (props: P & AdminPageProps) => {
 		const router = useRouter();
 		const user = useReactiveVar(userVar);
-		const device = useDeviceDetect();
+		const isMobile = useAdminMobileLayout();
 		const [authChecked, setAuthChecked] = useState(false);
 		const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -41,6 +41,14 @@ const withAdminLayout = <P extends object>(
 			updateUserInfo(jwt);
 			setAuthChecked(true);
 		}, [router.asPath, router]);
+
+		useEffect(() => {
+			setSidebarOpen(false);
+		}, [router.pathname]);
+
+		useEffect(() => {
+			if (!isMobile) setSidebarOpen(false);
+		}, [isMobile]);
 
 		useQuery(GET_ADMIN_USER, {
 			variables: { userId: user._id },
@@ -75,18 +83,14 @@ const withAdminLayout = <P extends object>(
 					<title>{headTitle}</title>
 					<meta name="title" content={headTitle} />
 				</Head>
-				<div className="fixora-admin-layout">
-					{device === 'mobile' && (
-						<button
-							type="button"
-							className="fixora-admin-mobile-menu"
-							onClick={() => setSidebarOpen((v) => !v)}
-							aria-label="Menu"
-						>
-							<Menu size={20} />
-						</button>
+				<div className={`fixora-admin-layout${isMobile ? ' fixora-admin-layout--mobile' : ''}`}>
+					{isMobile && (
+						<AdminMobileTopBar
+							sidebarOpen={sidebarOpen}
+							onMenuToggle={() => setSidebarOpen((v) => !v)}
+						/>
 					)}
-					{device === 'mobile' && sidebarOpen && (
+					{isMobile && sidebarOpen && (
 						<button
 							type="button"
 							className="fixora-admin-mobile-overlay"
@@ -94,7 +98,10 @@ const withAdminLayout = <P extends object>(
 							aria-label="Close menu"
 						/>
 					)}
-					<AdminSidebar className={sidebarOpen ? 'fixora-admin-sidebar--open' : ''} />
+					<AdminSidebar
+						className={sidebarOpen ? 'fixora-admin-sidebar--open' : ''}
+						onNavigate={() => setSidebarOpen(false)}
+					/>
 					<main className="fixora-admin-main">
 						<Component {...props} />
 					</main>

@@ -7,6 +7,7 @@ import SettingsSaveButton from '../SettingsSaveButton';
 import { ProfileFormState, TechnicianSettingsUser } from '../../../../hooks/useTechnicianSettings';
 import { useProfileImageUpload } from '../../../../hooks/useProfileImageUpload';
 import { sweetMixinErrorAlert } from '../../../../sweetAlert';
+import { hasRealProfileImage } from '../../../../utils/profileImage';
 
 interface ProfileSettingsSectionProps {
 	user: TechnicianSettingsUser | null;
@@ -33,7 +34,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 	const avatar = useProfileImageUpload(onUploadError);
 
 	React.useEffect(() => {
-		if (user?.userProfileImage) {
+		if (user && hasRealProfileImage(user.userProfileImage)) {
 			avatar.setExistingImage(user.userProfileImage);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate avatar once per profile image path
@@ -49,7 +50,11 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 			.toUpperCase() || 'T';
 	}, [form.fullName, user?.userFullName]);
 
-	const profileUrl = user?.userNickname ? `${user.userNickname}.fixora.io` : '';
+	const profileUrl = user?.userSlug
+		? `${user.userSlug}.fixora.io`
+		: user?.userNickname
+			? `${user.userNickname}.fixora.io`
+			: '';
 
 	const handleSave = async () => {
 		let imagePath: string | undefined;

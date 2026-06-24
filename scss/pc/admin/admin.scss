@@ -227,15 +227,14 @@ $admin-text-secondary: var(--fixora-text-secondary);
 /* ── Header ── */
 .fixora-admin-header {
 	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 24px;
+	flex-direction: column;
+	gap: 16px;
 	padding: 24px 32px 20px;
 	border-bottom: 1px solid $admin-border;
-	flex-wrap: wrap;
 
-	&__titles {
+	&__intro {
 		flex: 0 0 auto;
+		min-width: 0;
 	}
 
 	&__title {
@@ -252,13 +251,37 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		color: $admin-text-muted;
 	}
 
-	&__actions {
+	&__toolbar {
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		flex: 1;
-		justify-content: flex-end;
-		min-width: 280px;
+		min-width: 0;
+
+		&--desktop {
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			flex: 1;
+		}
+
+		&--mobile {
+			display: none;
+			width: 100%;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 24px;
+	}
+
+	&__user--avatar-only {
+		padding: 4px;
+		border-radius: 50%;
+		min-width: 44px;
+		min-height: 44px;
+		justify-content: center;
 	}
 
 	&__bell {
@@ -1086,15 +1109,26 @@ $admin-text-secondary: var(--fixora-text-secondary);
 .fixora-admin-verification {
 	display: grid;
 	grid-template-columns: 1fr 380px;
-	gap: 16px;
+	grid-template-areas:
+		'search detail'
+		'list detail';
+	gap: 12px 16px;
 	min-height: 480px;
 
+	&__search-row {
+		grid-area: search;
+		min-width: 0;
+		max-width: 420px;
+	}
+
 	&__list {
+		grid-area: list;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		max-height: calc(100vh - 220px);
+		max-height: calc(100vh - 284px);
 		overflow-y: auto;
+		min-width: 0;
 	}
 
 	&__list-item {
@@ -1145,6 +1179,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 
 	&__detail {
+		grid-area: detail;
 		@include fixora-admin-card-surface;
 		padding: 20px;
 		max-height: calc(100vh - 220px);
@@ -1858,10 +1893,64 @@ $admin-text-secondary: var(--fixora-text-secondary);
 }
 
 @media (max-width: 1023px) {
+	$admin-mobile-topbar-height: 56px;
+
+	.fixora-admin-layout--mobile {
+		overflow-x: hidden;
+	}
+
+	.fixora-admin-mobile-topbar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 130;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		height: calc(#{$admin-mobile-topbar-height} + var(--fixora-safe-top));
+		padding:
+			var(--fixora-safe-top)
+			calc(12px + var(--fixora-safe-right))
+			0
+			calc(12px + var(--fixora-safe-left));
+		background: linear-gradient(180deg, #1c080d 0%, #140f17 100%);
+		border-bottom: 1px solid $admin-border;
+
+		&__menu {
+			flex-shrink: 0;
+			width: 44px;
+			height: 44px;
+			border-radius: 10px;
+			border: 1px solid $admin-border;
+			background: $admin-surface;
+			color: $admin-text;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
+
+		&__spacer {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+
+		&__actions {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+	}
+
 	.fixora-admin-sidebar {
+		top: calc(#{$admin-mobile-topbar-height} + var(--fixora-safe-top));
+		height: calc(100dvh - #{$admin-mobile-topbar-height} - var(--fixora-safe-top));
 		transform: translateX(-100%);
 		transition: transform 0.25s ease;
 		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+		z-index: 125;
 
 		&--open {
 			transform: translateX(0);
@@ -1870,33 +1959,59 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 	.fixora-admin-main {
 		margin-left: 0;
+		padding-top: calc(#{$admin-mobile-topbar-height} + var(--fixora-safe-top));
+		min-width: 0;
+		overflow-x: hidden;
 	}
 
-	.fixora-admin-header__actions {
-		flex-wrap: wrap;
+	.fixora-admin-header {
+		padding: 16px var(--fixora-mobile-gutter) 14px;
+		gap: 12px;
+
+		&__title {
+			font-size: 22px;
+		}
+
+		&__subtitle {
+			font-size: 12px;
+			line-height: 1.4;
+		}
+
+		&__toolbar--desktop {
+			display: none;
+		}
+
+		&__toolbar--mobile {
+			display: flex;
+			width: 100%;
+		}
+	}
+
+	.fixora-admin-search--header {
+		flex: 1 1 auto;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.fixora-admin-header__notif-dropdown {
+		right: 0;
+		left: auto;
+		max-width: min(320px, calc(100vw - 24px));
+	}
+
+	.fixora-admin-header__user-menu {
+		right: 0;
+		left: auto;
 	}
 
 	.fixora-admin-mobile-menu {
-		position: fixed;
-		top: 12px;
-		left: 12px;
-		z-index: 110;
-		width: 40px;
-		height: 40px;
-		border-radius: 10px;
-		border: 1px solid $admin-border;
-		background: $admin-surface;
-		color: $admin-text;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
+		display: none !important;
 	}
 
 	.fixora-admin-mobile-overlay {
 		position: fixed;
 		inset: 0;
-		z-index: 99;
+		z-index: 120;
 		background: rgba(0, 0, 0, 0.5);
 		border: none;
 		cursor: pointer;
@@ -1905,7 +2020,9 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 @media (max-width: 767px) {
 	.fixora-admin-page {
-		padding: 16px;
+		padding: 12px var(--fixora-mobile-gutter) calc(20px + var(--fixora-safe-bottom));
+		min-width: 0;
+		overflow-x: hidden;
 	}
 
 	.fixora-admin-stats-grid,
@@ -1916,16 +2033,101 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		grid-template-columns: 1fr;
 	}
 
+	.fixora-admin-stat-card {
+		padding: 14px 16px;
+
+		&__value {
+			font-size: 24px;
+		}
+	}
+
+	.fixora-admin-filter-tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 4px;
+		margin-right: calc(-1 * var(--fixora-mobile-gutter));
+		padding-right: var(--fixora-mobile-gutter);
+		scrollbar-width: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		&__tab {
+			flex-shrink: 0;
+			white-space: nowrap;
+		}
+	}
+
+	.fixora-admin-toolbar-row,
+	.fixora-admin-toolbar-row--filters {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.fixora-admin-verification {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			'search'
+			'list'
+			'detail';
+		min-height: 0;
+
+		&__list {
+			max-height: none;
+		}
+
+		&__list-item {
+			flex-wrap: wrap;
+			padding: 12px;
+		}
+
+		&__list-aside {
+			width: 100%;
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: flex-start;
+			margin-top: 4px;
+		}
+
+		&__detail {
+			max-height: none;
+			padding: 16px;
+		}
+
+		&__actions {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+
+			.fixora-admin-btn {
+				width: 100%;
+			}
+		}
+	}
+
 	.fixora-admin-moderation-card__actions {
 		grid-template-columns: 1fr 1fr;
 	}
 
 	.fixora-admin-table-wrap {
+		margin: 0 calc(-1 * var(--fixora-mobile-gutter));
+		padding: 0 var(--fixora-mobile-gutter);
 		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.fixora-admin-table {
-		min-width: 720px;
+		min-width: 560px;
+	}
+
+	.fixora-admin-charts-grid {
+		.recharts-responsive-container {
+			min-height: 220px !important;
+		}
 	}
 }
 

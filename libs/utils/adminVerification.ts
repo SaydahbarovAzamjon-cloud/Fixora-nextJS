@@ -1,4 +1,5 @@
 import type { AdminUser } from '../types/admin/admin';
+import { hasRealProfileImage } from './profileImage';
 
 export interface CompletenessItem {
 	key: string;
@@ -7,7 +8,7 @@ export interface CompletenessItem {
 }
 
 export function buildVerificationCompleteness(user: AdminUser): CompletenessItem[] {
-	const hasPhoto = Boolean(user.userProfileImage && !user.userProfileImage.includes('defaultUser'));
+	const hasPhoto = hasRealProfileImage(user.userProfileImage);
 	const hasServices = (user.services?.length ?? 0) > 0;
 	const hasBio = Boolean(user.userBio?.trim());
 	const hasHours = Boolean(user.workingHours?.days?.length);

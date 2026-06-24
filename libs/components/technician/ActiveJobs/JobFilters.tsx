@@ -22,7 +22,7 @@ const FilterChip = styled(Chip)<{ active?: boolean; dotcolor?: string }>(({ acti
 	fontSize: 12,
 	fontWeight: 600,
 	color: active ? '#fff' : '#A0A0A0',
-	backgroundColor: active ? '#FF6B00' : 'rgba(255,255,255,0.04)',
+	backgroundColor: active ? 'var(--fixora-primary)' : 'rgba(255,255,255,0.04)',
 	border: active ? 'none' : '1px solid rgba(255,255,255,0.08)',
 	'& .MuiChip-label': { padding: '0 10px' },
 	...(dotcolor && !active

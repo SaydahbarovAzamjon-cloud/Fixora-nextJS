@@ -354,7 +354,7 @@
 	}
 
 	&__badge {
-		background: #FF6B00;
+		background: var(--fixora-primary);
 		color: #fff;
 		font-size: 12px;
 		font-weight: 700;
@@ -379,7 +379,7 @@
 	border: 1px solid rgba(255, 107, 0, 0.3);
 	border-radius: 10px;
 	padding: 9px 16px;
-	color: #FF6B00;
+	color: var(--fixora-primary);
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
@@ -416,7 +416,7 @@
 	&--active {
 		background: rgba(255, 107, 0, 0.15);
 		border-color: rgba(255, 107, 0, 0.35);
-		color: #FF6B00;
+		color: var(--fixora-primary);
 		font-weight: 600;
 	}
 }
@@ -462,7 +462,7 @@
 		width: 32px;
 		height: 32px;
 		border: 3px solid rgba(255, 107, 0, 0.15);
-		border-top-color: #FF6B00;
+		border-top-color: var(--fixora-primary);
 		border-radius: 50%;
 		animation: notif-spin 0.7s linear infinite;
 	}
@@ -497,7 +497,7 @@
 		inset: 0;
 		border-radius: inherit;
 		padding: 1px;
-		background: linear-gradient(120deg, #FF6B00, #EC4899, #8B5CF6, #22D3EE, #22C55E, #FF6B00);
+		background: linear-gradient(120deg, var(--fixora-primary), #EC4899, #8B5CF6, #22D3EE, #22C55E, var(--fixora-primary));
 		background-size: 300% 300%;
 		-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
 		-webkit-mask-composite: xor;
@@ -530,7 +530,7 @@
 			bottom: 12px;
 			width: 3px;
 			border-radius: 0 3px 3px 0;
-			background: #FF6B00;
+			background: var(--fixora-primary);
 			z-index: 1;
 		}
 	}
@@ -593,7 +593,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		color: #fff;
 		font-size: 8px;
 		font-weight: 700;
@@ -612,7 +612,7 @@
 	}
 
 	&__sender-row:hover &__sender {
-		color: #FF9A3C;
+		color: var(--fixora-primary-hover);
 	}
 
 	&__sender {
@@ -702,7 +702,7 @@
 		transition: all 0.15s ease;
 
 		&:hover {
-			background: var(--notif-action-color, #FF6B00);
+			background: var(--notif-action-color, var(--fixora-primary));
 			color: #fff !important;
 			transform: translateY(-1px);
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);

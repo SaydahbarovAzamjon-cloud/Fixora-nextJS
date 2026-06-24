@@ -27,7 +27,7 @@
 	}
 
 	&__sub {
-		color: #808080;
+		color: $tech-text-muted;
 		font-size: 14px;
 		margin: 6px 0 0;
 	}
@@ -43,8 +43,8 @@
 .fixora-ea-range {
 	display: flex;
 	gap: 4px;
-	background: #141414;
-	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: var(--fixora-surface-elevated);
+	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 11px;
 	padding: 4px;
 
@@ -53,18 +53,18 @@
 		border: none;
 		border-radius: 8px;
 		padding: 8px 15px;
-		color: #808080;
+		color: $tech-text-secondary;
 		font-size: 13px;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.15s ease;
 
 		&:hover {
-			color: #C0C0C0;
+			color: $tech-text-primary;
 		}
 
 		&--active {
-			background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+			background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 			color: #fff;
 		}
 	}
@@ -74,7 +74,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+	background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 	border: none;
 	border-radius: 11px;
 	padding: 11px 20px;
@@ -112,7 +112,7 @@
 	}
 
 	&__label {
-		color: #909090;
+		color: $tech-text-muted;
 		font-size: 14px;
 	}
 
@@ -181,7 +181,7 @@
 		display: flex;
 		align-items: center;
 		gap: 7px;
-		color: #909090;
+		color: $tech-text-muted;
 		font-size: 13px;
 	}
 
@@ -199,14 +199,14 @@
 	margin-bottom: 2px;
 
 	&__val {
-		color: #FF6B00;
+		color: $tech-text-primary;
 		font-size: 32px;
 		font-weight: 700;
 		letter-spacing: -0.03em;
 		line-height: 1;
 
 		&--blue {
-			color: #3B82F6;
+			color: #60A5FA;
 		}
 	}
 
@@ -221,7 +221,7 @@
 }
 
 .fixora-ea-subnote {
-	color: #808080;
+	color: $tech-text-muted;
 	font-size: 13px;
 	margin-top: 4px;
 }
@@ -232,28 +232,6 @@
 	margin-top: 12px;
 }
 
-/* -------- Custom tooltip -------- */
-.fixora-ea-tooltip {
-	background: #161616;
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-radius: 10px;
-	padding: 10px 14px;
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-
-	&__title {
-		color: #E0E0E0;
-		font-size: 13px;
-		font-weight: 600;
-		margin-bottom: 6px;
-	}
-
-	&__row {
-		font-size: 13px;
-		font-weight: 600;
-		line-height: 1.6;
-	}
-}
-
 /* -------- Transactions -------- */
 .fixora-ea-txfilters {
 	display: flex;
@@ -261,24 +239,25 @@
 }
 
 .fixora-ea-txfilter {
-	background: rgba(255, 255, 255, 0.04);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: var(--fixora-surface-elevated);
+	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 20px;
 	padding: 5px 13px;
-	color: #909090;
+	color: $tech-text-secondary;
 	font-size: 12px;
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.15s ease;
 
 	&:hover {
-		color: #C0C0C0;
+		color: $tech-text-primary;
+		border-color: var(--fixora-border);
 	}
 
 	&--active {
-		background: rgba(255, 107, 0, 0.15);
-		border-color: rgba(255, 107, 0, 0.35);
-		color: #FF6B00;
+		background: var(--fixora-primary-soft-bg);
+		border-color: var(--fixora-border);
+		color: $tech-text-primary;
 		font-weight: 600;
 	}
 }
@@ -324,7 +303,7 @@
 	}
 
 	&__service {
-		color: #707070;
+		color: $tech-text-muted;
 		font-size: 13px;
 		margin-top: 2px;
 	}
@@ -355,10 +334,14 @@
 .fixora-ea-seeall {
 	background: none;
 	border: none;
-	color: #FF6B00;
+	color: $tech-text-secondary;
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
+
+	&:hover {
+		color: $tech-text-primary;
+	}
 }
 
 .fixora-ea-balance {
@@ -370,13 +353,13 @@
 	margin: 8px 0 18px;
 
 	&__label {
-		color: #909090;
+		color: $tech-text-muted;
 		font-size: 13px;
 		margin-bottom: 8px;
 	}
 
 	&__value {
-		color: #FF6B00;
+		color: $tech-text-primary;
 		font-size: 34px;
 		font-weight: 700;
 		letter-spacing: -0.03em;
@@ -384,7 +367,7 @@
 	}
 
 	&__note {
-		color: #808080;
+		color: $tech-text-secondary;
 		font-size: 13px;
 		margin: 8px 0 16px;
 	}
@@ -395,7 +378,7 @@
 		justify-content: center;
 		gap: 8px;
 		width: 100%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		border: none;
 		border-radius: 11px;
 		padding: 12px;
@@ -452,7 +435,7 @@
 	}
 
 	&__acct {
-		color: #707070;
+		color: $tech-text-muted;
 		font-size: 12px;
 		margin-top: 2px;
 	}
@@ -469,7 +452,7 @@
 	}
 
 	&__dur {
-		color: #707070;
+		color: $tech-text-muted;
 		font-size: 12px;
 		margin-top: 2px;
 	}

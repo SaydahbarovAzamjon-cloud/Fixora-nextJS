@@ -22,7 +22,28 @@ $text-dim: var(--fixora-text-muted);
 	display: flex;
 	height: calc(100vh - 60px);
 	overflow: hidden;
-	font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+	font-family: $font-technician;
+
+	/* reset.scss sets Poppins on semantic tags — inherit settings font everywhere */
+	p,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	button,
+	li,
+	a,
+	span,
+	label,
+	input,
+	textarea,
+	select,
+	div,
+	section {
+		font-family: inherit;
+	}
 
 	&--center {
 		align-items: center;
@@ -511,6 +532,61 @@ $text-dim: var(--fixora-text-muted);
 		font-weight: 700;
 		box-shadow: 0 0 10px rgba(115, 12, 30, 0.2);
 	}
+}
+
+/* Section wrapper */
+.fts-section {
+	font-family: inherit;
+}
+
+/* Toggle rows (notifications, security, preferences) */
+.fts-toggle-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	font-family: inherit;
+
+	&:first-child {
+		padding-top: 0;
+	}
+
+	&:last-child {
+		border-bottom: none;
+		padding-bottom: 4px;
+	}
+
+	&__label {
+		color: $text-secondary;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.35;
+		font-family: inherit;
+	}
+
+	&__hint {
+		margin-top: 4px;
+		color: $text-dim;
+		font-size: 12px;
+		line-height: 1.45;
+		font-family: inherit;
+	}
+
+	> span {
+		flex: 1;
+		min-width: 0;
+		color: $text-secondary;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.4;
+		font-family: inherit;
+	}
+}
+
+.fts-card .fts-save-btn {
+	margin-top: 18px;
 }
 
 /* Toggle */

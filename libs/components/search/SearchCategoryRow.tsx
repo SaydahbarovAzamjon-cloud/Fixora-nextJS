@@ -32,7 +32,18 @@ const SearchCategoryRow = ({ searchFilter, setSearchFilter }: SearchCategoryRowP
 		setSearchFilter({
 			...searchFilter,
 			page: 1,
-			search: { ...searchFilter.search, issueCategory: chip.issueCategory, deviceCategory: chip.deviceCategory },
+			search: {
+				...searchFilter.search,
+				text: undefined,
+				issueCategory: chip.issueCategory,
+				deviceCategory: chip.deviceCategory,
+				latitude: undefined,
+				longitude: undefined,
+				radiusKm: undefined,
+				...(chip.key === 'all'
+					? { issueCategory: undefined, deviceCategory: undefined }
+					: {}),
+			},
 		});
 	};
 

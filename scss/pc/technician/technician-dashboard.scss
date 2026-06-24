@@ -168,7 +168,7 @@ $border-orange: var(--fixora-border);
 	}
 
 	&__section-label {
-		color: #404040;
+		color: $tech-text-muted;
 		font-size: 10px;
 		font-weight: 600;
 		letter-spacing: 0.12em;
@@ -179,7 +179,7 @@ $border-orange: var(--fixora-border);
 	&__nav-badge {
 		font-size: 11px;
 		font-weight: 600;
-		color: #707070;
+		color: $tech-text-muted;
 		flex-shrink: 0;
 		line-height: 1;
 	}
@@ -239,7 +239,7 @@ $border-orange: var(--fixora-border);
 	}
 
 	&__user-role {
-		color: #606060;
+		color: $tech-text-muted;
 		font-size: 11px;
 		margin-top: 1px;
 	}
@@ -277,7 +277,7 @@ $border-orange: var(--fixora-border);
 		background: transparent;
 		border: none;
 		cursor: pointer;
-		color: #808080;
+		color: $tech-text-secondary;
 		font-size: 13px;
 		font-weight: 400;
 		transition: all 0.15s ease;
@@ -362,7 +362,7 @@ $border-orange: var(--fixora-border);
 		padding: 8px 10px;
 		border: none;
 		background: transparent;
-		color: #808080;
+		color: $tech-text-secondary;
 		border-radius: 9px;
 		cursor: pointer;
 		font-size: 13px;
@@ -428,7 +428,7 @@ $border-orange: var(--fixora-border);
 
 	&__search-icon {
 		font-size: 14px;
-		color: #505050;
+		color: $tech-text-muted;
 	}
 
 	&__search-input {
@@ -442,7 +442,7 @@ $border-orange: var(--fixora-border);
 		font-family: inherit;
 
 		&::placeholder {
-			color: #505050;
+			color: $tech-text-muted;
 		}
 	}
 
@@ -452,7 +452,7 @@ $border-orange: var(--fixora-border);
 		border-radius: 5px;
 		padding: 2px 6px;
 		font-size: 10px;
-		color: #606060;
+		color: $tech-text-muted;
 		font-family: inherit;
 		line-height: 14px;
 	}
@@ -490,7 +490,7 @@ $border-orange: var(--fixora-border);
 		margin: 0 2px;
 
 		.fixora-nav__lang-btn {
-			color: #606060;
+			color: $tech-text-muted;
 
 			&:hover {
 				color: #d0d0d0;
@@ -502,7 +502,7 @@ $border-orange: var(--fixora-border);
 		}
 
 		.fixora-nav__lang-divider {
-			color: #505050;
+			color: $tech-text-muted;
 		}
 	}
 
@@ -529,7 +529,7 @@ $border-orange: var(--fixora-border);
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
-		color: #606060;
+		color: $tech-text-muted;
 		font-size: 16px;
 		transition: all 0.15s ease;
 
@@ -578,7 +578,7 @@ $border-orange: var(--fixora-border);
 
 		span:last-child {
 			font-size: 11px;
-			color: #505050;
+			color: $tech-text-muted;
 		}
 	}
 
@@ -617,7 +617,7 @@ $border-orange: var(--fixora-border);
 	}
 
 	&__profile-role {
-		color: #505050;
+		color: $tech-text-muted;
 		font-size: 10px;
 	}
 
@@ -708,7 +708,7 @@ $border-orange: var(--fixora-border);
 	}
 
 	&__date {
-		color: #707070;
+		color: $tech-text-muted;
 		font-size: 13px;
 		margin-bottom: 4px;
 	}
@@ -920,7 +920,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-stat-label {
-	color: #808080;
+	color: $tech-text-secondary;
 	font-size: 13px;
 	font-weight: 500;
 }
@@ -935,7 +935,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-stat-change {
-	color: #707070;
+	color: $tech-text-muted;
 	font-size: 11px;
 	display: flex;
 	align-items: center;
@@ -997,7 +997,7 @@ $border-orange: var(--fixora-border);
 	}
 
 	&__link {
-		color: $primary-orange !important;
+		color: $tech-text-secondary !important;
 		font-size: 12px;
 		font-weight: 600;
 		background: none;
@@ -1011,7 +1011,7 @@ $border-orange: var(--fixora-border);
 		outline: none;
 
 		&:hover {
-			color: #FF9A3C !important;
+			color: $tech-text-primary !important;
 		}
 	}
 
@@ -1026,7 +1026,7 @@ $border-orange: var(--fixora-border);
 
 .fixora-tech-empty {
 	padding: 20px;
-	color: rgba(255, 255, 255, 0.6);
+	color: $tech-text-muted;
 	text-align: center;
 	font-size: 13px;
 }
@@ -1102,7 +1102,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-request-desc {
-	color: #606060;
+	color: $tech-text-muted;
 	font-size: 12px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -1116,13 +1116,13 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-request-budget {
-	color: $primary-orange;
+	color: $tech-text-primary;
 	font-size: 13px;
 	font-weight: 700;
 }
 
 .fixora-tech-request-time {
-	color: #505050;
+	color: $tech-text-muted;
 	font-size: 11px;
 	margin-top: 2px;
 }
@@ -1168,7 +1168,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-job-device {
-	color: #606060;
+	color: $tech-text-muted;
 	font-size: 12px;
 }
 
@@ -1181,7 +1181,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-job-issue {
-	color: #707070;
+	color: $tech-text-muted;
 	font-size: 12px;
 	margin-bottom: 8px;
 }
@@ -1208,7 +1208,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-job-due {
-	color: #505050;
+	color: $tech-text-muted;
 	font-size: 11px;
 	flex-shrink: 0;
 	margin-left: auto;
@@ -1270,7 +1270,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-earnings-amount {
-	color: $primary-orange;
+	color: $tech-text-primary;
 	font-size: 24px;
 	font-weight: 700;
 	letter-spacing: -0.03em;
@@ -1295,24 +1295,24 @@ $border-orange: var(--fixora-border);
 
 .fixora-tech-period-btn {
 	background: transparent;
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 7px;
 	padding: 4px 12px;
 	font-size: 11px;
 	font-weight: 600;
-	color: #606060;
+	color: $tech-text-secondary;
 	cursor: pointer;
 	transition: all 0.2s ease;
 
 	&--active {
-		background: rgba(255, 107, 0, 0.15);
-		border-color: rgba(255, 107, 0, 0.3);
-		color: $primary-orange;
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
+		border-color: transparent;
+		color: #fff;
 	}
 
 	&:hover:not(.fixora-tech-period-btn--active) {
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #A0A0A0;
+		border-color: var(--fixora-border);
+		color: $tech-text-primary;
 	}
 }
 
@@ -1397,7 +1397,7 @@ $border-orange: var(--fixora-border);
 	border-radius: 50%;
 	border: none;
 	background: transparent;
-	color: #606060;
+	color: $tech-text-muted;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -1456,7 +1456,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-schedule-time {
-	color: #707070;
+	color: $tech-text-muted;
 	font-size: 10px;
 	font-weight: 600;
 	margin-bottom: 2px;
@@ -1470,7 +1470,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-schedule-client {
-	color: #505050;
+	color: $tech-text-muted;
 	font-size: 11px;
 	margin-top: 2px;
 	line-height: 1.2;
@@ -1484,9 +1484,9 @@ $border-orange: var(--fixora-border);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #404040;
+	color: $tech-text-muted;
 	font-size: 13px;
-	border: 1px dashed rgba(255, 255, 255, 0.08);
+	border: 1px dashed var(--fixora-border-subtle);
 	border-radius: 10px;
 }
 
@@ -1544,13 +1544,13 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-review-device {
-	color: #606060;
+	color: $tech-text-muted;
 	font-size: 11px;
 	margin-top: 1px;
 }
 
 .fixora-tech-review-date {
-	color: #505050;
+	color: $tech-text-muted;
 	font-size: 11px;
 }
 
@@ -1562,7 +1562,7 @@ $border-orange: var(--fixora-border);
 }
 
 .fixora-tech-review-text {
-	color: #808080;
+	color: $tech-text-secondary;
 	font-size: 12px;
 	line-height: 1.5;
 	margin: 0;

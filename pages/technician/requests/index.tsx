@@ -26,6 +26,8 @@ import { ACCEPT_BOOKING, REJECT_BOOKING } from '../../../apollo/user/mutation';
 import { userVar } from '../../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../libs/sweetAlert';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
+import { resolveProfileImageUrl, hasRealProfileImage } from '../../../libs/utils/profileImage';
+import { parseDeviceImagePaths, resolveDeviceImageUrl } from '../../../libs/utils/deviceImage';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -67,6 +69,15 @@ const DeviceGlyph = ({ type, size = 18, color = '#9A9A9A' }: { type?: string | n
 const deviceLabel = (deviceType?: string | null) => DEVICE_LABEL[deviceType ?? ''] ?? 'Device';
 const issueLabel = (issueCategory?: string | null) => ISSUE_LABEL[issueCategory ?? ''] ?? 'General';
 const reqCode = (id: string) => `REQ-${id.slice(-4).toUpperCase()}`;
+
+const customerInitial = (name: string) => {
+	const parts = name.trim().split(/\s+/).filter(Boolean);
+	if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+	return (parts[0]?.[0] ?? 'C').toUpperCase();
+};
+
+const customerDisplayName = (customer?: { userFullName?: string | null; userNickname?: string | null } | null, fallback = 'Customer') =>
+	customer?.userFullName?.trim() || customer?.userNickname?.trim() || fallback;
 
 const urgencyInfo = (complexity: string | null | undefined, t: (k: string) => string) => {
 	switch (complexity) {
@@ -242,6 +253,11 @@ const IncomingRequests: NextPage = () => {
 						const priceLabel = displayedBooking.estimatedPrice
 							? formatKrw(parseFloat(displayedBooking.estimatedPrice))
 							: 'No estimate';
+						const clientName = customerDisplayName(displayedBooking.customerData, t('requests.customer'));
+						const clientImage = displayedBooking.customerData?.userProfileImage;
+						const devicePhotos = parseDeviceImagePaths(displayedBooking.deviceData?.deviceImage)
+							.map((path) => resolveDeviceImageUrl(path))
+							.filter((url): url is string => Boolean(url));
 						return (
 							<>
 								<div className="fixora-requests-detail">
@@ -272,11 +288,15 @@ const IncomingRequests: NextPage = () => {
 											<div className="fixora-requests-detail__card-label">Client</div>
 											<UserProfileLink userId={displayedBooking.userId} userType={displayedBooking.customerData?.userType ?? 'USER'}>
 											<div className="fixora-requests-detail__entity">
-												<div className="fixora-requests-detail__avatar">C</div>
+												<div className="fixora-requests-detail__avatar">
+													{hasRealProfileImage(clientImage) ? (
+														<img src={resolveProfileImageUrl(clientImage)} alt="" />
+													) : (
+														customerInitial(clientName)
+													)}
+												</div>
 												<div>
-													<div className="fixora-requests-detail__entity-name">
-														{displayedBooking.customerData?.userFullName || displayedBooking.customerData?.userNickname || t('requests.customer')}
-													</div>
+													<div className="fixora-requests-detail__entity-name">{clientName}</div>
 													<div className="fixora-requests-detail__rating">
 														<StarRounded style={{ fontSize: 15, color: '#F59E0B' }} />
 														<span className="fixora-requests-detail__rating-val">Client</span>
@@ -294,7 +314,7 @@ const IncomingRequests: NextPage = () => {
 											<div className="fixora-requests-detail__card-label">Device</div>
 											<div className="fixora-requests-detail__entity">
 												<div className="fixora-requests-detail__device-icon">
-													<DeviceGlyph type={displayedBooking.aiClassification?.deviceType} size={22} color="#FF9A3C" />
+													<DeviceGlyph type={displayedBooking.aiClassification?.deviceType} size={22} color="currentColor" />
 												</div>
 												<div>
 													<div className="fixora-requests-detail__entity-name">{deviceLabel(displayedBooking.aiClassification?.deviceType)}</div>
@@ -305,9 +325,12 @@ const IncomingRequests: NextPage = () => {
 												</div>
 											</div>
 											<div className="fixora-requests-detail__chips">
-												<span className="fixora-requests-detail__chip">
-													<CameraAltOutlined style={{ fontSize: 13 }} /> 3 photos
-												</span>
+												{devicePhotos.length > 0 && (
+													<span className="fixora-requests-detail__chip">
+														<CameraAltOutlined style={{ fontSize: 13 }} />{' '}
+														{t('requests.photoCount', { count: devicePhotos.length })}
+													</span>
+												)}
 												<span className="fixora-requests-detail__chip fixora-requests-detail__chip--price">{priceLabel}</span>
 											</div>
 										</div>
@@ -319,15 +342,26 @@ const IncomingRequests: NextPage = () => {
 									</div>
 
 									<div className="fixora-requests-detail__photos">
-										<div className="fixora-requests-detail__card-label">Damage Photos (3)</div>
-										<div className="fixora-requests-detail__photos-grid">
-											{[1, 2, 3].map((n) => (
-												<div key={n} className="fixora-requests-detail__photo">
-													<PhotoCameraOutlined style={{ fontSize: 22 }} />
-													<span>Photo {n}</span>
-												</div>
-											))}
+										<div className="fixora-requests-detail__card-label">
+											{t('requests.damagePhotos', { count: devicePhotos.length })}
 										</div>
+										{devicePhotos.length === 0 ? (
+											<p className="fixora-requests-detail__photos-empty">{t('requests.noDamagePhotos')}</p>
+										) : (
+											<div className="fixora-requests-detail__photos-grid">
+												{devicePhotos.map((url, index) => (
+													<a
+														key={`${url}-${index}`}
+														href={url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="fixora-requests-detail__photo fixora-requests-detail__photo--image"
+													>
+														<img src={url} alt="" />
+													</a>
+												))}
+											</div>
+										)}
 									</div>
 								</div>
 

@@ -233,16 +233,7 @@
 			}
 		}
 
-		.fixora-request-card {
-			border-color: var(--fixora-border-subtle);
-
-			&--active {
-				background: var(--fixora-primary-soft-bg);
-				border-color: var(--fixora-border);
-			}
-		}
-
-		/* ── Active jobs ── */
+		/* ── Active jobs (expanded) ── */
 		.fixora-jobs-list__tab {
 			&--active {
 				background: var(--fixora-primary-soft-bg);
@@ -251,7 +242,390 @@
 			}
 		}
 
-		/* ── Messages ── */
+		.fixora-jobs-filterbar {
+			border-bottom-color: var(--fixora-border-subtle);
+		}
+
+		.fixora-jobs-filter {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&__count {
+				background: var(--fixora-primary-soft-bg);
+				color: var(--fixora-text-secondary);
+			}
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+		}
+
+		.fixora-jobs-empty {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-job-card {
+			&__name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__device,
+			&__title {
+				color: var(--fixora-text-secondary);
+			}
+
+			&__icon {
+				background: var(--fixora-primary-soft-bg);
+			}
+
+			&__track {
+				background: var(--fixora-chart-track);
+			}
+
+			&__due {
+				color: var(--fixora-text-muted);
+
+				svg {
+					color: var(--fixora-text-muted);
+				}
+			}
+		}
+
+		.fixora-jobs-detail {
+			&__meta {
+				color: var(--fixora-text-muted);
+			}
+
+			&__title {
+				color: var(--fixora-text-primary);
+			}
+
+			&__sub,
+			&__empty {
+				color: var(--fixora-text-secondary);
+			}
+		}
+
+		.fixora-jobs-infocard {
+			&__icon {
+				background: var(--fixora-primary-soft-bg);
+			}
+
+			&__label {
+				color: var(--fixora-text-muted);
+			}
+
+			&__value {
+				color: var(--fixora-text-primary);
+			}
+
+			&__sub {
+				color: var(--fixora-text-secondary);
+			}
+		}
+
+		.fixora-jobs-timeline-card__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-jobs-tl-step {
+			&__label {
+				color: var(--fixora-text-primary);
+			}
+
+			&__time {
+				color: var(--fixora-text-muted);
+			}
+
+			&__line {
+				background: var(--fixora-border-subtle);
+
+				&--done {
+					background: var(--fixora-primary);
+				}
+			}
+
+			&__node--pending {
+				color: var(--fixora-chart-track);
+			}
+
+			&--pending .fixora-jobs-tl-step__label {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-jobs-actionbar {
+			background: rgba(255, 255, 255, 0.96);
+			border-top-color: var(--fixora-border-subtle);
+			box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+		}
+
+		.fixora-jobs-btn--more {
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&:hover {
+				background: var(--fixora-surface-hover);
+				color: var(--fixora-text-primary);
+			}
+		}
+
+		/* ── Incoming requests (expanded) ── */
+		.fixora-requests-search {
+			input {
+				color: var(--fixora-text-primary);
+
+				&::placeholder {
+					color: var(--fixora-text-muted);
+				}
+			}
+
+			&__icon,
+			&__clear {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-requests-filter {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+		}
+
+		.fixora-requests-empty,
+		.fixora-requests-detail__empty,
+		.fixora-requests-detail__meta {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-request-card {
+			border-color: var(--fixora-border-subtle);
+
+			&:hover {
+				background: var(--fixora-surface-hover);
+			}
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+
+			&__icon {
+				background: var(--fixora-primary-soft-bg);
+			}
+
+			&__name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__device,
+			&__issue {
+				color: var(--fixora-text-secondary);
+			}
+
+			&__time {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-requests-detail__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-requests-detail__card-label {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-requests-detail__rating-val {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-requests-detail__rating-sub {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-requests-detail__entity-name {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-requests-detail__entity-sub {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-requests-actionbar {
+			background: rgba(255, 255, 255, 0.96);
+			border-top-color: var(--fixora-border-subtle);
+			box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+		}
+
+		/* ── Dashboard widgets (expanded) ── */
+		.fixora-tech-job-item {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+
+			&:hover,
+			&--hovered {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+		}
+
+		.fixora-tech-progress-track {
+			background: var(--fixora-chart-track);
+		}
+
+		.fixora-tech-schedule-line {
+			background: var(--fixora-border-subtle);
+		}
+
+		.fixora-tech-schedule-time,
+		.fixora-tech-schedule-client {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-ea-chart-card__title,
+		.fixora-ea-tx__name,
+		.fixora-ea-tx__amount {
+			color: var(--fixora-text-primary);
+		}
+
+		/* ── Notifications list ── */
+		.fixora-notif-card {
+			&__title {
+				color: var(--fixora-text-primary);
+			}
+
+			&__sender {
+				color: var(--fixora-text-secondary);
+			}
+
+			&__issue {
+				color: var(--fixora-text-muted);
+			}
+
+			&__time {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-notif-empty {
+			color: var(--fixora-text-muted);
+		}
+
+		/* ── Messages (expanded) ── */
+		.fixora-msg-search-wrap {
+			border-bottom-color: var(--fixora-border-subtle);
+		}
+
+		.fixora-msg-conv {
+			&:hover {
+				background: var(--fixora-surface-hover);
+			}
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+
+			&__name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__time,
+			&__preview {
+				color: var(--fixora-text-muted);
+			}
+
+			&__dot {
+				border-color: var(--fixora-bg);
+			}
+		}
+
+		.fixora-msg-chat {
+			&__header {
+				border-bottom-color: var(--fixora-border-subtle);
+			}
+
+			&__name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__status {
+				color: var(--fixora-text-muted);
+			}
+
+			&__context {
+				background: var(--fixora-primary-soft-bg);
+				border-bottom-color: var(--fixora-border-subtle);
+			}
+		}
+
+		.fixora-msg-icon-btn {
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&:hover {
+				background: var(--fixora-surface-hover);
+				color: var(--fixora-text-primary);
+			}
+		}
+
+		.fixora-msg-bubble {
+			&--in {
+				background: var(--fixora-surface);
+				color: var(--fixora-text-primary);
+				border: 1px solid var(--fixora-border-subtle);
+			}
+
+			&__meta {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-msg-composer {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			box-shadow: var(--fixora-input-shadow);
+
+			&__attach,
+			&__emoji {
+				color: var(--fixora-text-muted);
+
+				&:hover {
+					color: var(--fixora-text-secondary);
+				}
+			}
+
+			&__input {
+				color: var(--fixora-text-primary);
+
+				&::placeholder {
+					color: var(--fixora-text-muted);
+				}
+			}
+
+			&__hint {
+				color: var(--fixora-text-muted);
+
+				kbd {
+					background: var(--fixora-surface);
+					border-color: var(--fixora-border-subtle);
+					color: var(--fixora-text-secondary);
+				}
+			}
+		}
+
+		.fixora-msg-emoji-picker {
+			box-shadow: var(--fixora-select-shadow);
+		}
+
 		.fixora-conversations__search {
 			background: var(--fixora-surface);
 			border-color: var(--fixora-border-subtle);
@@ -331,12 +705,17 @@
 			}
 		}
 
-		.fixora-ea-tooltip {
+		.fixora-ea-tooltip,
+		.fixora-an-tooltip {
 			background: var(--fixora-surface);
 			border-color: var(--fixora-border-subtle);
 			box-shadow: var(--fixora-select-shadow);
 
 			&__title {
+				color: var(--fixora-text-primary);
+			}
+
+			&__row {
 				color: var(--fixora-text-primary);
 			}
 		}
@@ -410,7 +789,89 @@
 			background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
 		}
 
-		/* ── Write article ── */
+		/* ── Write article (expanded) ── */
+		.ftwa-page {
+			font-family: $font-technician;
+		}
+
+		.ftwa-label {
+			color: var(--fixora-text-muted);
+		}
+
+		.ftwa-counter {
+			color: var(--fixora-text-muted);
+		}
+
+		.ftwa-editor {
+			&__stat {
+				color: var(--fixora-text-muted);
+			}
+
+			&__dot {
+				color: var(--fixora-text-muted);
+			}
+
+			&__area {
+				color: var(--fixora-text-primary);
+			}
+
+			&__placeholder {
+				color: var(--fixora-text-muted);
+			}
+
+			&__footer {
+				border-top-color: var(--fixora-border-subtle);
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.ftwa-toolbar {
+			&__btn {
+				color: var(--fixora-text-muted);
+
+				&:hover {
+					background: var(--fixora-primary-soft-bg);
+					color: var(--fixora-text-primary);
+				}
+
+				&--active {
+					background: var(--fixora-primary-soft-bg);
+					color: var(--fixora-primary);
+				}
+			}
+
+			&__sep {
+				background: var(--fixora-border-subtle);
+			}
+		}
+
+		.ftwa-toggle-label {
+			color: var(--fixora-text-secondary);
+		}
+
+		.ftwa-toggle-sub {
+			color: var(--fixora-text-muted);
+		}
+
+		.ftwa-fab {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+			box-shadow: var(--fixora-card-shadow);
+
+			&:hover {
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+		}
+
+		.ftwa-modal {
+			&__content {
+				color: var(--fixora-text-primary);
+			}
+		}
+
+		/* ── Write article action bar ── */
 		.ftwa-action-bar {
 			background: rgba(255, 255, 255, 0.95);
 			border-top-color: var(--fixora-border-subtle);
@@ -565,6 +1026,18 @@
 
 		.fts-input--readonly {
 			color: var(--fixora-text-muted);
+		}
+
+		.fts-toggle-row {
+			border-bottom-color: var(--fixora-border-subtle);
+		}
+
+		.fts-toggle {
+			background: var(--fixora-chart-track);
+
+			&--on {
+				background: var(--fixora-btn-primary-bg);
+			}
 		}
 
 		/* ── Card borders — stronger reddish tint ── */

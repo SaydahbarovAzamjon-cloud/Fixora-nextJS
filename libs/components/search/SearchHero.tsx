@@ -6,6 +6,8 @@ import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
+import { resolveTextSearchFilters } from '../../utils/technicianSearch';
+import { SERVICE_ISSUE_CATEGORY, SERVICE_DEVICE_CATEGORY } from './categoryMappings';
 
 interface SearchHeroProps {
 	searchFilter: TechniciansInquiry;
@@ -18,25 +20,66 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 	const { t } = useTranslation('common');
 	const [searchText, setSearchText] = useState(searchFilter.search.text ?? '');
 
+	const applySearch = (value: string) => {
+		const resolved = resolveTextSearchFilters(value, {
+			screenRepair: t('search.filters.service.screenRepair'),
+			batteryIssue: t('search.filters.service.batteryIssue'),
+			waterDamage: t('search.filters.service.waterDamage'),
+			iphoneRepair: t('search.filters.service.iphoneRepair'),
+			macbookRepair: t('search.filters.service.macbookRepair'),
+		});
+
+		setSearchFilter({
+			...searchFilter,
+			page: 1,
+			search: {
+				...searchFilter.search,
+				text: resolved.text,
+				issueCategory: resolved.issueCategory,
+				deviceCategory: resolved.deviceCategory,
+				latitude: undefined,
+				longitude: undefined,
+				radiusKm: undefined,
+			},
+		});
+	};
+
 	const handleSearchInputChange = (value: string) => {
 		setSearchText(value);
 		if (!value.trim()) {
 			setSearchFilter({
 				...searchFilter,
 				page: 1,
-				search: { ...searchFilter.search, text: undefined },
+				search: {
+					...searchFilter.search,
+					text: undefined,
+					issueCategory: undefined,
+					deviceCategory: undefined,
+				},
 			});
 		}
 	};
 
 	const submitSearchText = () => {
-		setSearchFilter({ ...searchFilter, page: 1, search: { ...searchFilter.search, text: searchText || undefined } });
+		applySearch(searchText);
 	};
 
 	const popularSearchHandler = (key: (typeof POPULAR_SEARCHES)[number]) => {
 		const label = t(`search.filters.service.${key}`);
 		setSearchText(label);
-		setSearchFilter({ ...searchFilter, page: 1, search: { ...searchFilter.search, text: label } });
+		setSearchFilter({
+			...searchFilter,
+			page: 1,
+			search: {
+				...searchFilter.search,
+				text: label,
+				issueCategory: SERVICE_ISSUE_CATEGORY[key],
+				deviceCategory: SERVICE_DEVICE_CATEGORY[key],
+				latitude: undefined,
+				longitude: undefined,
+				radiusKm: undefined,
+			},
+		});
 	};
 
 	return (

@@ -569,11 +569,11 @@
 	&--active {
 		background: rgba(255, 107, 0, 0.15);
 		border-color: rgba(255, 107, 0, 0.35);
-		color: #FF6B00;
+		color: var(--fixora-primary);
 		font-weight: 600;
 
 		.fixora-jobs-filter__count {
-			background: #FF6B00;
+			background: var(--fixora-primary);
 			color: #fff;
 		}
 	}
@@ -697,7 +697,7 @@
 	&__bar {
 		height: 100%;
 		border-radius: 4px;
-		background: linear-gradient(90deg, #FF6B00 0%, #FF9A3C 50%, #FFCC00 100%);
+		background: linear-gradient(90deg, var(--fixora-primary) 0%, var(--fixora-primary-hover) 50%, #FFCC00 100%);
 
 		&--done {
 			background: linear-gradient(90deg, #22C55E, #4ADE80);
@@ -717,7 +717,7 @@
 	}
 
 	&__price {
-		color: #FF6B00;
+		color: var(--fixora-primary);
 		font-size: 16px;
 		font-weight: 700;
 	}
@@ -836,7 +836,7 @@
 		line-height: 1.2;
 
 		&--price {
-			color: #FF6B00;
+			color: var(--fixora-primary);
 		}
 	}
 
@@ -882,7 +882,7 @@
 
 	&__node {
 		&--reached {
-			color: #FF6B00;
+			color: var(--fixora-primary);
 		}
 
 		&--pending {
@@ -898,7 +898,7 @@
 		background: rgba(255, 255, 255, 0.08);
 
 		&--done {
-			background: #FF6B00;
+			background: var(--fixora-primary);
 		}
 	}
 
@@ -957,7 +957,7 @@
 	&--complete {
 		flex: 1;
 		padding: 15px 24px;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		color: #fff;
 		box-shadow: 0 0 24px rgba(255, 107, 0, 0.35);
 

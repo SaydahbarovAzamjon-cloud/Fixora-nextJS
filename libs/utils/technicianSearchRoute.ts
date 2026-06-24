@@ -1,4 +1,5 @@
 import { TechniciansInquiry } from '../types/fixora/fixora';
+import { serializeSearchPageQueryInput } from './technicianSearch';
 
 const DEFAULT_SEARCH_INPUT: TechniciansInquiry = {
 	page: 1,
@@ -18,5 +19,5 @@ export function buildTechnicianSearchUrl(text?: string): string {
 			...(trimmed ? { text: trimmed } : {}),
 		},
 	};
-	return `/search?input=${encodeURIComponent(JSON.stringify(input))}`;
+	return `/search?input=${serializeSearchPageQueryInput(input)}`;
 };

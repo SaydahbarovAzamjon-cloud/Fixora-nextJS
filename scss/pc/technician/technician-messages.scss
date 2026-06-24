@@ -730,7 +730,7 @@
 		width: 32px;
 		height: 32px;
 		border: 3px solid rgba(255, 107, 0, 0.15);
-		border-top-color: #FF6B00;
+		border-top-color: var(--fixora-primary);
 		border-radius: 50%;
 		animation: fixora-spin 0.7s linear infinite;
 	}
@@ -786,7 +786,7 @@
 		}
 
 		&--name:hover .fixora-msg-conv__name {
-			color: #FF9A3C;
+			color: var(--fixora-primary-hover);
 			text-decoration: underline;
 		}
 	}
@@ -800,7 +800,7 @@
 		width: 42px;
 		height: 42px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -860,7 +860,7 @@
 		height: 18px;
 		padding: 0 5px;
 		border-radius: 9px;
-		background: #FF6B00;
+		background: var(--fixora-primary);
 		color: #fff;
 		font-size: 11px;
 		font-weight: 700;
@@ -880,7 +880,7 @@
 	}
 
 	&__code {
-		color: #FF6B00;
+		color: var(--fixora-primary);
 		font-size: 12px;
 		font-weight: 600;
 	}
@@ -906,7 +906,7 @@
 		width: 42px;
 		height: 42px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -957,12 +957,12 @@
 		padding: 11px 20px;
 		background: rgba(255, 107, 0, 0.06);
 		border-bottom: 1px solid rgba(255, 107, 0, 0.12);
-		color: #FF9A3C;
+		color: var(--fixora-primary-hover);
 		font-size: 13px;
 		font-weight: 600;
 
 		svg {
-			color: #FF6B00;
+			color: var(--fixora-primary);
 		}
 	}
 
@@ -1010,7 +1010,7 @@
 		width: 30px;
 		height: 30px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -1044,7 +1044,7 @@
 	}
 
 	&--out {
-		background: linear-gradient(135deg, #FF7A1A, #FF9A3C);
+		background: linear-gradient(135deg, #FF7A1A, var(--fixora-primary-hover));
 		color: #fff;
 		font-weight: 500;
 		border-bottom-right-radius: 5px;
@@ -1060,7 +1060,7 @@
 		margin-top: 5px;
 
 		svg {
-			color: #FF6B00;
+			color: var(--fixora-primary);
 		}
 	}
 }
@@ -1124,7 +1124,7 @@
 		height: 38px;
 		border-radius: 10px;
 		border: none;
-		background: linear-gradient(135deg, #FF6B00, #FF9A3C);
+		background: linear-gradient(135deg, var(--fixora-primary), var(--fixora-primary-hover));
 		color: #fff;
 		display: flex;
 		align-items: center;

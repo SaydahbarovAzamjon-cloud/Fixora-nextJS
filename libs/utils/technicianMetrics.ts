@@ -107,7 +107,7 @@ export interface MonthlyPayoutPoint {
 }
 
 const DEVICE_COLORS: Record<string, string> = {
-	IPHONE: '#FF6B00',
+	IPHONE: '#8e1428',
 	MACBOOK: '#3B82F6',
 	IPAD: '#22C55E',
 	APPLE_WATCH: '#A855F7',
@@ -121,7 +121,7 @@ const DEVICE_LABELS: Record<string, string> = {
 };
 
 const ISSUE_COLORS: Record<string, string> = {
-	Screen: '#FF6B00',
+	Screen: '#8e1428',
 	Battery: '#FBBF77',
 	Water: '#3B82F6',
 	Camera: '#22C55E',
@@ -130,7 +130,7 @@ const ISSUE_COLORS: Record<string, string> = {
 	Other: '#909090',
 };
 
-const MONTH_COLORS = ['#7C6FF0', '#7C6FF0', '#7C6FF0', '#7C6FF0', '#FF6B00', '#3B82F6', '#22C55E', '#A855F7', '#F59E0B', '#EF4444', '#6366F1', '#14B8A6'];
+const MONTH_COLORS = ['#7C6FF0', '#7C6FF0', '#7C6FF0', '#7C6FF0', '#8e1428', '#3B82F6', '#22C55E', '#A855F7', '#F59E0B', '#EF4444', '#6366F1', '#14B8A6'];
 
 export function withFallback<T>(real: T[], demo: T[], hasReal?: boolean): T[] {
 	const useReal = hasReal ?? real.length > 0;

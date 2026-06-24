@@ -20,12 +20,16 @@ import SearchRecommendations from '../../libs/components/search/SearchRecommenda
 import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { LIKE_TARGET_USER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
-import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
 import { Messages } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import { notifySavedTechniciansChanged } from '../../libs/utils/savedTechnicians';
 import { sortTechniciansList } from '../../libs/utils/sortTechnicians';
+import {
+	getTechniciansResultsInput,
+	parseSearchPageQueryInput,
+	serializeSearchPageQueryInput,
+} from '../../libs/utils/technicianSearch';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
 const SearchMapExpandedSection = dynamic(
@@ -66,19 +70,19 @@ const SearchPage: NextPage = () => {
 	const [subscribe] = useMutation(SUBSCRIBE);
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 
-	const locationChangeHandler = ({ label, lat, lng }: { label: string; lat: number; lng: number }) => {
+	const techniciansQueryInput = useMemo(
+		() => getTechniciansResultsInput(searchFilter),
+		[searchFilter],
+	);
+
+	const { data, refetch } = useQuery(GET_TECHNICIANS, {
+		fetchPolicy: 'network-only',
+		variables: { input: techniciansQueryInput },
+		notifyOnNetworkStatusChange: true,
+	});
+
+	const locationChangeHandler = ({ label }: { label: string; lat: number; lng: number }) => {
 		setLocationLabel(label);
-		setSearchFilter((prev) => ({
-			...prev,
-			page: 1,
-			search: {
-				...prev.search,
-				isOnline: prev.search.isOnline ?? null,
-				latitude: lat,
-				longitude: lng,
-				radiusKm: prev.search.radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
-			},
-		}));
 	};
 
 	const toggleFavoriteHandler = async (id: string) => {
@@ -86,11 +90,11 @@ const SearchPage: NextPage = () => {
 			if (!id) return;
 			if (!user?._id) throw new Error(Messages.error2);
 
-			const { data } = await likeTargetUser({ variables: { userId: id } });
+			await likeTargetUser({ variables: { userId: id } });
 			if (user._id) {
 				notifySavedTechniciansChanged(user._id);
 			}
-			await refetch({ input: searchFilter });
+			await refetch();
 		} catch (err: any) {
 			await sweetErrorHandling(err);
 		}
@@ -107,17 +111,11 @@ const SearchPage: NextPage = () => {
 				await subscribe({ variables: { input: id } });
 				await sweetTopSmallSuccessAlert('Followed!', 800);
 			}
-			await refetch({ input: searchFilter });
+			await refetch();
 		} catch (err: any) {
 			await sweetErrorHandling(err);
 		}
 	};
-
-	const { data, refetch } = useQuery(GET_TECHNICIANS, {
-		fetchPolicy: 'network-only',
-		variables: { input: searchFilter },
-		notifyOnNetworkStatusChange: true,
-	});
 
 	const technicians = useMemo(() => {
 		const list = (data?.getTechnicians?.list ?? []) as TechnicianSummary[];
@@ -143,7 +141,7 @@ const SearchPage: NextPage = () => {
 	useEffect(() => {
 		if (!router.query.input) return;
 		try {
-			const parsed = JSON.parse(router.query.input as string) as TechniciansInquiry;
+			const parsed = parseSearchPageQueryInput(router.query.input as string);
 			setSearchFilter({
 				...parsed,
 				search: {
@@ -157,9 +155,8 @@ const SearchPage: NextPage = () => {
 	}, [router.query.input]);
 
 	useEffect(() => {
-		router.replace(`/search?input=${JSON.stringify(searchFilter)}`, undefined, { shallow: true });
-		refetch({ input: searchFilter });
-	}, [searchFilter]);
+		router.replace(`/search?input=${serializeSearchPageQueryInput(searchFilter)}`, undefined, { shallow: true });
+	}, [router, searchFilter]);
 
 	const paginationChangeHandler = (_: ChangeEvent<unknown>, value: number) => {
 		setSearchFilter({ ...searchFilter, page: value });

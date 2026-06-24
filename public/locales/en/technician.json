@@ -100,7 +100,11 @@
     "declineConfirm": "Decline this request?",
     "acceptedToast": "Request accepted — customer can now pay the deposit.",
     "device": "Device",
-    "general": "General"
+    "general": "General",
+    "damagePhotos": "Damage photos ({{count}})",
+    "noDamagePhotos": "No damage photos uploaded yet.",
+    "photoCount": "{{count}} photos",
+    "photoCount_one": "{{count}} photo"
   },
   "issue": {
     "BATTERY": "Battery",
@@ -362,6 +366,8 @@
       "title": "Notifications",
       "desc": "Choose what you get notified about",
       "saved": "Notification preferences saved.",
+      "savedOffline": "Saved on this device. Sync when you're back online.",
+      "offlineBanner": "Showing saved preferences from this device. Changes will sync when the server is available.",
       "prefs": {
         "bookingUpdates": "Booking updates",
         "bookingUpdatesHint": "Status changes on your active jobs",

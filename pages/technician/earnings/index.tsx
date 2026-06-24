@@ -13,6 +13,8 @@ import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import CreditCardOutlined from '@mui/icons-material/CreditCardOutlined';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
+import { useFixoraChartTheme } from '../../../libs/hooks/useFixoraChartTheme';
+import { fixoraRechartsTooltipProps } from '../../../libs/utils/fixoraRecharts';
 import { GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { GET_MY_PAYOUTS, GET_WALLET_BALANCE, REQUEST_PAYOUT } from '../../../apollo/user/payout';
 import { userVar } from '../../../apollo/store';
@@ -69,7 +71,7 @@ const DEMO_MONTHLY = [
 	{ month: 'Feb', payout: 11330000, color: '#7C6FF0' },
 	{ month: 'Mar', payout: 9330000, color: '#7C6FF0' },
 	{ month: 'Apr', payout: 14670000, color: '#7C6FF0' },
-	{ month: 'May', payout: 18130000, color: '#FF6B00' },
+	{ month: 'May', payout: 18130000, color: '#8e1428' },
 	{ month: 'Jun', payout: 17330000, color: '#3B82F6' },
 ];
 
@@ -87,28 +89,30 @@ const DEMO_TRANSACTIONS = [
 const TX_FILTERS: ('All' | TxStatus)[] = ['All', 'Paid', 'Pending', 'Processing'];
 
 const TX_STATUS_STYLE: Record<TxStatus, { color: string; bg: string }> = {
-	Paid: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-	Pending: { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-	Processing: { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
+	Paid: { color: '#BBF7D0', bg: 'rgba(34, 197, 94, 0.22)' },
+	Pending: { color: '#FDE68A', bg: 'rgba(245, 158, 11, 0.22)' },
+	Processing: { color: '#BFDBFE', bg: 'rgba(59, 130, 246, 0.28)' },
 };
 
 const RANGES: EarningsRange[] = ['This Week', 'This Month', 'Last 3 Mo', 'This Year'];
 
-const DailyTooltip = ({ active, payload, label, t }: any) => {
+const DailyTooltip = ({ active, payload, label, t, chart }: any) => {
 	if (!active || !payload?.length) return null;
 	const earned = payload.find((p: any) => p.dataKey === 'earned')?.value;
 	const pending = payload.find((p: any) => p.dataKey === 'pending')?.value;
 	return (
 		<div className="fixora-ea-tooltip">
 			<div className="fixora-ea-tooltip__title">{label}</div>
-			<div className="fixora-ea-tooltip__row" style={{ color: '#FF9A3C' }}>{t('earnings.earned')} : {formatKrw(earned ?? 0)}</div>
-			<div className="fixora-ea-tooltip__row" style={{ color: '#F59E0B' }}>{t('earnings.pending')} : {formatKrw(pending ?? 0)}</div>
+			<div className="fixora-ea-tooltip__row" style={{ color: chart.primaryHover }}>{t('earnings.earned')} : {formatKrw(earned ?? 0)}</div>
+			<div className="fixora-ea-tooltip__row" style={{ color: chart.starActive }}>{t('earnings.pending')} : {formatKrw(pending ?? 0)}</div>
 		</div>
 	);
 };
 
 const Earnings: NextPage = () => {
 	const { t } = useTranslation('technician');
+	const chart = useFixoraChartTheme();
+	const barTooltipProps = fixoraRechartsTooltipProps(chart);
 	const user = useReactiveVar(userVar);
 	const [range, setRange] = useState<EarningsRange>('This Week');
 	const [txFilter, setTxFilter] = useState<'All' | TxStatus>('All');
@@ -222,7 +226,7 @@ const Earnings: NextPage = () => {
 	);
 
 	const stats = [
-		{ label: t('earnings.totalEarned'), value: totalEarnedLabel, sub: weekChange, subColor: '#22C55E', icon: <AttachMoneyOutlined style={{ fontSize: 20, color: '#FF6B00' }} />, bg: 'rgba(255,107,0,0.12)' },
+		{ label: t('earnings.totalEarned'), value: totalEarnedLabel, sub: weekChange, subColor: '#22C55E', icon: <AttachMoneyOutlined style={{ fontSize: 20, color: chart.primary }} />, bg: 'var(--fixora-primary-soft-bg)' },
 		{
 			label: t('earnings.pending'),
 			value: pendingLabel,
@@ -297,8 +301,8 @@ const Earnings: NextPage = () => {
 					<div className="fixora-ea-card__head">
 						<h2 className="fixora-ea-card__title">{t('earnings.dailyEarnings')}</h2>
 						<div className="fixora-ea-legend">
-							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#FF6B00' }} /> {t('earnings.earned')}</span>
-							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: '#F59E0B' }} /> {t('earnings.pending')}</span>
+							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: chart.primary }} /> {t('earnings.earned')}</span>
+							<span className="fixora-ea-legend__item"><span className="fixora-ea-legend__dot" style={{ background: chart.starActive }} /> {t('earnings.pending')}</span>
 						</div>
 					</div>
 					<div className="fixora-ea-bignum">
@@ -310,16 +314,16 @@ const Earnings: NextPage = () => {
 							<AreaChart data={dailySeries} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
 								<defs>
 									<linearGradient id="eaEarned" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.3} />
-										<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
+										<stop offset="0%" stopColor={chart.primaryHover} stopOpacity={0.3} />
+										<stop offset="100%" stopColor={chart.primary} stopOpacity={0} />
 									</linearGradient>
 								</defs>
-								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
-								<XAxis dataKey="day" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-								<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, chartTicks[chartTicks.length - 1]]} ticks={chartTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-								<Tooltip content={<DailyTooltip t={t} />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
-								<Area type="monotone" dataKey="pending" stroke="#F59E0B" strokeWidth={1} fillOpacity={0} dot={false} />
-								<Area type="monotone" dataKey="earned" stroke="#FF6B00" strokeWidth={2.5} fill="url(#eaEarned)" dot={false} activeDot={{ r: 5, fill: '#FF6B00' }} />
+								<CartesianGrid strokeDasharray="4 4" stroke={chart.grid} vertical={false} />
+								<XAxis dataKey="day" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axis }} axisLine={false} tickLine={false} />
+								<YAxis stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, chartTicks[chartTicks.length - 1]]} ticks={chartTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+								<Tooltip content={<DailyTooltip t={t} chart={chart} />} cursor={{ stroke: chart.tooltipCursor }} />
+								<Area type="monotone" dataKey="pending" stroke={chart.starActive} strokeWidth={1} fillOpacity={0} dot={false} />
+								<Area type="monotone" dataKey="earned" stroke={chart.primary} strokeWidth={2.5} fill="url(#eaEarned)" dot={false} activeDot={{ r: 5, fill: chart.primary }} />
 							</AreaChart>
 						</ResponsiveContainer>
 					</div>
@@ -336,10 +340,10 @@ const Earnings: NextPage = () => {
 					<div className="fixora-ea-chart">
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={monthlySeries} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="30%">
-								<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
-								<XAxis dataKey="month" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-								<YAxis stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, payoutTicks[payoutTicks.length - 1]]} ticks={payoutTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-								<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), t('earnings.payout')]} />
+								<CartesianGrid strokeDasharray="4 4" stroke={chart.grid} vertical={false} />
+								<XAxis dataKey="month" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axis }} axisLine={false} tickLine={false} />
+								<YAxis stroke={chart.axisMuted} tick={{ fontSize: 11, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, payoutTicks[payoutTicks.length - 1]]} ticks={payoutTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+								<Tooltip {...barTooltipProps} formatter={(v: any) => [formatKrw(v), t('earnings.payout')]} />
 								<Bar dataKey="payout" radius={[6, 6, 0, 0]} maxBarSize={42}>
 									{monthlySeries.map((d) => (
 										<Cell key={d.month} fill={d.color} />

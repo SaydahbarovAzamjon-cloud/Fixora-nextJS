@@ -5,7 +5,7 @@ export type JobStage = 'DIAGNOSING' | 'IN_PROGRESS' | 'PARTS_ORDERED' | 'READY_F
 
 const STAGE_COLORS: Record<JobStage, { color: string; bg: string }> = {
 	DIAGNOSING: { color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
-	IN_PROGRESS: { color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' },
+	IN_PROGRESS: { color: '#8e1428', bg: 'rgba(115, 12, 30, 0.12)' },
 	PARTS_ORDERED: { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
 	READY_FOR_PICKUP: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
 };
@@ -25,7 +25,7 @@ export const getJobStageInfo = (stage: JobStage, t: TFunction) => ({
 /** @deprecated use getJobStageInfo(stage, t) */
 export const JOB_STAGE_INFO: Record<JobStage, { label: string; color: string; bg: string }> = {
 	DIAGNOSING: { label: 'Diagnosing', color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
-	IN_PROGRESS: { label: 'In Progress', color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' },
+	IN_PROGRESS: { label: 'In Progress', color: '#8e1428', bg: 'rgba(115, 12, 30, 0.12)' },
 	PARTS_ORDERED: { label: 'Parts Ordered', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
 	READY_FOR_PICKUP: { label: 'Ready for Pickup', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
 };

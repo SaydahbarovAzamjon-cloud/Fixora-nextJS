@@ -45,8 +45,8 @@ const ICON_SX = { fontSize: 20, color: '#fff' } as const;
 
 const CAT_META: Record<NotifCat, CatMeta> = {
 	request: {
-		gradient: 'linear-gradient(135deg, #FF3D54 0%, #FF7A00 100%)',
-		color: '#FF6B00',
+		gradient: 'linear-gradient(135deg, #730c1e 0%, #8e1428 100%)',
+		color: '#8e1428',
 		icon: <MoveToInboxRounded style={ICON_SX} />,
 		filter: 'requests',
 		action: () => ({ label: 'View Request', link: '/technician/requests' }),

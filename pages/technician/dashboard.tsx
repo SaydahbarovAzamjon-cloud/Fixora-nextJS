@@ -25,6 +25,8 @@ import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import AddRounded from '@mui/icons-material/AddRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../libs/components/layout/TechnicianLayout';
+import { useFixoraChartTheme } from '../../libs/hooks/useFixoraChartTheme';
+import { fixoraRechartsTooltipProps } from '../../libs/utils/fixoraRecharts';
 import { GET_INCOMING_REQUESTS, GET_MY_PAYMENTS, GET_TECHNICIAN_BOOKINGS, UPDATE_USER } from '../../apollo/user/profile';
 import { GET_TECHNICIAN_REVIEWS } from '../../apollo/user/query';
 import { EXPORT_EARNINGS_REPORT } from '../../apollo/user/payout';
@@ -143,7 +145,7 @@ const bookingPrice = (booking: any): string | null => {
 const jobStatusInfo = (status: string, t: (key: string) => string) => {
 	switch (status) {
 		case 'IN_PROGRESS':
-			return { label: t('jobStatus.inProgress'), color: '#FF6B00', bg: 'rgba(255,107,0,0.12)' };
+			return { label: t('jobStatus.inProgress'), color: '#8e1428', bg: 'rgba(115, 12, 30, 0.12)' };
 		case 'ACCEPTED':
 			return { label: t('jobStatus.diagnosing'), color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' };
 		default:
@@ -169,12 +171,14 @@ const scheduleDotColor = (status: string) => {
 		case 'REJECTED':
 			return '#404040';
 		default:
-			return '#FF6B00';
+			return '#8e1428';
 	}
 };
 
 const TechnicianDashboard: NextPage = () => {
 	const { t } = useTranslation('technician');
+	const chart = useFixoraChartTheme();
+	const earningsTooltipProps = fixoraRechartsTooltipProps(chart);
 	const router = useRouter();
 	const locale = router.locale;
 	const user = useReactiveVar(userVar);
@@ -649,24 +653,22 @@ const TechnicianDashboard: NextPage = () => {
 									<AreaChart data={chartData}>
 										<defs>
 											<linearGradient id="earningsGrad" x1="0" y1="0" x2="0" y2="1">
-												<stop offset="0%" stopColor="#FF9A3C" stopOpacity={0.35} />
-												<stop offset="60%" stopColor="#FF6B00" stopOpacity={0.08} />
-												<stop offset="100%" stopColor="#FF6B00" stopOpacity={0} />
+												<stop offset="0%" stopColor={chart.primaryHover} stopOpacity={0.35} />
+												<stop offset="60%" stopColor={chart.primary} stopOpacity={0.08} />
+												<stop offset="100%" stopColor={chart.primary} stopOpacity={0} />
 											</linearGradient>
 										</defs>
-										<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-										<XAxis dataKey="label" stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} />
-										<YAxis stroke="#404040" tick={{ fontSize: 11, fill: '#606060' }} axisLine={false} tickLine={false} domain={[0, chartYMax]} allowDecimals={false} tickFormatter={(v) => formatKrwCompact(v)} />
+										<CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+										<XAxis dataKey="label" stroke={chart.axisMuted} tick={{ fontSize: 11, fill: chart.axisMuted }} axisLine={false} tickLine={false} />
+										<YAxis stroke={chart.axisMuted} tick={{ fontSize: 11, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, chartYMax]} allowDecimals={false} tickFormatter={(v) => formatKrwCompact(v)} />
 										<Tooltip
-											contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,107,0,0.2)', borderRadius: 8 }}
-											labelStyle={{ color: '#A0A0A0', fontSize: 11 }}
-											itemStyle={{ color: '#FF9A3C', fontSize: 13, fontWeight: 600 }}
+											{...earningsTooltipProps}
 											formatter={(v: any) => [formatKrw(v), t('dashboard.earningsTooltip')]}
 										/>
 										<Area
 											type="monotone"
 											dataKey="earnings"
-											stroke="#FF6B00"
+											stroke={chart.primary}
 											strokeWidth={2.5}
 											fill="url(#earningsGrad)"
 											dot={false}
@@ -698,7 +700,7 @@ const TechnicianDashboard: NextPage = () => {
 							) : mergedSchedule.length > 0 ? (
 								mergedSchedule.map((item, idx) => {
 									const done = item.status === 'COMPLETED';
-									const dotColor = item.custom ? '#FF6B00' : scheduleDotColor(item.status);
+									const dotColor = item.custom ? chart.primary : scheduleDotColor(item.status);
 									return (
 										<div key={item.id} className="fixora-tech-schedule-item" style={{ opacity: done ? 0.45 : 1 }}>
 											<div className="fixora-tech-schedule-rail">

@@ -1,0 +1,38 @@
+/** Recharts tooltips — technician + customer charts (dark + light). */
+
+.recharts-default-tooltip {
+	background: var(--fixora-surface-elevated) !important;
+	border: 1px solid var(--fixora-border-subtle) !important;
+	border-radius: 8px !important;
+	box-shadow: var(--fixora-select-shadow, 0 12px 30px rgba(0, 0, 0, 0.25)) !important;
+
+	.recharts-tooltip-label {
+		color: var(--fixora-text-secondary) !important;
+	}
+
+	.recharts-tooltip-item {
+		color: var(--fixora-text-primary) !important;
+	}
+}
+
+.fixora-ea-tooltip,
+.fixora-an-tooltip {
+	background: var(--fixora-surface-elevated);
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 10px;
+	padding: 10px 14px;
+	box-shadow: var(--fixora-select-shadow, 0 12px 30px rgba(0, 0, 0, 0.25));
+
+	&__title {
+		color: var(--fixora-text-primary);
+		font-size: 13px;
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	&__row {
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1.6;
+	}
+}

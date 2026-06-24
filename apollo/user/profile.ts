@@ -80,6 +80,7 @@ export const GET_INCOMING_REQUESTS = gql`
 					deviceModel
 					deviceBrand
 					deviceCategory
+					deviceImage
 				}
 			}
 			metaCounter {
@@ -132,6 +133,7 @@ export const GET_TECHNICIAN_BOOKINGS = gql`
 					deviceModel
 					deviceBrand
 					deviceCategory
+					deviceImage
 				}
 			}
 			metaCounter {
@@ -177,6 +179,7 @@ const TECHNICIAN_BOOKING_FIELDS = `
 		deviceModel
 		deviceBrand
 		deviceCategory
+		deviceImage
 	}
 `;
 

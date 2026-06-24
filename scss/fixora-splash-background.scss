@@ -1,0 +1,62 @@
+/** Full-screen Splash Cursor background — behind all app content (z-index 0) */
+
+.fixora-splash-bg {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	overflow: hidden;
+
+	&__surface {
+		position: absolute;
+		inset: 0;
+	}
+
+	&--dark &__surface {
+		background: linear-gradient(180deg, #0f0f14 0%, #16161d 100%);
+	}
+
+	&--light &__surface {
+		background: linear-gradient(180deg, #fff8f5 0%, #ffefe7 52%, #ffe4d6 100%);
+	}
+
+	&__fluid {
+		position: absolute;
+		inset: 0;
+	}
+
+	&__canvas {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	&--dark &__canvas {
+		opacity: 0.62;
+	}
+
+	&--light &__canvas {
+		opacity: 0.78;
+	}
+}
+
+/* Let animated surface show through; page shells sit above (z-index 1). */
+html,
+body {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+}
+
+#pc-wrap,
+#pc-wrap-home,
+#pc-wrap-full,
+#pc-wrap-technician,
+.pc-wrap,
+#mobile-wrap,
+.fixora-admin-layout,
+.fixora-technician-layout,
+.fixora-auth-gate {
+	position: relative;
+	z-index: 1;
+}

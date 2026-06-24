@@ -7,9 +7,11 @@ import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
 import AppShell from '../libs/components/layout/AppShell';
 import FixoraWebSocketBridge from '../libs/components/FixoraWebSocketBridge';
+import FixoraSplashBackground from '../libs/components/background/FixoraSplashBackground';
 import { FixoraThemeProvider } from '../libs/components/theme/FixoraThemeProvider';
 
 import '../scss/app.scss';
+import '../scss/fixora-splash-background.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
 
@@ -20,6 +22,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 	return (
 		<ApolloProvider client={client}>
 			<FixoraThemeProvider pathname={router.pathname}>
+				<FixoraSplashBackground />
 				<CssBaseline />
 				<FixoraWebSocketBridge />
 				<AppShell Component={Component} pageProps={pageProps} />

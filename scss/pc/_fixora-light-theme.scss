@@ -17,8 +17,6 @@
 	.pc-wrap,
 	#mobile-wrap {
 		.fixora-hero {
-			background: linear-gradient(180deg, #ffffff 0%, #fffbfc 55%, #fff6f7 100%);
-
 			&__scene {
 				&::before,
 				&::after {
@@ -36,33 +34,22 @@
 				}
 			}
 
-			/* Red/pink ambient under devices — replaces dark orange CSS glow */
 			&__device-glow {
 				display: block;
-				z-index: 0;
 				background: radial-gradient(
-					ellipse 78% 55% at 50% 78%,
-					rgba(225, 29, 72, 0.22) 0%,
-					rgba(193, 18, 31, 0.14) 28%,
-					rgba(255, 180, 190, 0.08) 48%,
-					transparent 68%
+					ellipse,
+					rgba(225, 29, 72, 0.14) 0%,
+					rgba(225, 29, 72, 0.06) 45%,
+					transparent 70%
 				);
-				filter: blur(26px);
-				animation: none;
+				filter: blur(30px);
+				animation: fixora-hero-glow-pulse 4s ease-in-out infinite;
 				opacity: 1;
 			}
 
 			&__device-img {
-				position: relative;
-				z-index: 1;
-				opacity: 1;
-				/* Orange portals in PNG → brand rose; keep devices crisp */
-				filter:
-					hue-rotate(-32deg)
-					saturate(1.02)
-					brightness(1.06)
-					contrast(1.08)
-					drop-shadow(0 24px 44px rgba(193, 18, 31, 0.12));
+				opacity: 0.85;
+				filter: drop-shadow(0 32px 56px rgba(193, 18, 31, 0.12));
 				mask-image: radial-gradient(ellipse 92% 95% at 50% 50%, #000 62%, transparent 96%);
 				-webkit-mask-image: radial-gradient(ellipse 92% 95% at 50% 50%, #000 62%, transparent 96%);
 			}

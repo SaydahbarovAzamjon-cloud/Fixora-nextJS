@@ -21,6 +21,7 @@ import KeyboardIcon from '@mui/icons-material/Keyboard';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import { HERO_REPAIR_SEARCH } from '../../../apollo/user/hero';
 import { FixoraButton } from '../ui';
+import { useFixoraTheme } from '../theme/FixoraThemeProvider';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import type { HeroRecommendation } from './HeroRecommendedCarousel';
 
@@ -54,6 +55,7 @@ const FLOATING_DEVICES = [
 
 const HeroRepairSearch = () => {
 	const { t } = useTranslation('common');
+	const { mode } = useFixoraTheme();
 	const router = useRouter();
 	const [problemText, setProblemText] = useState('');
 	const [classification, setClassification] = useState<any>(null);
@@ -90,12 +92,15 @@ const HeroRepairSearch = () => {
 		}
 	};
 
+	const deviceImgSrc =
+		mode === 'light' ? '/img/heroSection/bothDevice1-light.png' : '/img/heroSection/bothDevice1.png';
+
 	return (
 		<Stack className="fixora-hero">
 			<div className="fixora-hero__scene" aria-hidden="true">
 				<div className="fixora-hero__device-backdrop">
 					<span className="fixora-hero__device-glow" />
-					<img src="/img/heroSection/bothDevice1.png" alt="" className="fixora-hero__device-img" />
+					<img src={deviceImgSrc} alt="" className="fixora-hero__device-img" />
 				</div>
 				<span className="fixora-hero__particle fixora-hero__particle--1" />
 				<span className="fixora-hero__particle fixora-hero__particle--2" />

@@ -60,3 +60,39 @@ body {
 	position: relative;
 	z-index: 1;
 }
+
+/* Hero + footer: transparent shells so fixed splash animation shows through */
+#pc-wrap,
+#pc-wrap-home,
+#pc-wrap-full,
+#mobile-wrap {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+
+	#main,
+	.home-page,
+	.fixora-home-section {
+		background: transparent !important;
+		background-color: transparent !important;
+		background-image: none !important;
+	}
+
+	.header-main--fixora {
+		background: transparent !important;
+		background-color: transparent !important;
+		background-image: none !important;
+	}
+
+	.fixora-hero {
+		background: transparent !important;
+		background-color: transparent !important;
+		background-image: none !important;
+	}
+
+	#footer {
+		background: transparent !important;
+		background-color: transparent !important;
+		background-image: none !important;
+	}
+}

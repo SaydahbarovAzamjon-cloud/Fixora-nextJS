@@ -19,8 +19,11 @@
 		"searchPlaceholder": "Search anything...",
 		"searchEmpty": "No results found",
 		"notifications": "Notifications",
+		"verificationAlertsTitle": "Verification queue",
 		"notificationsVerification": "{{name}} submitted verification for review",
 		"notificationsVerificationGeneric": "Technician verification submitted for review",
+		"viewVerificationQueue": "View verification queue",
+		"viewModerationQueue": "View moderation queue",
 		"settings": "Settings",
 		"logout": "Log out"
 	},

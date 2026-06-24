@@ -20,6 +20,7 @@ import {
 	deriveSignupNickname,
 	isSignupConflictError,
 	isValidKrContactPhone,
+	normalizeSignupPhone,
 	throwSignupConflictFromMutation,
 } from './signupAvailability';
 
@@ -53,6 +54,7 @@ export const validateLoginInput = (email: string, password: string): AuthValidat
 export const validateRegisterInput = (
 	fullName: string,
 	email: string,
+	phone: string,
 	password: string,
 	confirmPassword: string,
 	termsAccepted: boolean,
@@ -61,6 +63,8 @@ export const validateRegisterInput = (
 	if (!fullName.trim()) errors.fullName = 'nameRequired';
 	if (!email.trim()) errors.email = 'emailRequired';
 	else if (!validateEmail(email)) errors.email = 'emailInvalid';
+	if (!phone.trim()) errors.phone = 'phoneRequired';
+	else if (!isValidKrContactPhone(phone)) errors.phone = 'phoneInvalid';
 	if (!password) errors.password = 'passwordRequired';
 	else if (password.length < 5) errors.password = 'passwordMin';
 	else if (password.length > 12) errors.password = 'passwordMax';
@@ -185,16 +189,18 @@ export const fixoraCustomerSignup = async (
 	fullName: string,
 	userEmail: string,
 	userPassword: string,
-	userPhone = '',
+	userPhone: string,
+	photoFile?: File | null,
 ): Promise<void> => {
 	const nickname = deriveSignupNickname(fullName, userEmail);
+	const normalizedPhone = normalizeSignupPhone(userPhone);
 	const apolloClient = await initializeApollo();
 	try {
 		await assertSignupFieldsAvailable(apolloClient, {
 			email: userEmail,
 			nickname,
 			fullName,
-			...(userPhone.trim() ? { phone: userPhone } : {}),
+			phone: userPhone,
 		});
 
 		const result = await apolloClient.mutate({
@@ -204,7 +210,7 @@ export const fixoraCustomerSignup = async (
 					userEmail: userEmail.trim(),
 					userNickname: nickname,
 					userPassword,
-					userPhoneNumber: userPhone.trim() || '01000000000',
+					userPhoneNumber: normalizedPhone,
 					userType: 'USER',
 					termsAcceptedAt: new Date().toISOString(),
 				},
@@ -215,8 +221,12 @@ export const fixoraCustomerSignup = async (
 		if (!user?.accessToken) {
 			throw new Error('Sign up failed — no access token returned');
 		}
-		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
-			_id: user._id,
+
+		const token = user.accessToken as string;
+		const userId = user._id as string;
+
+		setAuthTokens(token, user.refreshToken ?? '', {
+			_id: userId,
 			userEmail: user.userEmail,
 			userProfileImage: user.userProfileImage,
 			userNickname: user.userNickname,
@@ -224,6 +234,45 @@ export const fixoraCustomerSignup = async (
 			userType: user.userType,
 			verificationStatus: user.verificationStatus,
 		});
+
+		let profileImagePath: string | undefined;
+		if (photoFile) {
+			profileImagePath = await uploadImageFile(photoFile, token);
+			const updateResult = await apolloClient.mutate({
+				mutation: UPDATE_USER,
+				variables: {
+					input: {
+						_id: userId,
+						userFullName: fullName.trim(),
+						userProfileImage: profileImagePath,
+					},
+				},
+			});
+			const updated = updateResult.data?.updateUser;
+			if (updated?.userProfileImage) {
+				profileImagePath = updated.userProfileImage;
+			}
+		}
+
+		setAuthTokens(token, user.refreshToken ?? '', {
+			_id: userId,
+			userEmail: user.userEmail,
+			userProfileImage: profileImagePath ?? user.userProfileImage,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName ?? fullName.trim(),
+			userType: user.userType,
+			verificationStatus: user.verificationStatus,
+		});
+		syncUserVarFromGraphqlUser({
+			_id: userId,
+			userFullName: fullName.trim(),
+			userNickname: user.userNickname,
+			userProfileImage: profileImagePath ?? user.userProfileImage ?? null,
+			userPhoneNumber: normalizedPhone,
+		});
+		if (userId && user.userEmail) {
+			writeStoredUserEmail(userId, user.userEmail);
+		}
 		setNeedsOnboarding(false);
 	} catch (err) {
 		if (isSignupConflictError(err)) throw err;

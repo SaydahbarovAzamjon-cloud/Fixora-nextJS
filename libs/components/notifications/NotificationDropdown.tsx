@@ -21,6 +21,13 @@ export interface NotificationDropdownProps {
 	viewAllHref?: string;
 	getDisplayText?: (notification: Notification) => string;
 	skipBookingLookup?: (notification: Notification) => boolean;
+	/** Extra rows rendered above API notifications (e.g. admin verification queue). */
+	listPrefix?: React.ReactNode;
+	/** Anchors below parent (admin bell) instead of navbar offsets. */
+	embedded?: boolean;
+	loading?: boolean;
+	loadingLabel?: string;
+	viewAllLabel?: string;
 }
 
 const NotificationDropdownItem = ({
@@ -89,34 +96,45 @@ const NotificationDropdown = ({
 	viewAllHref = '/notifications',
 	getDisplayText,
 	skipBookingLookup,
+	listPrefix,
+	embedded = false,
+	loading = false,
+	loadingLabel,
+	viewAllLabel,
 }: NotificationDropdownProps) => {
 	const { t } = useTranslation('common');
+	const hasListContent = Boolean(listPrefix) || notifications.length > 0;
 
 	return (
-		<div className="fixora-notif-dropdown">
+		<div className={`fixora-notif-dropdown${embedded ? ' fixora-notif-dropdown--embedded' : ''}`}>
 			<div className="fixora-notif-dropdown__header">
 				<strong>{t('notifications.title')}</strong>
 			</div>
 
 			<div className="fixora-notif-dropdown__list">
-				{notifications.length === 0 ? (
+				{loading && !hasListContent ? (
+					<p className="fixora-notif-dropdown__empty">{loadingLabel ?? t('common.loading')}</p>
+				) : !hasListContent ? (
 					<p className="fixora-notif-dropdown__empty">{t('notifications.empty')}</p>
 				) : (
-					notifications.map((notification) => (
-						<NotificationDropdownItem
-							key={notification._id}
-							notification={notification}
-							onClick={() => onItemClick(notification)}
-							onDelete={onDelete ? () => onDelete(notification) : undefined}
-							getDisplayText={getDisplayText}
-							skipBookingLookup={skipBookingLookup}
-						/>
-					))
+					<>
+						{listPrefix}
+						{notifications.map((notification) => (
+							<NotificationDropdownItem
+								key={notification._id}
+								notification={notification}
+								onClick={() => onItemClick(notification)}
+								onDelete={onDelete ? () => onDelete(notification) : undefined}
+								getDisplayText={getDisplayText}
+								skipBookingLookup={skipBookingLookup}
+							/>
+						))}
+					</>
 				)}
 			</div>
 
 			<Link href={viewAllHref} className="fixora-notif-dropdown__view-all" onClick={onViewAll}>
-				{t('notifications.viewAll')}
+				{viewAllLabel ?? t('notifications.viewAll')}
 			</Link>
 		</div>
 	);

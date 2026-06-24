@@ -339,14 +339,6 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		position: relative;
 	}
 
-	&__notif-dropdown {
-		position: absolute;
-		top: calc(100% + 8px);
-		right: 0;
-		z-index: 120;
-		min-width: 320px;
-	}
-
 	&__user {
 		display: flex;
 		align-items: center;
@@ -427,6 +419,11 @@ $admin-text-secondary: var(--fixora-text-secondary);
 			}
 		}
 	}
+}
+
+.fixora-admin-notif-dropdown__badge {
+	display: inline-flex;
+	margin-top: 4px;
 }
 
 /* ── Search ── */
@@ -2055,12 +2052,6 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		flex: 1 1 auto;
 		min-width: 0;
 		width: 100%;
-	}
-
-	.fixora-admin-header__notif-dropdown {
-		right: 0;
-		left: auto;
-		max-width: min(320px, calc(100vw - 24px));
 	}
 
 	.fixora-admin-header__user-menu {

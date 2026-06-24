@@ -20,8 +20,11 @@
 		"searchDisabled": "전역 검색은 백엔드 API가 필요합니다 (GAP-077)",
 		"searchEmpty": "결과 없음",
 		"notifications": "알림",
+		"verificationAlertsTitle": "인증 대기열",
 		"notificationsVerification": "{{name}}님이 인증 검토를 제출했습니다",
 		"notificationsVerificationGeneric": "기술자 인증 검토가 제출되었습니다",
+		"viewVerificationQueue": "인증 대기열 보기",
+		"viewModerationQueue": "모더레이션 보기",
 		"settings": "설정",
 		"logout": "로그아웃"
 	},

@@ -12,6 +12,8 @@ import AuthHeading from './AuthHeading';
 import { loadTechDraft, saveTechDraft, validateTechStep1, isSignupConflictError } from '../../auth/fixoraAuth';
 import { assertSignupFieldsAvailable, deriveSignupNickname } from '../../auth/signupAvailability';
 import { initializeApollo } from '../../../apollo/client';
+import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { getGraphQLErrorMessage } from '../../utils/oauthErrors';
 import { setTechPhotoFile, getTechPhotoFile } from '../../auth/techOnboardingFiles';
 import { readFileAsDataUrl } from '../../utils/onboardingFileStorage';
 
@@ -89,10 +91,16 @@ const TechOnboardingStep1 = () => {
 			});
 		} catch (err) {
 			if (isSignupConflictError(err)) {
-				setErrors(err.conflicts);
+				const conflicts = { ...err.conflicts };
+				if (conflicts.nickname) {
+					conflicts.fullName = conflicts.nickname;
+					delete conflicts.nickname;
+				}
+				setErrors(conflicts);
 				return;
 			}
-			throw err;
+			await sweetMixinErrorAlert(getGraphQLErrorMessage(err) || t('validation.signupConflict'));
+			return;
 		} finally {
 			setChecking(false);
 		}
@@ -118,7 +126,7 @@ const TechOnboardingStep1 = () => {
 			idPreviewDataUrl: current?.idPreviewDataUrl,
 		});
 		await router.push('/register/technician/id');
-	}, [fullName, email, phone, password, confirmPassword, photoFileName, router]);
+	}, [fullName, email, phone, password, confirmPassword, photoFileName, router, t]);
 
 	return (
 		<>

@@ -42,11 +42,20 @@ export function isSignupConflictError(err: unknown): err is SignupConflictError 
 	return err instanceof SignupConflictError;
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function deriveSignupNickname(fullName: string, emailFallback: string): string {
 	const compact = fullName.trim().replace(/\s+/g, '');
-	if (compact.length >= 3) return compact.slice(0, 12);
-	const local = emailFallback.split('@')[0]?.trim() ?? '';
-	return local.slice(0, 12) || 'user';
+	let nickname =
+		compact.length >= 3 ? compact.slice(0, 12) : (emailFallback.split('@')[0]?.trim() ?? '').slice(0, 12);
+	if (nickname.length < 3) nickname = `${nickname}fx`.slice(0, 12);
+	while (nickname.length < 3) nickname += '0';
+	return nickname.slice(0, 12);
+}
+
+export function isValidKrContactPhone(phone: string): boolean {
+	const normalized = normalizeSignupPhone(phone);
+	return /^01[016789]\d{7,8}$/.test(normalized);
 }
 
 export function normalizeSignupEmail(email: string): string {
@@ -88,30 +97,61 @@ function conflictsFromApi(
 	return mapped;
 }
 
+function validationConflictsFromInput(
+	input: SignupAvailabilityInput,
+): Partial<Record<SignupConflictField, string>> | null {
+	const conflicts: Partial<Record<SignupConflictField, string>> = {};
+
+	if (input.email?.trim() && !EMAIL_RE.test(normalizeSignupEmail(input.email))) {
+		conflicts.email = 'emailInvalid';
+	}
+
+	const nickname = input.nickname?.trim();
+	if (nickname && (nickname.length < 3 || nickname.length > 12)) {
+		conflicts.nickname = 'nicknameInvalid';
+	}
+
+	if (input.phone?.trim() && !isValidKrContactPhone(input.phone)) {
+		conflicts.phone = 'phoneInvalid';
+	}
+
+	return Object.keys(conflicts).length > 0 ? conflicts : null;
+}
+
 export async function fetchSignupAvailability(
 	apolloClient: ApolloClient<NormalizedCacheObject>,
 	input: SignupAvailabilityInput,
 ) {
-	const result = await apolloClient.query({
-		query: CHECK_SIGNUP_AVAILABILITY,
-		variables: {
-			input: {
-				...(input.email?.trim() ? { userEmail: normalizeSignupEmail(input.email) } : {}),
-				...(input.nickname?.trim() ? { userNickname: input.nickname.trim() } : {}),
-				...(input.phone?.trim() ? { userPhoneNumber: input.phone.trim() } : {}),
-				...(input.fullName?.trim() ? { userFullName: input.fullName.trim() } : {}),
-				...(input.excludeUserId?.trim() ? { excludeUserId: input.excludeUserId.trim() } : {}),
-			},
-		},
-		fetchPolicy: 'network-only',
-	});
+	const gqlInput = {
+		...(input.email?.trim() ? { userEmail: normalizeSignupEmail(input.email) } : {}),
+		...(input.nickname?.trim() ? { userNickname: input.nickname.trim() } : {}),
+		...(input.phone?.trim() ? { userPhoneNumber: normalizeSignupPhone(input.phone) } : {}),
+		...(input.fullName?.trim() ? { userFullName: input.fullName.trim() } : {}),
+		...(input.excludeUserId?.trim() ? { excludeUserId: input.excludeUserId.trim() } : {}),
+	};
 
-	return result.data?.checkSignupAvailability as
-		| {
-				available: boolean;
-				conflicts: { field: string; message: string }[];
-		  }
-		| undefined;
+	try {
+		const result = await apolloClient.query({
+			query: CHECK_SIGNUP_AVAILABILITY,
+			variables: { input: gqlInput },
+			fetchPolicy: 'network-only',
+		});
+
+		return result.data?.checkSignupAvailability as
+			| {
+					available: boolean;
+					conflicts: { field: string; message: string }[];
+			  }
+			| undefined;
+	} catch (err) {
+		if (getGraphQLErrorDetails(err).code === 'BAD_REQUEST') {
+			const validationConflicts = validationConflictsFromInput(input);
+			if (validationConflicts) {
+				throw new SignupConflictError(validationConflicts);
+			}
+		}
+		throw err;
+	}
 }
 
 export function parseSignupMutationConflicts(err: unknown): Partial<Record<SignupConflictField, string>> | null {
@@ -162,6 +202,11 @@ export async function assertSignupFieldsAvailable(
 		!!input.fullName?.trim();
 
 	if (!hasInput) return;
+
+	const validationConflicts = validationConflictsFromInput(input);
+	if (validationConflicts) {
+		throw new SignupConflictError(validationConflicts);
+	}
 
 	const availability = await fetchSignupAvailability(apolloClient, input);
 	if (!availability || availability.available) return;

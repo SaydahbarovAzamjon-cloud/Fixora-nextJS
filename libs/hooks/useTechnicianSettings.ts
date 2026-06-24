@@ -12,12 +12,16 @@ import { getJwtToken, setJwtToken, updateStorage, updateUserInfo } from '../auth
 import { settingsUserFromAuth } from '../auth/settingsUserFallback';
 import {
 	mergeTechnicianSettingsCache,
+	readStoredUserEmail,
 	readTechnicianSettingsCache,
 	writeStoredUserEmail,
 	writeTechnicianSettingsCache,
 } from '../auth/technicianSettingsCache';
 import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../apollo/technicianQueryContext';
 import { resolveAuthUser } from '../utils/authSession';
+import { resolveTechnicianEmailSave } from '../utils/technicianEmailSave';
+import { getGraphQLErrorMessage } from '../utils/oauthErrors';
+import { isNoDataFoundGraphQLError } from '../utils/graphqlErrors';
 import { syncUserVarFromGraphqlUser } from '../auth/syncUserVar';
 import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../sweetAlert';
 import { useTranslation } from 'next-i18next';
@@ -79,12 +83,43 @@ export const SETTINGS_HOURS = [
 const defaultDays = (): Record<string, boolean> =>
 	Object.fromEntries(SETTINGS_DAYS.map((d) => [d, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(d)]));
 
+function pickText(...values: (string | null | undefined)[]): string {
+	for (const value of values) {
+		if (value?.trim()) return value.trim();
+	}
+	return '';
+}
+
 function mergeSettingsUser(
 	graphqlUser: TechnicianSettingsUser | null,
 	cachedUser: TechnicianSettingsUser | null,
 	authUser: TechnicianSettingsUser | null,
 ): TechnicianSettingsUser | null {
-	return graphqlUser ?? cachedUser ?? authUser;
+	const base = graphqlUser ?? cachedUser ?? authUser;
+	if (!base?._id) return null;
+
+	return {
+		...authUser,
+		...cachedUser,
+		...graphqlUser,
+		_id: base._id,
+		userEmail: pickText(graphqlUser?.userEmail, cachedUser?.userEmail, authUser?.userEmail),
+		userFullName: pickText(graphqlUser?.userFullName, cachedUser?.userFullName, authUser?.userFullName),
+		userNickname: pickText(graphqlUser?.userNickname, cachedUser?.userNickname, authUser?.userNickname),
+		userSlug: graphqlUser?.userSlug ?? cachedUser?.userSlug ?? authUser?.userSlug ?? null,
+		shopName: graphqlUser?.shopName ?? cachedUser?.shopName ?? authUser?.shopName ?? null,
+		userPhoneNumber: pickText(graphqlUser?.userPhoneNumber, cachedUser?.userPhoneNumber, authUser?.userPhoneNumber),
+		userLocation: pickText(graphqlUser?.userLocation, cachedUser?.userLocation, authUser?.userLocation),
+		userBio: pickText(graphqlUser?.userBio, cachedUser?.userBio, authUser?.userBio),
+		userProfileImage: pickText(
+			graphqlUser?.userProfileImage,
+			cachedUser?.userProfileImage,
+			authUser?.userProfileImage,
+		),
+		userType: graphqlUser?.userType ?? cachedUser?.userType ?? authUser?.userType ?? null,
+		badgeLevel: graphqlUser?.badgeLevel ?? cachedUser?.badgeLevel ?? authUser?.badgeLevel ?? null,
+		workingHours: graphqlUser?.workingHours ?? cachedUser?.workingHours ?? authUser?.workingHours ?? null,
+	};
 }
 
 function toSettingsUser(raw: Record<string, unknown> | null | undefined, userId: string): TechnicianSettingsUser | null {
@@ -148,6 +183,14 @@ export function useTechnicianSettings(userId?: string) {
 
 	const offline = !!error && !graphqlUser && !!user;
 
+	const safeRefetchSettings = useCallback(async () => {
+		try {
+			await refetch();
+		} catch {
+			// GAP-113: public getUser may return NO_DATA_FOUND for PENDING technicians after a successful updateUser.
+		}
+	}, [refetch]);
+
 	useEffect(() => {
 		if (graphqlUser?._id) writeTechnicianSettingsCache(graphqlUser);
 	}, [graphqlUser]);
@@ -172,13 +215,14 @@ export function useTechnicianSettings(userId?: string) {
 	const hydratedFromGraphqlRef = useRef(false);
 
 	const hydrateFormFromUser = useCallback((next: TechnicianSettingsUser) => {
+		const storedEmail = next._id ? readStoredUserEmail(next._id) : null;
 		setProfileForm({
 			shopName: next.shopName ?? '',
-			fullName: next.userFullName ?? '',
-			email: next.userEmail ?? '',
-			phone: next.userPhoneNumber ?? '',
-			location: next.userLocation ?? '',
-			bio: next.userBio ?? '',
+			fullName: pickText(next.userFullName),
+			email: pickText(next.userEmail, storedEmail),
+			phone: pickText(next.userPhoneNumber),
+			location: pickText(next.userLocation),
+			bio: pickText(next.userBio),
 		});
 		setNickname(next.userSlug ?? next.userNickname ?? '');
 		const wh = next.workingHours;
@@ -216,7 +260,7 @@ export function useTechnicianSettings(userId?: string) {
 
 		if (graphqlUser) {
 			if (!hydratedFromGraphqlRef.current) {
-				hydrateFormFromUser(graphqlUser);
+				hydrateFormFromUser(user);
 				hydratedFromGraphqlRef.current = true;
 				setHydrated(true);
 			}
@@ -272,11 +316,13 @@ export function useTechnicianSettings(userId?: string) {
 				const result = await updateUser({
 					variables: { input: { _id: resolvedId, ...input } },
 					context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
-					refetchQueries: [{ query: GET_TECHNICIAN_SETTINGS, variables: { userId: resolvedId } }],
-					awaitRefetchQueries: true,
 				});
 				const updatedRaw = result.data?.updateUser as Record<string, unknown> | undefined;
 				const updated = toSettingsUser(updatedRaw, resolvedId);
+
+				if (!updated && !updatedRaw) {
+					throw new Error(t('settings.profile.saveFailed'));
+				}
 
 				if (updatedRaw?.accessToken) {
 					setJwtToken(updatedRaw.accessToken as string);
@@ -290,7 +336,10 @@ export function useTechnicianSettings(userId?: string) {
 					profileSource =
 						toSettingsUser(refetchResult.data?.getUser as Record<string, unknown> | undefined, resolvedId) ??
 						updated;
-				} catch {
+				} catch (refetchErr) {
+					if (!updated && isNoDataFoundGraphQLError(getGraphQLErrorMessage(refetchErr))) {
+						throw refetchErr;
+					}
 					profileSource = updated;
 				}
 
@@ -340,17 +389,27 @@ export function useTechnicianSettings(userId?: string) {
 				await sweetTopSmallSuccessAlert(successMessage, 1200);
 				return true;
 			} catch (err) {
-				await sweetErrorHandling(err);
+				await sweetErrorHandling({ message: getGraphQLErrorMessage(err) });
 				return false;
 			}
 		},
-		[refetch, resolvedId, syncProfileFormFromUser, updateUser],
+		[refetch, resolvedId, syncProfileFormFromUser, t, updateUser],
 	);
 
 	const saveProfile = useCallback(
 		async (profileImagePath?: string) => {
-			const emailChanged =
-				profileForm.email.trim().toLowerCase() !== (user?.userEmail ?? '').trim().toLowerCase();
+			const knownEmail = pickText(user?.userEmail, resolvedId ? readStoredUserEmail(resolvedId) : null);
+			const emailSave = resolveTechnicianEmailSave(profileForm.email, knownEmail);
+
+			if (!profileForm.fullName.trim()) {
+				await sweetMixinErrorAlert(t('settings.profile.fullNameRequired'));
+				return false;
+			}
+
+			if (emailSave.shouldUpdate && emailSave.invalidFormat) {
+				await sweetMixinErrorAlert(t('settings.profile.emailInvalid'));
+				return false;
+			}
 
 			const input: Record<string, unknown> = {
 				shopName: profileForm.shopName.trim() || null,
@@ -363,10 +422,10 @@ export function useTechnicianSettings(userId?: string) {
 				input.userProfileImage = profileImagePath || null;
 			}
 
-			if (emailChanged) {
+			if (emailSave.shouldUpdate) {
 				try {
 					const emailResult = await updateEmail({
-						variables: { input: { userEmail: profileForm.email.trim() } },
+						variables: { input: { userEmail: emailSave.nextEmail } },
 					});
 					const newEmail = emailResult.data?.updateEmail?.userEmail;
 					if (newEmail && resolvedId) {
@@ -374,7 +433,7 @@ export function useTechnicianSettings(userId?: string) {
 						mergeTechnicianSettingsCache(resolvedId, { userEmail: newEmail });
 					}
 				} catch (err) {
-					await sweetErrorHandling(err);
+					await sweetErrorHandling({ message: getGraphQLErrorMessage(err) });
 					return false;
 				}
 			}
@@ -382,7 +441,7 @@ export function useTechnicianSettings(userId?: string) {
 			const ok = await saveUpdate(input, t('settings.profile.saved'));
 			if (ok && resolvedId) {
 				mergeTechnicianSettingsCache(resolvedId, {
-					userEmail: profileForm.email.trim(),
+					userEmail: emailSave.nextEmail || knownEmail || null,
 					shopName: profileForm.shopName.trim() || null,
 					userFullName: profileForm.fullName.trim(),
 					userPhoneNumber: profileForm.phone.trim(),
@@ -390,11 +449,11 @@ export function useTechnicianSettings(userId?: string) {
 					userBio: profileForm.bio.trim(),
 					...(profileImagePath !== undefined ? { userProfileImage: profileImagePath || null } : {}),
 				});
-				await refetch();
+				await safeRefetchSettings();
 			}
 			return ok;
 		},
-		[profileForm, resolvedId, saveUpdate, t, updateEmail, user?.userEmail, refetch],
+		[profileForm, resolvedId, saveUpdate, safeRefetchSettings, t, updateEmail, user?.userEmail],
 	);
 
 	const saveAccount = useCallback(async () => {
@@ -405,17 +464,22 @@ export function useTechnicianSettings(userId?: string) {
 			return false;
 		}
 		try {
-			const emailChanged =
-				profileForm.email.trim().toLowerCase() !== (user?.userEmail ?? '').trim().toLowerCase();
+			const knownEmail = pickText(user?.userEmail, readStoredUserEmail(resolvedId));
+			const emailSave = resolveTechnicianEmailSave(profileForm.email, knownEmail);
 
-			if (emailChanged) {
+			if (emailSave.shouldUpdate && emailSave.invalidFormat) {
+				await sweetMixinErrorAlert(t('settings.profile.emailInvalid'));
+				return false;
+			}
+
+			if (emailSave.shouldUpdate) {
 				await updateEmail({
-					variables: { input: { userEmail: profileForm.email.trim() } },
+					variables: { input: { userEmail: emailSave.nextEmail } },
 				});
 			}
 
 			await updateUserSlug({ variables: { input: { userSlug: slug } } });
-			await refetch();
+			await safeRefetchSettings();
 			if (resolvedId) {
 				mergeTechnicianSettingsCache(resolvedId, { userSlug: slug });
 			}
@@ -423,10 +487,10 @@ export function useTechnicianSettings(userId?: string) {
 			await sweetTopSmallSuccessAlert(t('settings.account.saved'), 1200);
 			return true;
 		} catch (err) {
-			await sweetErrorHandling(err);
+			await sweetErrorHandling({ message: getGraphQLErrorMessage(err) });
 			return false;
 		}
-	}, [nickname, profileForm.email, refetch, resolvedId, t, updateEmail, updateUserSlug, user?.userEmail]);
+	}, [nickname, profileForm.email, resolvedId, safeRefetchSettings, t, updateEmail, updateUserSlug, user?.userEmail]);
 
 	const saveAvailability = useCallback(async () => {
 		const selectedDays = SETTINGS_DAYS.filter((d) => availability.days[d]);

@@ -1,0 +1,590 @@
+/**
+ * Technician portal — light theme overrides (P4-05).
+ * Fixes hardcoded dark-mode colors left in technician SCSS modules.
+ */
+[data-theme='light'],
+.theme-light {
+	#pc-wrap-technician,
+	.fixora-technician-mobile {
+		/* ── Header ── */
+		.fixora-tech-header {
+			&__title h1 {
+				color: var(--fixora-text-primary);
+			}
+
+			&__search {
+				background: var(--fixora-surface);
+				border-color: var(--fixora-border-subtle);
+				box-shadow: var(--fixora-input-shadow);
+			}
+
+			&__search-input {
+				color: var(--fixora-text-primary);
+
+				&::placeholder {
+					color: var(--fixora-text-muted);
+				}
+			}
+
+			&__search-kbd {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border-subtle);
+				color: var(--fixora-text-muted);
+			}
+
+			&__lang {
+				.fixora-nav__lang-btn {
+					color: var(--fixora-text-muted);
+
+					&:hover {
+						color: var(--fixora-text-primary);
+					}
+
+					&--active {
+						color: var(--fixora-primary);
+					}
+				}
+
+				.fixora-nav__lang-divider {
+					color: var(--fixora-border-subtle);
+				}
+			}
+
+			&__icon-btn {
+				border-color: var(--fixora-border-subtle);
+				color: var(--fixora-text-muted);
+
+				&:hover {
+					background: var(--fixora-primary-soft-bg);
+					color: var(--fixora-primary);
+					border-color: var(--fixora-border);
+				}
+			}
+
+			&__profile-btn {
+				background: var(--fixora-surface);
+				border: 1px solid var(--fixora-border);
+				box-shadow: var(--fixora-input-shadow);
+
+				&:hover {
+					background: var(--fixora-surface-hover);
+					border-color: var(--fixora-primary);
+				}
+			}
+
+			&__profile-name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__profile-role {
+				color: var(--fixora-text-muted);
+			}
+
+			&__dropdown {
+				background: var(--fixora-surface);
+				border-color: var(--fixora-border-subtle);
+				box-shadow: var(--fixora-select-shadow);
+			}
+
+			&__dropdown-item {
+				color: var(--fixora-text-secondary);
+
+				&:hover {
+					background: var(--fixora-primary-soft-bg);
+					color: var(--fixora-primary);
+				}
+			}
+
+			&__dropdown-divider {
+				border-top-color: var(--fixora-border-subtle);
+			}
+		}
+
+		/* ── Sidebar ── */
+		.fixora-technician-sidebar {
+			&__user-card {
+				background: var(--fixora-surface);
+				border: 1px solid var(--fixora-border);
+				box-shadow: var(--fixora-input-shadow);
+
+				&:hover {
+					background: var(--fixora-surface-hover);
+					border-color: var(--fixora-primary);
+				}
+			}
+
+			&__user-name {
+				color: var(--fixora-text-primary);
+			}
+
+			&__user-role {
+				color: var(--fixora-text-muted);
+			}
+
+			&__nav-item {
+				color: var(--fixora-text-muted);
+
+				&:hover {
+					background: var(--fixora-primary-soft-bg);
+					color: var(--fixora-text-primary);
+				}
+
+				&--active {
+					color: var(--fixora-primary);
+				}
+			}
+		}
+
+		/* ── Dashboard ── */
+		.fixora-tech-quick-action {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border);
+
+			&:hover {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-primary);
+				box-shadow: var(--fixora-glow);
+			}
+
+			&--orange {
+				color: var(--fixora-primary);
+				border-color: var(--fixora-border);
+
+				&:hover {
+					background: var(--fixora-primary-soft-bg);
+					border-color: var(--fixora-primary);
+					box-shadow: var(--fixora-glow);
+				}
+			}
+		}
+
+		.fixora-tech-card__title,
+		.fixora-tech-stat-label,
+		.fixora-tech-stat-value,
+		.fixora-tech-request-name,
+		.fixora-tech-schedule-task {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-tech-stat-icon--orange {
+			background: var(--fixora-primary-soft-bg);
+			color: var(--fixora-primary);
+		}
+
+		.fixora-tech-period-btn {
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+
+			&:hover:not(.fixora-tech-period-btn--active) {
+				border-color: var(--fixora-border);
+				color: var(--fixora-text-secondary);
+			}
+		}
+
+		.fixora-tech-schedule-add {
+			background: var(--fixora-primary-soft-bg);
+			border-color: var(--fixora-border);
+			color: var(--fixora-primary);
+
+			&:hover {
+				background: var(--fixora-primary-soft);
+				border-color: var(--fixora-primary);
+			}
+		}
+
+		.fixora-tech-empty {
+			color: var(--fixora-text-muted);
+		}
+
+		/* ── Incoming requests ── */
+		.fixora-requests-search {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+
+			&:focus-within {
+				border-color: var(--fixora-primary);
+				box-shadow: var(--fixora-focus-ring);
+			}
+
+			input {
+				color: var(--fixora-text-primary);
+
+				&::placeholder {
+					color: var(--fixora-text-muted);
+				}
+			}
+		}
+
+		.fixora-requests-filter {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+		}
+
+		.fixora-request-card {
+			border-color: var(--fixora-border-subtle);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+		}
+
+		/* ── Active jobs ── */
+		.fixora-jobs-list__tab {
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+		}
+
+		/* ── Messages ── */
+		.fixora-conversations__search {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+		}
+
+		.fixora-msg-search {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+
+			&:focus-within {
+				border-color: var(--fixora-primary);
+				box-shadow: var(--fixora-focus-ring);
+			}
+
+			input {
+				color: var(--fixora-text-primary);
+
+				&::placeholder {
+					color: var(--fixora-text-muted);
+				}
+			}
+		}
+
+		.fixora-conversation-card {
+			background: var(--fixora-surface);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+			}
+		}
+
+		.fixora-msg-emoji-picker,
+		.fixora-msg-thread__header,
+		.fixora-msg-compose {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+		}
+
+		/* ── Earnings ── */
+		.fixora-ea-header__title,
+		.fixora-ea-stat__value,
+		.fixora-ea-card__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-ea-header__sub,
+		.fixora-ea-stat__label {
+			color: var(--fixora-text-muted);
+		}
+
+		.fixora-ea-range {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+
+			&__btn {
+				color: var(--fixora-text-muted);
+
+				&:hover {
+					color: var(--fixora-text-primary);
+				}
+
+				&--active {
+					background: var(--fixora-btn-primary-bg);
+					color: #fff;
+				}
+			}
+		}
+
+		.fixora-ea-payout-btn {
+			background: var(--fixora-btn-primary-bg);
+			box-shadow: var(--fixora-btn-primary-shadow);
+
+			&:hover {
+				background: var(--fixora-btn-primary-bg-hover);
+				box-shadow: var(--fixora-btn-primary-shadow);
+			}
+		}
+
+		.fixora-ea-tooltip {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			box-shadow: var(--fixora-select-shadow);
+
+			&__title {
+				color: var(--fixora-text-primary);
+			}
+		}
+
+		.fixora-ea-txfilter {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+		}
+
+		.fixora-ea-tx__icon {
+			background: var(--fixora-primary-soft-bg);
+		}
+
+		/* ── My articles ── */
+		.ftma-page__title,
+		.ftma-summary__value,
+		.ftma-empty h2,
+		.ftma-card .fixora-tip-card__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.ftma-page__subtitle,
+		.ftma-summary__label,
+		.ftma-empty p {
+			color: var(--fixora-text-muted);
+		}
+
+		.ftma-page__icon,
+		.ftma-page__cta {
+			background: var(--fixora-btn-primary-bg);
+			box-shadow: var(--fixora-btn-primary-shadow);
+
+			&:hover {
+				background: var(--fixora-btn-primary-bg-hover);
+				box-shadow: var(--fixora-btn-primary-shadow);
+			}
+		}
+
+		.ftma-filter {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+				box-shadow: none;
+			}
+
+			&:hover:not(.ftma-filter--active) {
+				background: var(--fixora-surface-hover);
+				color: var(--fixora-text-secondary);
+			}
+		}
+
+		.ftma-empty {
+			border-color: var(--fixora-border-subtle);
+			background: var(--fixora-surface);
+		}
+
+		.ftma-skeleton,
+		.ftma-card__thumb-empty {
+			background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+		}
+
+		/* ── Write article ── */
+		.ftwa-action-bar {
+			background: rgba(255, 255, 255, 0.95);
+			border-top-color: var(--fixora-border-subtle);
+
+			&__btn--ghost,
+			&__btn--secondary {
+				background: var(--fixora-surface);
+				border-color: var(--fixora-border-subtle);
+				color: var(--fixora-text-secondary);
+
+				&:hover:not(:disabled) {
+					border-color: var(--fixora-border);
+					color: var(--fixora-text-primary);
+				}
+			}
+
+			&__btn--primary {
+				background: var(--fixora-btn-primary-bg);
+			}
+		}
+
+		.ftwa-preview__cover {
+			background: var(--fixora-primary-soft-bg);
+			border: 1px dashed var(--fixora-border-subtle);
+		}
+
+		.ftwa-preview__author {
+			border-top-color: var(--fixora-border-subtle);
+		}
+
+		.ftwa-category {
+			background: var(--fixora-surface);
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-muted);
+
+			&--active {
+				background: var(--fixora-primary-soft-bg);
+				border-color: var(--fixora-border);
+				color: var(--fixora-primary);
+			}
+		}
+
+		/* ── Help center ── */
+		.fth-page__subtitle {
+			color: var(--fixora-text-muted);
+		}
+
+		.fth-card__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.fth-faq__item {
+			border-color: var(--fixora-border-subtle);
+			background: var(--fixora-surface);
+
+			&--open {
+				border-color: var(--fixora-border);
+				background: var(--fixora-primary-soft-bg);
+			}
+		}
+
+		.fth-faq__q {
+			color: var(--fixora-text-primary);
+		}
+
+		.fth-faq__a {
+			color: var(--fixora-text-secondary);
+		}
+
+		.fth-faq__item--open .fth-faq__chevron {
+			color: var(--fixora-primary);
+		}
+
+		.fth-contact-row {
+			color: var(--fixora-primary);
+
+			&--muted {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fth-link {
+			border-color: var(--fixora-border-subtle);
+			background: var(--fixora-surface);
+			color: var(--fixora-text-secondary);
+
+			&:hover {
+				border-color: var(--fixora-border);
+				background: var(--fixora-primary-soft-bg);
+				color: var(--fixora-primary);
+			}
+		}
+
+		.fth-issues {
+			color: var(--fixora-text-secondary);
+		}
+
+		/* ── Public profile ── */
+		.fixora-pp-header__name,
+		.fixora-pp-stat__value,
+		.fixora-pp-stories-card__title,
+		.fixora-pp-panel__title,
+		.fixora-pp-service__title,
+		.fixora-pp-port__title,
+		.fixora-pp-review__name,
+		.fixora-pp-articles-empty__title {
+			color: var(--fixora-text-primary);
+		}
+
+		.fixora-pp-empty {
+			border-color: var(--fixora-border-subtle);
+
+			&__title {
+				color: var(--fixora-text-primary);
+			}
+
+			&__sub {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fixora-pp-stat__label,
+		.fixora-pp-panel__text,
+		.fixora-pp-articles-empty__desc {
+			color: var(--fixora-text-secondary);
+		}
+
+		.fixora-pp-btn--ghost {
+			border-color: var(--fixora-border-subtle);
+			color: var(--fixora-text-secondary);
+
+			&:hover {
+				background: var(--fixora-primary-soft-bg);
+				color: var(--fixora-primary);
+			}
+		}
+
+		/* ── Settings skeleton ── */
+		.fts-page__skeleton {
+			background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+		}
+
+		/* ── Settings inputs ── */
+		.fts-input,
+		.fts-textarea {
+			color: var(--fixora-text-primary);
+
+			&::placeholder {
+				color: var(--fixora-text-muted);
+			}
+		}
+
+		.fts-input--readonly {
+			color: var(--fixora-text-muted);
+		}
+
+		/* ── Card borders — stronger reddish tint ── */
+		.fixora-tech-stat-card,
+		.fixora-technician-layout .fixora-tech-card,
+		.fixora-technician-mobile .fixora-tech-card,
+		.fixora-ea-stat,
+		.fixora-ea-card,
+		.ftma-summary__item,
+		.ftma-card,
+		.ftwa-card,
+		.fth-card,
+		.fixora-pp-header,
+		.fixora-pp-stories-card,
+		.fixora-pp-panel,
+		.fixora-conversation-list,
+		.fixora-message-thread,
+		.fixora-active-jobs-list,
+		.fixora-job-detail {
+			border-color: var(--fixora-border) !important;
+		}
+	}
+}

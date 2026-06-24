@@ -8,6 +8,7 @@ import { ProfileFormState, TechnicianSettingsUser } from '../../../../hooks/useT
 import { useProfileImageUpload } from '../../../../hooks/useProfileImageUpload';
 import { sweetMixinErrorAlert } from '../../../../sweetAlert';
 import { hasRealProfileImage } from '../../../../utils/profileImage';
+import { readStoredProfileImage } from '../../../../auth/syncUserVar';
 
 interface ProfileSettingsSectionProps {
 	user: TechnicianSettingsUser | null;
@@ -34,11 +35,13 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 	const avatar = useProfileImageUpload(onUploadError);
 
 	React.useEffect(() => {
-		if (user && hasRealProfileImage(user.userProfileImage)) {
-			avatar.setExistingImage(user.userProfileImage);
+		const storedImage = user?._id ? readStoredProfileImage(user._id) : null;
+		const imagePath = user?.userProfileImage ?? storedImage;
+		if (imagePath && hasRealProfileImage(imagePath)) {
+			avatar.setExistingImage(imagePath);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate avatar once per profile image path
-	}, [user?.userProfileImage]);
+	}, [user?._id, user?.userProfileImage]);
 
 	const initials = useMemo(() => {
 		const name = form.fullName || user?.userFullName || '';
@@ -128,6 +131,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					<input
 						className="fts-input"
 						value={form.shopName}
+						placeholder={user?.shopName ?? t('settings.profile.shopNamePlaceholder')}
 						onChange={(e) => onChange({ shopName: e.target.value })}
 					/>
 				</SettingsField>
@@ -135,6 +139,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					<input
 						className="fts-input"
 						value={form.fullName}
+						placeholder={user?.userFullName ?? t('settings.profile.fullNamePlaceholder')}
 						onChange={(e) => onChange({ fullName: e.target.value })}
 					/>
 				</SettingsField>
@@ -142,6 +147,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					<input
 						className="fts-input"
 						value={form.location}
+						placeholder={user?.userLocation ?? t('settings.profile.locationPlaceholder')}
 						onChange={(e) => onChange({ location: e.target.value })}
 					/>
 				</SettingsField>
@@ -150,6 +156,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 						className="fts-input"
 						type="email"
 						value={form.email}
+						placeholder={user?.userEmail ?? t('settings.profile.emailPlaceholder')}
 						onChange={(e) => onChange({ email: e.target.value })}
 					/>
 				</SettingsField>
@@ -157,6 +164,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					<input
 						className="fts-input"
 						value={form.phone}
+						placeholder={user?.userPhoneNumber ?? t('settings.profile.phonePlaceholder')}
 						onChange={(e) => onChange({ phone: e.target.value })}
 					/>
 				</SettingsField>
@@ -170,6 +178,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					className="fts-textarea"
 					rows={4}
 					value={form.bio}
+					placeholder={user?.userBio ?? t('settings.profile.bioPlaceholder')}
 					onChange={(e) => onChange({ bio: e.target.value })}
 				/>
 			</SettingsField>

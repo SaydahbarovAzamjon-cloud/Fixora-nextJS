@@ -19,6 +19,7 @@ import {
 	assertSignupFieldsAvailable,
 	deriveSignupNickname,
 	isSignupConflictError,
+	isValidKrContactPhone,
 	throwSignupConflictFromMutation,
 } from './signupAvailability';
 
@@ -79,7 +80,7 @@ export const validateTechStep1 = (
 	if (!fullName.trim()) errors.fullName = 'nameRequired';
 	if (!email.trim()) errors.email = 'emailRequired';
 	else if (!validateEmail(email)) errors.email = 'emailInvalid';
-	if (phone.trim() && phone.trim().length < 8) errors.phone = 'phoneInvalid';
+	if (phone.trim() && !isValidKrContactPhone(phone)) errors.phone = 'phoneInvalid';
 	if (!password) errors.password = 'passwordRequired';
 	else if (password.length < 5) errors.password = 'passwordMin';
 	else if (password.length > 12) errors.password = 'passwordMax';
@@ -94,7 +95,7 @@ export const validateOAuthCompleteInput = (
 ): AuthValidationResult => {
 	const errors: Record<string, string> = {};
 	if (!nickname.trim() || nickname.trim().length < 3) errors.nickname = 'nameRequired';
-	if (!phone.trim() || phone.trim().length < 8) errors.phone = 'phoneInvalid';
+	if (!phone.trim() || !isValidKrContactPhone(phone)) errors.phone = 'phoneInvalid';
 	if (!termsAccepted) errors.terms = 'termsRequired';
 	return { valid: Object.keys(errors).length === 0, errors };
 };

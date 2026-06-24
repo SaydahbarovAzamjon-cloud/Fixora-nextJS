@@ -22,7 +22,7 @@ $tech-text-muted: var(--fixora-text-muted);
 
 @mixin fixora-tech-card-surface {
 	background: $tech-card-bg;
-	border-color: $tech-card-border;
+	border: 1px solid $tech-card-border;
 	box-shadow: $tech-card-shadow;
 	border-radius: var(--fixora-card-radius);
 }

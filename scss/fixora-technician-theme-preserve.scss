@@ -1,4 +1,5 @@
 /**
  * Technician portal — color tokens inherit from client :root (variables.scss).
- * No theme overrides here; technician UI uses the same burgundy system as customer.
+ * Light-mode overrides for hardcoded dark technician SCSS.
  */
+@import '/scss/pc/technician/_technician-light-theme.scss';

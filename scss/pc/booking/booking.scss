@@ -721,3 +721,76 @@
 	font-size: 13px;
 	font-weight: 600;
 }
+
+/** P4-01 — optional AI classification hint on booking form */
+.fixora-booking-ai-hint {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+	border-radius: var(--fixora-card-radius, 16px);
+	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-primary-soft-bg);
+	transition: var(--fixora-transition);
+
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		color: var(--fixora-primary);
+		margin-top: 2px;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__subtitle {
+		margin: 4px 0 0;
+		font-size: 12px;
+		color: var(--fixora-text-muted);
+		line-height: 1.4;
+	}
+
+	&__loading {
+		margin: 0;
+		font-size: 13px;
+		color: var(--fixora-text-secondary);
+	}
+
+	&__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	&__chip {
+		display: inline-flex;
+		align-items: center;
+		padding: 6px 12px;
+		border-radius: 999px;
+		font-size: 12px;
+		font-weight: 600;
+		background: var(--fixora-surface);
+		border: 1px solid var(--fixora-border-subtle);
+		color: var(--fixora-primary);
+
+		&--muted {
+			color: var(--fixora-text-secondary);
+			background: var(--fixora-surface-elevated);
+		}
+	}
+
+	&__confidence {
+		margin: 0;
+		font-size: 11px;
+		color: var(--fixora-text-muted);
+	}
+}

@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from 'next/document';
+import { FIXORA_THEME_BOOTSTRAP_SCRIPT } from '../libs/theme/fixoraThemeMode';
 
 const viewportBootstrapScript = `
 (function () {
@@ -35,6 +36,7 @@ export default function Document() {
 				/>
 			</Head>
 			<body>
+				<script dangerouslySetInnerHTML={{ __html: FIXORA_THEME_BOOTSTRAP_SCRIPT }} />
 				<script dangerouslySetInnerHTML={{ __html: viewportBootstrapScript }} />
 				<Main />
 				<NextScript />

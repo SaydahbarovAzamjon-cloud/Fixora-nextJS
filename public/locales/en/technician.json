@@ -172,7 +172,23 @@
     "tooltipJobs": "Jobs",
     "loadError": "Could not load analytics KPIs. Charts may still show booking data.",
     "noData": "No data yet — complete your first booking to see analytics here.",
-    "noClients": "No client history yet."
+    "noClients": "No client history yet.",
+    "devices": {
+      "iphone": "iPhone",
+      "macbook": "MacBook",
+      "ipad": "iPad",
+      "appleWatch": "Apple Watch"
+    },
+    "issueTypes": {
+      "SCREEN": "Screen",
+      "BATTERY": "Battery",
+      "WATER_DAMAGE": "Water damage",
+      "CAMERA": "Camera",
+      "CHARGING": "Charging",
+      "KEYBOARD": "Keyboard",
+      "SOFTWARE": "Software",
+      "GENERAL": "General"
+    }
   },
   "earnings": {
     "title": "Earnings & Payouts",

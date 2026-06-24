@@ -73,6 +73,24 @@ export function verificationStatusTone(status: string): BadgeTone {
 	}
 }
 
+/** i18n key under admin namespace — `verification.statuses.*` */
+export function verificationStatusLabelKey(status: string): string {
+	switch (status) {
+		case 'PENDING':
+			return 'verification.statuses.PENDING';
+		case 'UNDER_REVIEW':
+			return 'verification.statuses.UNDER_REVIEW';
+		case 'APPROVED':
+			return 'verification.statuses.APPROVED';
+		case 'REJECTED':
+			return 'verification.statuses.REJECTED';
+		case 'NONE':
+			return 'verification.statuses.NONE';
+		default:
+			return 'verification.statuses.NONE';
+	}
+}
+
 export const BOOKING_STATUS_DOT: Record<string, string> = {
 	PENDING: '#faad14',
 	ACCEPTED: '#52c41a',

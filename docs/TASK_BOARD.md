@@ -107,13 +107,13 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P4-01 | AI classification display on booking form | ⬜ Todo | Optional UI hint |
-| P4-02 | Technician matching UI | ⬜ Todo | Search recommendations |
-| P4-03 | Technician analytics charts | ⬜ Todo | Tenant dashboard |
-| P4-04 | E2E / component tests for Fixora flows | ⬜ Todo | |
-| P4-05 | Light theme tokens | ⬜ Todo | No mockup yet — derive from dark tokens |
-| P4-06 | Light pages rollout | ⬜ Todo | Auth + core pages |
-| P4-07 | Theme toggle (Settings) | ⬜ Todo | My Page + Tech Settings |
+| P4-01 | AI classification display on booking form | ✅ Done | `classifyRepairIssue` + `BookingAiClassificationHint` — display only (BIZ-06/07) |
+| P4-02 | Technician matching UI | ✅ Done | `recommendTechnicians` + `SearchRecommendations` on `/search` — display only (BIZ-07) |
+| P4-03 | Technician analytics charts | ✅ Done | Range-aware KPIs/trends, theme-aware charts, EN/KR labels, responsive |
+| P4-04 | E2E / component tests for Fixora flows | ✅ Done | Vitest (13 tests): theme, metrics, booking AI hint; Playwright smoke (`e2e/fixora-smoke.spec.ts`); `yarn test` / `yarn test:e2e` |
+| P4-05 | Light theme tokens | ✅ Done | `variables.scss` full `[data-theme='light']` block + `fixoraLight.ts` — user prompt spec |
+| P4-06 | Light pages rollout | ✅ Done | Token-driven SCSS (`fixora-ui`, card surfaces, navbar, admin, technician, mobile) |
+| P4-07 | Theme toggle (Settings) | ✅ Done | `FixoraThemeProvider` + localStorage + PreferencesSection darkMode → `setMode` |
 
 ---
 
@@ -125,7 +125,7 @@ Backend work (DeviceModule, BookingModule, KakaoPay server, etc.) is tracked in 
 
 ## Current Focus
 
-**Next task:** **Phase 5** polish (`P4-01`…`P4-07`) — **Phase 4 Migration ✅** · **Phase 3 mobile PM-01…PM-12 ✅** · **production build ✅**
+**Next task:** **Phase 5 complete** — all P4-xx ✅. Next: post-MVP polish or FIXORAB gaps per `BACKEND_GAPS.md`.
 
 **Backend wiring:** Phase 0–4 ✅ — `docs/FIXORAF_SYNC.md`
 

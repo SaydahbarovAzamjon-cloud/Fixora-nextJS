@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { Bell } from 'lucide-react';
-import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
+import { MARK_NOTIFICATION_READ } from '../../../apollo/user/notification';
 import { Notification } from '../../types/fixora/fixora';
-import { getNotificationLink } from '../../utils/notifications';
+import { getAdminNotificationDisplayText, getAdminNotificationLink } from '../../utils/adminNotifications';
+import { useAdminNotifications } from '../../hooks/useAdminNotifications';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 
 const AdminNotificationBell: React.FC = () => {
@@ -13,23 +14,8 @@ const AdminNotificationBell: React.FC = () => {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
-
-	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
-		variables: { input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC' } },
-		fetchPolicy: 'cache-and-network',
-		pollInterval: 60000,
-	});
-
-	const { data: unreadData, refetch: refetchUnread } = useQuery(GET_NOTIFICATIONS, {
-		variables: { input: { page: 1, limit: 50, search: { isRead: false } } },
-		fetchPolicy: 'cache-and-network',
-		pollInterval: 60000,
-	});
-
+	const { notifications, unreadCount, loading, refetchAll } = useAdminNotifications();
 	const [markRead] = useMutation(MARK_NOTIFICATION_READ);
-
-	const notifications: Notification[] = data?.getNotifications?.list ?? [];
-	const unreadCount = unreadData?.getNotifications?.metaCounter?.[0]?.total ?? 0;
 
 	useEffect(() => {
 		const onDocClick = (e: MouseEvent) => {
@@ -45,14 +31,15 @@ const AdminNotificationBell: React.FC = () => {
 		if (!notification.isRead) {
 			try {
 				await markRead({ variables: { input: { notificationId: notification._id } } });
-				await refetch();
-				await refetchUnread();
+				await refetchAll();
 			} catch {
 				// Continue navigation even if mark-read fails
 			}
 		}
+
 		setOpen(false);
-		const link = getNotificationLink(notification);
+
+		const link = getAdminNotificationLink(notification);
 		if (link) router.push(link);
 	};
 
@@ -81,6 +68,7 @@ const AdminNotificationBell: React.FC = () => {
 								router.push('/notifications');
 							}}
 							viewAllHref="/notifications"
+							getDisplayText={getAdminNotificationDisplayText}
 						/>
 					)}
 				</div>

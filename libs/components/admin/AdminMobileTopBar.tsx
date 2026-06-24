@@ -3,6 +3,7 @@ import { useTranslation } from 'next-i18next';
 import { Menu, X } from 'lucide-react';
 import AdminNotificationBell from './AdminNotificationBell';
 import AdminUserMenuButton from './AdminUserMenuButton';
+import NavThemeToggle from '../nav/NavThemeToggle';
 
 export interface AdminMobileTopBarProps {
 	sidebarOpen: boolean;
@@ -27,6 +28,7 @@ const AdminMobileTopBar: React.FC<AdminMobileTopBarProps> = ({ sidebarOpen, onMe
 			<div className="fixora-admin-mobile-topbar__spacer" aria-hidden />
 
 			<div className="fixora-admin-mobile-topbar__actions">
+				<NavThemeToggle compact />
 				<AdminNotificationBell />
 				<AdminUserMenuButton variant="avatar" />
 			</div>

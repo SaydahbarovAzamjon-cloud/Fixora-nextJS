@@ -5,7 +5,7 @@ import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton } from '../ui';
 import AuthHeading from './AuthHeading';
-import { fixoraTechnicianSignup, loadTechDraft, saveTechDraft } from '../../auth/fixoraAuth';
+import { fixoraTechnicianSignup, isSignupConflictError, loadTechDraft, saveTechDraft } from '../../auth/fixoraAuth';
 import { getTechIdFile, getTechPhotoFile, setTechIdFile } from '../../auth/techOnboardingFiles';
 import { readFileAsDataUrl } from '../../utils/onboardingFileStorage';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
@@ -95,8 +95,16 @@ const TechIdUpload = () => {
 			saveTechDraft(draft);
 			await fixoraTechnicianSignup(draft);
 			await router.push('/register/technician/pending');
-		} catch (err: any) {
-			await sweetMixinErrorAlert(err?.message ?? 'Submission failed');
+		} catch (err: unknown) {
+			if (isSignupConflictError(err)) {
+				const messages = Object.values(err.conflicts)
+					.map((key) => t(`validation.${key}`))
+					.join(' ');
+				await sweetMixinErrorAlert(messages || t('validation.signupConflict'));
+				await router.push('/register/technician/1');
+				return;
+			}
+			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Submission failed');
 		} finally {
 			setLoading(false);
 		}

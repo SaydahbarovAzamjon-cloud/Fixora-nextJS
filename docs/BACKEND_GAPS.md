@@ -150,6 +150,7 @@ Contract: [`PAYOUT_API.md`](PAYOUT_API.md)
 |----|-----|---------------|--------|-------|
 | GAP-050 | Apple OAuth | Apple credentials + `loginWithOAuth(APPLE)` | `DONE` | ✅ |
 | GAP-051 | Real payment gateway | KakaoPay production | `MOCK` | 5 |
+| GAP-114 | Signup uniqueness (email, phone, nickname, name, OAuth provider) | `checkSignupAvailability` public query + Mongo unique indexes | `DONE` | FixoraF wired: `CHECK_SIGNUP_AVAILABILITY` + `assertSignupFieldsAvailable` |
 
 ---
 

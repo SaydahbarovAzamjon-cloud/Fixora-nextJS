@@ -172,7 +172,23 @@
     "tooltipJobs": "작업",
     "loadError": "분석 KPI를 불러올 수 없습니다. 차트에는 예약 데이터가 표시될 수 있습니다.",
     "noData": "아직 데이터가 없습니다 — 첫 예약을 완료하면 분석이 표시됩니다.",
-    "noClients": "아직 고객 기록이 없습니다."
+    "noClients": "아직 고객 기록이 없습니다.",
+    "devices": {
+      "iphone": "아이폰",
+      "macbook": "맥북",
+      "ipad": "아이패드",
+      "appleWatch": "애플워치"
+    },
+    "issueTypes": {
+      "SCREEN": "화면",
+      "BATTERY": "배터리",
+      "WATER_DAMAGE": "침수",
+      "CAMERA": "카메라",
+      "CHARGING": "충전",
+      "KEYBOARD": "키보드",
+      "SOFTWARE": "소프트웨어",
+      "GENERAL": "일반"
+    }
   },
   "earnings": {
     "title": "수익 및 정산",

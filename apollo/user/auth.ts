@@ -75,6 +75,18 @@ export const COMPLETE_OAUTH_SIGNUP = gql`
 	}
 `;
 
+export const CHECK_SIGNUP_AVAILABILITY = gql`
+	query CheckSignupAvailability($input: CheckSignupAvailabilityInput!) {
+		checkSignupAvailability(input: $input) {
+			available
+			conflicts {
+				field
+				message
+			}
+		}
+	}
+`;
+
 export const SUBMIT_TECHNICIAN_VERIFICATION = gql`
 	mutation SubmitTechnicianVerification {
 		submitTechnicianVerification {

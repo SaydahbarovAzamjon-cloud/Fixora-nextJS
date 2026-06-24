@@ -19,27 +19,34 @@ export interface NotificationDropdownProps {
 	onViewAll: () => void;
 	onDelete?: (notification: Notification) => void;
 	viewAllHref?: string;
+	getDisplayText?: (notification: Notification) => string;
+	skipBookingLookup?: (notification: Notification) => boolean;
 }
 
 const NotificationDropdownItem = ({
 	notification,
 	onClick,
 	onDelete,
+	getDisplayText,
+	skipBookingLookup,
 }: {
 	notification: Notification;
 	onClick: () => void;
 	onDelete?: () => void;
+	getDisplayText?: (notification: Notification) => string;
+	skipBookingLookup?: (notification: Notification) => boolean;
 }) => {
 	const { t } = useTranslation('common');
+	const shouldSkipBooking = skipBookingLookup?.(notification) ?? false;
 	const { data } = useQuery(GET_BOOKING, {
-		skip: notification.referenceType !== 'BOOKING' || !notification.referenceId,
+		skip: shouldSkipBooking || notification.referenceType !== 'BOOKING' || !notification.referenceId,
 		variables: { bookingId: notification.referenceId! },
 		fetchPolicy: 'cache-first',
 	});
 
 	const kind = getNotificationVisualKind(notification, data?.getBooking?.bookingStatus);
-	const text = getNotificationDisplayText(notification, kind, t);
-	const showSender = shouldShowNotificationSender(notification);
+	const text = getDisplayText?.(notification) ?? getNotificationDisplayText(notification, kind, t);
+	const showSender = shouldShowNotificationSender(notification) && !shouldSkipBooking;
 
 	return (
 		<div className={`fixora-notif-dropdown__row ${!notification.isRead ? 'fixora-notif-dropdown__row--unread' : ''}`}>
@@ -80,6 +87,8 @@ const NotificationDropdown = ({
 	onViewAll,
 	onDelete,
 	viewAllHref = '/notifications',
+	getDisplayText,
+	skipBookingLookup,
 }: NotificationDropdownProps) => {
 	const { t } = useTranslation('common');
 
@@ -99,6 +108,8 @@ const NotificationDropdown = ({
 							notification={notification}
 							onClick={() => onItemClick(notification)}
 							onDelete={onDelete ? () => onDelete(notification) : undefined}
+							getDisplayText={getDisplayText}
+							skipBookingLookup={skipBookingLookup}
 						/>
 					))
 				)}

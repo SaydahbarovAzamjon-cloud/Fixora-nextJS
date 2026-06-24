@@ -7,6 +7,7 @@ import { ADMIN_GLOBAL_SEARCH } from '../../../apollo/admin/query';
 import type { AdminSearchHit } from '../../types/admin/admin';
 import AdminNotificationBell from './AdminNotificationBell';
 import AdminUserMenuButton from './AdminUserMenuButton';
+import NavThemeToggle from '../nav/NavThemeToggle';
 
 export interface AdminHeaderProps {
 	title: string;
@@ -106,11 +107,15 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ title, subtitle }) => {
 
 			<div className="fixora-admin-header__toolbar fixora-admin-header__toolbar--desktop">
 				{searchField}
+				<NavThemeToggle compact />
 				<AdminNotificationBell />
 				<AdminUserMenuButton />
 			</div>
 
-			<div className="fixora-admin-header__toolbar fixora-admin-header__toolbar--mobile">{searchField}</div>
+			<div className="fixora-admin-header__toolbar fixora-admin-header__toolbar--mobile">
+				{searchField}
+				<NavThemeToggle compact />
+			</div>
 		</header>
 	);
 };

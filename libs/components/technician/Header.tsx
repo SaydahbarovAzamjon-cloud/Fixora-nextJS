@@ -14,6 +14,7 @@ import { logOut } from '../../auth';
 import { resolveProfileImageUrl, hasRealProfileImage } from '../../utils/profileImage';
 import { readStoredProfileImage } from '../../auth/syncUserVar';
 import LanguageToggle from '../common/LanguageToggle';
+import NavThemeToggle from '../nav/NavThemeToggle';
 
 interface HeaderProps {
 	activePage: string;
@@ -109,6 +110,8 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 			</button>
 
 			<LanguageToggle className="fixora-tech-header__lang fixora-nav__lang" />
+
+			<NavThemeToggle compact className="fixora-tech-header__theme-toggle" />
 
 			<button
 				className="fixora-tech-header__icon-btn"

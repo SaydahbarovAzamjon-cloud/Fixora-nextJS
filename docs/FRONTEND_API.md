@@ -29,6 +29,7 @@ This document is the **single integration reference** for the separate frontend 
 | Operation | Auth | Notes |
 |-----------|------|-------|
 | `signup` | Public | `userEmail`, `userNickname`, `userPassword`, `userPhoneNumber`, `userType`, `termsAcceptedAt` |
+| `checkSignupAvailability` | Public | Pre-signup uniqueness check — `userEmail`, `userNickname`, `userPhoneNumber`, `userFullName`, optional `excludeUserId` |
 | `login` | Public | `LoginInput.userEmail` + `userPassword` only |
 | `loginWithOAuth` | Public | `KAKAO`, `GOOGLE`, `APPLE` — requires provider env (`APPLE_CLIENT_ID`, etc.) |
 | `completeOAuthSignup` | Bearer | Mandatory phone for new OAuth users |

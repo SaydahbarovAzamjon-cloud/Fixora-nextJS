@@ -28,6 +28,13 @@ $admin-mobile-topbar-height: 56px;
 			@include fixora-touch-active;
 		}
 
+		.fixora-admin-verification__list-item {
+			&:active {
+				opacity: 1;
+				transform: none;
+			}
+		}
+
 		.fixora-admin-verification__actions .fixora-admin-btn {
 			min-height: 44px;
 		}

@@ -4,8 +4,7 @@ import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { useTechnicianUserSync } from '../../hooks/useTechnicianUserSync';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
-import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
-import { fixoraTechnicianOrange } from '../../../scss/MaterialTheme';
+import { ThemeProvider } from '@mui/material/styles';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { isTechnicianUser } from '../../utils/userRole';
 import { useReactiveVar } from '@apollo/client';
@@ -13,17 +12,17 @@ import { userVar } from '../../../apollo/store';
 import TechnicianSidebar from '../technician/TechnicianSidebar';
 import Header from '../technician/Header';
 import TechnicianMobileBottomNav from '../technician/TechnicianMobileBottomNav';
+import { useFixoraTheme } from '../theme/FixoraThemeProvider';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-
-const technicianTheme = createTheme(fixoraTechnicianOrange as ThemeOptions);
 
 const withTechnicianLayout = (Component: any) => {
 	return (props: any) => {
 		const router = useRouter();
 		const device = useDeviceDetect();
 		const user = useReactiveVar(userVar);
+		const { muiTheme } = useFixoraTheme();
 
 		useTechnicianUserSync();
 
@@ -58,7 +57,7 @@ const withTechnicianLayout = (Component: any) => {
 
 		if (device == 'mobile') {
 			return (
-				<ThemeProvider theme={technicianTheme}>
+				<ThemeProvider theme={muiTheme}>
 					<Head>
 						<title>Fixora - Technician Dashboard</title>
 						<meta name={'title'} content={`Fixora - Technician Dashboard`} />
@@ -74,7 +73,7 @@ const withTechnicianLayout = (Component: any) => {
 			);
 		} else {
 			return (
-				<ThemeProvider theme={technicianTheme}>
+				<ThemeProvider theme={muiTheme}>
 					<Head>
 						<title>Fixora - Technician Dashboard</title>
 						<meta name={'title'} content={`Fixora - Technician Dashboard`} />

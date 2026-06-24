@@ -4,11 +4,14 @@ import { useTranslation } from 'next-i18next';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import PersonOutlined from '@mui/icons-material/PersonOutlined';
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import LockOutlined from '@mui/icons-material/LockOutlined';
 import AddAPhotoOutlined from '@mui/icons-material/AddAPhotoOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
-import { loadTechDraft, saveTechDraft, validateTechStep1 } from '../../auth/fixoraAuth';
+import { loadTechDraft, saveTechDraft, validateTechStep1, isSignupConflictError } from '../../auth/fixoraAuth';
+import { assertSignupFieldsAvailable, deriveSignupNickname } from '../../auth/signupAvailability';
+import { initializeApollo } from '../../../apollo/client';
 import { setTechPhotoFile, getTechPhotoFile } from '../../auth/techOnboardingFiles';
 import { readFileAsDataUrl } from '../../utils/onboardingFileStorage';
 
@@ -19,9 +22,12 @@ const TechOnboardingStep1 = () => {
 	const [fullName, setFullName] = useState('');
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
+	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [photoFileName, setPhotoFileName] = useState('');
 	const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [checking, setChecking] = useState(false);
 
 	useEffect(() => {
 		return () => {
@@ -37,6 +43,8 @@ const TechOnboardingStep1 = () => {
 		setFullName(draft.fullName ?? '');
 		setEmail(draft.email ?? '');
 		setPhone(draft.phone ?? '');
+		setPassword(draft.password ?? '');
+		setConfirmPassword(draft.password ?? '');
 		setPhotoFileName(draft.photoFileName ?? '');
 	}, []);
 
@@ -64,11 +72,31 @@ const TechOnboardingStep1 = () => {
 	};
 
 	const handleContinue = useCallback(async () => {
-		const result = validateTechStep1(fullName, email, phone);
+		const result = validateTechStep1(fullName, email, phone, password, confirmPassword);
 		if (!result.valid) {
 			setErrors(result.errors);
 			return;
 		}
+		setErrors({});
+		setChecking(true);
+		try {
+			const apolloClient = await initializeApollo();
+			await assertSignupFieldsAvailable(apolloClient, {
+				email,
+				nickname: deriveSignupNickname(fullName, email),
+				fullName,
+				...(phone.trim() ? { phone } : {}),
+			});
+		} catch (err) {
+			if (isSignupConflictError(err)) {
+				setErrors(err.conflicts);
+				return;
+			}
+			throw err;
+		} finally {
+			setChecking(false);
+		}
+
 		const current = loadTechDraft();
 		const photoFile = getTechPhotoFile();
 		let photoDataUrl = current?.photoDataUrl;
@@ -83,13 +111,14 @@ const TechOnboardingStep1 = () => {
 			fullName,
 			email,
 			phone,
+			password,
 			photoFileName: photoFileName || current?.photoFileName,
 			photoDataUrl,
 			idFileName: current?.idFileName,
 			idPreviewDataUrl: current?.idPreviewDataUrl,
 		});
 		await router.push('/register/technician/id');
-	}, [fullName, email, phone, photoFileName, router]);
+	}, [fullName, email, phone, password, confirmPassword, photoFileName, router]);
 
 	return (
 		<>
@@ -156,9 +185,33 @@ const TechOnboardingStep1 = () => {
 						onChange={(e) => setEmail(e.target.value)}
 						error={!!errors.email}
 						helperText={errors.email ? t(`validation.${errors.email}`) : undefined}
+					/>
+					<FixoraInput
+						label={t('register.passwordLabel')}
+						type="password"
+						name="password"
+						autoComplete="new-password"
+						placeholder={t('register.passwordPlaceholder')}
+						icon={<LockOutlined fontSize="small" />}
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						error={!!errors.password}
+						helperText={errors.password ? t(`validation.${errors.password}`) : t('register.passwordHint')}
+					/>
+					<FixoraInput
+						label={t('register.confirmLabel')}
+						type="password"
+						name="confirmPassword"
+						autoComplete="new-password"
+						placeholder={t('register.confirmPlaceholder')}
+						icon={<LockOutlined fontSize="small" />}
+						value={confirmPassword}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+						error={!!errors.confirmPassword}
+						helperText={errors.confirmPassword ? t(`validation.${errors.confirmPassword}`) : undefined}
 						onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
 					/>
-					<FixoraButton variant="primary" fullWidth onClick={handleContinue}>
+					<FixoraButton variant="primary" fullWidth disabled={checking} onClick={handleContinue}>
 						{t('tech.continue')}
 						<ArrowForward fontSize="small" />
 					</FixoraButton>

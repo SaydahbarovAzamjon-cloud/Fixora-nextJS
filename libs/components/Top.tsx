@@ -24,6 +24,7 @@ import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
 import NotificationDropdown from './notifications/NotificationDropdown';
 import NavSearchInput from './nav/NavSearchInput';
+import NavThemeToggle from './nav/NavThemeToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 
 const LANGS = ['en', 'kr'] as const;
@@ -267,6 +268,7 @@ const Top = () => {
 						</Link>
 
 						<div className="fixora-nav-mobile__actions">
+							<NavThemeToggle compact />
 							{langToggle(true)}
 
 							{user?._id ? (
@@ -378,6 +380,7 @@ const Top = () => {
 					<NavSearchInput />
 
 					<Box component={'div'} className={'fixora-nav__actions'}>
+						<NavThemeToggle />
 						{langToggle()}
 
 						{user?._id ? (

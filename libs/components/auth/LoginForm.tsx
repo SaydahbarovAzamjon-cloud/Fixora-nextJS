@@ -22,6 +22,7 @@ const LoginForm = () => {
 	const [remember, setRemember] = useState(true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
+	const oauthHint = router.query.oauthError === 'provider_mismatch';
 
 	const handleSubmit = useCallback(async () => {
 		const result = validateLoginInput(email, password);
@@ -50,6 +51,11 @@ const LoginForm = () => {
 				subtitle={t('login.subtitle')}
 			/>
 			<div className="auth-form">
+				{oauthHint && (
+					<p className="auth-form__hint auth-form__hint--warning" role="status">
+						{t('oauth.providerMismatchUseEmail')}
+					</p>
+				)}
 				<FixoraInput
 					label={t('login.emailLabel')}
 					type="email"

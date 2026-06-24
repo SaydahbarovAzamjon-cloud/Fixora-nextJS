@@ -38,8 +38,9 @@ const AdminBookingsPage: NextPage = () => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
 	const filterUserId = typeof router.query.userId === 'string' ? router.query.userId : undefined;
+	const filterBookingId = typeof router.query.bookingId === 'string' ? router.query.bookingId : undefined;
 	const [page, setPage] = useState(1);
-	const [search, setSearch] = useState('');
+	const [search, setSearch] = useState(filterBookingId ?? '');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
 	const [statusFilter, setStatusFilter] = useState<BookingStatus | ''>('');
 	const [typeFilter, setTypeFilter] = useState<BookingType | ''>('');

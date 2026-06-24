@@ -82,6 +82,11 @@
 			@include fixora-tap-target;
 			@include fixora-touch-active;
 		}
+
+		.fixora-nav__theme-toggle {
+			@include fixora-tap-target;
+			@include fixora-touch-active;
+		}
 	}
 }
 

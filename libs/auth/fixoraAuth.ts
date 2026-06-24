@@ -14,15 +14,18 @@ import { uploadImageFile } from '../utils/uploadImageFile';
 import { syncUserVarFromGraphqlUser } from './syncUserVar';
 import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
 import { dataUrlToFile } from '../utils/onboardingFileStorage';
+import { getGraphQLErrorMessage } from '../utils/oauthErrors';
+import {
+	assertSignupFieldsAvailable,
+	deriveSignupNickname,
+	isSignupConflictError,
+	throwSignupConflictFromMutation,
+} from './signupAvailability';
+
+export { deriveSignupNickname, isSignupConflictError, SignupConflictError } from './signupAvailability';
+export type { SignupConflictField } from './signupAvailability';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function getGraphQLErrorMessage(err: unknown): string {
-	const anyErr = err as { graphQLErrors?: { message?: string }[]; message?: string };
-	if (anyErr?.graphQLErrors?.[0]?.message) return anyErr.graphQLErrors[0].message;
-	if (anyErr?.message) return anyErr.message;
-	return 'Request failed';
-}
 
 export interface AuthValidationResult {
 	valid: boolean;
@@ -69,12 +72,18 @@ export const validateTechStep1 = (
 	fullName: string,
 	email: string,
 	phone: string,
+	password: string,
+	confirmPassword: string,
 ): AuthValidationResult => {
 	const errors: Record<string, string> = {};
 	if (!fullName.trim()) errors.fullName = 'nameRequired';
 	if (!email.trim()) errors.email = 'emailRequired';
 	else if (!validateEmail(email)) errors.email = 'emailInvalid';
 	if (phone.trim() && phone.trim().length < 8) errors.phone = 'phoneInvalid';
+	if (!password) errors.password = 'passwordRequired';
+	else if (password.length < 5) errors.password = 'passwordMin';
+	else if (password.length > 12) errors.password = 'passwordMax';
+	if (password !== confirmPassword) errors.confirmPassword = 'passwordMismatch';
 	return { valid: Object.keys(errors).length === 0, errors };
 };
 
@@ -177,9 +186,16 @@ export const fixoraCustomerSignup = async (
 	userPassword: string,
 	userPhone = '',
 ): Promise<void> => {
-	const nickname = fullName.trim().replace(/\s+/g, '').slice(0, 12) || userEmail.split('@')[0].slice(0, 12);
+	const nickname = deriveSignupNickname(fullName, userEmail);
 	const apolloClient = await initializeApollo();
 	try {
+		await assertSignupFieldsAvailable(apolloClient, {
+			email: userEmail,
+			nickname,
+			fullName,
+			...(userPhone.trim() ? { phone: userPhone } : {}),
+		});
+
 		const result = await apolloClient.mutate({
 			mutation: FIXORA_SIGNUP,
 			variables: {
@@ -209,7 +225,8 @@ export const fixoraCustomerSignup = async (
 		});
 		setNeedsOnboarding(false);
 	} catch (err) {
-		throw new Error(getGraphQLErrorMessage(err));
+		if (isSignupConflictError(err)) throw err;
+		throwSignupConflictFromMutation(err);
 	}
 };
 
@@ -257,29 +274,41 @@ export const fixoraCompleteOAuthSignup = async (input: {
 	userEmail?: string;
 }): Promise<string> => {
 	const apolloClient = await initializeApollo();
-	const result = await apolloClient.mutate({
-		mutation: COMPLETE_OAUTH_SIGNUP,
-		variables: {
-			input: {
-				...input,
-				termsAcceptedAt: new Date().toISOString(),
+	try {
+		await assertSignupFieldsAvailable(apolloClient, {
+			...(input.userEmail?.trim() ? { email: input.userEmail } : {}),
+			nickname: input.userNickname,
+			phone: input.userPhoneNumber,
+			excludeUserId: userVar()._id || undefined,
+		});
+
+		const result = await apolloClient.mutate({
+			mutation: COMPLETE_OAUTH_SIGNUP,
+			variables: {
+				input: {
+					...input,
+					termsAcceptedAt: new Date().toISOString(),
+				},
 			},
-		},
-		fetchPolicy: 'network-only',
-	});
+			fetchPolicy: 'network-only',
+		});
 
-	const user = result.data?.completeOAuthSignup;
-	if (!user?.accessToken) throw new Error('OAuth signup completion failed');
+		const user = result.data?.completeOAuthSignup;
+		if (!user?.accessToken) throw new Error('OAuth signup completion failed');
 
-	setAuthTokens(user.accessToken, user.refreshToken ?? '', {
-		_id: user._id,
-		userNickname: user.userNickname,
-		userFullName: user.userFullName,
-		userType: user.userType,
-		verificationStatus: user.verificationStatus,
-	});
-	setNeedsOnboarding(false);
-	return user.userType;
+		setAuthTokens(user.accessToken, user.refreshToken ?? '', {
+			_id: user._id,
+			userNickname: user.userNickname,
+			userFullName: user.userFullName,
+			userType: user.userType,
+			verificationStatus: user.verificationStatus,
+		});
+		setNeedsOnboarding(false);
+		return user.userType;
+	} catch (err) {
+		if (isSignupConflictError(err)) throw err;
+		throwSignupConflictFromMutation(err);
+	}
 };
 
 /** Technician signup draft — stores multi-step data */
@@ -289,6 +318,7 @@ export interface TechOnboardingDraft {
 	fullName: string;
 	email: string;
 	phone: string;
+	password?: string;
 	photoFileName?: string;
 	photoDataUrl?: string;
 	idFileName?: string;
@@ -313,7 +343,7 @@ export const loadTechDraft = (): TechOnboardingDraft | null => {
 };
 
 export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promise<void> => {
-	const nickname = draft.fullName.trim().replace(/\s+/g, '').slice(0, 12) || 'tech';
+	const nickname = deriveSignupNickname(draft.fullName, draft.email);
 	const apolloClient = await initializeApollo();
 	let photoFile = getTechPhotoFile();
 	let idFile = getTechIdFile();
@@ -337,15 +367,25 @@ export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promis
 	if (!idFile) {
 		throw new Error('ID document is required. Please upload your ID again.');
 	}
+	if (!draft.password?.trim()) {
+		throw new Error('Password is required. Please go back and set your password.');
+	}
 
 	try {
+		await assertSignupFieldsAvailable(apolloClient, {
+			email: draft.email,
+			nickname,
+			fullName: draft.fullName,
+			...(draft.phone.trim() ? { phone: draft.phone } : {}),
+		});
+
 		const result = await apolloClient.mutate({
 			mutation: FIXORA_SIGNUP,
 			variables: {
 				input: {
 					userEmail: draft.email.trim(),
 					userNickname: nickname,
-					userPassword: 'Fixora1!',
+					userPassword: draft.password?.trim() || '',
 					userPhoneNumber: draft.phone.trim() || '01000000000',
 					userType: 'TECHNICIAN',
 					termsAcceptedAt: new Date().toISOString(),
@@ -440,6 +480,7 @@ export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promis
 		}
 		clearTechOnboardingFiles();
 	} catch (err) {
-		throw new Error(getGraphQLErrorMessage(err));
+		if (isSignupConflictError(err)) throw err;
+		throwSignupConflictFromMutation(err);
 	}
 };

@@ -10,6 +10,7 @@ import { FixoraButton, FixoraInput } from '../ui';
 import {
 	fixoraCompleteOAuthSignup,
 	getNeedsOnboarding,
+	isSignupConflictError,
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
@@ -54,8 +55,12 @@ const RoleSelect = () => {
 			} else {
 				await router.push('/');
 			}
-		} catch (err: any) {
-			await sweetMixinErrorAlert(err?.message ?? 'Signup failed');
+		} catch (err: unknown) {
+			if (isSignupConflictError(err)) {
+				setErrors(err.conflicts);
+				return;
+			}
+			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Signup failed');
 		} finally {
 			setLoading(false);
 		}

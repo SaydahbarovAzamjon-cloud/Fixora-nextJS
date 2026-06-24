@@ -93,19 +93,15 @@ body::-webkit-scrollbar {
 				align-items: center;
 				overflow: visible;
 				background: var(--fixora-navbar-bg);
-				backdrop-filter: blur(14px);
-				border-bottom: 1px solid var(--fixora-border);
-				box-shadow:
-					0 2px 10px rgba(0, 0, 0, 0.22),
-					0 8px 24px rgba(115, 12, 30, 0.12);
-				transition: border-color 0.2s ease, box-shadow 0.2s ease;
+				backdrop-filter: blur(var(--fixora-navbar-blur));
+				border-bottom: 1px solid var(--fixora-navbar-border);
+				box-shadow: var(--fixora-navbar-shadow);
+				transition: var(--fixora-transition);
 
 				&.transparent {
-					background: linear-gradient(180deg, rgba(20, 15, 23, 0.99) 0%, rgba(33, 2, 7, 0.96) 100%);
-					border-bottom: 1px solid var(--fixora-border);
-					box-shadow:
-						0 4px 18px rgba(0, 0, 0, 0.28),
-						0 10px 28px rgba(115, 12, 30, 0.14);
+					background: var(--fixora-navbar-transparent-bg);
+					border-bottom: 1px solid var(--fixora-navbar-border);
+					box-shadow: var(--fixora-navbar-shadow);
 				}
 				.container {
 					flex-direction: row;
@@ -135,7 +131,7 @@ body::-webkit-scrollbar {
 						justify-content: space-between;
 						div {
 							position: relative;
-							color: #eeeeeeed;
+							color: var(--fixora-text-secondary);
 							font-family: $font;
 							font-size: 15px;
 							font-style: normal;
@@ -238,12 +234,7 @@ body::-webkit-scrollbar {
 		&--fixora {
 			height: auto;
 			min-height: 520px;
-			background:
-				radial-gradient(130% 95% at 50% 35%, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
-				radial-gradient(820px 400px at 10% 92%, rgba(115, 12, 30, 0.17), transparent 62%),
-				radial-gradient(820px 400px at 90% 88%, rgba(115, 12, 30, 0.17), transparent 62%),
-				radial-gradient(ellipse at top, rgba(115, 12, 30, 0.12) 0%, transparent 55%),
-				linear-gradient(180deg, #140f17 0%, var(--fixora-bg) 55%, #210207 100%);
+			background: var(--fixora-header-overlay), var(--fixora-header-ambient);
 		}
 		.container {
 			position: relative;

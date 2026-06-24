@@ -17,7 +17,7 @@ import { displayUserName } from '../../../libs/hooks/useUserLookup';
 import { resolveProfileImageUrl, hasRealProfileImage } from '../../../libs/utils/profileImage';
 import { buildVerificationCompleteness } from '../../../libs/utils/adminVerification';
 import { runAdminVerificationApprove, runAdminVerificationReject } from '../../../libs/utils/adminVerificationActions';
-import { verificationStatusTone } from '../../../libs/utils/adminBadges';
+import { verificationStatusTone, verificationStatusLabelKey } from '../../../libs/utils/adminBadges';
 import { dateLocale } from '../../../libs/utils/i18nLocale';
 import { useRouter } from 'next/router';
 
@@ -130,17 +130,20 @@ const AdminVerificationPage: NextPage = () => {
 				<AdminFilterTabs tabs={tabs} activeId={activeTab} onChange={(id) => setActiveTab(id as FilterTab)} />
 
 				<div className="fixora-admin-verification">
-					<div className="fixora-admin-verification__search-row">
-						<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
-					</div>
+					<div className="fixora-admin-verification__main">
+						<div className="fixora-admin-verification__search-row">
+							<AdminSearchBar value={search} onChange={setSearch} placeholder={t('users.searchPlaceholder')} />
+						</div>
 
-					<div className="fixora-admin-verification__list">
+						<div className="fixora-admin-verification__list">
 						{loading && <div className="fixora-admin-empty">{t('common.loading')}</div>}
 						{!loading && list.length === 0 && <div className="fixora-admin-empty">{t('verification.empty')}</div>}
 						{list.map((tech) => {
 							const name = displayUserName(tech);
 							const initial = name.charAt(0).toUpperCase();
 							const active = selected?._id === tech._id;
+							const shopMeta = [tech.shopName, tech.specialty].filter(Boolean).join(' · ');
+							const locationMeta = tech.userLocation?.trim() ?? '';
 							return (
 								<button
 									key={tech._id}
@@ -148,7 +151,7 @@ const AdminVerificationPage: NextPage = () => {
 									className={`fixora-admin-verification__list-item${active ? ' fixora-admin-verification__list-item--active' : ''}`}
 									onClick={() => setSelectedId(tech._id)}
 								>
-									<div className="fixora-admin-table-user__avatar">
+									<div className="fixora-admin-verification__list-avatar fixora-admin-table-user__avatar">
 										{hasRealProfileImage(tech.userProfileImage) ? (
 											<img src={resolveProfileImageUrl(tech.userProfileImage)} alt="" />
 										) : (
@@ -157,19 +160,19 @@ const AdminVerificationPage: NextPage = () => {
 									</div>
 									<div className="fixora-admin-verification__list-body">
 										<div className="fixora-admin-table-user__name">{name}</div>
-										<div className="fixora-admin-verification__list-meta">
-											{tech.shopName} · {tech.specialty}
-										</div>
-										<div className="fixora-admin-verification__list-meta fixora-admin-verification__list-meta--spaced">
-											{tech.userLocation}
-										</div>
+										{(shopMeta || locationMeta) && (
+											<div className="fixora-admin-verification__list-meta">
+												{shopMeta}
+												{shopMeta && locationMeta ? ' · ' : ''}
+												{locationMeta}
+											</div>
+										)}
 									</div>
 									<div className="fixora-admin-verification__list-aside">
 										<AdminStatusBadge
-											label={tech.verificationStatus}
+											label={t(verificationStatusLabelKey(tech.verificationStatus))}
 											tone={verificationStatusTone(tech.verificationStatus)}
 										/>
-										<AdminUserBadgeStack user={tech} compact />
 										<div className="fixora-admin-verification__list-date">
 											{new Date(tech.createdAt).toLocaleDateString(dateLocale(router.locale), {
 												year: 'numeric',
@@ -181,6 +184,7 @@ const AdminVerificationPage: NextPage = () => {
 								</button>
 							);
 						})}
+						</div>
 					</div>
 
 					<div className="fixora-admin-verification__detail">
@@ -200,7 +204,7 @@ const AdminVerificationPage: NextPage = () => {
 										<h3 className="fixora-admin-verification__profile-name">{displayUserName(selected)}</h3>
 										<div className="fixora-admin-verification__badges">
 											<AdminStatusBadge
-												label={selected.verificationStatus}
+												label={t(verificationStatusLabelKey(selected.verificationStatus))}
 												tone={verificationStatusTone(selected.verificationStatus)}
 											/>
 											<AdminUserBadgeStack user={selected} compact />

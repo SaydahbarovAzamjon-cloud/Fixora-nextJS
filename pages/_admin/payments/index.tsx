@@ -28,8 +28,9 @@ const AdminPaymentsPage: NextPage = () => {
 	const { t } = useTranslation('admin');
 	const router = useRouter();
 	const filterUserId = typeof router.query.userId === 'string' ? router.query.userId : undefined;
+	const filterPaymentId = typeof router.query.paymentId === 'string' ? router.query.paymentId : undefined;
 	const [page, setPage] = useState(1);
-	const [search, setSearch] = useState('');
+	const [search, setSearch] = useState(filterPaymentId ?? '');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
 	const [statusFilter, setStatusFilter] = useState<PaymentStatus | ''>('');
 	const [methodFilter, setMethodFilter] = useState<PaymentMethod | ''>('');

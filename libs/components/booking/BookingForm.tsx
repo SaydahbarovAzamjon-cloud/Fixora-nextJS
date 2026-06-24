@@ -11,6 +11,7 @@ import { GET_MY_DEVICES } from '../../../apollo/user/query';
 import { FixoraButton, FixoraGlassCard, FixoraInput, FixoraSelect } from '../ui';
 import BookingServiceTypeOptions from './BookingServiceTypeOptions';
 import BookingDeviceImageUpload from './BookingDeviceImageUpload';
+import BookingAiClassificationHint from './BookingAiClassificationHint';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { useDeviceImageUpload } from '../../hooks/useDeviceImageUpload';
 import {
@@ -465,6 +466,13 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 						</div>
 					</div>
 				</div>
+
+				<BookingAiClassificationHint
+					problemTitle={problemTitle}
+					problemDescription={problemDescription}
+					deviceIssue={deviceIssue}
+					isNewDevice={isNewDevice}
+				/>
 
 				<BookingServiceTypeOptions />
 			</FixoraGlassCard>

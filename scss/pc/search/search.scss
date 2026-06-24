@@ -437,8 +437,64 @@
 
 	&--active {
 		border-color: var(--fixora-primary);
-		background: rgba(115, 12, 30, 0.1);
+		background: var(--fixora-primary-soft-bg);
 		color: var(--fixora-primary);
+	}
+}
+
+/* ---------- AI recommendations (P4-02) ---------- */
+
+.fixora-search-recommendations {
+	margin-bottom: 28px;
+	padding: 20px;
+	border-radius: var(--fixora-card-radius, 16px);
+	border: 1px solid var(--fixora-border-subtle);
+	background: var(--fixora-primary-soft-bg);
+	box-shadow: var(--fixora-card-shadow);
+	transition: var(--fixora-transition);
+
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		margin-bottom: 16px;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		color: var(--fixora-primary);
+		margin-top: 2px;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: $font;
+		font-size: 18px;
+		font-weight: 700;
+		color: var(--fixora-text-primary);
+	}
+
+	&__hint {
+		margin: 4px 0 0;
+		font-size: 13px;
+		line-height: 1.45;
+		color: var(--fixora-text-muted);
+	}
+
+	&__loading {
+		margin: 0;
+		font-size: 14px;
+		color: var(--fixora-text-secondary);
+	}
+
+	&__carousel {
+		.fixora-hero__cards-wrap {
+			margin-top: 0;
+		}
+
+		.fixora-hero__results {
+			margin-top: 0;
+		}
 	}
 }
 

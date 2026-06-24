@@ -43,9 +43,13 @@ import {
 	buildRevenueJobsSeries,
 	buildTopClients,
 	computeCompletionRate,
+	computeRateDeltaTrend,
 	computeRepeatClientRate,
+	bookingsInAnalyticsRange,
+	filterCompletedInRange,
 	getCompletedBookings,
 } from '../../../libs/utils/technicianMetrics';
+import { useFixoraChartTheme } from '../../../libs/hooks/useFixoraChartTheme';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -59,18 +63,27 @@ const RANGE_KEYS: Record<AnalyticsRange, string> = {
 };
 
 const RANGES: AnalyticsRange[] = ['7 Days', '30 Days', '3 Months', 'Year'];
-const BURGUNDY = '#730c1e';
-const BURGUNDY_LIGHT = '#8e1428';
 
-const RevenueTooltip = ({ active, payload, label, t }: any) => {
+const DEVICE_I18N_KEYS: Record<string, string> = {
+	IPHONE: 'analytics.devices.iphone',
+	MACBOOK: 'analytics.devices.macbook',
+	IPAD: 'analytics.devices.ipad',
+	APPLE_WATCH: 'analytics.devices.appleWatch',
+};
+
+const RevenueTooltip = ({ active, payload, label, t, chart }: any) => {
 	if (!active || !payload?.length) return null;
 	const rev = payload.find((p: any) => p.dataKey === 'revenue')?.value;
 	const jobs = payload.find((p: any) => p.dataKey === 'jobs')?.value;
 	return (
 		<div className="fixora-an-tooltip">
 			<div className="fixora-an-tooltip__title">{label}</div>
-			<div className="fixora-an-tooltip__row" style={{ color: BURGUNDY_LIGHT }}>{t('analytics.revenue')} : {formatKrw(rev ?? 0)}</div>
-			<div className="fixora-an-tooltip__row" style={{ color: '#3B82F6' }}>{t('analytics.tooltipJobs')} : {jobs}</div>
+			<div className="fixora-an-tooltip__row" style={{ color: chart.primaryHover }}>
+				{t('analytics.revenue')} : {formatKrw(rev ?? 0)}
+			</div>
+			<div className="fixora-an-tooltip__row" style={{ color: chart.blue }}>
+				{t('analytics.tooltipJobs')} : {jobs}
+			</div>
 		</div>
 	);
 };
@@ -81,6 +94,7 @@ const AnalyticsEmpty = ({ message }: { message: string }) => (
 
 const Analytics: NextPage = () => {
 	const { t } = useTranslation('technician');
+	const chart = useFixoraChartTheme();
 	const user = useReactiveVar(userVar);
 	const [range, setRange] = useState<AnalyticsRange>('7 Days');
 
@@ -134,25 +148,42 @@ const Analytics: NextPage = () => {
 	const loading = analyticsLoading || bookingsLoading;
 
 	const revenueSeries = useMemo(() => buildRevenueJobsSeries(bookings, range), [bookings, range]);
-	const deviceData = useMemo(() => buildDeviceBreakdown(bookings), [bookings]);
-	const repairTypeData = useMemo(() => buildIssueRevenue(bookings), [bookings]);
+	const deviceData = useMemo(
+		() =>
+			buildDeviceBreakdown(bookings).map((item) => ({
+				...item,
+				name: DEVICE_I18N_KEYS[item.category] ? t(DEVICE_I18N_KEYS[item.category]) : item.name,
+			})),
+		[bookings, t],
+	);
+	const repairTypeData = useMemo(
+		() =>
+			buildIssueRevenue(bookings).map((item) => ({
+				...item,
+				type: t(`analytics.issueTypes.${item.issueKey}`, { defaultValue: item.type }),
+			})),
+		[bookings, t],
+	);
 	const ratingTrend = useMemo(() => buildRatingTrend(reviews, range), [reviews, range]);
 	const topClients = useMemo(() => buildTopClients(bookings), [bookings]);
+	const rangedCompleted = useMemo(() => filterCompletedInRange(bookings, range), [bookings, range]);
 
 	const completedCount = useMemo(() => {
-		if (useAnalytics) return analytics?.completedJobsCount ?? 0;
-		return technicianUser?.completedJobsCount ?? getCompletedBookings(bookings).length;
-	}, [analytics, bookings, technicianUser, useAnalytics]);
+		if (loading) return '—';
+		if (bookings.length > 0) return String(rangedCompleted.length);
+		if (useAnalytics) return String(analytics?.completedJobsCount ?? 0);
+		return String(technicianUser?.completedJobsCount ?? getCompletedBookings(bookings).length);
+	}, [loading, bookings, rangedCompleted, analytics, technicianUser, useAnalytics]);
 
 	const completionRate = useMemo(() => {
-		const rate = computeCompletionRate(bookings);
+		const rate = computeCompletionRate(bookingsInAnalyticsRange(bookings, range));
 		return rate != null ? `${rate}%` : '—';
-	}, [bookings]);
+	}, [bookings, range]);
 
 	const repeatRate = useMemo(() => {
-		const rate = computeRepeatClientRate(bookings);
+		const rate = computeRepeatClientRate(filterCompletedInRange(bookings, range));
 		return rate != null ? `${rate}%` : '—';
-	}, [bookings]);
+	}, [bookings, range]);
 
 	const avgRating = useMemo(() => {
 		if (useAnalytics && analytics?.averageRating != null) return analytics.averageRating.toFixed(1);
@@ -179,12 +210,18 @@ const Analytics: NextPage = () => {
 		() => (useAnalytics ? formatTrendPercent(analytics?.completedJobsTrendPercent) : '—'),
 		[analytics, useAnalytics],
 	);
-	const completionTrend = useMemo(() => '—', []);
+	const completionTrend = useMemo(
+		() => computeRateDeltaTrend(bookings, range, computeCompletionRate) ?? '—',
+		[bookings, range],
+	);
 	const responseTrend = useMemo(
 		() => (useAnalytics ? formatTrendPercent(analytics?.avgResponseTrendPercent) : '—'),
 		[analytics, useAnalytics],
 	);
-	const repeatTrend = useMemo(() => '—', []);
+	const repeatTrend = useMemo(
+		() => computeRateDeltaTrend(bookings, range, computeRepeatClientRate) ?? '—',
+		[bookings, range],
+	);
 	const ratingTrendKpi = useMemo(() => {
 		if (useAnalytics && analytics?.averageRatingTrendPercent != null) {
 			const sign = analytics.averageRatingTrendPercent > 0 ? '+' : '';
@@ -220,12 +257,12 @@ const Analytics: NextPage = () => {
 		: 5;
 
 	const kpis = [
-		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: BURGUNDY }} />, bg: 'rgba(115,12,30,0.12)', trend: jobsTrend, value: loading ? '—' : String(completedCount), label: t('analytics.totalJobs') },
+		{ icon: <WorkOutlineOutlined style={{ fontSize: 20, color: chart.primary }} />, bg: 'var(--fixora-primary-soft-bg)', trend: jobsTrend, value: completedCount, label: t('analytics.totalJobs') },
 		{ icon: <BoltOutlined style={{ fontSize: 20, color: '#22C55E' }} />, bg: 'rgba(34,197,94,0.12)', trend: completionTrend, value: loading ? '—' : completionRate, label: t('analytics.completionRate') },
-		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: '#3B82F6' }} />, bg: 'rgba(59,130,246,0.12)', trend: responseTrend, value: loading ? '—' : avgResponseDisplay, label: t('analytics.avgResponse') },
+		{ icon: <AccessTimeOutlined style={{ fontSize: 20, color: chart.blue }} />, bg: 'rgba(59,130,246,0.12)', trend: responseTrend, value: loading ? '—' : avgResponseDisplay, label: t('analytics.avgResponse') },
 		{ icon: <GroupOutlined style={{ fontSize: 20, color: '#A855F7' }} />, bg: 'rgba(168,85,247,0.12)', trend: repeatTrend, value: loading ? '—' : repeatRate, label: t('analytics.repeatClients') },
 		{ icon: <StarBorderOutlined style={{ fontSize: 20, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', trend: ratingTrendKpi, value: loading ? '—' : avgRating, label: t('analytics.avgRating') },
-		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: BURGUNDY }} />, bg: 'rgba(115,12,30,0.12)', trend: rankTrend, value: loading ? '—' : topPerformerDisplay, label: t('analytics.topPerformer') },
+		{ icon: <EmojiEventsOutlined style={{ fontSize: 20, color: chart.primary }} />, bg: 'var(--fixora-primary-soft-bg)', trend: rankTrend, value: loading ? '—' : topPerformerDisplay, label: t('analytics.topPerformer') },
 	];
 
 	return (
@@ -284,24 +321,24 @@ const Analytics: NextPage = () => {
 								<ComposedChart data={revenueSeries} margin={{ top: 10, right: 8, left: -8, bottom: 0 }}>
 									<defs>
 										<linearGradient id="anRevFill" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor={BURGUNDY_LIGHT} stopOpacity={0.22} />
-											<stop offset="100%" stopColor={BURGUNDY} stopOpacity={0} />
+											<stop offset="0%" stopColor={chart.primaryHover} stopOpacity={0.22} />
+											<stop offset="100%" stopColor={chart.primary} stopOpacity={0} />
 										</linearGradient>
 									</defs>
-									<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
-									<XAxis dataKey="day" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-									<YAxis yAxisId="left" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, revTicks[revTicks.length - 1]]} ticks={revTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-									<YAxis yAxisId="right" orientation="right" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, jobsMax]} />
-									<Tooltip content={<RevenueTooltip t={t} />} cursor={{ stroke: 'rgba(255,255,255,0.15)' }} />
-									<Area yAxisId="left" type="monotone" dataKey="revenue" stroke={BURGUNDY} strokeWidth={1.5} fill="url(#anRevFill)" />
-									<Line yAxisId="right" type="monotone" dataKey="jobs" stroke="#3B82F6" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#3B82F6' }} />
+									<CartesianGrid strokeDasharray="4 4" stroke={chart.grid} vertical={false} />
+									<XAxis dataKey="day" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axis }} axisLine={false} tickLine={false} />
+									<YAxis yAxisId="left" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, revTicks[revTicks.length - 1]]} ticks={revTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+									<YAxis yAxisId="right" orientation="right" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, jobsMax]} />
+									<Tooltip content={<RevenueTooltip t={t} chart={chart} />} cursor={{ stroke: chart.tooltipCursor }} />
+									<Area yAxisId="left" type="monotone" dataKey="revenue" stroke={chart.primary} strokeWidth={1.5} fill="url(#anRevFill)" />
+									<Line yAxisId="right" type="monotone" dataKey="jobs" stroke={chart.blue} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: chart.blue }} />
 								</ComposedChart>
 							</ResponsiveContainer>
 						)}
 					</div>
 					<div className="fixora-an-legend">
-						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: BURGUNDY }} /> {t('analytics.revenue')}</span>
-						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: '#3B82F6' }} /> {t('analytics.jobsCompleted')}</span>
+						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: chart.primary }} /> {t('analytics.revenue')}</span>
+						<span className="fixora-an-legend__item"><span className="fixora-an-legend__line" style={{ background: chart.blue }} /> {t('analytics.jobsCompleted')}</span>
 					</div>
 				</div>
 
@@ -352,10 +389,10 @@ const Analytics: NextPage = () => {
 						) : (
 							<ResponsiveContainer width="100%" height="100%">
 								<BarChart data={repairTypeData} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="32%">
-									<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
-									<XAxis dataKey="type" stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#808080' }} axisLine={false} tickLine={false} />
-									<YAxis stroke="#5A5A5A" tick={{ fontSize: 12, fill: '#707070' }} axisLine={false} tickLine={false} domain={[0, repairTicks[repairTicks.length - 1]]} ticks={repairTicks} tickFormatter={(v) => formatKrwCompact(v)} />
-									<Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} contentStyle={{ background: 'var(--fixora-surface-elevated)', border: '1px solid var(--fixora-border-subtle)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), t('analytics.revenue')]} />
+									<CartesianGrid strokeDasharray="4 4" stroke={chart.grid} vertical={false} />
+									<XAxis dataKey="type" stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axis }} axisLine={false} tickLine={false} />
+									<YAxis stroke={chart.axisMuted} tick={{ fontSize: 12, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[0, repairTicks[repairTicks.length - 1]]} ticks={repairTicks} tickFormatter={(v) => formatKrwCompact(v)} />
+									<Tooltip cursor={{ fill: chart.barHover }} contentStyle={{ background: 'var(--fixora-surface-elevated)', border: '1px solid var(--fixora-border-subtle)', borderRadius: 8 }} formatter={(v: any) => [formatKrw(v), t('analytics.revenue')]} />
 									<Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={46}>
 										{repairTypeData.map((d) => (
 											<Cell key={d.type} fill={d.color} />
@@ -383,15 +420,15 @@ const Analytics: NextPage = () => {
 								<AreaChart data={ratingTrend} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
 									<defs>
 										<linearGradient id="anRatingFill" x1="0" y1="0" x2="0" y2="1">
-											<stop offset="0%" stopColor={BURGUNDY_LIGHT} stopOpacity={0.25} />
-											<stop offset="100%" stopColor={BURGUNDY} stopOpacity={0} />
+											<stop offset="0%" stopColor={chart.primaryHover} stopOpacity={0.25} />
+											<stop offset="100%" stopColor={chart.primary} stopOpacity={0} />
 										</linearGradient>
 									</defs>
-									<CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
-									<XAxis dataKey="week" stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#808080' }} axisLine={false} tickLine={false} />
-									<YAxis stroke="#5A5A5A" tick={{ fontSize: 11, fill: '#707070' }} axisLine={false} tickLine={false} domain={[ratingMin, ratingMax]} />
+									<CartesianGrid strokeDasharray="4 4" stroke={chart.grid} vertical={false} />
+									<XAxis dataKey="week" stroke={chart.axisMuted} tick={{ fontSize: 11, fill: chart.axis }} axisLine={false} tickLine={false} />
+									<YAxis stroke={chart.axisMuted} tick={{ fontSize: 11, fill: chart.axisMuted }} axisLine={false} tickLine={false} domain={[ratingMin, ratingMax]} />
 									<Tooltip contentStyle={{ background: 'var(--fixora-surface-elevated)', border: '1px solid var(--fixora-border-subtle)', borderRadius: 8 }} />
-									<Area type="monotone" dataKey="rating" stroke={BURGUNDY_LIGHT} strokeWidth={2.5} fill="url(#anRatingFill)" dot={false} />
+									<Area type="monotone" dataKey="rating" stroke={chart.primaryHover} strokeWidth={2.5} fill="url(#anRatingFill)" dot={false} />
 								</AreaChart>
 							</ResponsiveContainer>
 						)}
@@ -416,7 +453,7 @@ const Analytics: NextPage = () => {
 										<div className="fixora-an-client__name">{c.name}</div>
 										<div className="fixora-an-client__stars">
 											{Array.from({ length: 5 }).map((_, i) => (
-												<StarRounded key={i} style={{ fontSize: 13, color: i < c.stars ? '#F59E0B' : '#3A3A3A' }} />
+												<StarRounded key={i} style={{ fontSize: 13, color: i < c.stars ? chart.starActive : chart.starInactive }} />
 											))}
 										</div>
 									</div>

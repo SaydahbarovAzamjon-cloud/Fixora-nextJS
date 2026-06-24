@@ -157,6 +157,36 @@ export interface ReviewDistribution {
 }
 
 export type DeviceCategory = 'IPHONE' | 'IPAD' | 'MACBOOK' | 'APPLE_WATCH';
+
+export type IssueCategory =
+	| 'BATTERY'
+	| 'CAMERA'
+	| 'CHARGING'
+	| 'GENERAL'
+	| 'KEYBOARD'
+	| 'SCREEN'
+	| 'SOFTWARE'
+	| 'WATER_DAMAGE';
+
+export type RepairComplexity = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export type ClassificationProviderType = 'GEMINI' | 'RULE_BASED';
+
+export interface IssueClassificationResult {
+	deviceType: DeviceCategory;
+	issueCategory: IssueCategory;
+	repairComplexity: RepairComplexity;
+	confidenceScore: number;
+	keywords: string[];
+	provider: ClassificationProviderType;
+}
+
+export interface TechnicianRecommendation {
+	technicianId: string;
+	score: number;
+	matchReason: string;
+	technician: TechnicianSummary;
+}
 export type DeviceBrand = 'APPLE';
 export type DeviceStatus = 'ACTIVE' | 'INACTIVE' | 'IN_REPAIR' | 'REPAIR_COMPLETE';
 export type BookingType = 'SHOP_VISIT' | 'ON_SITE';
@@ -511,8 +541,8 @@ export interface ArticleUpdate {
 
 export type EarningsReportPeriod = 'ALL_TIME' | 'LAST_30_DAYS' | 'LAST_90_DAYS' | 'THIS_MONTH';
 
-export type NotificationType = 'BOOKING' | 'COMMENT' | 'FOLLOW' | 'LIKE' | 'MESSAGE' | 'REVIEW';
-export type NotificationReferenceType = 'ARTICLE' | 'BOOKING' | 'MESSAGE' | 'REVIEW';
+export type NotificationType = 'BOOKING' | 'COMMENT' | 'FOLLOW' | 'LIKE' | 'MESSAGE' | 'PAYMENT' | 'REVIEW';
+export type NotificationReferenceType = 'ARTICLE' | 'BOOKING' | 'MESSAGE' | 'PAYMENT' | 'REVIEW' | 'USER';
 
 export interface Notification {
 	_id: string;

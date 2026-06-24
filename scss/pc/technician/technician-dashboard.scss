@@ -506,6 +506,18 @@ $border-orange: var(--fixora-border);
 		}
 	}
 
+	&__theme-toggle {
+		flex-shrink: 0;
+		border-color: $tech-input-border;
+		background: $tech-surface;
+		color: #a0a0a0;
+
+		&:hover {
+			color: $tech-primary;
+			border-color: rgba(115, 12, 30, 0.45);
+		}
+	}
+
 	&__icon-btn {
 		position: relative;
 		width: 36px;

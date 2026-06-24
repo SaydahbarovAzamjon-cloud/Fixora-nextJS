@@ -491,6 +491,14 @@ input CompleteBookingInput {
   finalPrice: Float
 }
 
+input CheckSignupAvailabilityInput {
+  excludeUserId: String
+  userEmail: String
+  userFullName: String
+  userNickname: String
+  userPhoneNumber: String
+}
+
 input CompleteOAuthSignupInput {
   termsAcceptedAt: DateTime!
   userEmail: String
@@ -1182,6 +1190,7 @@ type Query {
   adminGlobalSearch(limit: Int! = 5, query: String!): AdminGlobalSearchResult!
   checkAuth: String!
   checkAuthRoles: String!
+  checkSignupAvailability(input: CheckSignupAvailabilityInput!): SignupAvailabilityResult!
   classifyRepairIssue(input: ClassifyIssueInput!): IssueClassificationResult!
   exportEarningsReport(input: ExportEarningsReportInput!): EarningsReportExport!
   getAdminDashboardStats(period: AdminDashboardPeriod!): AdminDashboardStats!
@@ -1378,6 +1387,23 @@ input SendMessageInput {
   messageContent: String!
   messageType: MessageType
   receiverId: String!
+}
+
+enum SignupConflictField {
+  EMAIL
+  FULL_NAME
+  NICKNAME
+  PHONE
+}
+
+type SignupAvailabilityResult {
+  available: Boolean!
+  conflicts: [SignupFieldConflict!]!
+}
+
+type SignupFieldConflict {
+  field: SignupConflictField!
+  message: String!
 }
 
 type Stories {

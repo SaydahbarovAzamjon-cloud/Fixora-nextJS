@@ -20,6 +20,8 @@
 		"searchDisabled": "전역 검색은 백엔드 API가 필요합니다 (GAP-077)",
 		"searchEmpty": "결과 없음",
 		"notifications": "알림",
+		"notificationsVerification": "{{name}}님이 인증 검토를 제출했습니다",
+		"notificationsVerificationGeneric": "기술자 인증 검토가 제출되었습니다",
 		"settings": "설정",
 		"logout": "로그아웃"
 	},
@@ -118,6 +120,13 @@
 			"email": "이메일",
 			"phone": "전화",
 			"location": "위치"
+		},
+		"statuses": {
+			"PENDING": "대기",
+			"UNDER_REVIEW": "검토 중",
+			"APPROVED": "승인됨",
+			"REJECTED": "거절됨",
+			"NONE": "미제출"
 		}
 	},
 	"users": {

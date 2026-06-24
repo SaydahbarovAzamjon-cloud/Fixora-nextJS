@@ -14,7 +14,7 @@
 	font-weight: 600;
 	line-height: 1.2;
 	cursor: pointer;
-	transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+	transition: var(--fixora-transition);
 
 	&:disabled {
 		opacity: 0.5;
@@ -26,11 +26,12 @@
 	}
 
 	&--primary {
-		background: linear-gradient(135deg, var(--fixora-primary) 0%, var(--fixora-primary-dark) 100%);
-		color: var(--fixora-text-primary);
+		background: var(--fixora-btn-primary-bg);
+		color: var(--fixora-btn-primary-text);
+		box-shadow: var(--fixora-btn-primary-shadow);
 
 		&:hover:not(:disabled) {
-			background: linear-gradient(135deg, var(--fixora-primary-hover) 0%, var(--fixora-primary) 100%);
+			background: var(--fixora-btn-primary-bg-hover);
 		}
 	}
 
@@ -46,13 +47,13 @@
 	}
 
 	&--secondary {
-		background: rgba(115, 12, 30, 0.12);
-		border: 1px solid var(--fixora-border-subtle);
+		background: var(--fixora-btn-secondary-bg);
+		border: 1px solid var(--fixora-btn-secondary-border);
 		color: var(--fixora-text-primary);
 
 		&:hover:not(:disabled) {
 			border-color: var(--fixora-primary);
-			background: rgba(115, 12, 30, 0.2);
+			background: var(--fixora-primary-soft-bg);
 		}
 	}
 
@@ -103,16 +104,15 @@
 .fixora-glass-card {
 	background: var(--fixora-card-gradient);
 	border: 1px solid var(--fixora-border);
-	border-radius: 16px;
-	box-shadow: var(--fixora-glow);
+	border-radius: var(--fixora-card-radius);
+	box-shadow: var(--fixora-card-shadow);
 	padding: 32px;
-	transition:
-		background 0.2s ease,
-		border-color 0.2s ease,
-		box-shadow 0.2s ease;
+	transition: var(--fixora-transition);
 
 	@include fixora-card-hover-passive {
 		background: var(--fixora-card-gradient-hover);
+		box-shadow: var(--fixora-card-shadow-hover);
+		transform: var(--fixora-card-hover-transform);
 	}
 
 	@media (max-width: 768px) {
@@ -141,11 +141,12 @@
 		background: var(--fixora-surface);
 		border: 1px solid var(--fixora-border-subtle);
 		border-radius: 12px;
-		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		box-shadow: var(--fixora-input-shadow);
+		transition: var(--fixora-transition);
 
 		&:focus-within {
 			border-color: var(--fixora-primary);
-			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+			box-shadow: var(--fixora-focus-ring);
 		}
 
 		&--error {
@@ -251,7 +252,7 @@
 
 		&--open .fixora-select__trigger {
 			border-color: var(--fixora-primary);
-			box-shadow: 0 0 0 3px rgba(115, 12, 30, 0.15);
+			box-shadow: var(--fixora-focus-ring);
 		}
 	}
 
@@ -295,7 +296,7 @@
 		border-radius: 12px;
 		background: var(--fixora-surface-elevated);
 		border: 1px solid var(--fixora-border-subtle);
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+		box-shadow: var(--fixora-select-shadow);
 		max-height: 220px;
 		overflow-y: auto;
 	}
@@ -314,11 +315,11 @@
 		transition: background-color 0.15s ease, color 0.15s ease;
 
 		&:hover {
-			background: rgba(115, 12, 30, 0.12);
+			background: var(--fixora-select-option-hover);
 		}
 
 		&--active {
-			background: rgba(115, 12, 30, 0.18);
+			background: var(--fixora-select-option-active);
 			color: var(--fixora-primary-hover);
 			font-weight: 600;
 		}
@@ -333,7 +334,7 @@
 	width: 100%;
 	height: 48px;
 	padding: 0 16px;
-	border: 1px solid rgba(255, 255, 255, 0.15);
+	border: 1px solid var(--fixora-kakao-border);
 	border-radius: 12px;
 	background: var(--fixora-surface);
 	color: var(--fixora-text-primary);
@@ -341,10 +342,10 @@
 	font-size: 14px;
 	font-weight: 500;
 	cursor: pointer;
-	transition: border-color 0.2s ease, background 0.2s ease;
+	transition: var(--fixora-transition);
 
 	&:hover:not(:disabled) {
-		border-color: rgba(255, 255, 255, 0.3);
+		border-color: var(--fixora-kakao-border-hover);
 		background: var(--fixora-surface-hover);
 	}
 

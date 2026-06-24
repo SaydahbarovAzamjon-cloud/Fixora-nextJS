@@ -19,6 +19,8 @@
 		"searchPlaceholder": "Search anything...",
 		"searchEmpty": "No results found",
 		"notifications": "Notifications",
+		"notificationsVerification": "{{name}} submitted verification for review",
+		"notificationsVerificationGeneric": "Technician verification submitted for review",
 		"settings": "Settings",
 		"logout": "Log out"
 	},
@@ -122,6 +124,13 @@
 			"email": "Email",
 			"phone": "Phone",
 			"location": "Location"
+		},
+		"statuses": {
+			"PENDING": "Pending",
+			"UNDER_REVIEW": "Under Review",
+			"APPROVED": "Approved",
+			"REJECTED": "Rejected",
+			"NONE": "Not submitted"
 		}
 	},
 	"users": {

@@ -149,6 +149,16 @@
 			svg {
 				font-size: 14px;
 			}
+
+			&--warning {
+				margin-top: 0;
+				padding: 10px 12px;
+				border-radius: 10px;
+				border: 1px solid rgba(250, 173, 20, 0.45);
+				background: rgba(250, 173, 20, 0.1);
+				color: var(--fixora-text-secondary);
+				line-height: 1.45;
+			}
 		}
 
 		&__checkbox {

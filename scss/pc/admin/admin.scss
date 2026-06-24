@@ -47,7 +47,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	z-index: 100;
 	display: flex;
 	flex-direction: column;
-	background: linear-gradient(180deg, #1c080d 0%, #210207 45%, #140f17 100%);
+	background: var(--fixora-sidebar-bg);
 	border-right: 1px solid $admin-border;
 	padding: 20px 12px 16px;
 
@@ -173,7 +173,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		width: 36px;
 		height: 36px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		background: var(--fixora-btn-primary-bg);
 		color: #fff;
 		font-size: 14px;
 		font-weight: 700;
@@ -256,6 +256,18 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		align-items: center;
 		gap: 12px;
 		min-width: 0;
+
+		.fixora-nav__theme-toggle {
+			flex-shrink: 0;
+			border-color: $admin-border;
+			background: $admin-surface;
+			color: $admin-text-secondary;
+
+			&:hover {
+				color: $admin-primary;
+				border-color: $admin-primary;
+			}
+		}
 
 		&--desktop {
 			justify-content: flex-end;
@@ -359,7 +371,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		width: 28px;
 		height: 28px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		background: var(--fixora-btn-primary-bg);
 		color: #fff;
 		font-size: 12px;
 		font-weight: 700;
@@ -1034,10 +1046,10 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
 	&--primary {
-		background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+		background: var(--fixora-btn-primary-bg);
 		color: #fff;
 		&:hover:not(:disabled) {
-			background: linear-gradient(135deg, #8e1428 0%, #730c1e 100%);
+			background: var(--fixora-btn-primary-bg-hover);
 			box-shadow: var(--fixora-glow);
 		}
 	}
@@ -1108,56 +1120,97 @@ $admin-text-secondary: var(--fixora-text-secondary);
 /* ── Verification layout ── */
 .fixora-admin-verification {
 	display: grid;
-	grid-template-columns: 1fr 380px;
-	grid-template-areas:
-		'search detail'
-		'list detail';
+	grid-template-columns: minmax(0, 1fr) 380px;
 	gap: 12px 16px;
-	min-height: 480px;
+	align-items: start;
+
+	&__main {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		min-width: 0;
+		align-self: start;
+		grid-column: 1;
+		grid-row: 1;
+	}
 
 	&__search-row {
-		grid-area: search;
 		min-width: 0;
 		max-width: 420px;
+		flex: 0 0 auto;
 	}
 
 	&__list {
-		grid-area: list;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
 		max-height: calc(100vh - 284px);
 		overflow-y: auto;
 		min-width: 0;
+		flex: 0 0 auto;
 	}
 
 	&__list-item {
-		display: flex;
-		align-items: flex-start;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		align-items: center;
 		gap: 12px;
-		padding: 14px 16px;
+		padding: 12px 14px;
 		border-radius: 14px;
 		border: 1px solid var(--fixora-border-subtle);
-		@include fixora-admin-card-surface;
+		background: var(--fixora-card-gradient);
+		box-shadow: var(--fixora-card-shadow);
 		cursor: pointer;
 		text-align: left;
 		width: 100%;
 		color: inherit;
+		transform: none;
+		transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+
+		&:hover,
+		&:focus-visible,
+		&:hover:not(:focus-within):not(:has(:is(button):hover)) {
+			transform: none;
+			box-shadow: var(--fixora-card-shadow);
+			background: var(--fixora-card-gradient-hover);
+			border-color: rgba(115, 12, 30, 0.35);
+		}
 
 		&--active {
-			border-color: var(--fixora-primary);
-			box-shadow: var(--fixora-glow);
+			border-color: rgba(115, 12, 30, 0.45);
+			background: var(--fixora-primary-soft);
+			box-shadow: none;
+
+			&:hover,
+			&:focus-visible {
+				transform: none;
+				box-shadow: none;
+				background: var(--fixora-primary-soft);
+				border-color: rgba(115, 12, 30, 0.45);
+			}
 		}
 	}
 
+	&__list-avatar {
+		width: 40px;
+		height: 40px;
+		font-size: 14px;
+		grid-column: 1;
+	}
+
 	&__list-body {
-		flex: 1;
 		min-width: 0;
+		overflow: hidden;
+		grid-column: 2;
 	}
 
 	&__list-meta {
 		font-size: 12px;
 		color: $admin-text-muted;
+		margin-top: 2px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	&__list-meta--spaced {
@@ -1168,18 +1221,22 @@ $admin-text-secondary: var(--fixora-text-secondary);
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
-		gap: 6px;
+		gap: 4px;
 		text-align: right;
+		flex-shrink: 0;
+		grid-column: 3;
 	}
 
 	&__list-date {
 		font-size: 11px;
 		color: $admin-text-muted;
-		margin-top: 8px;
+		white-space: nowrap;
 	}
 
 	&__detail {
-		grid-area: detail;
+		grid-column: 2;
+		grid-row: 1;
+		align-self: start;
 		@include fixora-admin-card-surface;
 		padding: 20px;
 		max-height: calc(100vh - 220px);
@@ -1888,7 +1945,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	}
 
 	.fixora-admin-verification {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr) 320px;
 	}
 }
 
@@ -1914,7 +1971,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 			calc(12px + var(--fixora-safe-right))
 			0
 			calc(12px + var(--fixora-safe-left));
-		background: linear-gradient(180deg, #1c080d 0%, #140f17 100%);
+		background: var(--fixora-sidebar-bg);
 		border-bottom: 1px solid $admin-border;
 
 		&__menu {
@@ -1941,6 +1998,13 @@ $admin-text-secondary: var(--fixora-text-secondary);
 			align-items: center;
 			gap: 8px;
 			flex-shrink: 0;
+
+			.fixora-nav__theme-toggle {
+				flex-shrink: 0;
+				border-color: $admin-border;
+				background: $admin-surface;
+				color: $admin-text-secondary;
+			}
 		}
 	}
 
@@ -2069,27 +2133,45 @@ $admin-text-secondary: var(--fixora-text-secondary);
 
 	.fixora-admin-verification {
 		grid-template-columns: 1fr;
-		grid-template-areas:
-			'search'
-			'list'
-			'detail';
 		min-height: 0;
+
+		&__main {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		&__detail {
+			grid-column: 1;
+			grid-row: 2;
+		}
 
 		&__list {
 			max-height: none;
 		}
 
 		&__list-item {
-			flex-wrap: wrap;
+			grid-template-columns: auto minmax(0, 1fr);
+			grid-template-areas:
+				'avatar body'
+				'aside aside';
 			padding: 12px;
 		}
 
+		&__list-avatar {
+			grid-area: avatar;
+		}
+
+		&__list-body {
+			grid-area: body;
+		}
+
 		&__list-aside {
+			grid-area: aside;
 			width: 100%;
 			flex-direction: row;
 			flex-wrap: wrap;
 			align-items: center;
-			justify-content: flex-start;
+			justify-content: space-between;
 			margin-top: 4px;
 		}
 
@@ -2141,7 +2223,7 @@ $admin-text-secondary: var(--fixora-text-secondary);
 	border-radius: 50%;
 	overflow: hidden;
 	flex-shrink: 0;
-	background: linear-gradient(135deg, #730c1e 0%, #480415 100%);
+	background: var(--fixora-btn-primary-bg);
 	display: flex;
 	align-items: center;
 	justify-content: center;

@@ -5,9 +5,9 @@
 | Field | Value |
 |-------|-------|
 | **Last updated** | 2026-06-24 |
-| **Last agent** | Codex |
-| **Last session** | **P3-13 complete — Phase 4 done** — Apollo migrated to Fixora schema: `getTechnicians` for legacy agents, `getUser` for member profiles, `getArticles`/`likeTargetArticle`/`createArticle` for community legacy components, `getUserFollowers/Followings` + `authorData` aliases; utils handlers renamed; board-article types re-export Fixora `Article`; `yarn build` ✅ |
-| **Next agent should start with** | **Phase 5** — `P4-01` AI classification hint on booking form, or `P4-05` light theme tokens |
+| **Last agent** | Cursor |
+| **Last session** | **P4-04 Tests** — Vitest (13 passed): theme, technicianMetrics, BookingAiClassificationHint; Playwright smoke E2E (3 passed: home, search, login); `yarn test` / `yarn test:e2e` |
+| **Next agent should start with** | Post-MVP — expand E2E coverage, CI test job, or `BACKEND_GAPS.md` wiring as needed |
 
 ---
 
@@ -96,7 +96,7 @@ Full checklist: `TASK_BOARD.md`
 | Tech onboarding steps 2–5 | Wireframe shows Step 1 + ID upload only |
 | Apollo still on legacy nestar ops | ✅ P3-13 Done — MVP uses Fixora ops; `/property` pages retain legacy property queries (no FixoraB equivalent) |
 | Admin mockup | None — build incrementally (P3-15) |
-| Light theme mockup | None — Phase 5 (P4-05+) |
+| Light theme mockup | ✅ User prompt spec (P4-05) — Apple-inspired light + pink ambient gradient |
 | Mobile phase | **Phase 3 — PM-01…PM-12** — see `DECISIONS.md` MOB-* |
 | Messages real-time | **Dedicated auth WS** (`connectFixoraWebSocket` in `fixoraWebSocket.ts`) + `FixoraWebSocketBridge` Apollo refetch. Polling stops when WS connected (`useRealtimePollInterval`). Booking/payment push still needs FIXORAB GAP-062. |
 | "View Request" in Messages | Links to `/mypage/bookings/[id]` — booking detail page (P3-08b ✅) |

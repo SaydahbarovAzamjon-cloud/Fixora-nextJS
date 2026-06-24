@@ -12,7 +12,7 @@ $fixora-bp-sm-tablet: 768px;
 $fixora-bp-phone: 639px;
 
 :root {
-	/* Dark theme — premium burgundy (MVP customer default) */
+	/* Dark theme — premium burgundy (MVP default) */
 	--fixora-primary: #730c1e;
 	--fixora-primary-hover: #8e1428;
 	--fixora-primary-dark: #480415;
@@ -29,7 +29,19 @@ $fixora-bp-phone: 639px;
 	--fixora-card-gradient-hover: linear-gradient(135deg, #301014 0%, #5a0818 50%, #6a0a1c 100%);
 	--fixora-glass-bg: linear-gradient(135deg, #2a1518 0%, #301014 50%, #3a1018 100%);
 	--fixora-navbar-bg: linear-gradient(180deg, rgba(20, 15, 23, 0.97) 0%, rgba(33, 2, 7, 0.94) 100%);
+	--fixora-navbar-transparent-bg: linear-gradient(180deg, rgba(20, 15, 23, 0.99) 0%, rgba(33, 2, 7, 0.96) 100%);
+	--fixora-navbar-border: var(--fixora-border);
+	--fixora-navbar-blur: 14px;
+	--fixora-navbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.22), 0 8px 24px rgba(115, 12, 30, 0.12);
 	--fixora-footer-bg: linear-gradient(180deg, #1c080d 0%, #160c10 50%, #140f17 100%);
+	--fixora-sidebar-bg: linear-gradient(180deg, #1c080d 0%, #210207 45%, #140f17 100%);
+	--fixora-footer-ambient:
+		radial-gradient(820px 400px at 10% 92%, rgba(115, 12, 30, 0.17), transparent 62%),
+		radial-gradient(820px 400px at 90% 88%, rgba(115, 12, 30, 0.17), transparent 62%),
+		radial-gradient(ellipse at top, rgba(115, 12, 30, 0.12) 0%, transparent 55%),
+		linear-gradient(180deg, #140f17 0%, var(--fixora-bg) 55%, #210207 100%);
+	--fixora-header-overlay: radial-gradient(130% 95% at 50% 35%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+	--fixora-header-ambient: var(--fixora-footer-ambient);
 	--fixora-border: rgba(115, 12, 30, 0.45);
 	--fixora-border-subtle: rgba(115, 12, 30, 0.35);
 	--fixora-text-primary: #f5f5f5;
@@ -37,8 +49,39 @@ $fixora-bp-phone: 639px;
 	--fixora-text-muted: #8a8a8a;
 	--fixora-error: #ff4d4f;
 	--fixora-success: #52c41a;
+	--fixora-warning: #fa8c16;
 	--fixora-glow: 0 0 24px rgba(115, 12, 30, 0.18);
 	--fixora-primary-soft: rgba(115, 12, 30, 0.12);
+	--fixora-primary-soft-bg: rgba(115, 12, 30, 0.12);
+	--fixora-card-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.04),
+		0 4px 18px rgba(0, 0, 0, 0.22);
+	--fixora-card-shadow-hover:
+		inset 0 1px 0 rgba(255, 255, 255, 0.05),
+		0 6px 22px rgba(115, 12, 30, 0.16);
+	--fixora-card-radius: 16px;
+	--fixora-card-hover-transform: none;
+	--fixora-focus-ring: 0 0 0 3px rgba(115, 12, 30, 0.15);
+	--fixora-input-shadow: none;
+	--fixora-btn-primary-bg: linear-gradient(135deg, var(--fixora-primary) 0%, var(--fixora-primary-dark) 100%);
+	--fixora-btn-primary-bg-hover: linear-gradient(135deg, var(--fixora-primary-hover) 0%, var(--fixora-primary) 100%);
+	--fixora-btn-primary-text: var(--fixora-text-primary);
+	--fixora-btn-primary-shadow: none;
+	--fixora-btn-secondary-bg: rgba(115, 12, 30, 0.12);
+	--fixora-btn-secondary-border: var(--fixora-border-subtle);
+	--fixora-select-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+	--fixora-select-option-hover: rgba(115, 12, 30, 0.12);
+	--fixora-select-option-active: rgba(115, 12, 30, 0.18);
+	--fixora-kakao-border: rgba(255, 255, 255, 0.15);
+	--fixora-kakao-border-hover: rgba(255, 255, 255, 0.3);
+	--fixora-transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+	--fixora-chart-grid: rgba(255, 255, 255, 0.05);
+	--fixora-chart-axis: #808080;
+	--fixora-chart-axis-muted: #707070;
+	--fixora-chart-tooltip-cursor: rgba(255, 255, 255, 0.15);
+	--fixora-chart-bar-hover: rgba(255, 255, 255, 0.04);
+	--fixora-chart-track: rgba(255, 255, 255, 0.06);
+	--fixora-chart-star-inactive: #3a3a3a;
 
 	/* Mobile layout — PM-01 */
 	--fixora-safe-top: env(safe-area-inset-top, 0px);
@@ -46,16 +89,72 @@ $fixora-bp-phone: 639px;
 	--fixora-safe-left: env(safe-area-inset-left, 0px);
 	--fixora-safe-right: env(safe-area-inset-right, 0px);
 	--fixora-mobile-gutter: 16px;
-
-	/* Light theme placeholders (Phase 4 — not active in MVP) */
-	--fixora-light-bg: #f5f5f7;
-	--fixora-light-surface: #ffffff;
-	--fixora-light-text: #181a20;
 }
 
+/* Light theme — P4-05 (design: Apple-inspired premium marketplace prompt) */
 [data-theme='light'],
 .theme-light {
-	--fixora-bg: var(--fixora-light-bg);
-	--fixora-surface: var(--fixora-light-surface);
-	--fixora-text-primary: var(--fixora-light-text);
+	--fixora-primary: #c1121f;
+	--fixora-primary-hover: #a20e19;
+	--fixora-primary-dark: #e11d48;
+	--fixora-bg: #ffffff;
+	--fixora-bg-ambient:
+		radial-gradient(circle at top left, rgba(255, 120, 120, 0.1) 0%, transparent 35%),
+		radial-gradient(circle at bottom right, rgba(255, 140, 140, 0.08) 0%, transparent 40%),
+		linear-gradient(180deg, #ffffff 0%, #fff8f8 50%, #ffffff 100%);
+	--fixora-surface: #ffffff;
+	--fixora-surface-elevated: #ffffff;
+	--fixora-surface-hover: #fff1f2;
+	--fixora-card-gradient: #ffffff;
+	--fixora-card-gradient-hover: #ffffff;
+	--fixora-glass-bg: #ffffff;
+	--fixora-navbar-bg: rgba(255, 255, 255, 0.85);
+	--fixora-navbar-transparent-bg: rgba(255, 255, 255, 0.92);
+	--fixora-navbar-border: #f1f5f9;
+	--fixora-navbar-blur: 20px;
+	--fixora-navbar-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+	--fixora-footer-bg: linear-gradient(180deg, #fff8f8 0%, #ffffff 50%, #ffffff 100%);
+	--fixora-sidebar-bg: #ffffff;
+	--fixora-footer-ambient:
+		radial-gradient(circle at 10% 92%, rgba(255, 120, 120, 0.08) 0%, transparent 50%),
+		radial-gradient(circle at 90% 88%, rgba(255, 140, 140, 0.06) 0%, transparent 50%),
+		linear-gradient(180deg, #ffffff 0%, #fff8f8 55%, #ffffff 100%);
+	--fixora-header-overlay: none;
+	--fixora-header-ambient: var(--fixora-bg-ambient);
+	--fixora-border: rgba(190, 24, 93, 0.08);
+	--fixora-border-subtle: rgba(190, 24, 93, 0.08);
+	--fixora-text-primary: #111827;
+	--fixora-text-secondary: #6b7280;
+	--fixora-text-muted: #94a3b8;
+	--fixora-error: #ff4d4f;
+	--fixora-success: #52c41a;
+	--fixora-warning: #fa8c16;
+	--fixora-glow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	--fixora-primary-soft: #fee2e2;
+	--fixora-primary-soft-bg: #fff1f2;
+	--fixora-card-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	--fixora-card-shadow-hover: 0 16px 40px rgba(15, 23, 42, 0.08);
+	--fixora-card-radius: 20px;
+	--fixora-card-hover-transform: translateY(-2px);
+	--fixora-focus-ring: 0 0 0 2px rgba(193, 18, 31, 0.25);
+	--fixora-input-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+	--fixora-btn-primary-bg: linear-gradient(135deg, #c1121f, #e11d48);
+	--fixora-btn-primary-bg-hover: linear-gradient(135deg, #a20e19, #c1121f);
+	--fixora-btn-primary-text: #ffffff;
+	--fixora-btn-primary-shadow: 0 8px 24px rgba(193, 18, 31, 0.2);
+	--fixora-btn-secondary-bg: #ffffff;
+	--fixora-btn-secondary-border: #e5e7eb;
+	--fixora-select-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+	--fixora-select-option-hover: #fff1f2;
+	--fixora-select-option-active: #fee2e2;
+	--fixora-kakao-border: #e5e7eb;
+	--fixora-kakao-border-hover: rgba(193, 18, 31, 0.25);
+	--fixora-transition: all 0.25s ease;
+	--fixora-chart-grid: rgba(15, 23, 42, 0.06);
+	--fixora-chart-axis: #94a3b8;
+	--fixora-chart-axis-muted: #6b7280;
+	--fixora-chart-tooltip-cursor: rgba(15, 23, 42, 0.08);
+	--fixora-chart-bar-hover: rgba(15, 23, 42, 0.04);
+	--fixora-chart-track: rgba(15, 23, 42, 0.08);
+	--fixora-chart-star-inactive: #e5e7eb;
 }

@@ -1188,6 +1188,36 @@
 	font-size: 12px;
 }
 
+.fixora-nav__theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 9px;
+	background: var(--fixora-surface-elevated, transparent);
+	color: var(--fixora-text-secondary);
+	cursor: pointer;
+	transition:
+		color 0.2s ease,
+		border-color 0.2s ease,
+		background 0.2s ease;
+
+	&:hover {
+		color: var(--fixora-primary);
+		border-color: var(--fixora-primary);
+	}
+
+	&--compact {
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+	}
+}
+
 .fixora-nav__login {
 	padding: 9px 20px;
 	border-radius: 9px;

@@ -16,6 +16,7 @@ import SearchFilters from '../../libs/components/search/SearchFilters';
 import SearchResultsHeader from '../../libs/components/search/SearchResultsHeader';
 import TechnicianResultCard from '../../libs/components/search/TechnicianResultCard';
 import SearchTrustBar from '../../libs/components/search/SearchTrustBar';
+import SearchRecommendations from '../../libs/components/search/SearchRecommendations';
 import { GET_TECHNICIANS } from '../../apollo/user/query';
 import { LIKE_TARGET_USER, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { TechnicianSummary, TechniciansInquiry } from '../../libs/types/fixora/fixora';
@@ -170,6 +171,8 @@ const SearchPage: NextPage = () => {
 				<SearchHero searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
 
 				<SearchCategoryRow searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+
+				<SearchRecommendations searchFilter={searchFilter} />
 
 				{mapExpanded && (
 					<SearchMapExpandedSection

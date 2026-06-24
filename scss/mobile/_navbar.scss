@@ -8,8 +8,9 @@
 		align-items: stretch;
 		width: 100%;
 		background: var(--fixora-navbar-bg);
-		border-bottom: 1px solid var(--fixora-border);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+		border-bottom: 1px solid var(--fixora-navbar-border);
+		box-shadow: var(--fixora-navbar-shadow);
+		backdrop-filter: blur(var(--fixora-navbar-blur));
 		padding:
 			calc(8px + var(--fixora-safe-top))
 			var(--fixora-mobile-gutter)
@@ -72,6 +73,11 @@
 			color: var(--fixora-text-muted);
 			font-size: 12px;
 		}
+	}
+
+	.fixora-nav__theme-toggle {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
 	}
 
 	.fixora-nav-mobile__login {

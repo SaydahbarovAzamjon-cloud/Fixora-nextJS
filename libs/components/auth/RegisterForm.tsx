@@ -10,7 +10,7 @@ import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
-import { fixoraCustomerSignup, validateRegisterInput } from '../../auth/fixoraAuth';
+import { fixoraCustomerSignup, isSignupConflictError, validateRegisterInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
 import { getPostAuthRoute } from '../../utils/postAuthRoute';
@@ -38,8 +38,12 @@ const RegisterForm = () => {
 			await fixoraCustomerSignup(fullName, email, password);
 			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
 			await router.push(getPostAuthRoute(userVar(), referrer));
-		} catch (err: any) {
-			await sweetMixinErrorAlert(err?.message ?? 'Sign up failed');
+		} catch (err: unknown) {
+			if (isSignupConflictError(err)) {
+				setErrors(err.conflicts);
+				return;
+			}
+			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Sign up failed');
 		} finally {
 			setLoading(false);
 		}

@@ -75,12 +75,14 @@ export interface DailyEarningsPoint {
 
 export interface DeviceBreakdownItem {
 	name: string;
+	category: string;
 	value: number;
 	color: string;
 }
 
 export interface IssueRevenueItem {
 	type: string;
+	issueKey: string;
 	revenue: number;
 	color: string;
 }
@@ -443,6 +445,69 @@ function mapIssueCategory(raw?: string | null): string {
 	}
 }
 
+function issueCategoryKey(raw?: string | null): string {
+	switch (raw) {
+		case 'SCREEN':
+			return 'SCREEN';
+		case 'BATTERY':
+			return 'BATTERY';
+		case 'WATER_DAMAGE':
+			return 'WATER_DAMAGE';
+		case 'CAMERA':
+			return 'CAMERA';
+		case 'CHARGING':
+			return 'CHARGING';
+		case 'KEYBOARD':
+			return 'KEYBOARD';
+		case 'SOFTWARE':
+			return 'SOFTWARE';
+		case 'GENERAL':
+		default:
+			return 'GENERAL';
+	}
+}
+
+export function bookingsInAnalyticsRange(bookings: TechnicianBooking[], range: AnalyticsRange): TechnicianBooking[] {
+	return bookingsCreatedBetween(bookings, rangeStart(range), new Date());
+}
+
+export function bookingsCreatedBetween(
+	bookings: TechnicianBooking[],
+	start: Date,
+	end: Date,
+): TechnicianBooking[] {
+	return bookings.filter((b) => {
+		const when = new Date(b.createdAt || b.updatedAt || 0);
+		return !Number.isNaN(when.getTime()) && when >= start && when < end;
+	});
+}
+
+export function previousRangeWindow(range: AnalyticsRange): {
+	currentStart: Date;
+	previousStart: Date;
+	now: Date;
+} {
+	const now = new Date();
+	const currentStart = rangeStart(range);
+	const duration = Math.max(now.getTime() - currentStart.getTime(), 86400000);
+	const previousStart = new Date(currentStart.getTime() - duration);
+	return { currentStart, previousStart, now };
+}
+
+export function computeRateDeltaTrend(
+	bookings: TechnicianBooking[],
+	range: AnalyticsRange,
+	computeRate: (list: TechnicianBooking[]) => number | null,
+): string | null {
+	const { currentStart, previousStart, now } = previousRangeWindow(range);
+	const current = computeRate(bookingsCreatedBetween(bookings, currentStart, now));
+	const previous = computeRate(bookingsCreatedBetween(bookings, previousStart, currentStart));
+	if (current == null || previous == null) return null;
+	const delta = current - previous;
+	const sign = delta > 0 ? '+' : '';
+	return `${sign}${Math.round(delta)}%`;
+}
+
 export function buildDeviceBreakdown(bookings: TechnicianBooking[]): DeviceBreakdownItem[] {
 	const completed = getCompletedBookings(bookings);
 	const counts: Record<string, number> = {};
@@ -457,6 +522,7 @@ export function buildDeviceBreakdown(bookings: TechnicianBooking[]): DeviceBreak
 		.sort((a, b) => b[1] - a[1])
 		.map(([cat, count]) => ({
 			name: DEVICE_LABELS[cat] || cat,
+			category: cat,
 			value: Math.round((count / total) * 100),
 			color: DEVICE_COLORS[cat] || '#909090',
 		}));
@@ -464,14 +530,23 @@ export function buildDeviceBreakdown(bookings: TechnicianBooking[]): DeviceBreak
 
 export function buildIssueRevenue(bookings: TechnicianBooking[]): IssueRevenueItem[] {
 	const completed = getCompletedBookings(bookings);
-	const totals: Record<string, number> = {};
+	const totals: Record<string, { revenue: number; issueKey: string }> = {};
 	completed.forEach((b) => {
+		const issueKey = issueCategoryKey(b.aiClassification?.issueCategory);
 		const label = mapIssueCategory(b.aiClassification?.issueCategory);
-		totals[label] = (totals[label] || 0) + parsePrice(b);
+		if (!totals[label]) {
+			totals[label] = { revenue: 0, issueKey };
+		}
+		totals[label].revenue += parsePrice(b);
 	});
 	return Object.entries(totals)
-		.sort((a, b) => b[1] - a[1])
-		.map(([type, revenue]) => ({ type, revenue, color: ISSUE_COLORS[type] || '#909090' }));
+		.sort((a, b) => b[1].revenue - a[1].revenue)
+		.map(([type, { revenue, issueKey }]) => ({
+			type,
+			issueKey,
+			revenue,
+			color: ISSUE_COLORS[type] || '#909090',
+		}));
 }
 
 export function buildRatingTrend(reviews: TechnicianReview[], range: AnalyticsRange): RatingTrendPoint[] {

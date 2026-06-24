@@ -7,9 +7,11 @@ import SettingsSaveButton from '../SettingsSaveButton';
 import SettingsToggle from '../SettingsToggle';
 import { GET_USER_PREFERENCES, UPDATE_USER_PREFERENCES } from '../../../../../apollo/user/settings';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../../sweetAlert';
+import { useFixoraTheme } from '../../../theme/FixoraThemeProvider';
 
 const PreferencesSection: React.FC = () => {
 	const { t } = useTranslation('technician');
+	const { setMode } = useFixoraTheme();
 	const { data, loading, refetch } = useQuery(GET_USER_PREFERENCES, { fetchPolicy: 'network-only' });
 	const [updatePrefs, { loading: saving }] = useMutation(UPDATE_USER_PREFERENCES);
 
@@ -25,13 +27,16 @@ const PreferencesSection: React.FC = () => {
 		setCurrency(remote.currency || 'KRW');
 		setTimezone(remote.timezone || 'Asia/Seoul');
 		setDarkMode(remote.darkMode ?? true);
-	}, [data]);
+		setMode(remote.darkMode === false ? 'light' : 'dark');
+	}, [data, setMode]);
 
 	const handleSave = async () => {
 		try {
+			const nextMode = darkMode ? 'dark' : 'light';
 			await updatePrefs({
 				variables: { input: { language, currency, timezone, darkMode } },
 			});
+			setMode(nextMode);
 			await refetch();
 			await sweetTopSmallSuccessAlert(t('settings.preferences.saved'), 1200);
 		} catch (err) {

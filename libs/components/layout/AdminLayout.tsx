@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
-import { fixoraDark } from '../../../scss/MaterialTheme';
+import { ThemeProvider } from '@mui/material/styles';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { isAdminUser } from '../../utils/userRole';
 import { useQuery, useReactiveVar } from '@apollo/client';
@@ -13,8 +12,7 @@ import AdminSidebar from '../admin/AdminSidebar';
 import AdminMobileTopBar from '../admin/AdminMobileTopBar';
 import AdminForbidden from '../admin/AdminForbidden';
 import useAdminMobileLayout from '../../hooks/useAdminMobileLayout';
-
-const adminTheme = createTheme(fixoraDark as ThemeOptions);
+import { useFixoraTheme } from '../theme/FixoraThemeProvider';
 
 export interface AdminPageProps {
 	title?: string;
@@ -28,6 +26,7 @@ const withAdminLayout = <P extends object>(
 	const Wrapped = (props: P & AdminPageProps) => {
 		const router = useRouter();
 		const user = useReactiveVar(userVar);
+		const { muiTheme } = useFixoraTheme();
 		const isMobile = useAdminMobileLayout();
 		const [authChecked, setAuthChecked] = useState(false);
 		const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,7 +66,7 @@ const withAdminLayout = <P extends object>(
 
 		if (user?._id && !isAdminUser(user)) {
 			return (
-				<ThemeProvider theme={adminTheme}>
+				<ThemeProvider theme={muiTheme}>
 					<AdminForbidden />
 				</ThemeProvider>
 			);
@@ -78,7 +77,7 @@ const withAdminLayout = <P extends object>(
 		const headTitle = pageMeta?.title ? `Fixora Admin — ${pageMeta.title}` : 'Fixora Admin Console';
 
 		return (
-			<ThemeProvider theme={adminTheme}>
+			<ThemeProvider theme={muiTheme}>
 				<Head>
 					<title>{headTitle}</title>
 					<meta name="title" content={headTitle} />

@@ -67,10 +67,21 @@
 @import '/scss/pc/technician/technician-client.scss';
 @import '/scss/pc/technician/_technician-card-surfaces.scss';
 
+html {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+	overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+	display: none;
+}
+
 body {
 	-ms-overflow-style: none; /* for Internet Explorer, Edge */
 	scrollbar-width: none; /* for Firefox */
-	overflow-y: scroll;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 body::-webkit-scrollbar {
@@ -235,6 +246,7 @@ body::-webkit-scrollbar {
 		&--fixora {
 			height: auto;
 			min-height: 520px;
+			overflow: hidden;
 			background: var(--fixora-header-overlay), var(--fixora-header-ambient);
 		}
 		.container {

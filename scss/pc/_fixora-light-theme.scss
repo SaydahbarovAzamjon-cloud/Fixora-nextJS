@@ -112,23 +112,24 @@
 				}
 
 				&:hover:not(:disabled) {
-					background: var(--fixora-primary-soft-bg);
-					color: var(--fixora-primary-hover);
+					background: var(--fixora-primary);
+					color: #fff;
 					box-shadow: none;
 
 					svg {
-						color: var(--fixora-primary-hover);
+						color: #fff;
 					}
 				}
 			}
 
 			&__category {
 				&:hover {
-					background: var(--fixora-primary-soft-bg);
-					color: var(--fixora-primary);
+					background: var(--fixora-primary);
+					border-color: var(--fixora-primary);
+					color: #fff;
 
 					svg {
-						color: var(--fixora-primary);
+						color: #fff;
 					}
 				}
 			}
@@ -137,10 +138,11 @@
 
 	.fixora-home-arrow {
 		border-color: var(--fixora-border);
+		color: var(--fixora-text-primary);
 
 		&:hover:not(.swiper-button-disabled) {
 			background: var(--fixora-primary-soft-bg);
-			color: var(--fixora-primary);
+			color: var(--fixora-text-primary);
 			border-color: var(--fixora-primary);
 		}
 	}
@@ -155,7 +157,7 @@
 
 		&__meta-row svg,
 		&__rating svg {
-			color: var(--fixora-primary);
+			color: var(--fixora-text-secondary);
 			filter: none;
 		}
 
@@ -165,8 +167,8 @@
 			color: var(--fixora-primary);
 
 			&:hover {
-				background: var(--fixora-primary-soft);
-				color: var(--fixora-primary-hover);
+				background: var(--fixora-primary);
+				color: #fff;
 			}
 		}
 	}

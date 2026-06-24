@@ -11,9 +11,9 @@ import FixoraSplashBackground from '../libs/components/background/FixoraSplashBa
 import { FixoraThemeProvider } from '../libs/components/theme/FixoraThemeProvider';
 
 import '../scss/app.scss';
-import '../scss/fixora-splash-background.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
+import '../scss/fixora-splash-background.scss';
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const router = useRouter();

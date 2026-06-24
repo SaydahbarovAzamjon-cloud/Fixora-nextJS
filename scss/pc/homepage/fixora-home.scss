@@ -70,14 +70,14 @@
 	border-radius: 50%;
 	border: 1px solid var(--fixora-border-subtle);
 	background: var(--fixora-card-gradient);
-	color: var(--fixora-primary);
+	color: var(--fixora-text-primary);
 	cursor: pointer;
 	transition: all 0.2s ease;
 	z-index: 2;
 
 	&:hover {
 		background: var(--fixora-primary-soft-bg);
-		color: var(--fixora-primary);
+		color: var(--fixora-text-primary);
 		border-color: var(--fixora-primary);
 	}
 
@@ -267,7 +267,7 @@
 
 		svg {
 			font-size: 15px;
-			color: var(--fixora-primary);
+			color: var(--fixora-text-primary);
 		}
 
 		em {
@@ -321,7 +321,7 @@
 			width: 15px;
 			height: 15px;
 			font-size: 15px;
-			color: var(--fixora-primary);
+			color: var(--fixora-text-primary);
 			margin-top: 1px;
 		}
 
@@ -374,6 +374,7 @@
 
 		svg {
 			font-size: 14px;
+			color: inherit;
 		}
 
 		&:hover {

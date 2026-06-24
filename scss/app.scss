@@ -49,7 +49,6 @@ body {
 	background-attachment: fixed;
 	background-color: var(--fixora-bg);
 	color: var(--fixora-text-primary);
-	@include fixora-scrollbar;
 
 	.MuiPopover-paper {
 		box-shadow: none;

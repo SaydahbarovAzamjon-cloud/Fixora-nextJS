@@ -1,6 +1,7 @@
 import type { FixoraThemeMode } from '../../theme/fixoraThemeMode';
 
-export const FIXORA_SPLASH_DARK_PALETTE = ['#FF6B35', '#FF7A45', '#FF8C42'] as const;
+/** Dark burgundy — matches --fixora-primary / card gradient (not orange) */
+export const FIXORA_SPLASH_DARK_PALETTE = ['#480415', '#5a0818', '#730c1e', '#8e1428'] as const;
 /** Hero light PNG glow + brand rose — avoid orange-heavy splash on light mode */
 export const FIXORA_SPLASH_LIGHT_PALETTE = ['#E11D48', '#F43F5E', '#F472B6', '#FB7185'] as const;
 
@@ -26,6 +27,6 @@ export function getFixoraSplashProps(mode: FixoraThemeMode, intensity: FixoraSpl
 		TRANSPARENT: true,
 		RAINBOW_MODE: false,
 		colorPalette: [...(isLight ? FIXORA_SPLASH_LIGHT_PALETTE : FIXORA_SPLASH_DARK_PALETTE)],
-		colorIntensity: isLight ? 0.26 : 0.14,
+		colorIntensity: isLight ? 0.26 : 0.2,
 	} as const;
 }

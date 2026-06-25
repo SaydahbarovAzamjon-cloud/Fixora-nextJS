@@ -17,7 +17,7 @@ import DoneRounded from '@mui/icons-material/DoneRounded';
 import DoneAllRounded from '@mui/icons-material/DoneAllRounded';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import withTechnicianLayout from '../../../libs/components/layout/TechnicianLayout';
-import { GET_MY_CONVERSATIONS, GET_MESSAGES, SEND_MESSAGE, MARK_MESSAGES_AS_READ, UPLOAD_MESSAGE_IMAGE } from '../../../apollo/user/message';
+import { GET_MY_CONVERSATIONS, SEND_MESSAGE, MARK_MESSAGES_AS_READ, UPLOAD_MESSAGE_IMAGE } from '../../../apollo/user/message';
 import { userVar } from '../../../apollo/store';
 import { Conversation, Message } from '../../../libs/types/fixora/fixora';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
@@ -25,7 +25,9 @@ import { resolveProfileImageUrl } from '../../../libs/utils/profileImage';
 import { compressMessageImage } from '../../../libs/utils/compressMessageImage';
 import UserProfileLink from '../../../libs/components/common/UserProfileLink';
 import useRealtimePollInterval from '../../../libs/hooks/useRealtimePollInterval';
+import usePeerMessages from '../../../libs/hooks/usePeerMessages';
 import useDeviceDetect from '../../../libs/hooks/useDeviceDetect';
+import { useNotificationContextOptional } from '../../../libs/context/NotificationContext';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -102,6 +104,7 @@ const Messages: NextPage = () => {
 	const emojiRef = useRef<HTMLDivElement>(null);
 	const conversationsPollMs = useRealtimePollInterval(30000);
 	const messagesPollMs = useRealtimePollInterval(15000);
+	const notifCtx = useNotificationContextOptional();
 
 	/** APOLLO **/
 	const { data: conversationsData, loading: convsLoading, refetch: refetchConversations } = useQuery(GET_MY_CONVERSATIONS, {
@@ -136,22 +139,7 @@ const Messages: NextPage = () => {
 	// FIX 1: show skeleton until data actually arrives (prevents "no data" flash)
 	const isConvsLoading = !user?._id || convsLoading || !conversationsData;
 
-	const { data: messagesData, loading: msgsLoading, refetch: refetchMessages } = useQuery(GET_MESSAGES, {
-		skip: !selected?.peerId,
-		variables: {
-			input: {
-				page: 1,
-				limit: 100,
-				sort: 'createdAt',
-				direction: 'ASC',
-				search: { peerId: selected?.peerId },
-			},
-		},
-		fetchPolicy: 'network-only',
-		pollInterval: messagesPollMs,
-	});
-
-	const messages: Message[] = messagesData?.getMessages?.list ?? [];
+	const { messages, loading: msgsLoading, refetchMessages } = usePeerMessages(selected?.peerId, messagesPollMs);
 
 	const [sendMessage] = useMutation(SEND_MESSAGE);
 	const [uploadMessageImage] = useMutation(UPLOAD_MESSAGE_IMAGE);
@@ -179,6 +167,13 @@ const Messages: NextPage = () => {
 				.catch(() => undefined);
 		}
 	}, [selected?.peerId, selected?.bookingId, conversations]);
+
+	useEffect(() => {
+		if (!notifCtx) return;
+		return notifCtx.subscribeMessageReceived(() => {
+			void refetchConversations();
+		});
+	}, [notifCtx, refetchConversations]);
 
 	// Close emoji picker on outside click
 	useEffect(() => {

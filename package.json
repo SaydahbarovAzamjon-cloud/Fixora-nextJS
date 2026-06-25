@@ -12,6 +12,7 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:e2e": "playwright test",
+		"test:messages": "node scripts/test-message-notifications.mjs",
 		"changelog": "standard-version --skip.tag"
 	},
 	"dependencies": {

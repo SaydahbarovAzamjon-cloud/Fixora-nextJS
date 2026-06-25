@@ -30,6 +30,29 @@
 	@include fixora-scrollbar;
 }
 
+.fixora-notifications__tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fixora-notifications__tab {
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: transparent;
+	color: rgba(255, 255, 255, 0.72);
+	border-radius: 999px;
+	padding: 6px 14px;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+	&--active {
+		background: rgba(255, 107, 0, 0.18);
+		border-color: rgba(255, 107, 0, 0.55);
+		color: #fff;
+	}
+}
+
 .fixora-notifications__group {
 	display: flex;
 	flex-direction: column;

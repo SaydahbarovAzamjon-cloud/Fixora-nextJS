@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useApolloClient } from '@apollo/client';
 import { GET_MESSAGES } from '../../apollo/user/message';
+import { useNotificationContextOptional } from '../context/NotificationContext';
 import { Message } from '../types/fixora/fixora';
 
 const sortMessages = (list: Message[]) =>
@@ -8,6 +9,7 @@ const sortMessages = (list: Message[]) =>
 
 export default function usePeerMessages(peerId: string | null | undefined, pollIntervalMs: number) {
 	const apolloClient = useApolloClient();
+	const notifCtx = useNotificationContextOptional();
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [loading, setLoading] = useState(false);
 
@@ -46,6 +48,19 @@ export default function usePeerMessages(peerId: string | null | undefined, pollI
 		const timer = setInterval(fetchMessages, pollIntervalMs);
 		return () => clearInterval(timer);
 	}, [fetchMessages, peerId, pollIntervalMs]);
+
+	useEffect(() => {
+		if (!peerId || !notifCtx) return;
+		return notifCtx.subscribeMessageReceived((message) => {
+			const involvesPeer =
+				message.senderId === peerId || message.receiverId === peerId;
+			if (!involvesPeer) return;
+			setMessages((prev) => {
+				if (prev.some((m) => m._id === message._id)) return prev;
+				return sortMessages([...prev, message]);
+			});
+		});
+	}, [peerId, notifCtx]);
 
 	return { messages, loading, refetchMessages: fetchMessages };
 }

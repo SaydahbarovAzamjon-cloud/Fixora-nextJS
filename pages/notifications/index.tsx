@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -10,7 +10,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { userVar } from '../../apollo/store';
-import { Notification } from '../../libs/types/fixora/fixora';
+import { Notification, NotificationType } from '../../libs/types/fixora/fixora';
 import { FixoraButton } from '../../libs/components/ui';
 import NotificationSender from '../../libs/components/notifications/NotificationSender';
 import NotificationVisualIcon from '../../libs/components/notifications/NotificationVisualIcon';
@@ -22,6 +22,7 @@ import {
 	shouldShowNotificationSender,
 	filterCustomerNotifications,
 } from '../../libs/utils/notifications';
+import { useNotificationContextOptional } from '../../libs/context/NotificationContext';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: {
@@ -30,6 +31,12 @@ export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 });
 
 const PAGE_SIZE = 20;
+type NotifTab = 'all' | 'messages' | 'bookings';
+
+const TAB_TYPES: Record<Exclude<NotifTab, 'all'>, NotificationType> = {
+	messages: 'MESSAGE',
+	bookings: 'BOOKING',
+};
 
 const NotificationListItem = ({
 	notification,
@@ -88,7 +95,9 @@ const NotificationsPage: NextPage = () => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const notifCtx = useNotificationContextOptional();
 	const [page, setPage] = useState(1);
+	const [activeTab, setActiveTab] = useState<NotifTab>('all');
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 
 	/** APOLLO REQUESTS **/
@@ -122,13 +131,14 @@ const NotificationsPage: NextPage = () => {
 		if (!notification.isRead) {
 			await markAsRead(notification);
 		}
-		const link = getNotificationLink(notification);
+		const link = getNotificationLink(notification, { isTechnician: false });
 		if (link) router.push(link);
 	};
 
 	const markAsRead = async (notification: Notification) => {
 		try {
 			await markNotificationRead({ variables: { input: { notificationId: notification._id } } });
+			notifCtx?.decrementUnread();
 			setNotifications((prev) => prev.map((n) => (n._id === notification._id ? { ...n, isRead: true } : n)));
 		} catch {
 			/* ignore */
@@ -139,6 +149,7 @@ const NotificationsPage: NextPage = () => {
 		try {
 			await markAllNotificationsRead();
 			setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+			await notifCtx?.refetchNotifications();
 		} catch {
 			/* ignore */
 		}
@@ -162,6 +173,12 @@ const NotificationsPage: NextPage = () => {
 		setNotifications((prev) => [...prev, ...filterCustomerNotifications(result.data?.getNotifications?.list ?? [])]);
 	};
 
+	const tabbedNotifications = useMemo(() => {
+		const base = filterCustomerNotifications(notifications);
+		if (activeTab === 'all') return base;
+		return base.filter((n) => n.notificationType === TAB_TYPES[activeTab]);
+	}, [notifications, activeTab]);
+
 	const { today, yesterday, earlier } = useMemo(() => {
 		const startOfToday = new Date();
 		startOfToday.setHours(0, 0, 0, 0);
@@ -171,14 +188,14 @@ const NotificationsPage: NextPage = () => {
 		const todayList: Notification[] = [];
 		const yesterdayList: Notification[] = [];
 		const earlierList: Notification[] = [];
-		notifications.forEach((n) => {
+		tabbedNotifications.forEach((n) => {
 			const createdAt = new Date(n.createdAt);
 			if (createdAt >= startOfToday) todayList.push(n);
 			else if (createdAt >= startOfYesterday) yesterdayList.push(n);
 			else earlierList.push(n);
 		});
 		return { today: todayList, yesterday: yesterdayList, earlier: earlierList };
-	}, [notifications]);
+	}, [tabbedNotifications]);
 
 	const renderGroup = (title: string, list: Notification[]) => {
 		if (!list.length) return null;
@@ -201,7 +218,20 @@ const NotificationsPage: NextPage = () => {
 	return (
 		<div className="fixora-notifications-page">
 			<div className="container fixora-notifications">
-				{notifications.length === 0 ? (
+				<div className="fixora-notifications__tabs">
+					{(['all', 'messages', 'bookings'] as NotifTab[]).map((tab) => (
+						<button
+							key={tab}
+							type="button"
+							className={`fixora-notifications__tab${activeTab === tab ? ' fixora-notifications__tab--active' : ''}`}
+							onClick={() => setActiveTab(tab)}
+						>
+							{t(`notifications.tabs.${tab}`)}
+						</button>
+					))}
+				</div>
+
+				{tabbedNotifications.length === 0 ? (
 					<p className="fixora-notifications__empty">{t('notifications.empty')}</p>
 				) : (
 					<>
@@ -217,7 +247,7 @@ const NotificationsPage: NextPage = () => {
 					</FixoraButton>
 				)}
 
-				{notifications.some((n) => !n.isRead) && (
+				{tabbedNotifications.some((n) => !n.isRead) && (
 					<FixoraButton variant="outline" className="fixora-notifications__mark-all" onClick={markAllRead}>
 						{t('notifications.markAllRead')}
 					</FixoraButton>

@@ -6,6 +6,7 @@ import { GET_NOTIFICATIONS } from '../../apollo/user/notification';
 import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../apollo/technicianQueryContext';
 import { getJwtToken } from '../auth';
 import { isTechnicianUser } from '../utils/userRole';
+import { useNotificationContextOptional } from '../context/NotificationContext';
 
 export interface TechnicianBadges {
 	requests: number;
@@ -21,6 +22,7 @@ export interface TechnicianBadges {
  */
 const useTechnicianBadges = (): TechnicianBadges => {
 	const user = useReactiveVar(userVar);
+	const notifCtx = useNotificationContextOptional();
 	const skip = !user?._id || !isTechnicianUser(user) || !getJwtToken();
 
 	const { data: requestsData } = useQuery(GET_INCOMING_REQUESTS, {
@@ -71,9 +73,9 @@ const useTechnicianBadges = (): TechnicianBadges => {
 		0,
 	);
 
-	const notifications = (notificationsData?.getNotifications?.list ?? []).filter(
-		(n: any) => n?.notificationType !== 'MESSAGE',
-	).length;
+	const notifications =
+		notifCtx?.unreadCount ??
+		(notificationsData?.getNotifications?.list ?? []).filter((n: { isRead?: boolean }) => !n?.isRead).length;
 
 	return { requests, jobs, messages, notifications };
 };

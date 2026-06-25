@@ -186,7 +186,8 @@ export const getNotificationDisplayText = (
 	}
 
 	if (notification.notificationType === 'MESSAGE') {
-		return t('notifications.types.message');
+		const preview = notification.notificationDescription?.trim();
+		return preview || t('notifications.types.message');
 	}
 
 	const problem = getNotificationProblemLabel(notification);
@@ -219,27 +220,38 @@ export const getNotificationText = (notification: Notification, t: (key: string)
 
 export const shouldShowNotificationSender = (notification: Notification) =>
 	isAdminWarningNotification(notification) ||
-	['BOOKING', 'REVIEW', 'FOLLOW', 'LIKE', 'COMMENT'].includes(notification.notificationType);
+	['BOOKING', 'REVIEW', 'FOLLOW', 'LIKE', 'COMMENT', 'MESSAGE'].includes(notification.notificationType);
 
-/** Customer bell/page: booking flow only — no like/follow/comment/review/message. */
-export const isCustomerNotification = (notification: Notification) => notification.notificationType === 'BOOKING';
+/** Actor / sender id — schema field `userId` (not referenceId, which is message _id). */
+export const getNotificationActorId = (notification: Notification): string | null =>
+	notification.userId?.trim() || null;
+
+/** Customer feed: booking + message notifications (no social noise). */
+export const isCustomerNotification = (notification: Notification) =>
+	['BOOKING', 'MESSAGE'].includes(notification.notificationType);
 
 export const filterCustomerNotifications = (notifications: Notification[]) =>
 	notifications.filter(isCustomerNotification);
 
-export const filterNavbarNotifications = (notifications: Notification[], isTechnician: boolean) => {
-	const withoutMessages = notifications.filter((n) => n.notificationType !== 'MESSAGE');
-	return isTechnician ? withoutMessages : filterCustomerNotifications(withoutMessages);
-};
+export const filterNavbarNotifications = (notifications: Notification[], isTechnician: boolean) =>
+	isTechnician ? notifications : filterCustomerNotifications(notifications);
 
-export const getNotificationLink = (notification: Notification): string | null => {
+export const getNotificationLink = (
+	notification: Notification,
+	options?: { isTechnician?: boolean },
+): string | null => {
+	const isTechnician = options?.isTechnician ?? false;
+	const messagesBase = isTechnician ? '/technician/messages' : '/messages';
+
 	switch (notification.referenceType) {
 		case 'BOOKING':
 			return notification.referenceId
 				? `/mypage/bookings/${notification.referenceId}`
 				: ownerMyPageHref('activeRequests');
-		case 'MESSAGE':
-			return '/messages';
+		case 'MESSAGE': {
+			const peerId = getNotificationActorId(notification);
+			return peerId ? `${messagesBase}?peerId=${encodeURIComponent(peerId)}` : messagesBase;
+		}
 		case 'ARTICLE':
 			return notification.referenceId ? `/community/${notification.referenceId}` : '/community';
 		case 'REVIEW':

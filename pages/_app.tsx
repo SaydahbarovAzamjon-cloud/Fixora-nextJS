@@ -6,7 +6,7 @@ import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
 import AppShell from '../libs/components/layout/AppShell';
-import FixoraWebSocketBridge from '../libs/components/FixoraWebSocketBridge';
+import { NotificationProvider } from '../libs/context/NotificationContext';
 import FixoraSplashBackground from '../libs/components/background/FixoraSplashBackground';
 import { FixoraThemeProvider } from '../libs/components/theme/FixoraThemeProvider';
 
@@ -21,12 +21,13 @@ const App = ({ Component, pageProps }: AppProps) => {
 
 	return (
 		<ApolloProvider client={client}>
-			<FixoraThemeProvider pathname={router.pathname}>
-				<FixoraSplashBackground />
-				<CssBaseline />
-				<FixoraWebSocketBridge />
-				<AppShell Component={Component} pageProps={pageProps} />
-			</FixoraThemeProvider>
+			<NotificationProvider>
+				<FixoraThemeProvider pathname={router.pathname}>
+					<FixoraSplashBackground />
+					<CssBaseline />
+					<AppShell Component={Component} pageProps={pageProps} />
+				</FixoraThemeProvider>
+			</NotificationProvider>
 		</ApolloProvider>
 	);
 };

@@ -25,15 +25,18 @@ import {
 } from '../../../apollo/user/notification';
 import { userVar } from '../../../apollo/store';
 import NotificationSender from '../../../libs/components/notifications/NotificationSender';
-import { isAdminWarningNotification } from '../../../libs/utils/notifications';
+import {
+	getNotificationLink,
+	isAdminWarningNotification,
+} from '../../../libs/utils/notifications';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
 });
 
-type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'payment' | 'alert' | 'warning';
-type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'alerts';
+type NotifCat = 'request' | 'status' | 'review' | 'follow' | 'like' | 'comment' | 'message' | 'payment' | 'alert' | 'warning';
+type FilterId = 'all' | 'requests' | 'payments' | 'reviews' | 'likes' | 'follows' | 'messages' | 'alerts';
 
 interface CatMeta {
 	gradient: string;
@@ -94,6 +97,16 @@ const CAT_META: Record<NotifCat, CatMeta> = {
 		filter: 'alerts',
 		action: (n) => ({ label: 'View Article', link: n.referenceId ? `/community/${n.referenceId}` : '/community' }),
 	},
+	message: {
+		gradient: 'linear-gradient(135deg, #35A8FF 0%, #3FE5FF 100%)',
+		color: '#22D3EE',
+		icon: <ChatBubbleRounded style={ICON_SX} />,
+		filter: 'messages',
+		action: (n) => {
+			const link = getNotificationLink(n, { isTechnician: true });
+			return link ? { label: 'Open Chat', link } : null;
+		},
+	},
 	payment: {
 		gradient: 'linear-gradient(135deg, #19D68C 0%, #3EE8A5 100%)',
 		color: '#22C55E',
@@ -124,6 +137,7 @@ const FILTER_KEYS: Record<FilterId, string> = {
 	reviews: 'notifications.filterReviews',
 	likes: 'notifications.filterLikes',
 	follows: 'notifications.filterFollows',
+	messages: 'notifications.filterMessages',
 	alerts: 'notifications.filterAlerts',
 };
 
@@ -145,6 +159,8 @@ const detectCat = (n: any): NotifCat => {
 			return 'like';
 		case 'COMMENT':
 			return 'comment';
+		case 'MESSAGE':
+			return 'message';
 		case 'BOOKING':
 			return BOOKING_REQUEST_PATTERN.test(text) ? 'request' : 'status';
 		default:
@@ -182,7 +198,7 @@ const Notifications: NextPage = () => {
 	const user = useReactiveVar(userVar);
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 
-	const FILTERS: FilterId[] = ['all', 'requests', 'payments', 'reviews', 'likes', 'follows'];
+	const FILTERS: FilterId[] = ['all', 'requests', 'messages', 'payments', 'reviews', 'likes', 'follows'];
 
 	const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
@@ -196,9 +212,9 @@ const Notifications: NextPage = () => {
 
 	const notifications = useMemo(
 		() =>
-			(data?.getNotifications?.list ?? [])
-				.filter((n: any) => n.notificationType !== 'MESSAGE')
-				.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+			(data?.getNotifications?.list ?? []).sort(
+				(a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+			),
 		[data],
 	);
 

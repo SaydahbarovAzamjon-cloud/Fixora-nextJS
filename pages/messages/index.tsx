@@ -16,6 +16,7 @@ import { sweetErrorHandling } from '../../libs/sweetAlert';
 import useRealtimePollInterval from '../../libs/hooks/useRealtimePollInterval';
 import usePeerMessages from '../../libs/hooks/usePeerMessages';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
+import { useNotificationContextOptional } from '../../libs/context/NotificationContext';
 import { GET_MY_BOOKINGS } from '../../apollo/user/profile';
 import { dedupeConversationsByPeer, resolvePeerBookingId } from '../../libs/utils/messageHelpers';
 import { compressMessageImage } from '../../libs/utils/compressMessageImage';
@@ -32,6 +33,7 @@ const MessagesPage: NextPage = () => {
 	const screenDevice = useDeviceDetect();
 	const isMobile = screenDevice === 'mobile';
 	const apolloClient = useApolloClient();
+	const notifCtx = useNotificationContextOptional();
 
 	const queryPeerId = router.query.peerId as string | undefined;
 	const queryBookingId = router.query.bookingId as string | undefined;
@@ -172,6 +174,13 @@ const MessagesPage: NextPage = () => {
 			cancelled = true;
 		};
 	}, [conversations, apolloClient]);
+
+	useEffect(() => {
+		if (!notifCtx) return;
+		return notifCtx.subscribeMessageReceived(() => {
+			void refetchConversations();
+		});
+	}, [notifCtx, refetchConversations]);
 
 	/** LIFECYCLES **/
 	useEffect(() => {

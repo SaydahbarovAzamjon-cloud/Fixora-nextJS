@@ -8,7 +8,6 @@ import Menu from '@mui/material/Menu';
 import useDeviceDetect from '../hooks/useDeviceDetect';
 import Link from 'next/link';
 import { FixoraLogo } from './brand';
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
@@ -29,10 +28,12 @@ import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
 import NotificationDropdown from './notifications/NotificationDropdown';
+import NotificationBell from './layout/NotificationBell';
 import NavSearchInput from './nav/NavSearchInput';
 import NavThemeToggle from './nav/NavThemeToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 import { normalizeAppLocale } from '../utils/i18nLocale';
+import { useNotificationContextOptional } from '../context/NotificationContext';
 
 const LANGS = ['en', 'kr'] as const;
 const NAV_ICON_SIZE = 18;
@@ -52,18 +53,12 @@ const Top = () => {
 	const [notifOpen, setNotifOpen] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const notifRef = useRef<HTMLDivElement>(null);
+	const notifCtx = useNotificationContextOptional();
 	const navPollMs = useRealtimePollInterval(30000);
 
 	const { data: notificationsData, refetch: refetchNotifications } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
 		variables: { input: { page: 1, limit: 20, sort: 'createdAt', direction: 'DESC' } },
-		fetchPolicy: 'network-only',
-		pollInterval: navPollMs,
-	});
-
-	const { data: unreadCountData, refetch: refetchUnreadCount } = useQuery(GET_NOTIFICATIONS, {
-		skip: !user?._id,
-		variables: { input: { page: 1, limit: 50, search: { isRead: false } } },
 		fetchPolicy: 'network-only',
 		pollInterval: navPollMs,
 	});
@@ -80,8 +75,8 @@ const Top = () => {
 		notificationsData?.getNotifications?.list ?? [],
 		isTechnician,
 	).slice(0, 8);
-	const unreadNotifications: number = filterNavbarNotifications(
-		unreadCountData?.getNotifications?.list ?? [],
+	const unreadNotifications: number = notifCtx?.unreadCount ?? filterNavbarNotifications(
+		(notificationsData?.getNotifications?.list ?? []).filter((n: Notification) => !n.isRead),
 		isTechnician,
 	).length;
 
@@ -162,7 +157,8 @@ const Top = () => {
 	const handleNotificationDelete = async (notification: Notification) => {
 		try {
 			await deleteNotification({ variables: { notificationId: notification._id } });
-			await Promise.all([refetchNotifications(), refetchUnreadCount()]);
+			if (!notification.isRead) notifCtx?.decrementUnread();
+			await refetchNotifications();
 		} catch {
 			/* ignore */
 		}
@@ -173,12 +169,13 @@ const Top = () => {
 		if (!notification.isRead) {
 			try {
 				await markNotificationRead({ variables: { input: { notificationId: notification._id } } });
-				await Promise.all([refetchNotifications(), refetchUnreadCount()]);
+				notifCtx?.decrementUnread();
+				await refetchNotifications();
 			} catch {
 				/* ignore */
 			}
 		}
-		const link = getNotificationLink(notification);
+		const link = getNotificationLink(notification, { isTechnician });
 		if (link) router.push(link);
 	};
 
@@ -316,14 +313,7 @@ const Top = () => {
 											)}
 										</span>
 									</Link>
-									<Link href={notificationsHref} className="fixora-nav-mobile__icon-link">
-										<span className="fixora-nav__icon-wrap">
-											<NotificationsOutlinedIcon className="fixora-nav__bell" />
-											{unreadNotifications > 0 && (
-												<span className="fixora-nav__badge">{formatNavBadge(unreadNotifications)}</span>
-											)}
-										</span>
-									</Link>
+									<NotificationBell href={notificationsHref} unreadCount={unreadNotifications} />
 									<button
 										type="button"
 										className="fixora-nav-mobile__avatar"
@@ -435,18 +425,10 @@ const Top = () => {
 									</span>
 								</Link>
 								<div className={'fixora-nav__icon-link'} ref={notifRef}>
-									<button
-										type="button"
-										className={'fixora-nav__icon-btn'}
+									<NotificationBell
 										onClick={() => setNotifOpen((prev) => !prev)}
-									>
-										<span className="fixora-nav__icon-wrap">
-											<NotificationsOutlinedIcon className={'fixora-nav__bell'} />
-											{unreadNotifications > 0 && (
-												<span className={'fixora-nav__badge'}>{formatNavBadge(unreadNotifications)}</span>
-											)}
-										</span>
-									</button>
+										unreadCount={unreadNotifications}
+									/>
 									{notifOpen && (
 										<NotificationDropdown
 											notifications={recentNotifications}

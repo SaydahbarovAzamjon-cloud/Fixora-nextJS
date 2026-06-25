@@ -12,7 +12,14 @@ import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
+import NotificationSetupCard from '../notifications/NotificationSetupCard';
 import { fixoraCustomerSignup, isSignupConflictError, validateRegisterInput } from '../../auth/fixoraAuth';
+import { applyNotificationPreferences } from '../../auth/applyNotificationPreferences';
+import {
+	DEFAULT_NOTIFICATION_PREFERENCES,
+	NotificationPreferences,
+} from '../../auth/notificationPreferencesCache';
+import { useApolloClient } from '@apollo/client';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
 import { getPostAuthRoute } from '../../utils/postAuthRoute';
@@ -20,6 +27,7 @@ import { getPostAuthRoute } from '../../utils/postAuthRoute';
 const RegisterForm = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
+	const apolloClient = useApolloClient();
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [fullName, setFullName] = useState('');
 	const [email, setEmail] = useState('');
@@ -30,6 +38,9 @@ const RegisterForm = () => {
 	const [photoFileName, setPhotoFileName] = useState('');
 	const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 	const [termsAccepted, setTermsAccepted] = useState(false);
+	const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
+		DEFAULT_NOTIFICATION_PREFERENCES,
+	);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 
@@ -66,6 +77,8 @@ const RegisterForm = () => {
 		setLoading(true);
 		try {
 			await fixoraCustomerSignup(fullName, email, password, phone, photoFile);
+			const userId = userVar()._id;
+			if (userId) await applyNotificationPreferences(apolloClient, userId, notificationPrefs);
 			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
 			await router.push(getPostAuthRoute(userVar(), referrer));
 		} catch (err: unknown) {
@@ -77,7 +90,7 @@ const RegisterForm = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [fullName, email, phone, password, confirmPassword, termsAccepted, photoFile, router]);
+	}, [fullName, email, phone, password, confirmPassword, termsAccepted, photoFile, router, notificationPrefs, apolloClient]);
 
 	return (
 		<>
@@ -195,6 +208,7 @@ const RegisterForm = () => {
 							{t(`validation.${errors.terms}`)}
 						</span>
 					)}
+					<NotificationSetupCard prefs={notificationPrefs} onChange={setNotificationPrefs} />
 					<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleSubmit}>
 						{t('register.submit')}
 						<ArrowForward fontSize="small" />

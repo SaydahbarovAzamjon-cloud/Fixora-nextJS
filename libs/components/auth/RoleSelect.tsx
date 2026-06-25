@@ -1,30 +1,48 @@
 import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import { useApolloClient } from '@apollo/client';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import AuthHeading from './AuthHeading';
 import { FixoraButton, FixoraInput } from '../ui';
+import NotificationSetupCard from '../notifications/NotificationSetupCard';
 import {
 	fixoraCompleteOAuthSignup,
 	getNeedsOnboarding,
 	isSignupConflictError,
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
+import { applyNotificationPreferences } from '../../auth/applyNotificationPreferences';
+import {
+	DEFAULT_NOTIFICATION_PREFERENCES,
+	NotificationPreferences,
+	writeNotificationPreferencesCache,
+} from '../../auth/notificationPreferencesCache';
+import { UPDATE_NOTIFICATION_PREFERENCES } from '../../../apollo/user/settings';
+import { userVar } from '../../../apollo/store';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 
 const RoleSelect = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
+	const apolloClient = useApolloClient();
 	const isOAuth = router.query.oauth === '1' || getNeedsOnboarding();
 	const [selectedType, setSelectedType] = useState<'USER' | 'TECHNICIAN' | null>(null);
 	const [nickname, setNickname] = useState('');
 	const [phone, setPhone] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
+	const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
+		DEFAULT_NOTIFICATION_PREFERENCES,
+	);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
+
+	const applyNotificationPrefs = async (userId: string) => {
+		await applyNotificationPreferences(apolloClient, userId, notificationPrefs);
+	};
 
 	const handleRolePick = (type: 'USER' | 'TECHNICIAN') => {
 		if (isOAuth) {
@@ -50,6 +68,8 @@ const RoleSelect = () => {
 				userPhoneNumber: phone.trim(),
 				userType: selectedType,
 			});
+			const userId = userVar()._id;
+			if (userId) await applyNotificationPrefs(userId);
 			if (userType === 'TECHNICIAN') {
 				await router.push('/register/technician/id');
 			} else {
@@ -64,7 +84,7 @@ const RoleSelect = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [nickname, phone, termsAccepted, selectedType, router]);
+	}, [nickname, phone, termsAccepted, selectedType, router, notificationPrefs, apolloClient]);
 
 	return (
 		<>
@@ -127,6 +147,7 @@ const RoleSelect = () => {
 							{t(`validation.${errors.terms}`)}
 						</span>
 					)}
+					<NotificationSetupCard prefs={notificationPrefs} onChange={setNotificationPrefs} />
 					<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleOAuthComplete}>
 						{t('oauthComplete.submit')}
 						<ArrowForward fontSize="small" />

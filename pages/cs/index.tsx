@@ -7,6 +7,7 @@ import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import Notice from '../../libs/components/cs/Notice';
 import Faq from '../../libs/components/cs/Faq';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -17,6 +18,7 @@ export const getStaticProps = async ({ locale }: any) => ({
 const CS: NextPage = () => {
 	const device = useDeviceDetect();
 	const router = useRouter();
+	const { t } = useTranslation('common');
 
 	/** HANDLERS **/
 	const changeTabHandler = (tab: string) => {
@@ -32,15 +34,15 @@ const CS: NextPage = () => {
 	const tab = router.query.tab ?? 'notice';
 
 	if (device === 'mobile') {
-		return <h1>CS PAGE MOBILE</h1>;
+		return <h1>{t('cs.mobilePlaceholder')}</h1>;
 	} else {
 		return (
 			<Stack className={'cs-page'}>
 				<Stack className={'container'}>
 					<Box component={'div'} className={'cs-main-info'}>
 						<Box component={'div'} className={'info'}>
-							<span>Cs center</span>
-							<p>I will answer your questions</p>
+							<span>{t('cs.hero.eyebrow')}</span>
+							<p>{t('cs.hero.subtitle')}</p>
 						</Box>
 						<Box component={'div'} className={'btns'}>
 							<div
@@ -49,7 +51,7 @@ const CS: NextPage = () => {
 									changeTabHandler('notice');
 								}}
 							>
-								Notice
+								{t('cs.tabs.notice')}
 							</div>
 							<div
 								className={tab == 'faq' ? 'active' : ''}
@@ -57,7 +59,7 @@ const CS: NextPage = () => {
 									changeTabHandler('faq');
 								}}
 							>
-								FAQ
+								{t('cs.tabs.faq')}
 							</div>
 						</Box>
 					</Box>

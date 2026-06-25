@@ -19,7 +19,7 @@ export function useAdminNotifications() {
 	const notifications: Notification[] = data?.getNotifications?.list ?? [];
 	const unreadCount =
 		unreadData?.getNotifications?.metaCounter?.[0]?.total ??
-		unreadData?.getNotifications?.list?.filter((notification) => !notification.isRead).length ??
+		unreadData?.getNotifications?.list?.filter((notification: Notification) => !notification.isRead).length ??
 		0;
 
 	const refetchAll = async () => {

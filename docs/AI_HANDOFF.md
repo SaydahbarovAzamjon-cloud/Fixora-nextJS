@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-24 |
+| **Last updated** | 2026-06-25 |
 | **Last agent** | Cursor |
-| **Last session** | **P4-04 Tests** — Vitest (13 passed): theme, technicianMetrics, BookingAiClassificationHint; Playwright smoke E2E (3 passed: home, search, login); `yarn test` / `yarn test:e2e` |
-| **Next agent should start with** | Post-MVP — expand E2E coverage, CI test job, or `BACKEND_GAPS.md` wiring as needed |
+| **Last session** | **Removed `ru` locale** — deleted `public/locales/ru/*`, config `en`+`kr` only, `normalizeAppLocale` fallback; prior CS/i18n + Nestar cleanup |
+| **Next agent should start with** | Optional: remove unused legacy common.json keys, expand E2E |
 
 ---
 

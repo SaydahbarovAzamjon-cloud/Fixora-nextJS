@@ -1,7 +1,6 @@
 /** Minimal Fixora summaries for homepage sections (full User/Article types arrive with P3-13). */
 
-import { MeLiked } from '../property/property';
-import { MeFollowed } from '../follow/follow';
+import { MeFollowed, MeLiked } from '../common/meta';
 
 export type BadgeLevel = 'NEW' | 'VERIFIED' | 'PREMIUM_PRO';
 

@@ -64,7 +64,7 @@ const JobListItem: React.FC<JobListItemProps> = ({ job, active, onClick }) => {
 		<Card active={active} onClick={onClick}>
 			<Stack direction="row" spacing={1.25} alignItems="flex-start" mb={1}>
 				<IconBox>{deviceIcon(job.aiClassification?.deviceType)}</IconBox>
-				<Box flex={1} minWidth={0}>
+				<div style={{ flex: 1, minWidth: 0 }}>
 					<Stack direction="row" justifyContent="space-between" alignItems="center" mb={0.25}>
 						<Typography sx={{ color: '#E0E0E0', fontSize: 13, fontWeight: 600 }}>Customer</Typography>
 						<StageChip label={stageInfo.label} stagecolor={stageInfo.color} stagebg={stageInfo.bg} />
@@ -72,7 +72,7 @@ const JobListItem: React.FC<JobListItemProps> = ({ job, active, onClick }) => {
 					<Typography sx={{ color: '#808080', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
 						{deviceLabel(job.aiClassification?.deviceType)}
 					</Typography>
-				</Box>
+				</div>
 			</Stack>
 
 			<Typography sx={{ color: '#707070', fontSize: 12, lineHeight: 1.4, mb: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>

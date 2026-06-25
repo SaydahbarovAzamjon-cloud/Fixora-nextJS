@@ -32,6 +32,7 @@ import NotificationDropdown from './notifications/NotificationDropdown';
 import NavSearchInput from './nav/NavSearchInput';
 import NavThemeToggle from './nav/NavThemeToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
+import { normalizeAppLocale } from '../utils/i18nLocale';
 
 const LANGS = ['en', 'kr'] as const;
 const NAV_ICON_SIZE = 18;
@@ -94,11 +95,11 @@ const Top = () => {
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (localStorage.getItem('locale') === null) {
-			localStorage.setItem('locale', 'en');
-			setLang('en');
-		} else {
-			setLang(localStorage.getItem('locale') ?? 'en');
+		const stored = normalizeAppLocale(localStorage.getItem('locale'));
+		localStorage.setItem('locale', stored);
+		setLang(stored);
+		if (router.locale && router.locale !== stored) {
+			void router.replace(router.asPath, router.asPath, { locale: stored });
 		}
 	}, [router]);
 

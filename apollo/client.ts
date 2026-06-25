@@ -8,6 +8,11 @@ import { sweetErrorAlert } from '../libs/sweetAlert';
 import { isNoDataFoundGraphQLError } from '../libs/utils/graphqlErrors';
 import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
+const GRAPHQL_URI =
+	process.env.REACT_APP_API_GRAPHQL_URL ||
+	process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+	'http://localhost:2000/graphql';
+const isProd = process.env.NODE_ENV === 'production';
 
 function getHeaders() {
 	const headers = {} as HeadersInit;
@@ -29,26 +34,25 @@ const tokenRefreshLink = new TokenRefreshLink({
 });
 
 function createIsomorphicLink() {
-	if (typeof window !== 'undefined') {
-		const authLink = new ApolloLink((operation, forward) => {
-			operation.setContext(({ headers = {} }) => ({
-				headers: {
-					...headers,
-					...getHeaders(),
-				},
-			}));
-			if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true') {
-				console.debug('[Apollo]', operation.operationName);
-			}
-			return forward(operation);
-		});
+	const authLink = new ApolloLink((operation, forward) => {
+		operation.setContext(({ headers = {} }) => ({
+			headers: {
+				...headers,
+				...getHeaders(),
+			},
+		}));
+		if (process.env.NEXT_PUBLIC_APOLLO_DEBUG === 'true' && !isProd) {
+			console.debug('[Apollo]', operation.operationName);
+		}
+		return forward(operation);
+	});
 
-		// @ts-ignore
-		const httpLink = new createUploadLink({
-			uri: process.env.REACT_APP_API_GRAPHQL_URL,
-		});
+	// @ts-ignore
+	const httpLink = new createUploadLink({
+		uri: GRAPHQL_URI,
+	});
 
-		const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
+	const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
 		if (graphQLErrors) {
 			graphQLErrors.map(({ message, locations, path }) => {
 				const isAuthMutation =
@@ -63,9 +67,11 @@ function createIsomorphicLink() {
 				const isLookupMiss = isNoDataFoundGraphQLError(message);
 
 				if (isRoleError || isAuthError || isLookupMiss) {
-					console.debug(`[GraphQL auth]: ${message}`);
+					if (!isProd) console.debug(`[GraphQL auth]: ${message}`);
 				} else {
-					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+					if (!isProd) {
+						console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+					}
 				}
 
 				if (
@@ -81,15 +87,14 @@ function createIsomorphicLink() {
 			});
 		}
 
-	if (networkError) console.log(`[Network error]: ${networkError}`);
-	// @ts-ignore
-	if (networkError?.statusCode === 401) {
-	}
-		});
+		if (networkError && !isProd) console.log(`[Network error]: ${networkError}`);
+		// @ts-ignore
+		if (networkError?.statusCode === 401) {
+		}
+	});
 
-		// Realtime push uses libs/utils/fixoraWebSocket.ts (FixoraWebSocketBridge) — not Apollo subscriptions.
-		return from([errorLink, tokenRefreshLink, authLink.concat(httpLink)]);
-	}
+	// Realtime push uses libs/utils/fixoraWebSocket.ts (FixoraWebSocketBridge) — not Apollo subscriptions.
+	return from([errorLink, tokenRefreshLink, authLink.concat(httpLink)]);
 }
 
 function createApolloClient() {

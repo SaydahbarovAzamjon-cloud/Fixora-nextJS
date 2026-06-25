@@ -24,7 +24,7 @@ interface SplashCursorProps {
   TRANSPARENT?: boolean;
   RAINBOW_MODE?: boolean;
   COLOR?: string;
-  colorPalette?: string[];
+  colorPalette?: readonly string[];
   colorIntensity?: number;
 }
 

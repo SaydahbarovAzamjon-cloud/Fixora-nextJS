@@ -178,8 +178,7 @@
        .right {
          width: 50%;
          height: 100%;
-         background-image: url("/img/banner/joinBg.svg");
-         background-size: cover;
+         background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
        }
      }
    }

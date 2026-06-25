@@ -164,7 +164,7 @@ Reuse existing `libs/`, `pages/`, and `apollo/` patterns before creating new fol
 | Item | Value |
 |------|-------|
 | Library | `next-i18next` — `useTranslation(namespace)` + `t('key')` |
-| Locales | `en`, **`kr`** (Korean — not `ko`), `ru` |
+| Locales | `en`, **`kr`** (Korean — not `ko`) |
 | Paths | `public/locales/{locale}/{namespace}.json` |
 | Namespaces | `common` (customer UI), `auth` (login/register), `technician` (technician portal) |
 | SSR | `serverSideTranslations(locale, ['common', …])` in `getServerSideProps` |

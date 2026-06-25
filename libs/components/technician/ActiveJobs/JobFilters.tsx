@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip } from '@mui/material';
+import { Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { JOB_STAGE_INFO, JobStage } from './jobHelpers';
 
@@ -56,7 +56,7 @@ const JobFilters: React.FC<JobFiltersProps> = ({ jobs, active, onChange }) => {
 	];
 
 	return (
-		<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+		<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 			{options.map((opt) => (
 				<FilterChip
 					key={opt.id}
@@ -66,7 +66,7 @@ const JobFilters: React.FC<JobFiltersProps> = ({ jobs, active, onChange }) => {
 					clickable
 				/>
 			))}
-		</Box>
+		</div>
 	);
 };
 

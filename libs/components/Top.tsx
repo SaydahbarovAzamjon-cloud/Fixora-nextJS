@@ -96,7 +96,7 @@ const Top = () => {
 		if (router.locale && router.locale !== stored) {
 			void router.replace(router.asPath, router.asPath, { locale: stored });
 		}
-	}, [router]);
+	}, [router.locale, router.asPath]);
 
 	useEffect(() => {
 		const jwt = getJwtToken();

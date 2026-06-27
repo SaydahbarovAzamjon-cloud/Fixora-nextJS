@@ -8,10 +8,10 @@ import {
 } from '../../apollo/user/auth';
 import { UPDATE_USER } from '../../apollo/user/profile';
 import { userVar } from '../../apollo/store';
-import { updateUserInfo } from './index';
+import { updateUserInfo } from './userInfo';
 import { clearTechOnboardingFiles, getTechIdFile, getTechPhotoFile } from './techOnboardingFiles';
 import { uploadImageFile } from '../utils/uploadImageFile';
-import { syncUserVarFromGraphqlUser } from './syncUserVar';
+import { syncUserVarFromGraphqlUser, writeStoredProfileImage } from './syncUserVar';
 import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
 import { dataUrlToFile } from '../utils/onboardingFileStorage';
 import { getGraphQLErrorMessage } from '../utils/oauthErrors';
@@ -120,30 +120,29 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 	localStorage.setItem('refreshToken', refreshToken);
 	localStorage.setItem('login', Date.now().toString());
 	updateUserInfo(accessToken);
-	if (profile) {
-		const current = userVar();
-		userVar({
-			...current,
-			...(profile._id ? { _id: profile._id } : {}),
-			...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
-			...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
-			...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
-			...(profile.userType ? { memberType: profile.userType, userType: profile.userType } : {}),
-			...(profile.verificationStatus
-				? { verificationStatus: profile.verificationStatus }
-				: profile.userType === 'TECHNICIAN'
-					? { verificationStatus: 'PENDING' }
-					: {}),
-		});
-		if (profile._id && profile.userProfileImage) {
-			syncUserVarFromGraphqlUser({
-				_id: profile._id,
-				userProfileImage: profile.userProfileImage,
-			});
-		}
-		if (profile._id && profile.userEmail) {
-			writeStoredUserEmail(profile._id, profile.userEmail);
-		}
+
+	if (!profile) return;
+
+	const current = userVar();
+	userVar({
+		...current,
+		...(profile._id ? { _id: profile._id } : {}),
+		...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
+		...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
+		...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
+		...(profile.userType ? { memberType: profile.userType, userType: profile.userType } : {}),
+		...(profile.verificationStatus
+			? { verificationStatus: profile.verificationStatus }
+			: profile.userType === 'TECHNICIAN'
+				? { verificationStatus: 'PENDING' }
+				: {}),
+	});
+
+	if (profile._id && profile.userProfileImage) {
+		writeStoredProfileImage(profile._id, profile.userProfileImage);
+	}
+	if (profile._id && profile.userEmail) {
+		writeStoredUserEmail(profile._id, profile.userEmail);
 	}
 }
 
@@ -159,7 +158,7 @@ export function getNeedsOnboarding(): boolean {
 }
 
 export const fixoraLogin = async (userEmail: string, userPassword: string): Promise<void> => {
-	const apolloClient = await initializeApollo();
+	const apolloClient = initializeApollo();
 	try {
 		const result = await apolloClient.mutate({
 			mutation: FIXORA_LOGIN,
@@ -181,6 +180,9 @@ export const fixoraLogin = async (userEmail: string, userPassword: string): Prom
 		});
 		setNeedsOnboarding(false);
 	} catch (err) {
+		if (err instanceof Error && !('graphQLErrors' in err)) {
+			throw err;
+		}
 		throw new Error(getGraphQLErrorMessage(err));
 	}
 };

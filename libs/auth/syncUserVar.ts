@@ -32,3 +32,10 @@ export function readStoredProfileImage(userId: string): string | null {
 	if (typeof window === 'undefined' || !userId) return null;
 	return localStorage.getItem(`${PROFILE_IMAGE_STORAGE_PREFIX}${userId}`);
 }
+
+export function writeStoredProfileImage(userId: string, imagePath: string | null | undefined) {
+	if (typeof window === 'undefined' || !userId) return;
+	const key = `${PROFILE_IMAGE_STORAGE_PREFIX}${userId}`;
+	if (imagePath) localStorage.setItem(key, imagePath);
+	else localStorage.removeItem(key);
+}

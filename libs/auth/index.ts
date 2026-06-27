@@ -1,20 +1,11 @@
-import decodeJWT from 'jwt-decode';
 import { initializeApollo } from '../../apollo/client';
-import { userVar } from '../../apollo/store';
-import { CustomJwtPayload } from '../types/customJwtPayload';
 import { sweetMixinErrorAlert } from '../sweetAlert';
-import { readStoredProfileImage } from './syncUserVar';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
+import { clearAuthStorage, getJwtToken, setJwtToken, updateAuthStorage } from './tokens';
+import { deleteUserInfo, updateUserInfo } from './userInfo';
 
-export function getJwtToken(): any {
-	if (typeof window !== 'undefined') {
-		return localStorage.getItem('accessToken') ?? '';
-	}
-}
-
-export function setJwtToken(token: string) {
-	localStorage.setItem('accessToken', token);
-}
+export { getJwtToken, setJwtToken, clearAuthStorage, updateAuthStorage } from './tokens';
+export { updateUserInfo, deleteUserInfo } from './userInfo';
 
 export const logIn = async (nick: string, password: string): Promise<void> => {
 	try {
@@ -120,40 +111,8 @@ const requestSignUpJwtToken = async ({
 	}
 };
 
-export const updateStorage = ({ jwtToken }: { jwtToken: any }) => {
-	setJwtToken(jwtToken);
-	window.localStorage.setItem('login', Date.now().toString());
-};
-
-export const updateUserInfo = (jwtToken: any) => {
-	if (!jwtToken) return false;
-
-	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
-	const userId = claims._id ?? (claims as { sub?: string }).sub ?? '';
-	const storedImage = userId ? readStoredProfileImage(userId) : null;
-	const profileImage = storedImage ?? claims.userProfileImage ?? claims.memberImage ?? '';
-	userVar({
-		_id: userId,
-		memberType: claims.userType ?? claims.memberType ?? '',
-		userType: claims.userType ?? claims.memberType ?? '',
-		verificationStatus: claims.verificationStatus,
-		memberStatus: claims.memberStatus ?? '',
-		memberAuthType: claims.memberAuthType,
-		memberPhone: claims.memberPhone ?? '',
-		memberNick: claims.userNickname ?? claims.memberNick ?? '',
-		memberFullName: claims.userFullName ?? claims.memberFullName ?? '',
-		memberImage: profileImage ? `${profileImage}` : '',
-		memberAddress: claims.memberAddress ?? '',
-		memberDesc: claims.memberDesc ?? '',
-		memberProperties: claims.memberProperties,
-		memberRank: claims.memberRank,
-		memberArticles: claims.memberArticles,
-		memberPoints: claims.memberPoints,
-		memberLikes: claims.memberLikes,
-		memberViews: claims.memberViews,
-		memberWarnings: claims.memberWarnings,
-		memberBlocks: claims.memberBlocks,
-	});
+export const updateStorage = ({ jwtToken }: { jwtToken: string }) => {
+	updateAuthStorage(jwtToken);
 };
 
 export const logOut = () => {
@@ -163,29 +122,5 @@ export const logOut = () => {
 };
 
 const deleteStorage = () => {
-	localStorage.removeItem('accessToken');
-	window.localStorage.setItem('logout', Date.now().toString());
-};
-
-const deleteUserInfo = () => {
-	userVar({
-		_id: '',
-		memberType: '',
-		memberStatus: '',
-		memberAuthType: '',
-		memberPhone: '',
-		memberNick: '',
-		memberFullName: '',
-		memberImage: '',
-		memberAddress: '',
-		memberDesc: '',
-		memberProperties: 0,
-		memberRank: 0,
-		memberArticles: 0,
-		memberPoints: 0,
-		memberLikes: 0,
-		memberViews: 0,
-		memberWarnings: 0,
-		memberBlocks: 0,
-	});
+	clearAuthStorage();
 };

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
@@ -8,12 +8,16 @@ import { getJwtToken, updateUserInfo } from '../../auth';
 import { getNeedsOnboarding } from '../../auth/fixoraAuth';
 import { resolveAuthUser } from '../../utils/authSession';
 import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { routePathsEqual } from '../../utils/routePaths';
 
 const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 	return (props: any) => {
 		const { t } = useTranslation('auth');
 		const device = useDeviceDetect();
 		const router = useRouter();
+		const redirectingRef = useRef(false);
+		const authUserId = resolveAuthUser()?._id ?? '';
+		const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
 
 		useEffect(() => {
 			const jwt = getJwtToken();
@@ -21,11 +25,19 @@ const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 		}, []);
 
 		useEffect(() => {
-			if (getNeedsOnboarding()) return;
+			if (getNeedsOnboarding() || !authUserId || redirectingRef.current) return;
+
 			const authUser = resolveAuthUser();
 			if (!authUser?._id) return;
-			router.replace(getPostAuthRoute(authUser)).then();
-		}, [router]);
+
+			const target = getPostAuthRoute(authUser, referrer);
+			if (routePathsEqual(router.pathname, target)) return;
+
+			redirectingRef.current = true;
+			void router.replace(target).finally(() => {
+				redirectingRef.current = false;
+			});
+		}, [authUserId, referrer, router.pathname]);
 
 		const wrapId = device === 'mobile' ? 'mobile-wrap' : 'pc-wrap';
 

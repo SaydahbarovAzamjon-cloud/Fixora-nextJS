@@ -27,6 +27,11 @@
 		width: 100%;
 		min-width: 0;
 		overflow-x: hidden;
+		padding-top: var(--fixora-mobile-page-top);
+
+		&:has(> .home-page) {
+			padding-top: 0;
+		}
 	}
 
 	#footer {

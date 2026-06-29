@@ -1,7 +1,12 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
-import { getJwtToken } from '../auth';
+import { getJwtToken } from '../auth/tokens';
 import { MAX_DEVICE_IMAGES } from '../utils/deviceImage';
+
+const GRAPHQL_URI =
+	process.env.REACT_APP_API_GRAPHQL_URL ||
+	process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+	'http://localhost:2000/graphql';
 import { validateCoverFile } from './useArticleCoverUpload';
 
 /** FixoraB allowedUploadTargets — `device` whitelisted (GAP-112). */
@@ -49,7 +54,7 @@ async function uploadDeviceFileWithTarget(file: File, target: string, token: str
 	formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
 	formData.append('0', file);
 
-	const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+	const response = await axios.post(GRAPHQL_URI, formData, {
 		headers: {
 			'Content-Type': 'multipart/form-data',
 			'apollo-require-preflight': true,
@@ -205,26 +210,44 @@ export function useDeviceImageUpload(onError?: (key: string) => void, existingCo
 	const totalCount = safeExistingCount + images.length;
 	const remainingSlots = Math.max(0, MAX_DEVICE_IMAGES - totalCount);
 
-	return {
-		images,
-		maxImages: MAX_DEVICE_IMAGES,
-		fileRef,
-		pickFiles,
-		removeImage,
-		clearImages,
-		uploadDeviceImages,
-		uploading,
-		openPicker: () => {
-			replaceTargetIdRef.current = null;
-			fileRef.current?.click();
-		},
-		openReplacePicker: (id: string) => {
-			replaceTargetIdRef.current = id;
-			fileRef.current?.click();
-		},
-		hasImages: images.length > 0,
-		canAddMore: totalCount < MAX_DEVICE_IMAGES,
-		remainingSlots,
-		totalCount,
-	};
+	const openPicker = useCallback(() => {
+		replaceTargetIdRef.current = null;
+		fileRef.current?.click();
+	}, []);
+
+	const openReplacePicker = useCallback((id: string) => {
+		replaceTargetIdRef.current = id;
+		fileRef.current?.click();
+	}, []);
+
+	return useMemo(
+		() => ({
+			images,
+			maxImages: MAX_DEVICE_IMAGES,
+			fileRef,
+			pickFiles,
+			removeImage,
+			clearImages,
+			uploadDeviceImages,
+			uploading,
+			openPicker,
+			openReplacePicker,
+			hasImages: images.length > 0,
+			canAddMore: totalCount < MAX_DEVICE_IMAGES,
+			remainingSlots,
+			totalCount,
+		}),
+		[
+			images,
+			pickFiles,
+			removeImage,
+			clearImages,
+			uploadDeviceImages,
+			uploading,
+			openPicker,
+			openReplacePicker,
+			totalCount,
+			remainingSlots,
+		],
+	);
 }

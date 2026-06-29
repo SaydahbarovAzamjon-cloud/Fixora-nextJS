@@ -20,6 +20,8 @@ export function useBookingAiClassification(problemText: string) {
 			setClassification(null);
 		},
 	});
+	const classifyRef = useRef(classify);
+	classifyRef.current = classify;
 
 	useEffect(() => {
 		if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -34,13 +36,13 @@ export function useBookingAiClassification(problemText: string) {
 		debounceRef.current = setTimeout(() => {
 			if (trimmed === lastRequestedRef.current) return;
 			lastRequestedRef.current = trimmed;
-			classify({ variables: { input: { problemText: trimmed } } });
+			classifyRef.current({ variables: { input: { problemText: trimmed } } });
 		}, DEBOUNCE_MS);
 
 		return () => {
 			if (debounceRef.current) clearTimeout(debounceRef.current);
 		};
-	}, [problemText, classify]);
+	}, [problemText]);
 
 	return { classification, loading };
 }

@@ -31,7 +31,9 @@
 			.fixora-footer__grid {
 				display: flex;
 				flex-direction: column;
+				align-items: center;
 				gap: 28px;
+				width: 100%;
 			}
 
 			.fixora-footer__heading {
@@ -41,14 +43,18 @@
 				font-weight: 600;
 				line-height: 1.2;
 				margin: 0;
+				width: 100%;
+				text-align: center;
 			}
 
 			.fixora-footer__links,
 			.fixora-footer__discover {
 				display: flex;
 				flex-direction: column;
-				align-items: flex-start;
+				align-items: center;
+				text-align: center;
 				gap: 12px;
+				width: 100%;
 			}
 
 			.fixora-footer__logo-scene {
@@ -154,6 +160,7 @@
 				@include fixora-tap-target;
 				@include fixora-touch-active;
 				display: inline-flex;
+				justify-content: center;
 				width: fit-content;
 				color: var(--fixora-text-secondary);
 				font-family: $font;
@@ -161,7 +168,7 @@
 				font-weight: 400;
 				cursor: pointer;
 				text-decoration: none;
-				transform-origin: left center;
+				transform-origin: center center;
 				transition: transform 0.22s ease-in-out, color 0.22s ease-in-out;
 
 				&:hover,
@@ -178,9 +185,12 @@
 				padding-bottom: var(--fixora-safe-bottom);
 				border-top: 1px solid var(--fixora-border-subtle);
 				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				align-items: flex-end;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				gap: 8px;
+				width: 100%;
 
 				span {
 					color: var(--fixora-text-secondary);
@@ -193,6 +203,70 @@
 				.fixora-footer__legal {
 					display: none;
 				}
+			}
+		}
+	}
+}
+
+@media (max-width: 991px) {
+	#pc-wrap-home #footer,
+	#pc-wrap #footer,
+	#pc-wrap-full #footer {
+		.footer-container {
+			width: 100%;
+			max-width: calc(100% - 2 * var(--fixora-mobile-gutter));
+			padding-left: var(--fixora-mobile-gutter);
+			padding-right: var(--fixora-mobile-gutter);
+
+			.fixora-footer__newsletter-title,
+			.fixora-footer__newsletter-input {
+				display: none;
+			}
+
+			.fixora-footer__grid {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 28px;
+				width: 100%;
+			}
+
+			.fixora-footer__logo-scene,
+			.fixora-footer__contact,
+			.fixora-footer__links,
+			.fixora-footer__discover {
+				grid-column: auto;
+				grid-row: auto;
+				margin-top: 0;
+				width: 100%;
+			}
+
+			.fixora-footer__contact {
+				align-items: center;
+				text-align: center;
+			}
+
+			.fixora-footer__heading {
+				width: 100%;
+				text-align: center;
+			}
+
+			.fixora-footer__links,
+			.fixora-footer__discover {
+				align-items: center;
+				text-align: center;
+			}
+
+			.fixora-footer__link {
+				transform-origin: center center;
+			}
+
+			.second {
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				gap: 8px;
 			}
 		}
 	}

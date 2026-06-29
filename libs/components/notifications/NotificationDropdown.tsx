@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Moment from 'react-moment';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { Notification } from '../../types/fixora/fixora';
 import { GET_BOOKING } from '../../../apollo/user/query';
 import {
@@ -88,7 +89,7 @@ const NotificationDropdownItem = ({
 						onDelete();
 					}}
 				>
-					×
+					<DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
 				</button>
 			)}
 		</div>

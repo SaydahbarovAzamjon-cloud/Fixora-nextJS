@@ -3,7 +3,7 @@
 
 #mobile-wrap {
 	.fixora-community-page {
-		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+		padding: 0 var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
 	}
 
 	.fixora-community {
@@ -43,7 +43,7 @@
 	}
 
 	.fixora-post-detail-page {
-		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+		padding: 0 var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
 	}
 
 	.fixora-post-detail__hero-media {
@@ -57,6 +57,6 @@
 	}
 
 	.fixora-community-write-page {
-		padding: 12px var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
+		padding: 0 var(--fixora-mobile-gutter) calc(24px + var(--fixora-safe-bottom));
 	}
 }

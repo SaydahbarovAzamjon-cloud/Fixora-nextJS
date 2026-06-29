@@ -8,7 +8,10 @@ import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
+import { normalizeTechniciansInquiry } from '../../utils/technicianSearch';
 import { SERVICE_ISSUE_CATEGORY, SERVICE_DEVICE_CATEGORY } from './categoryMappings';
+import SearchHorizontalCarousel from './SearchHorizontalCarousel';
+import { SEARCH_CATEGORY_CAROUSEL } from '../../constants/searchCarousel';
 
 interface SearchCategoryRowProps {
 	searchFilter: TechniciansInquiry;
@@ -29,45 +32,72 @@ const SearchCategoryRow = ({ searchFilter, setSearchFilter }: SearchCategoryRowP
 	const { t } = useTranslation('common');
 
 	const categoryClickHandler = (chip: (typeof CATEGORY_CHIPS)[number]) => {
-		setSearchFilter({
-			...searchFilter,
-			page: 1,
-			search: {
-				...searchFilter.search,
-				text: undefined,
-				issueCategory: chip.issueCategory,
-				deviceCategory: chip.deviceCategory,
-				latitude: undefined,
-				longitude: undefined,
-				radiusKm: undefined,
-				...(chip.key === 'all'
-					? { issueCategory: undefined, deviceCategory: undefined }
-					: {}),
-			},
-		});
+		const { latitude, longitude, radiusKm, minAverageRating, maxAvgResponseMinutes, userLocation, isOnline } =
+			searchFilter.search;
+
+		const sharedSearch: TechniciansInquiry['search'] = {
+			isOnline: isOnline ?? null,
+		};
+
+		if (latitude != null && longitude != null) {
+			sharedSearch.latitude = latitude;
+			sharedSearch.longitude = longitude;
+			sharedSearch.radiusKm = radiusKm ?? undefined;
+		}
+		if (minAverageRating != null) sharedSearch.minAverageRating = minAverageRating;
+		if (maxAvgResponseMinutes != null) sharedSearch.maxAvgResponseMinutes = maxAvgResponseMinutes;
+		if (userLocation?.trim()) sharedSearch.userLocation = userLocation.trim();
+
+		if (chip.key === 'all') {
+			setSearchFilter(
+				normalizeTechniciansInquiry({
+					...searchFilter,
+					page: 1,
+					search: sharedSearch,
+				}),
+			);
+			return;
+		}
+
+		setSearchFilter(
+			normalizeTechniciansInquiry({
+				...searchFilter,
+				page: 1,
+				search: {
+					...sharedSearch,
+					issueCategory: chip.issueCategory,
+					deviceCategory: chip.deviceCategory,
+				},
+			}),
+		);
 	};
 
 	const isCategoryActive = (chip: (typeof CATEGORY_CHIPS)[number]) => {
+		const { issueCategory, deviceCategory, text } = searchFilter.search;
 		if (chip.key === 'all') {
-			return !searchFilter.search.issueCategory && !searchFilter.search.deviceCategory;
+			return !issueCategory && !deviceCategory && !text?.trim();
 		}
-		return searchFilter.search.issueCategory === chip.issueCategory && searchFilter.search.deviceCategory === chip.deviceCategory;
+		return issueCategory === chip.issueCategory && deviceCategory === chip.deviceCategory;
 	};
 
 	return (
-		<div className="fixora-search-categories">
+		<SearchHorizontalCarousel
+			className="fixora-search-categories"
+			slideClassName="fixora-search-categories__slide"
+			spaceBetween={SEARCH_CATEGORY_CAROUSEL.spaceBetween}
+		>
 			{CATEGORY_CHIPS.map((chip) => (
 				<button
 					key={chip.key}
 					type="button"
-					className={`fixora-search-category${isCategoryActive(chip) ? ' fixora-search-category--active' : ''}`}
+					className={`fixora-search-category swiper-no-swiping${isCategoryActive(chip) ? ' fixora-search-category--active' : ''}`}
 					onClick={() => categoryClickHandler(chip)}
 				>
 					<chip.Icon />
 					<span>{t(`search.categories.${chip.key}`)}</span>
 				</button>
 			))}
-		</div>
+		</SearchHorizontalCarousel>
 	);
 };
 

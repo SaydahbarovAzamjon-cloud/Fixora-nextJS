@@ -1,5 +1,6 @@
 import type { MapPoint } from '../kakao-maps';
 import type { TechnicianSummary, TechniciansInquiry } from '../types/fixora/fixora';
+import { prepareTechniciansQueryInput } from './technicianSearch';
 
 export interface PlottableTechnician extends TechnicianSummary {
 	shopLatitude: number;
@@ -42,15 +43,12 @@ export function getMapTechniciansQueryInput(
 	searchFilter: TechniciansInquiry,
 	limit: number,
 ): TechniciansInquiry {
+	const prepared = prepareTechniciansQueryInput(searchFilter);
+	const { latitude, longitude, radiusKm, ...mapSearch } = prepared.search;
 	return {
-		...searchFilter,
+		...prepared,
 		page: 1,
 		limit,
-		search: {
-			...searchFilter.search,
-			latitude: undefined,
-			longitude: undefined,
-			radiusKm: undefined,
-		},
+		search: mapSearch,
 	};
 }

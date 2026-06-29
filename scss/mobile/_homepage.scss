@@ -17,9 +17,12 @@
 		&__head {
 			margin-bottom: 14px;
 			gap: 8px;
+			min-width: 0;
 
 			h2 {
 				font-size: 18px;
+				flex: 1;
+				min-width: 0;
 			}
 		}
 
@@ -39,22 +42,48 @@
 	}
 
 	.fixora-home-technicians {
+		--fixora-home-tech-arrow-size: 32px;
+		--fixora-home-tech-carousel-gap: 8px;
+
 		.container {
-			padding: 16px 14px;
-			border-radius: 14px;
+			padding: 0 var(--fixora-mobile-gutter);
+			border: none;
+			background: transparent;
+			border-radius: 0;
 		}
 
 		&__wrapper {
-			gap: 8px;
+			gap: var(--fixora-home-tech-carousel-gap);
 		}
 
-		&__swiper--mobile .fixora-home-technicians__slide {
-			width: 240px !important;
+		&__arrow {
+			display: flex;
+			flex: 0 0 var(--fixora-home-tech-arrow-size);
+			width: var(--fixora-home-tech-arrow-size);
+			height: var(--fixora-home-tech-arrow-size);
+			min-width: var(--fixora-home-tech-arrow-size);
+		}
+
+		&__swiper {
+			flex: 1 1 auto;
+			min-width: 0;
+			margin: 0;
+			padding: 4px 0 8px !important;
+			overflow: hidden;
 		}
 	}
 
 	.fixora-tech-card {
 		@include fixora-touch-active;
+
+		&__identity {
+			min-height: auto;
+		}
+
+		&__meta {
+			min-height: auto;
+			flex: 0 0 auto;
+		}
 	}
 
 	.fixora-home-how {
@@ -150,7 +179,11 @@
 	}
 
 	.fixora-hero {
-		padding: 20px var(--fixora-mobile-gutter) 32px;
+		padding: 72px var(--fixora-mobile-gutter) 24px;
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
+		overflow-x: clip;
 
 		&__scene {
 			&::before,
@@ -166,11 +199,16 @@
 
 		&__content {
 			gap: 14px;
+			width: 100%;
+			max-width: 100%;
 		}
 
 		&__eyebrow {
-			font-size: 11px;
-			letter-spacing: 0.1em;
+			font-size: 10px;
+			letter-spacing: 0.08em;
+			max-width: 100%;
+			flex-wrap: wrap;
+			justify-content: center;
 		}
 
 		&__title {
@@ -180,17 +218,19 @@
 
 		&__subtitle {
 			font-size: 14px;
-			padding: 0 4px;
+			padding: 0;
 		}
 
 		&__search-bar {
 			padding: 6px 6px 6px 14px;
 			border-radius: 14px;
 			max-width: 100%;
+			width: 100%;
 		}
 
 		&__search-input {
 			font-size: 13px;
+			min-width: 0;
 		}
 
 		&__search-submit {
@@ -208,8 +248,9 @@
 
 		&__category {
 			justify-content: center;
-			padding: 12px 10px;
+			padding: 12px 8px;
 			font-size: 12px;
+			min-width: 0;
 			@include fixora-touch-active;
 
 			&:active {
@@ -232,16 +273,32 @@
 
 		&__trust {
 			width: 100%;
+			max-width: 100%;
 			margin-top: 8px;
 		}
 
 		&__trust-viewport {
-			mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-			-webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+			mask-image: none;
+			-webkit-mask-image: none;
+			overflow: visible;
+		}
+
+		&__trust-track {
+			animation: none;
+			flex-wrap: wrap;
+			justify-content: center;
+			width: 100%;
+			gap: 10px 14px;
+		}
+
+		&__trust-item[aria-hidden='true'] {
+			display: none;
 		}
 
 		&__trust-item {
 			@include fixora-touch-active;
+			white-space: normal;
+			text-align: center;
 		}
 	}
 

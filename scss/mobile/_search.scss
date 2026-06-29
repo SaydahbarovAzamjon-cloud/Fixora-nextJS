@@ -3,32 +3,122 @@
 
 #mobile-wrap {
 	.fixora-search-page {
-		padding: 16px 0 calc(24px + var(--fixora-safe-bottom));
+		padding: 0 0 calc(24px + var(--fixora-safe-bottom));
 
 		.container {
-			@include fixora-mobile-container;
-			max-width: 100%;
+			width: 100%;
+			max-width: calc(100% - 2 * var(--fixora-mobile-gutter));
+			margin-left: auto;
+			margin-right: auto;
+			padding-left: var(--fixora-mobile-gutter);
+			padding-right: var(--fixora-mobile-gutter);
+			box-sizing: border-box;
 		}
 	}
 
 	.fixora-search-hero {
-		padding: 0 0 12px;
+		padding: 18px 16px 12px;
+		margin-top: 0;
+		margin-bottom: 16px;
+		border-radius: 14px;
 
 		&__title {
 			font-size: 22px;
+			line-height: 1.3;
+			white-space: normal;
+		}
+
+		&__subtitle {
+			font-size: 13px;
+		}
+
+		&__searchbar {
+			max-width: 100%;
+			height: 48px;
+			padding: 4px 4px 4px 12px;
+
+			input {
+				font-size: 13px;
+				min-width: 0;
+			}
+		}
+
+		&__search-btn-label {
+			display: none;
+		}
+
+		&__search-btn {
+			width: 44px;
+			height: 40px;
+			padding: 0;
+			justify-content: center;
+		}
+
+		&__popular {
+			gap: 6px;
+
+			&-carousel {
+				width: 100%;
+
+				.fixora-search-carousel {
+					--fixora-search-carousel-gap: 12px;
+				}
+
+				.fixora-search-carousel__slide,
+				.fixora-search-hero__popular-slide,
+				.swiper-slide {
+					width: max-content !important;
+					max-width: none;
+				}
+
+				.fixora-search-chip {
+					width: max-content;
+					max-width: none;
+					overflow: visible;
+					text-overflow: unset;
+					flex-shrink: 0;
+					white-space: nowrap;
+				}
+			}
 		}
 	}
 
 	.fixora-search-categories {
-		overflow-x: auto;
-		flex-wrap: nowrap;
-		padding-bottom: 4px;
-		@include fixora-scrollbar;
+		margin-bottom: 16px;
+
+		&__slide,
+		.swiper-slide {
+			width: max-content !important;
+			max-width: none;
+		}
 
 		.fixora-search-category {
-			flex: 0 0 auto;
 			@include fixora-touch-active;
+			width: max-content;
+			min-width: 88px;
+			min-height: 88px;
+			padding: 11px 7px;
+			font-size: 10.5px;
+			overflow: visible;
+
+			span {
+				display: block;
+				width: auto;
+				max-width: none;
+				font-size: 10.5px;
+				white-space: nowrap;
+				overflow: visible;
+				text-overflow: unset;
+				-webkit-line-clamp: unset;
+				-webkit-box-orient: unset;
+				overflow-wrap: normal;
+				word-break: normal;
+			}
 		}
+	}
+
+	.fixora-search-carousel {
+		--fixora-search-carousel-arrow-size: 32px;
 	}
 
 	.fixora-search-chip,
@@ -127,19 +217,94 @@
 	.fixora-search__results-header {
 		flex-wrap: wrap;
 		gap: 10px;
+		width: 100%;
+	}
+
+	.fixora-search__results {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.fixora-search__no-results {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.fixora-search-trust {
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.fixora-result-card {
 		@include fixora-touch-active;
 	}
 
-	.fixora-tech-profile-page,
 	.fixora-tech-list-page {
-		padding: 12px 0 calc(80px + var(--fixora-safe-bottom));
+		padding: 0 0 calc(80px + var(--fixora-safe-bottom));
+		overflow-x: hidden;
 
 		.container {
 			@include fixora-mobile-container;
 			max-width: 100%;
+		}
+	}
+
+	.fixora-tech-list-page {
+		&__intro {
+			margin-top: 0;
+
+			h1 {
+				font-size: 22px;
+			}
+		}
+
+		.fixora-tech-list-section {
+			--fixora-tech-discovery-arrow-size: 32px;
+			--fixora-tech-discovery-carousel-gap: 8px;
+			--fixora-tech-discovery-track-width: calc(
+				100% - (var(--fixora-tech-discovery-arrow-size) * 2) -
+					(var(--fixora-tech-discovery-carousel-gap) * 2)
+			);
+
+			&__carousel {
+				gap: var(--fixora-tech-discovery-carousel-gap);
+			}
+
+			&__arrow {
+				display: flex;
+				flex-shrink: 0;
+
+				&.fixora-home-arrow {
+					width: var(--fixora-tech-discovery-arrow-size);
+					height: var(--fixora-tech-discovery-arrow-size);
+					min-width: var(--fixora-tech-discovery-arrow-size);
+					flex: 0 0 var(--fixora-tech-discovery-arrow-size);
+				}
+			}
+
+			&__swiper {
+				margin: 0;
+				padding: 4px 0 8px !important;
+			}
+
+			&__track {
+				flex: 0 0 var(--fixora-tech-discovery-track-width);
+				width: var(--fixora-tech-discovery-track-width);
+				max-width: var(--fixora-tech-discovery-track-width);
+			}
+		}
+
+		.fixora-tech-card {
+			@include fixora-touch-active;
+
+			&__identity {
+				min-height: auto;
+			}
+
+			&__meta {
+				min-height: auto;
+				flex: 0 0 auto;
+			}
 		}
 	}
 

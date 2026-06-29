@@ -8,7 +8,8 @@
 }
 
 #pc-wrap #main,
-.pc-wrap #main {
+.pc-wrap #main,
+#pc-wrap-home #main {
 	max-width: 100%;
 	overflow-x: hidden;
 }
@@ -30,12 +31,16 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 20px;
+		min-width: 0;
+		gap: 12px;
 
 		h2 {
 			margin: 0;
 			font-size: 22px;
 			font-weight: 700;
 			color: var(--fixora-text-primary);
+			flex: 1;
+			min-width: 0;
 		}
 	}
 
@@ -107,6 +112,15 @@
 		min-width: 0;
 	}
 
+	&__arrow {
+		flex: 0 0 36px;
+		width: 36px;
+		height: 36px;
+		min-width: 36px;
+		padding: 0;
+		font: inherit;
+	}
+
 	&__swiper {
 		width: 100%;
 		min-width: 0;
@@ -127,13 +141,6 @@
 		display: flex;
 		align-items: stretch;
 		min-width: 0;
-	}
-
-	/* mobile swiper uses slidesPerView="auto", so slides need an explicit width;
-	   swiper core css (.swiper-slide { width: 100% }) loads later, hence !important —
-	   same workaround as testimonials. Desktop gets inline widths from slidesPerView={4}. */
-	&__swiper--mobile &__slide {
-		width: 262px !important;
 	}
 
 	&__slide-inner {
@@ -361,33 +368,36 @@
 		height: 28px;
 		padding: 0 10px;
 		border-radius: 999px;
-		border: 1px solid var(--fixora-primary);
-		background: rgba(115, 12, 30, 0.12);
-		color: var(--fixora-primary);
+		border: 1px solid rgba(255, 255, 255, 0.45);
+		background: rgba(255, 255, 255, 0.06);
+		color: #fff;
 		font-family: inherit;
 		font-size: 11px;
 		font-weight: 700;
 		cursor: pointer;
 		white-space: nowrap;
 		flex-shrink: 0;
-		transition: background 0.2s ease, color 0.2s ease;
+		transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 
 		svg {
 			font-size: 14px;
-			color: inherit;
+			color: #fff;
 		}
 
 		&:hover {
 			background: var(--fixora-primary);
+			border-color: var(--fixora-primary);
 			color: #fff;
 		}
 
 		&--active {
 			background: var(--fixora-primary);
+			border-color: var(--fixora-primary);
 			color: #fff;
 
 			&:hover {
 				background: var(--fixora-primary-hover);
+				border-color: var(--fixora-primary-hover);
 			}
 		}
 	}
@@ -396,11 +406,11 @@
 		margin-top: 0;
 		padding: 4px 10px;
 		border-radius: 6px;
-		border: 1px solid var(--fixora-border);
-		background: var(--fixora-primary-soft-bg);
+		border: 1px solid rgba(255, 255, 255, 0.35);
+		background: rgba(255, 255, 255, 0.08);
 		font-size: 11px;
 		font-weight: 700;
-		color: var(--fixora-primary);
+		color: #fff;
 		letter-spacing: 0.02em;
 		flex-shrink: 0;
 	}
@@ -1380,9 +1390,77 @@
 	}
 }
 
-/* ---------- responsive (tablet/mobile fallback) ---------- */
+/* ---------- responsive (tablet/mobile fallback — MOB-03) ---------- */
 
-@media (max-width: 992px) {
+@media (max-width: 991px) {
+	.fixora-home-section {
+		padding: 20px 0;
+
+		.container {
+			width: 100%;
+			max-width: calc(100% - 2 * var(--fixora-mobile-gutter));
+			padding-left: var(--fixora-mobile-gutter);
+			padding-right: var(--fixora-mobile-gutter);
+		}
+
+		&__head {
+			margin-bottom: 14px;
+			gap: 8px;
+
+			h2 {
+				font-size: 18px;
+				flex: 1;
+				min-width: 0;
+			}
+		}
+
+		&__view-all {
+			flex-shrink: 0;
+			font-size: 13px;
+		}
+	}
+
+	.fixora-home-technicians {
+		--fixora-home-tech-arrow-size: 32px;
+		--fixora-home-tech-carousel-gap: 8px;
+
+		&__wrapper {
+			gap: var(--fixora-home-tech-carousel-gap);
+		}
+
+		&__arrow {
+			display: flex;
+			flex: 0 0 var(--fixora-home-tech-arrow-size);
+			width: var(--fixora-home-tech-arrow-size);
+			height: var(--fixora-home-tech-arrow-size);
+			min-width: var(--fixora-home-tech-arrow-size);
+		}
+
+		.container {
+			padding: 16px;
+			border-radius: 16px;
+		}
+
+		&__swiper {
+			flex: 1 1 auto;
+			min-width: 0;
+			margin: 0;
+			padding: 4px 0 8px !important;
+			overflow: hidden;
+		}
+	}
+
+	.fixora-tech-card {
+		&__identity {
+			min-height: auto;
+		}
+
+		&__meta {
+			min-height: auto;
+			flex: 0 0 auto;
+		}
+	}
+
 	.fixora-home-how__steps {
 		flex-wrap: wrap;
 
@@ -1395,7 +1473,114 @@
 		grid-template-columns: 1fr;
 	}
 
-	.fixora-home-technicians__swiper--mobile .fixora-home-technicians__slide {
-		width: 240px !important;
+	.fixora-hero {
+		padding: 88px var(--fixora-mobile-gutter) 28px;
+
+		&__scene {
+			height: clamp(520px, 62vh, 680px);
+		}
+
+		&__content {
+			width: 100%;
+			max-width: 100%;
+			box-sizing: border-box;
+		}
+
+		&__title {
+			font-size: clamp(28px, 7vw, 36px);
+		}
+
+		&__subtitle {
+			font-size: 14px;
+			padding: 0;
+		}
+
+		&__search-bar {
+			max-width: 100%;
+		}
+
+		&__categories {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 10px;
+			width: 100%;
+		}
+
+		&__category {
+			justify-content: center;
+			padding: 11px 8px;
+			font-size: 12px;
+			min-width: 0;
+		}
+
+		&__cta-wrap {
+			width: 100%;
+			max-width: 100%;
+
+			.fixora-hero__cta {
+				width: 100%;
+				justify-content: center;
+			}
+		}
+
+		&__trust {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		&__trust-track {
+			animation: none;
+			flex-wrap: wrap;
+			justify-content: center;
+			width: 100%;
+			max-width: 100%;
+			gap: 10px 16px;
+		}
+
+		&__trust-viewport {
+			mask-image: none;
+			-webkit-mask-image: none;
+			overflow: visible;
+		}
+
+		&__trust-item[aria-hidden='true'] {
+			display: none;
+		}
+	}
+}
+
+@media (max-width: 639px) {
+	.fixora-home-technicians {
+		.container {
+			background: transparent;
+			border: none;
+			padding: 0 var(--fixora-mobile-gutter);
+		}
+
+		&__swiper {
+			margin: 0;
+			padding: 4px 0 8px !important;
+		}
+	}
+
+	.fixora-hero {
+		padding: 72px var(--fixora-mobile-gutter) 24px;
+
+		&__eyebrow {
+			font-size: 10px;
+			letter-spacing: 0.08em;
+			max-width: 100%;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+	}
+
+	.fixora-tech-card {
+		padding: 14px;
+
+		&__avatar {
+			width: 56px;
+			height: 56px;
+		}
 	}
 }

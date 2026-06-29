@@ -7,6 +7,7 @@ import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import Moment from 'react-moment';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DoneIcon from '@mui/icons-material/Done';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { userVar } from '../../apollo/store';
@@ -84,8 +85,17 @@ const NotificationListItem = ({
 					<DoneIcon fontSize="small" />
 				</button>
 			)}
-			<button type="button" className="fixora-notifications__delete" title={t('notifications.delete')} onClick={onDelete}>
-				×
+			<button
+				type="button"
+				className="fixora-notifications__delete"
+				title={t('notifications.delete')}
+				aria-label={t('notifications.delete')}
+				onClick={(e) => {
+					e.stopPropagation();
+					onDelete();
+				}}
+			>
+				<DeleteOutlineOutlinedIcon fontSize="small" />
 			</button>
 		</div>
 	);

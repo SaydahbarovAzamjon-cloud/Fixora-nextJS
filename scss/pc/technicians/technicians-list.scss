@@ -244,35 +244,108 @@
 	}
 }
 
-@media (max-width: 992px) {
+@media (max-width: 991px) {
+	.fixora-tech-list-page {
+		padding: 88px 0 40px;
+		overflow-x: clip;
+
+		.container {
+			width: 100%;
+			max-width: calc(100% - 2 * var(--fixora-mobile-gutter));
+			padding-left: var(--fixora-mobile-gutter);
+			padding-right: var(--fixora-mobile-gutter);
+			gap: 22px;
+		}
+
+		&__intro {
+			margin-top: 0;
+
+			h1 {
+				font-size: 22px;
+			}
+
+			p {
+				font-size: 13px;
+			}
+		}
+
+		&__sections {
+			gap: 22px;
+		}
+
+		.fixora-tech-list-section {
+			--fixora-tech-discovery-arrow-size: 32px;
+			--fixora-tech-discovery-carousel-gap: 8px;
+			--fixora-tech-discovery-track-width: calc(
+				100% - (var(--fixora-tech-discovery-arrow-size) * 2) -
+					(var(--fixora-tech-discovery-carousel-gap) * 2)
+			);
+			gap: 12px;
+
+			&__head h2 {
+				font-size: 18px;
+			}
+
+			&__carousel {
+				gap: var(--fixora-tech-discovery-carousel-gap);
+			}
+
+			&__arrow {
+				display: flex;
+				flex-shrink: 0;
+
+				&.fixora-home-arrow {
+					width: var(--fixora-tech-discovery-arrow-size);
+					height: var(--fixora-tech-discovery-arrow-size);
+					min-width: var(--fixora-tech-discovery-arrow-size);
+					flex: 0 0 var(--fixora-tech-discovery-arrow-size);
+				}
+			}
+
+			&__track {
+				flex: 0 0 var(--fixora-tech-discovery-track-width);
+				width: var(--fixora-tech-discovery-track-width);
+				max-width: var(--fixora-tech-discovery-track-width);
+			}
+
+			&__swiper {
+				margin: 0;
+				padding: 4px 0 8px !important;
+				overflow: hidden;
+			}
+
+			&__loading {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				margin: 0;
+				width: 100%;
+			}
+		}
+
+		.fixora-tech-card {
+			padding: 14px;
+
+			&__identity {
+				min-height: auto;
+			}
+
+			&__meta {
+				min-height: auto;
+				flex: 0 0 auto;
+			}
+
+			&__avatar {
+				width: 56px;
+				height: 56px;
+			}
+		}
+	}
+
 	.fixora-tech-list-stats {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
 @media (max-width: 639px) {
-	.fixora-tech-list-page {
-		padding-top: 88px;
-
-		.container {
-			gap: 22px;
-		}
-
-		.fixora-tech-list-section {
-			--fixora-tech-discovery-track-width: 100%;
-
-			&__carousel {
-				.fixora-tech-list-section__arrow {
-					display: none;
-				}
-			}
-
-			&__loading {
-				grid-template-columns: repeat(2, minmax(0, 1fr));
-			}
-		}
-	}
-
 	.fixora-tech-list-stats {
 		grid-template-columns: 1fr;
 	}

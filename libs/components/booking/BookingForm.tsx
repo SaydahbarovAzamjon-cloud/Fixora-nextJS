@@ -15,10 +15,9 @@ import BookingAiClassificationHint from './BookingAiClassificationHint';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { useDeviceImageUpload } from '../../hooks/useDeviceImageUpload';
 import {
-	mergeDeviceImages,
-	parseDeviceImagePaths,
 	serializeDeviceImages,
 } from '../../utils/deviceImage';
+import { getGraphQLErrorMessage } from '../../utils/oauthErrors';
 import type { Device, DeviceCategory } from '../../types/fixora/fixora';
 import { bookingDevicePlaceholderKey } from '../../utils/bookingDevicePlaceholders';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
@@ -30,6 +29,14 @@ interface BookingFormProps {
 }
 
 const DEVICE_CATEGORIES: DeviceCategory[] = ['IPHONE', 'IPAD', 'MACBOOK', 'APPLE_WATCH'];
+
+const MUTATION_CONTEXT = { suppressErrorAlert: true } as const;
+
+function formatBookingSubmitError(err: unknown, fallback: string): string {
+	const message = getGraphQLErrorMessage(err).trim();
+	if (!message || /maximum call stack/i.test(message)) return fallback;
+	return message;
+}
 
 const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }: BookingFormProps) => {
 	const { t } = useTranslation('common');
@@ -51,6 +58,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [submitting, setSubmitting] = useState(false);
+	const submittingRef = useRef(false);
 	const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
 	const hasInitializedDeviceSelection = useRef(false);
 
@@ -99,20 +107,10 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 	);
 
 	const isNewDevice = selectedDeviceId === 'new';
+	const deviceImageUpload = useDeviceImageUpload(onDeviceImageError);
 
-	const selectedDevice = useMemo(
-		() => devices.find((device) => device._id === selectedDeviceId),
-		[devices, selectedDeviceId],
-	);
-
-	const existingDeviceImagePaths = useMemo(
-		() => (isNewDevice ? [] : parseDeviceImagePaths(selectedDevice?.deviceImage)),
-		[isNewDevice, selectedDevice?.deviceImage],
-	);
-
-	const existingDeviceImageCount = isNewDevice ? 0 : existingDeviceImagePaths.length;
-
-	const deviceImageUpload = useDeviceImageUpload(onDeviceImageError, existingDeviceImageCount);
+	const deviceImageUploadRef = useRef(deviceImageUpload);
+	deviceImageUploadRef.current = deviceImageUpload;
 
 	const clearDeviceImagesRef = useRef(deviceImageUpload.clearImages);
 	clearDeviceImagesRef.current = deviceImageUpload.clearImages;
@@ -169,17 +167,21 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 	}, [isNewDevice, deviceCategory, deviceModel, deviceIssue, problemTitle, estimatedPrice, t]);
 
 	const handleSubmit = useCallback(async () => {
-		if (!isLoggedIn) return;
+		if (!isLoggedIn || submittingRef.current) return;
 		if (!validate()) return;
 
+		submittingRef.current = true;
 		setSubmitting(true);
+		const upload = deviceImageUploadRef.current;
+		const genericError = t('booking.errors.generic');
+
 		try {
 			let deviceId = selectedDeviceId;
 
 			if (isNewDevice) {
 				let deviceImageValue: string | undefined;
-				if (deviceImageUpload.hasImages) {
-					const paths = await deviceImageUpload.uploadDeviceImages();
+				if (upload.hasImages) {
+					const paths = await upload.uploadDeviceImages();
 					deviceImageValue = serializeDeviceImages(paths);
 				}
 
@@ -196,21 +198,27 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 							deviceImage: deviceImageValue,
 						},
 					},
+					context: MUTATION_CONTEXT,
 				});
 				deviceId = result.data?.createDevice?._id;
-			} else if (deviceImageUpload.hasImages) {
-				const newPaths = await deviceImageUpload.uploadDeviceImages();
-				const mergedImage = mergeDeviceImages(existingDeviceImagePaths, newPaths);
-				if (mergedImage) {
+			} else if (upload.hasImages) {
+				const newPaths = await upload.uploadDeviceImages();
+				const nextDeviceImage = serializeDeviceImages(newPaths);
+				if (nextDeviceImage) {
 					await updateDevice({
 						variables: {
 							input: {
 								_id: deviceId,
-								deviceImage: mergedImage,
+								deviceImage: nextDeviceImage,
 							},
 						},
+						context: MUTATION_CONTEXT,
 					});
 				}
+			}
+
+			if (!deviceId || deviceId === 'new') {
+				throw new Error(genericError);
 			}
 
 			const bookingResult = await createBooking({
@@ -224,14 +232,17 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 						estimatedPrice: estimatedPrice ? Number(estimatedPrice) : undefined,
 					},
 				},
+				context: MUTATION_CONTEXT,
 			});
 
 			const bookingId = bookingResult.data?.createBooking?._id as string | undefined;
-			if (!bookingId) throw new Error(t('booking.errors.generic'));
+			if (!bookingId) throw new Error(genericError);
+			upload.clearImages();
 			setCreatedBookingId(bookingId);
-		} catch (err: any) {
-			await sweetMixinErrorAlert(err?.message ?? t('booking.errors.generic'));
+		} catch (err: unknown) {
+			await sweetMixinErrorAlert(formatBookingSubmitError(err, genericError));
 		} finally {
+			submittingRef.current = false;
 			setSubmitting(false);
 		}
 	}, [
@@ -248,8 +259,6 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 		deviceDescription,
 		deviceSerialNumber,
 		releaseYear,
-		existingDeviceImagePaths,
-		deviceImageUpload,
 		technicianId,
 		problemTitle,
 		problemDescription,
@@ -477,7 +486,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 				<BookingServiceTypeOptions />
 			</FixoraGlassCard>
 
-			<BookingDeviceImageUpload upload={deviceImageUpload} existingImagePaths={existingDeviceImagePaths} />
+			<BookingDeviceImageUpload upload={deviceImageUpload} />
 
 			<FixoraButton variant="primary" fullWidth disabled={submitting} onClick={handleSubmit}>
 				{submitting ? t('booking.submitting') : t('booking.submit')}

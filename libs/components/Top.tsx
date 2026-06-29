@@ -33,6 +33,7 @@ import NavSearchInput from './nav/NavSearchInput';
 import NavThemeToggle from './nav/NavThemeToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 import { normalizeAppLocale } from '../utils/i18nLocale';
+import { normalizeRoutePath } from '../utils/routePaths';
 import { useNotificationContextOptional } from '../context/NotificationContext';
 
 const LANGS = ['en', 'kr'] as const;
@@ -52,6 +53,7 @@ const Top = () => {
 	const logoutOpen = Boolean(logoutAnchor);
 	const [notifOpen, setNotifOpen] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const menuIgnoreBackdropRef = useRef(false);
 	const notifRef = useRef<HTMLDivElement>(null);
 	const notifCtx = useNotificationContextOptional();
 	const navPollMs = useRealtimePollInterval(30000);
@@ -130,10 +132,15 @@ const Top = () => {
 	}, [menuOpen]);
 
 	useEffect(() => {
-		const closeMenu = () => setMenuOpen(false);
+		const closeMenu = (url: string) => {
+			const nextPath = url.split('?')[0].split('#')[0];
+			if (normalizeRoutePath(nextPath) !== normalizeRoutePath(router.pathname)) {
+				setMenuOpen(false);
+			}
+		};
 		router.events.on('routeChangeStart', closeMenu);
 		return () => router.events.off('routeChangeStart', closeMenu);
-	}, [router.events]);
+	}, [router.events, router.pathname]);
 
 	/** HANDLERS **/
 	const langChoice = useCallback(
@@ -181,7 +188,21 @@ const Top = () => {
 
 	const homeHref = isTechnician ? '/technician/dashboard' : '/';
 
-	const closeMenu = useCallback(() => setMenuOpen(false), []);
+	const closeMenu = useCallback(() => {
+		if (menuIgnoreBackdropRef.current) return;
+		setMenuOpen(false);
+	}, []);
+
+	const toggleMenu = useCallback(() => {
+		setMenuOpen((open) => {
+			if (open) return false;
+			menuIgnoreBackdropRef.current = true;
+			window.setTimeout(() => {
+				menuIgnoreBackdropRef.current = false;
+			}, 400);
+			return true;
+		});
+	}, []);
 
 	const linkClass = (active: boolean, drawer = false) =>
 		drawer
@@ -288,8 +309,8 @@ const Top = () => {
 						<button
 							type="button"
 							className="fixora-nav-mobile__menu-btn"
-							onClick={() => setMenuOpen(true)}
-							aria-label={t('nav.openMenu')}
+							onClick={toggleMenu}
+							aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
 							aria-expanded={menuOpen}
 						>
 							<MenuIcon />
@@ -341,6 +362,7 @@ const Top = () => {
 						<button
 							type="button"
 							className="fixora-nav-mobile__backdrop"
+							onPointerDown={(event) => event.preventDefault()}
 							onClick={closeMenu}
 							aria-label={t('nav.closeMenu')}
 						/>

@@ -74,6 +74,7 @@ const TechniciansDiscoveryCarousel = ({
 						modules={[Navigation]}
 						slidesPerView={TECHNICIAN_DISCOVERY_CAROUSEL_CONFIG.defaultSlidesPerView}
 						spaceBetween={TECHNICIAN_DISCOVERY_CAROUSEL_CONFIG.spaceBetween}
+						centeredSlides={TECHNICIAN_DISCOVERY_CAROUSEL_CONFIG.centeredSlides}
 						preventClicksPropagation={false}
 						watchOverflow
 						observer

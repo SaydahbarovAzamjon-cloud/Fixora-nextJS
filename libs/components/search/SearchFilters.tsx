@@ -6,10 +6,12 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import { TechniciansInquiry } from '../../types/fixora/fixora';
 import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../kakao-maps';
 import { SERVICES, SERVICE_ISSUE_CATEGORY, SERVICE_DEVICE_CATEGORY } from './categoryMappings';
+import { normalizeTechniciansInquiry } from '../../utils/technicianSearch';
 
 interface SearchFiltersProps {
 	searchFilter: TechniciansInquiry;
 	setSearchFilter: (input: TechniciansInquiry) => void;
+	onApplied?: () => void;
 }
 
 const DEVICES = ['all', 'iphone', 'macbook', 'ipad', 'appleWatch'] as const;
@@ -35,7 +37,7 @@ interface FilterDraft {
 
 const EMPTY_DRAFT: FilterDraft = { service: null, device: 'all', rating: null, availability: 'anytime' };
 
-const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) => {
+const SearchFilters = ({ searchFilter, setSearchFilter, onApplied }: SearchFiltersProps) => {
 	const { t } = useTranslation('common');
 	const [draft, setDraft] = useState<FilterDraft>(EMPTY_DRAFT);
 	const [openGroups, setOpenGroups] = useState<Record<GroupKey, boolean>>({
@@ -50,24 +52,26 @@ const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) =>
 	const clearAllHandler = () => {
 		setDraft(EMPTY_DRAFT);
 		const { latitude, longitude, radiusKm } = searchFilter.search;
-		setSearchFilter({
-			...searchFilter,
-			page: 1,
-			search: {
-				isOnline: null,
-				...(latitude != null && longitude != null
-					? { latitude, longitude, radiusKm: radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM }
-					: {}),
-			},
-		});
+		setSearchFilter(
+			normalizeTechniciansInquiry({
+				...searchFilter,
+				page: 1,
+				search: {
+					isOnline: null,
+					...(latitude != null && longitude != null
+						? { latitude, longitude, radiusKm: radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM }
+						: {}),
+				},
+			}),
+		);
 	};
 
 	const applyHandler = () => {
+		const { latitude, longitude, radiusKm } = searchFilter.search;
 		const search: TechniciansInquiry['search'] = {
 			isOnline: draft.availability === 'availableNow' ? true : null,
 		};
 
-		const { latitude, longitude, radiusKm } = searchFilter.search;
 		if (latitude != null && longitude != null) {
 			search.latitude = latitude;
 			search.longitude = longitude;
@@ -88,7 +92,14 @@ const SearchFilters = ({ searchFilter, setSearchFilter }: SearchFiltersProps) =>
 			search.minAverageRating = draft.rating;
 		}
 
-		setSearchFilter({ ...searchFilter, page: 1, search });
+		setSearchFilter(
+			normalizeTechniciansInquiry({
+				...searchFilter,
+				page: 1,
+				search,
+			}),
+		);
+		onApplied?.();
 	};
 
 	const groupHeader = (key: GroupKey, titleKey: string) => (

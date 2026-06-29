@@ -6,7 +6,8 @@ import { getJwtToken } from '../libs/auth/tokens';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
 import { isNoDataFoundGraphQLError } from '../libs/utils/graphqlErrors';
-import { isRoleRestrictedError, isMissingTokenError } from '../libs/utils/userRole';
+import { isRoleRestrictedError, isMissingTokenError, shouldRedirectToLogin } from '../libs/utils/userRole';
+import { handleSessionExpired } from '../libs/auth/sessionExpiry';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 const GRAPHQL_URI =
 	process.env.REACT_APP_API_GRAPHQL_URL ||
@@ -52,9 +53,9 @@ function createIsomorphicLink() {
 		uri: GRAPHQL_URI,
 	});
 
-	const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
+	const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 		if (graphQLErrors) {
-			graphQLErrors.map(({ message, locations, path }) => {
+			graphQLErrors.forEach(({ message, locations, path }) => {
 				const isAuthMutation =
 					path?.[0] === 'login' ||
 					path?.[0] === 'signup' ||
@@ -62,9 +63,15 @@ function createIsomorphicLink() {
 					path?.[0] === 'completeOAuthSignup';
 				const isRoleError = isRoleRestrictedError(message);
 				const isAuthError = isMissingTokenError(message);
+				const isExpiredSession = shouldRedirectToLogin(message);
 
 				const suppressAlert = operation.getContext().suppressErrorAlert;
 				const isLookupMiss = isNoDataFoundGraphQLError(message);
+
+				if (isExpiredSession) {
+					handleSessionExpired();
+					return;
+				}
 
 				if (isRoleError || isAuthError || isLookupMiss) {
 					if (!isProd) console.debug(`[GraphQL auth]: ${message}`);
@@ -80,7 +87,8 @@ function createIsomorphicLink() {
 					!message.includes('input') &&
 					!isAuthMutation &&
 					!isRoleError &&
-					!isAuthError
+					!isAuthError &&
+					!isExpiredSession
 				) {
 					sweetErrorAlert(message);
 				}
@@ -89,7 +97,9 @@ function createIsomorphicLink() {
 
 		if (networkError && !isProd) console.log(`[Network error]: ${networkError}`);
 		// @ts-ignore
-		if (networkError?.statusCode === 401) {
+		const statusCode = networkError?.statusCode ?? networkError?.status;
+		if (statusCode === 401) {
+			handleSessionExpired();
 		}
 	});
 

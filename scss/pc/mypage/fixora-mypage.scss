@@ -540,12 +540,37 @@
 	}
 
 	&--rating {
-		background: rgba(115, 12, 30, 0.08);
-		border: 1px solid rgba(115, 12, 30, 0.35);
+		background: rgba(115, 12, 30, 0.12);
+		border: 1px solid rgba(115, 12, 30, 0.4);
+		transition:
+			background 0.2s ease,
+			border-color 0.2s ease,
+			box-shadow 0.2s ease,
+			transform 0.2s ease;
 
 		strong,
 		span {
-			color: var(--fixora-primary);
+			color: #fff;
+			transition: opacity 0.2s ease;
+		}
+
+		span {
+			opacity: 0.82;
+		}
+
+		&:hover {
+			background: rgba(115, 12, 30, 0.22);
+			border-color: rgba(255, 255, 255, 0.18);
+			box-shadow: 0 6px 20px rgba(115, 12, 30, 0.28);
+			transform: translateY(-1px);
+
+			strong {
+				opacity: 1;
+			}
+
+			span {
+				opacity: 1;
+			}
 		}
 	}
 
@@ -580,7 +605,7 @@
 	color: var(--fixora-text-primary);
 }
 
-.fixora-mypage__new-request-btn {
+a.fixora-mypage__new-request-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -591,10 +616,27 @@
 	font-size: 13px;
 	font-weight: 700;
 	text-decoration: none;
-	transition: background 0.2s ease, transform 0.15s ease;
+	white-space: nowrap;
+	transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+
+	svg {
+		color: inherit;
+	}
+
+	&:hover,
+	&:focus-visible {
+		background: var(--fixora-primary-hover);
+		color: #fff;
+	}
 
 	&:hover {
-		background: var(--fixora-primary-hover);
+		transform: translateY(-1px);
+		box-shadow: 0 6px 18px rgba(115, 12, 30, 0.35);
+	}
+
+	&:focus-visible {
+		outline: 2px solid rgba(255, 255, 255, 0.4);
+		outline-offset: 2px;
 	}
 }
 

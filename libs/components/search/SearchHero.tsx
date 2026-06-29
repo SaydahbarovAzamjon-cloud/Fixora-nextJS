@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import SearchIcon from '@mui/icons-material/Search';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
@@ -6,8 +6,10 @@ import BatteryAlertIcon from '@mui/icons-material/BatteryAlert';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { TechniciansInquiry } from '../../types/fixora/fixora';
-import { resolveTextSearchFilters } from '../../utils/technicianSearch';
+import { normalizeTechniciansInquiry, resolveTextSearchFilters } from '../../utils/technicianSearch';
 import { SERVICE_ISSUE_CATEGORY, SERVICE_DEVICE_CATEGORY } from './categoryMappings';
+import SearchHorizontalCarousel from './SearchHorizontalCarousel';
+import { SEARCH_HERO_CHIP_CAROUSEL } from '../../constants/searchCarousel';
 
 interface SearchHeroProps {
 	searchFilter: TechniciansInquiry;
@@ -20,6 +22,10 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 	const { t } = useTranslation('common');
 	const [searchText, setSearchText] = useState(searchFilter.search.text ?? '');
 
+	useEffect(() => {
+		setSearchText(searchFilter.search.text ?? '');
+	}, [searchFilter.search.text]);
+
 	const applySearch = (value: string) => {
 		const resolved = resolveTextSearchFilters(value, {
 			screenRepair: t('search.filters.service.screenRepair'),
@@ -29,34 +35,37 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 			macbookRepair: t('search.filters.service.macbookRepair'),
 		});
 
-		setSearchFilter({
-			...searchFilter,
-			page: 1,
-			search: {
-				...searchFilter.search,
-				text: resolved.text,
-				issueCategory: resolved.issueCategory,
-				deviceCategory: resolved.deviceCategory,
-				latitude: undefined,
-				longitude: undefined,
-				radiusKm: undefined,
-			},
-		});
+		setSearchFilter(
+			normalizeTechniciansInquiry({
+				...searchFilter,
+				page: 1,
+				search: {
+					...searchFilter.search,
+					text: resolved.text,
+					issueCategory: resolved.issueCategory,
+					deviceCategory: resolved.deviceCategory,
+					latitude: undefined,
+					longitude: undefined,
+					radiusKm: undefined,
+				},
+			}),
+		);
 	};
 
 	const handleSearchInputChange = (value: string) => {
 		setSearchText(value);
 		if (!value.trim()) {
-			setSearchFilter({
-				...searchFilter,
-				page: 1,
-				search: {
-					...searchFilter.search,
-					text: undefined,
-					issueCategory: undefined,
-					deviceCategory: undefined,
-				},
-			});
+			const { text, issueCategory, deviceCategory, latitude, longitude, radiusKm, ...rest } = searchFilter.search;
+			setSearchFilter(
+				normalizeTechniciansInquiry({
+					...searchFilter,
+					page: 1,
+					search: {
+						...rest,
+						isOnline: rest.isOnline ?? null,
+					},
+				}),
+			);
 		}
 	};
 
@@ -67,19 +76,21 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 	const popularSearchHandler = (key: (typeof POPULAR_SEARCHES)[number]) => {
 		const label = t(`search.filters.service.${key}`);
 		setSearchText(label);
-		setSearchFilter({
-			...searchFilter,
-			page: 1,
-			search: {
-				...searchFilter.search,
-				text: label,
-				issueCategory: SERVICE_ISSUE_CATEGORY[key],
-				deviceCategory: SERVICE_DEVICE_CATEGORY[key],
-				latitude: undefined,
-				longitude: undefined,
-				radiusKm: undefined,
-			},
-		});
+		setSearchFilter(
+			normalizeTechniciansInquiry({
+				...searchFilter,
+				page: 1,
+				search: {
+					...searchFilter.search,
+					text: label,
+					issueCategory: SERVICE_ISSUE_CATEGORY[key],
+					deviceCategory: SERVICE_DEVICE_CATEGORY[key],
+					latitude: undefined,
+					longitude: undefined,
+					radiusKm: undefined,
+				},
+			}),
+		);
 	};
 
 	return (
@@ -108,17 +119,28 @@ const SearchHero = ({ searchFilter, setSearchFilter }: SearchHeroProps) => {
 						/>
 						<button type="button" className="fixora-search-hero__search-btn" onClick={submitSearchText}>
 							<SearchIcon fontSize="small" />
-							{t('search.hero.searchButton')}
+							<span className="fixora-search-hero__search-btn-label">{t('search.hero.searchButton')}</span>
 						</button>
 					</div>
 
 					<div className="fixora-search-hero__popular">
-						<span>{t('search.hero.popularSearches')}</span>
-						{POPULAR_SEARCHES.map((key) => (
-							<button key={key} type="button" className="fixora-search-chip" onClick={() => popularSearchHandler(key)}>
-								{t(`search.filters.service.${key}`)}
-							</button>
-						))}
+						<span className="fixora-search-hero__popular-label">{t('search.hero.popularSearches')}</span>
+						<SearchHorizontalCarousel
+							className="fixora-search-hero__popular-carousel"
+							slideClassName="fixora-search-hero__popular-slide"
+							spaceBetween={SEARCH_HERO_CHIP_CAROUSEL.spaceBetween}
+						>
+							{POPULAR_SEARCHES.map((key) => (
+								<button
+									key={key}
+									type="button"
+									className="fixora-search-chip swiper-no-swiping"
+									onClick={() => popularSearchHandler(key)}
+								>
+									{t(`search.filters.service.${key}`)}
+								</button>
+							))}
+						</SearchHorizontalCarousel>
 					</div>
 				</div>
 

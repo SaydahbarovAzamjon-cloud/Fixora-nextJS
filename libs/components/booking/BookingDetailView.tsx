@@ -34,6 +34,10 @@ import {
 } from '../../utils/bookingDetailProgress';
 import { parseDeviceImagePaths, resolveDeviceImageUrl } from '../../utils/deviceImage';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
+import {
+	getTechnicianDisplayName,
+	getTechnicianOwnerSubtitleLabel,
+} from '../../utils/technicianProfileDisplay';
 import { formatTechnicianWorkingHours } from '../../utils/workingHours';
 
 interface BookingDetailViewProps {
@@ -58,7 +62,8 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 		fetchPolicy: 'cache-first',
 	});
 	const technician = technicianData?.getUser;
-	const technicianName = technician?.shopName || technician?.userFullName || technician?.userNickname || '';
+	const technicianDisplayName = getTechnicianDisplayName(technician);
+	const technicianOwnerLabel = getTechnicianOwnerSubtitleLabel(technician);
 
 	const { data: deviceFallbackData } = useQuery(GET_DEVICE, {
 		variables: { deviceId: booking.deviceId },
@@ -195,7 +200,10 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 					<div className="fixora-booking-detail__tech-profile">
 						<img src={technicianAvatar} alt="" className="fixora-booking-detail__tech-avatar" />
 						<div>
-							<strong>{technicianName || '—'}</strong>
+							<strong>{technicianDisplayName}</strong>
+							{technicianOwnerLabel && (
+								<span className="fixora-booking-detail__tech-owner">{technicianOwnerLabel}</span>
+							)}
 							<span className="fixora-booking-detail__tech-rating">
 								<StarIcon fontSize="inherit" />
 								{technician?.averageRating?.toFixed(1) ?? '—'}
@@ -317,7 +325,7 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 							<DepositPaymentCard
 								bookingId={booking._id}
 								problemTitle={booking.problemTitle}
-								technicianName={technicianName}
+								technicianName={technicianDisplayName}
 								estimatedPrice={booking.estimatedPrice}
 								bookingStatus={booking.bookingStatus}
 								initialPaid={depositPaid}
@@ -330,7 +338,7 @@ const BookingDetailView = ({ booking, review, payments: paymentsProp, onRefresh 
 							<FinalPaymentCard
 								bookingId={booking._id}
 								problemTitle={booking.problemTitle}
-								technicianName={technicianName}
+								technicianName={technicianDisplayName}
 								estimatedPrice={booking.estimatedPrice}
 								finalPrice={booking.finalPrice}
 								bookingStatus={booking.bookingStatus}

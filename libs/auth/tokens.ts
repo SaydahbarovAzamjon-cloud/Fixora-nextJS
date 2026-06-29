@@ -18,5 +18,7 @@ export function updateAuthStorage(jwtToken: string) {
 
 export function clearAuthStorage() {
 	localStorage.removeItem('accessToken');
+	localStorage.removeItem('refreshToken');
+	localStorage.removeItem('needsOnboarding');
 	window.localStorage.setItem('logout', Date.now().toString());
 }

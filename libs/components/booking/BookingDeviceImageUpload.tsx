@@ -1,30 +1,21 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import { FixoraGlassCard } from '../ui';
 import type { useDeviceImageUpload } from '../../hooks/useDeviceImageUpload';
-import { MAX_DEVICE_IMAGES, resolveDeviceImageUrl } from '../../utils/deviceImage';
+import { MAX_DEVICE_IMAGES } from '../../utils/deviceImage';
 
 type DeviceImageUploadApi = ReturnType<typeof useDeviceImageUpload>;
 
 interface BookingDeviceImageUploadProps {
 	upload: DeviceImageUploadApi;
-	existingImagePaths: string[];
 }
 
-const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceImageUploadProps) => {
+const BookingDeviceImageUpload = ({ upload }: BookingDeviceImageUploadProps) => {
 	const { t } = useTranslation('common');
 	const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-
-	const existingUrls = useMemo(
-		() =>
-			existingImagePaths
-				.map((path) => resolveDeviceImageUrl(path))
-				.filter((url): url is string => !!url),
-		[existingImagePaths],
-	);
 
 	const closeLightbox = useCallback(() => setLightboxUrl(null), []);
 
@@ -46,22 +37,6 @@ const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceI
 				</span>
 
 				<div className="fixora-booking__device-image-grid">
-					{existingUrls.map((url, index) => (
-						<div
-							key={`existing-${index}`}
-							className="fixora-booking__device-image-preview fixora-booking__device-image-preview--saved"
-						>
-							<button
-								type="button"
-								className="fixora-booking__device-image-preview-btn"
-								onClick={() => setLightboxUrl(url)}
-								aria-label={t('booking.device.imageEnlarge', { index: index + 1 })}
-							>
-								<img src={url} alt="" />
-							</button>
-						</div>
-					))}
-
 					{upload.images.map((image, index) => (
 						<div key={image.id} className="fixora-booking__device-image-preview">
 							<button
@@ -69,7 +44,7 @@ const BookingDeviceImageUpload = ({ upload, existingImagePaths }: BookingDeviceI
 								className="fixora-booking__device-image-preview-btn"
 								onClick={() => setLightboxUrl(image.previewUrl)}
 								aria-label={t('booking.device.imageEnlarge', {
-									index: existingUrls.length + index + 1,
+									index: index + 1,
 								})}
 							>
 								<img src={image.previewUrl} alt="" width={120} height={120} decoding="async" />

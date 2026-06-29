@@ -26,10 +26,13 @@ import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetA
 import { notifySavedTechniciansChanged } from '../../libs/utils/savedTechnicians';
 import { sortTechniciansList } from '../../libs/utils/sortTechnicians';
 import {
-	getTechniciansResultsInput,
+	normalizeTechniciansInquiry,
 	parseSearchPageQueryInput,
+	prepareTechniciansQueryInput,
 	serializeSearchPageQueryInput,
+	techniciansInquiryEqual,
 } from '../../libs/utils/technicianSearch';
+import { normalizeRoutePath } from '../../libs/utils/routePaths';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
 const SearchMapExpandedSection = dynamic(
@@ -71,7 +74,7 @@ const SearchPage: NextPage = () => {
 	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 
 	const techniciansQueryInput = useMemo(
-		() => getTechniciansResultsInput(searchFilter),
+		() => prepareTechniciansQueryInput(searchFilter),
 		[searchFilter],
 	);
 
@@ -133,30 +136,42 @@ const SearchPage: NextPage = () => {
 	}, [filtersOpen]);
 
 	useEffect(() => {
-		const closeFilters = () => setFiltersOpen(false);
+		const closeFilters = (url: string) => {
+			const nextPath = url.split('?')[0].split('#')[0];
+			if (normalizeRoutePath(nextPath) !== normalizeRoutePath(router.pathname)) {
+				setFiltersOpen(false);
+			}
+		};
 		router.events.on('routeChangeStart', closeFilters);
 		return () => router.events.off('routeChangeStart', closeFilters);
-	}, [router.events]);
+	}, [router.events, router.pathname]);
 
 	useEffect(() => {
 		if (!router.query.input) return;
 		try {
-			const parsed = parseSearchPageQueryInput(router.query.input as string);
-			setSearchFilter({
-				...parsed,
-				search: {
-					isOnline: null,
-					...parsed.search,
-				},
-			});
+			const parsed = normalizeTechniciansInquiry(parseSearchPageQueryInput(router.query.input as string));
+			setSearchFilter((current) => (techniciansInquiryEqual(current, parsed) ? current : parsed));
 		} catch {
 			// ignore malformed query
 		}
 	}, [router.query.input]);
 
 	useEffect(() => {
-		router.replace(`/search?input=${serializeSearchPageQueryInput(searchFilter)}`, undefined, { shallow: true });
-	}, [router, searchFilter]);
+		if (!router.isReady) return;
+		const normalized = normalizeTechniciansInquiry(searchFilter);
+		const urlInput = router.query.input;
+		if (typeof urlInput === 'string') {
+			try {
+				const parsed = normalizeTechniciansInquiry(parseSearchPageQueryInput(urlInput));
+				if (techniciansInquiryEqual(parsed, normalized)) return;
+			} catch {
+				// malformed query — rewrite below
+			}
+		}
+		void router.replace(`/search?input=${serializeSearchPageQueryInput(normalized)}`, undefined, {
+			shallow: true,
+		});
+	}, [router.isReady, router.query.input, searchFilter]);
 
 	const paginationChangeHandler = (_: ChangeEvent<unknown>, value: number) => {
 		setSearchFilter({ ...searchFilter, page: value });
@@ -217,7 +232,11 @@ const SearchPage: NextPage = () => {
 							onExpandMap={() => setMapExpanded(true)}
 							mapExpanded={mapExpanded}
 						/>
-						<SearchFilters searchFilter={searchFilter} setSearchFilter={setSearchFilter} />
+						<SearchFilters
+							searchFilter={searchFilter}
+							setSearchFilter={setSearchFilter}
+							onApplied={() => setFiltersOpen(false)}
+						/>
 					</Stack>
 
 					<Stack className="fixora-search__results">

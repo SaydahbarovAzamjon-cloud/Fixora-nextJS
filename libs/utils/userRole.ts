@@ -31,3 +31,11 @@ export function isRoleRestrictedError(message: string): boolean {
 export function isMissingTokenError(message: string): boolean {
 	return /authorization token is missing|token is missing|not authenticated|unauthorized/i.test(message);
 }
+
+export function isSessionExpiredError(message: string): boolean {
+	return /jwt expired|token expired|invalid token|session (has )?expired|session_revoked/i.test(message);
+}
+
+export function shouldRedirectToLogin(message: string): boolean {
+	return isSessionExpiredError(message);
+}

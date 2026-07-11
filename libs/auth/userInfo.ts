@@ -6,33 +6,42 @@ import { readStoredProfileImage } from './syncUserVar';
 export const updateUserInfo = (jwtToken: string | null | undefined): boolean => {
 	if (!jwtToken) return false;
 
-	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
-	const userId = claims._id ?? (claims as { sub?: string }).sub ?? '';
-	const storedImage = userId ? readStoredProfileImage(userId) : null;
-	const profileImage = storedImage ?? claims.userProfileImage ?? claims.memberImage ?? '';
-	userVar({
-		_id: userId,
-		memberType: claims.userType ?? claims.memberType ?? '',
-		userType: claims.userType ?? claims.memberType ?? '',
-		verificationStatus: claims.verificationStatus,
-		memberStatus: claims.memberStatus ?? '',
-		memberAuthType: claims.memberAuthType,
-		memberPhone: claims.memberPhone ?? '',
-		memberNick: claims.userNickname ?? claims.memberNick ?? '',
-		memberFullName: claims.userFullName ?? claims.memberFullName ?? '',
-		memberImage: profileImage ? `${profileImage}` : '',
-		memberAddress: claims.memberAddress ?? '',
-		memberDesc: claims.memberDesc ?? '',
-		memberProperties: claims.memberProperties,
-		memberRank: claims.memberRank,
-		memberArticles: claims.memberArticles,
-		memberPoints: claims.memberPoints,
-		memberLikes: claims.memberLikes,
-		memberViews: claims.memberViews,
-		memberWarnings: claims.memberWarnings,
-		memberBlocks: claims.memberBlocks,
-	});
-	return true;
+	try {
+		const claims = decodeJWT<CustomJwtPayload>(jwtToken);
+		const current = userVar();
+		const userId = claims._id ?? (claims as { sub?: string }).sub ?? current._id ?? '';
+		const role = claims.userType ?? claims.memberType ?? current.userType ?? current.memberType ?? '';
+		const storedImage = userId ? readStoredProfileImage(userId) : null;
+		const profileImage =
+			storedImage ?? claims.userProfileImage ?? claims.memberImage ?? current.memberImage ?? '';
+
+		userVar({
+			...current,
+			_id: userId || current._id,
+			memberType: role,
+			userType: role,
+			verificationStatus: claims.verificationStatus ?? current.verificationStatus,
+			memberStatus: claims.memberStatus ?? current.memberStatus ?? '',
+			memberAuthType: claims.memberAuthType ?? current.memberAuthType ?? '',
+			memberPhone: claims.memberPhone ?? current.memberPhone ?? '',
+			memberNick: claims.userNickname ?? claims.memberNick ?? current.memberNick ?? '',
+			memberFullName: claims.userFullName ?? claims.memberFullName ?? current.memberFullName ?? '',
+			memberImage: profileImage ? `${profileImage}` : current.memberImage ?? '',
+			memberAddress: claims.memberAddress ?? current.memberAddress ?? '',
+			memberDesc: claims.memberDesc ?? current.memberDesc ?? '',
+			memberProperties: claims.memberProperties ?? current.memberProperties ?? 0,
+			memberRank: claims.memberRank ?? current.memberRank ?? 0,
+			memberArticles: claims.memberArticles ?? current.memberArticles ?? 0,
+			memberPoints: claims.memberPoints ?? current.memberPoints ?? 0,
+			memberLikes: claims.memberLikes ?? current.memberLikes ?? 0,
+			memberViews: claims.memberViews ?? current.memberViews ?? 0,
+			memberWarnings: claims.memberWarnings ?? current.memberWarnings ?? 0,
+			memberBlocks: claims.memberBlocks ?? current.memberBlocks ?? 0,
+		});
+		return Boolean(userId || current._id);
+	} catch {
+		return false;
+	}
 };
 
 export const deleteUserInfo = () => {

@@ -1,7 +1,8 @@
 const KAKAO_MAPS_SCRIPT_ID = 'kakao-maps-sdk-script';
 
 export const SEOUL_CENTER = { lat: 37.5665, lng: 126.978 };
-export const DEFAULT_GEO_SEARCH_RADIUS_KM = 10;
+/** MVP: 30 km — sparse technician coverage; DECISIONS MAP-01 target was 10 km. */
+export const DEFAULT_GEO_SEARCH_RADIUS_KM = 30;
 
 /** Kakao Maps tile coverage is Korea-only — coords outside this box show a blank map. */
 const KOREA_BOUNDS = {
@@ -105,11 +106,32 @@ export interface LocationChangePayload {
 	label: string;
 	lat: number;
 	lng: number;
+	/** When false, update label/map only — do not narrow search results (e.g. Seoul GPS fallback). */
+	commitGeo?: boolean;
 }
 
 export interface MapPoint {
 	lat: number;
 	lng: number;
+}
+
+export interface LocationSearchResult {
+	label: string;
+	lat: number;
+	lng: number;
+}
+
+interface KakaoAddressSearchResult {
+	address_name: string;
+	x: string;
+	y: string;
+}
+
+interface KakaoPlaceSearchResult {
+	place_name: string;
+	address_name: string;
+	x: string;
+	y: string;
 }
 
 declare global {
@@ -194,6 +216,17 @@ declare global {
 							lng: number,
 							lat: number,
 							callback: (result: KakaoGeocodeResult[], status: string) => void,
+						) => void;
+						addressSearch: (
+							address: string,
+							callback: (result: KakaoAddressSearchResult[], status: string) => void,
+						) => void;
+					};
+					Places: new () => {
+						keywordSearch: (
+							keyword: string,
+							callback: (result: KakaoPlaceSearchResult[], status: string, pagination: unknown) => void,
+							options?: { size?: number },
 						) => void;
 					};
 				};
@@ -694,6 +727,69 @@ export function reverseGeocode(kakao: NonNullable<Window['kakao']>, lat: number,
 	});
 
 	return withTimeout(geocodePromise, 6000, 'Reverse geocode').catch(() => '');
+}
+
+function parseSearchCoords(item: { x: string; y: string }): MapPoint | null {
+	const lat = Number.parseFloat(item.y);
+	const lng = Number.parseFloat(item.x);
+	if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+	return { lat, lng };
+}
+
+export function searchLocations(kakao: NonNullable<Window['kakao']>, query: string): Promise<LocationSearchResult[]> {
+	const trimmed = query.trim();
+	if (!trimmed) return Promise.resolve([]);
+
+	const searchPromise = new Promise<LocationSearchResult[]>((resolve) => {
+		const collected: LocationSearchResult[] = [];
+		const seen = new Set<string>();
+
+		const pushResult = (label: string, lat: number, lng: number) => {
+			const key = `${label}|${lat.toFixed(5)}|${lng.toFixed(5)}`;
+			if (!label.trim() || seen.has(key)) return;
+			seen.add(key);
+			collected.push({ label: label.trim(), lat, lng });
+		};
+
+		try {
+			const geocoder = new kakao.maps.services.Geocoder();
+			geocoder.addressSearch(trimmed, (addressResults, addressStatus) => {
+				if (addressStatus === kakao.maps.services.Status.OK && addressResults?.length) {
+					addressResults.slice(0, 5).forEach((item) => {
+						const point = parseSearchCoords(item);
+						if (point) pushResult(item.address_name, point.lat, point.lng);
+					});
+				}
+
+				try {
+					const places = new kakao.maps.services.Places();
+					places.keywordSearch(
+						trimmed,
+						(placeResults, placeStatus) => {
+							if (placeStatus === kakao.maps.services.Status.OK && placeResults?.length) {
+								placeResults.slice(0, 5).forEach((item) => {
+									const point = parseSearchCoords(item);
+									if (!point) return;
+									const label = [item.place_name, item.address_name].filter(Boolean).join(', ');
+									pushResult(label, point.lat, point.lng);
+								});
+							}
+							resolve(collected.slice(0, 8));
+						},
+						{ size: 8 },
+					);
+				} catch (err) {
+					logKakaoMapError('searchLocations.places', err);
+					resolve(collected.slice(0, 8));
+				}
+			});
+		} catch (err) {
+			logKakaoMapError('searchLocations', err);
+			resolve([]);
+		}
+	});
+
+	return withTimeout(searchPromise, 8000, 'Location search').catch(() => []);
 }
 
 export function getCurrentPosition(): Promise<GeolocationPosition> {

@@ -1,9 +1,10 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { FixoraKakaoButton } from '../ui';
 import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin } from '../../auth/fixoraAuth';
+import { getJwtToken } from '../../auth/tokens';
 import { requestGoogleAuthCode } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
@@ -15,8 +16,16 @@ import { getGraphQLErrorMessage, isOAuthProviderMismatchError } from '../../util
 const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
+	const mountedRef = useRef(true);
 	const [loading, setLoading] = useState<'google' | 'kakao' | null>(null);
 	const kakaoKey = mode === 'register' ? 'ui.signUpWithKakao' : 'ui.continueWithKakao';
+
+	useEffect(() => {
+		mountedRef.current = true;
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
 
 	const routeAfterOAuth = useCallback(
 		async (needsOnboarding: boolean, userType?: string) => {
@@ -33,6 +42,7 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 		(err: unknown, provider: 'google' | 'kakao') => {
 			const message = getGraphQLErrorMessage(err);
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
+			if (/timed out/i.test(message)) return t('oauth.kakaoFailed');
 			if (/NEXT_PUBLIC_GOOGLE_CLIENT_ID|GOOGLE_NOT_CONFIGURED/i.test(message)) return t('oauth.googleNotConfigured');
 			if (/NEXT_PUBLIC_KAKAO_JS_KEY|KAKAO_NOT_CONFIGURED/i.test(message)) return t('oauth.kakaoNotConfigured');
 			if (/OAUTH_NOT_CONFIGURED|not configured on the server/i.test(message)) {
@@ -61,6 +71,18 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 		}
 	}, [mode, router]);
 
+	const showOAuthError = useCallback(
+		async (err: unknown, provider: 'google' | 'kakao') => {
+			// Stale OAuth attempt after email login or leaving /login — do not flash a false error.
+			if (!mountedRef.current || getJwtToken()) return;
+			if (isOAuthProviderMismatchError(err)) {
+				await handleProviderMismatch();
+			}
+			await sweetMixinErrorAlert(oauthErrorMessage(err, provider));
+		},
+		[handleProviderMismatch, oauthErrorMessage],
+	);
+
 	const handleGoogle = useCallback(async () => {
 		const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 		if (!clientId) {
@@ -73,14 +95,11 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 			const result = await fixoraOAuthLogin('GOOGLE', code);
 			await routeAfterOAuth(result.needsOnboarding, result.userType);
 		} catch (err: unknown) {
-			if (isOAuthProviderMismatchError(err)) {
-				await handleProviderMismatch();
-			}
-			await sweetMixinErrorAlert(oauthErrorMessage(err, 'google'));
+			await showOAuthError(err, 'google');
 		} finally {
 			setLoading(null);
 		}
-	}, [handleProviderMismatch, oauthErrorMessage, routeAfterOAuth, t]);
+	}, [oauthErrorMessage, routeAfterOAuth, showOAuthError, t]);
 
 	const handleKakao = useCallback(async () => {
 		if (!process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {
@@ -93,14 +112,11 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 			const result = await fixoraOAuthLogin('KAKAO', token);
 			await routeAfterOAuth(result.needsOnboarding, result.userType);
 		} catch (err: unknown) {
-			if (isOAuthProviderMismatchError(err)) {
-				await handleProviderMismatch();
-			}
-			await sweetMixinErrorAlert(oauthErrorMessage(err, 'kakao'));
+			await showOAuthError(err, 'kakao');
 		} finally {
 			setLoading(null);
 		}
-	}, [handleProviderMismatch, oauthErrorMessage, routeAfterOAuth, t]);
+	}, [oauthErrorMessage, routeAfterOAuth, showOAuthError, t]);
 
 	const handleApple = useCallback(async () => {
 		await sweetTopSmallSuccessAlert(t('oauth.comingSoon'), 1200);

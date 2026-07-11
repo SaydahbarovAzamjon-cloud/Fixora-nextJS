@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useApolloClient } from '@apollo/client';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import AuthHeading from './AuthHeading';
 import { FixoraButton, FixoraInput } from '../ui';
@@ -13,6 +14,7 @@ import {
 	fixoraCompleteOAuthSignup,
 	getNeedsOnboarding,
 	isSignupConflictError,
+	resolveOAuthStubEmail,
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
 import { applyNotificationPreferences } from '../../auth/applyNotificationPreferences';
@@ -30,8 +32,11 @@ const RoleSelect = () => {
 	const router = useRouter();
 	const apolloClient = useApolloClient();
 	const isOAuth = router.query.oauth === '1' || getNeedsOnboarding();
+	const oauthStubEmail = useMemo(() => (isOAuth ? resolveOAuthStubEmail() : ''), [isOAuth]);
+	const needsEmail = isOAuth && !oauthStubEmail;
 	const [selectedType, setSelectedType] = useState<'USER' | 'TECHNICIAN' | null>(null);
 	const [nickname, setNickname] = useState('');
+	const [email, setEmail] = useState(oauthStubEmail);
 	const [phone, setPhone] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
 	const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
@@ -55,7 +60,10 @@ const RoleSelect = () => {
 
 	const handleOAuthComplete = useCallback(async () => {
 		if (!selectedType) return;
-		const result = validateOAuthCompleteInput(nickname, phone, termsAccepted);
+		const result = validateOAuthCompleteInput(nickname, phone, termsAccepted, {
+			email,
+			emailRequired: needsEmail,
+		});
 		if (!result.valid) {
 			setErrors(result.errors);
 			return;
@@ -67,6 +75,7 @@ const RoleSelect = () => {
 				userNickname: nickname.trim(),
 				userPhoneNumber: phone.trim(),
 				userType: selectedType,
+				...(needsEmail || email.trim() ? { userEmail: email.trim() } : {}),
 			});
 			const userId = userVar()._id;
 			if (userId) await applyNotificationPrefs(userId);
@@ -80,11 +89,17 @@ const RoleSelect = () => {
 				setErrors(err.conflicts);
 				return;
 			}
-			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Signup failed');
+			const message = err instanceof Error ? err.message : '';
+			if (/required signup field|missing/i.test(message)) {
+				setErrors({ email: 'emailRequired' });
+				await sweetMixinErrorAlert(t('oauthComplete.emailRequiredHint'));
+				return;
+			}
+			await sweetMixinErrorAlert(message || 'Signup failed');
 		} finally {
 			setLoading(false);
 		}
-	}, [nickname, phone, termsAccepted, selectedType, router, notificationPrefs, apolloClient]);
+	}, [email, needsEmail, nickname, phone, termsAccepted, selectedType, router, notificationPrefs, apolloClient, t]);
 
 	return (
 		<>
@@ -119,6 +134,24 @@ const RoleSelect = () => {
 						error={!!errors.nickname}
 						helperText={errors.nickname ? t(`validation.${errors.nickname}`) : undefined}
 					/>
+					{needsEmail && (
+						<FixoraInput
+							label={t('oauthComplete.emailLabel')}
+							type="email"
+							name="email"
+							autoComplete="email"
+							placeholder={t('oauthComplete.emailPlaceholder')}
+							icon={<EmailOutlined fontSize="small" />}
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							error={!!errors.email}
+							helperText={
+								errors.email
+									? t(`validation.${errors.email}`)
+									: t('oauthComplete.emailHint')
+							}
+						/>
+					)}
 					<FixoraInput
 						label={t('oauthComplete.phoneLabel')}
 						type="tel"

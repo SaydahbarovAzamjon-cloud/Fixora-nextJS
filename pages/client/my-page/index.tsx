@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useQuery, useReactiveVar } from '@apollo/client';
+import decodeJWT from 'jwt-decode';
 import withLayoutFull from '../../../libs/components/layout/LayoutFull';
 import ClientMyPageView from '../../../libs/components/mypage/fixora/ClientMyPageView';
 import { ClientSettingsSection } from '../../../libs/components/mypage/fixora/ClientSettingsTab';
@@ -14,7 +16,10 @@ import {
 	GET_USER_FOLLOWINGS,
 } from '../../../apollo/user/profile';
 import { userVar } from '../../../apollo/store';
+import { getJwtToken } from '../../../libs/auth';
+import { useIsClientReady } from '../../../libs/hooks/useIsClientReady';
 import { isCustomerUser } from '../../../libs/utils/userRole';
+import { CustomJwtPayload } from '../../../libs/types/customJwtPayload';
 import { Booking, BookingReview, Payment } from '../../../libs/types/fixora/fixora';
 import { useClientMyPageStats } from '../../../libs/hooks/useClientMyPageStats';
 import { useSavedTechnicianCount } from '../../../libs/hooks/useSavedTechnicianCount';
@@ -48,13 +53,15 @@ const parseSettingsSection = (section: string | string[] | undefined): ClientSet
 
 const ClientMyPage: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
+	const isClientReady = useIsClientReady();
 	const user = useReactiveVar(userVar);
 	const isCustomer = isCustomerUser(user);
 
 	const tab = parseOwnerMyPageTab(router.query.tab);
 	const settingsSection = parseSettingsSection(router.query.section);
 
-	const { data: userData } = useQuery(GET_USER, {
+	const { data: userData, loading: profileLoading, refetch: refetchProfile } = useQuery(GET_USER, {
 		skip: !user?._id || !isCustomer,
 		variables: { userId: user?._id },
 		fetchPolicy: 'network-only',
@@ -105,10 +112,25 @@ const ClientMyPage: NextPage = () => {
 	});
 
 	useEffect(() => {
-		if (!user?._id) {
+		if (!isClientReady) return;
+		const jwt = getJwtToken();
+		if (!user?._id && !jwt) {
 			router.push('/login?redirect=/client/my-page').then();
 		}
-	}, [user, router]);
+	}, [isClientReady, user?._id, router]);
+
+	const sessionUserId = useMemo(() => {
+		if (user?._id) return user._id;
+		if (!isClientReady) return undefined;
+		const jwt = getJwtToken();
+		if (!jwt) return undefined;
+		try {
+			const claims = decodeJWT<CustomJwtPayload>(jwt);
+			return claims._id ?? (claims as { sub?: string }).sub;
+		} catch {
+			return undefined;
+		}
+	}, [user?._id, isClientReady]);
 
 	const selectTab = (next: OwnerMyPageTab) => {
 		router.push(ownerMyPageHref(next), undefined, { shallow: true });
@@ -120,7 +142,27 @@ const ClientMyPage: NextPage = () => {
 		});
 	};
 
-	if (!user?._id || !isCustomer) {
+	const openSettingsSection = (section: ClientSettingsSection) => {
+		router.push(ownerMyPageHref('settings', section === 'menu' ? undefined : section), undefined, {
+			shallow: true,
+		});
+	};
+
+	if (!isClientReady) {
+		return (
+			<div className="fixora-mypage-page">
+				<div className="container fixora-mypage">
+					<div className="fixora-mypage__settings-loading">{t('mypage.settings.loading')}</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (!user?._id && !getJwtToken()) {
+		return null;
+	}
+
+	if (user?._id && !isCustomer) {
 		return null;
 	}
 
@@ -135,7 +177,11 @@ const ClientMyPage: NextPage = () => {
 			settingsSection={settingsSection}
 			onSelectTab={selectTab}
 			onSettingsSectionChange={changeSettingsSection}
+			onOpenSettingsSection={openSettingsSection}
 			onRefetchBookings={() => refetchBookings()}
+			onRefetchProfile={() => refetchProfile()}
+			settingsUserId={sessionUserId}
+			profileLoading={profileLoading}
 		/>
 	);
 };

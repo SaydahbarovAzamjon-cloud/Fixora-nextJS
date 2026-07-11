@@ -3,6 +3,7 @@ import {
 	SERVICE_ISSUE_CATEGORY,
 	SERVICES,
 } from '../components/search/categoryMappings';
+import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../kakao-maps';
 import type { TechniciansInquiry } from '../types/fixora/fixora';
 
 const VALID_ISSUE_CATEGORIES = new Set([
@@ -98,7 +99,11 @@ export function normalizeTechniciansInquiry(filter: TechniciansInquiry): Technic
 	}
 	if (latitude != null && Number.isFinite(latitude)) search.latitude = latitude;
 	if (longitude != null && Number.isFinite(longitude)) search.longitude = longitude;
-	if (radiusKm != null && Number.isFinite(radiusKm)) search.radiusKm = radiusKm;
+	if (latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude)) {
+		const resolvedRadius =
+			radiusKm != null && Number.isFinite(radiusKm) ? radiusKm : DEFAULT_GEO_SEARCH_RADIUS_KM;
+		search.radiusKm = Math.max(resolvedRadius, DEFAULT_GEO_SEARCH_RADIUS_KM);
+	}
 	if (minAverageRating != null && Number.isFinite(minAverageRating)) {
 		search.minAverageRating = minAverageRating;
 	}
@@ -124,6 +129,8 @@ export function prepareTechniciansQueryInput(filter: TechniciansInquiry): Techni
 	const search: TechniciansInquiry['search'] = {};
 
 	for (const [key, value] of Object.entries(processed.search) as [keyof TechniciansInquiry['search'], unknown][]) {
+		// userLocation in TISearch is a regex on technician profiles — not the map/GPS label (MAP-01).
+		if (key === 'userLocation') continue;
 		if (value === undefined || value === null || value === '') continue;
 		search[key] = value as never;
 	}
@@ -143,13 +150,15 @@ export function techniciansInquiryEqual(a: TechniciansInquiry, b: TechniciansInq
 }
 
 /**
- * Main search results query — text/category discovery is nationwide.
- * GPS radius from the map must not empty results when the user searches by problem.
+ * Main search results — combine discovery filters with geo when the user picked a map point (MAP-01).
  */
 export function getTechniciansResultsInput(filter: TechniciansInquiry): TechniciansInquiry {
 	const normalized = normalizeTechniciansInquiry(filter);
-	const { text, issueCategory, deviceCategory, latitude, longitude, radiusKm, ...rest } = normalized.search;
+	const { text, issueCategory, deviceCategory, latitude, longitude, radiusKm, userLocation, ...rest } =
+		normalized.search;
 	const hasDiscoveryFilter = Boolean(text?.trim() || issueCategory || deviceCategory);
+	const hasGeoFilter =
+		latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
 
 	if (!hasDiscoveryFilter) return normalized;
 
@@ -161,11 +170,20 @@ export function getTechniciansResultsInput(filter: TechniciansInquiry): Technici
 			issueCategory,
 			deviceCategory,
 			isOnline: normalized.search.isOnline ?? null,
-			latitude: undefined,
-			longitude: undefined,
-			radiusKm: undefined,
+			...(hasGeoFilter
+				? {
+						latitude,
+						longitude,
+						radiusKm: radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
+					}
+				: {}),
 		},
 	};
+}
+
+export function hasActiveGeoSearch(filter: TechniciansInquiry): boolean {
+	const { latitude, longitude } = filter.search;
+	return latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
 }
 
 export function parseSearchPageQueryInput(raw: string): TechniciansInquiry {

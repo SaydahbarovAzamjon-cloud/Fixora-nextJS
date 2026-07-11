@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import { useMutation, useReactiveVar } from '@apollo/client';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
@@ -24,6 +25,12 @@ import { formatKrw } from '../../../utils/formatCurrency';
 import { dateLocale } from '../../../utils/i18nLocale';
 import { ClientMyPageStats } from '../../../hooks/useClientMyPageStats';
 import { OwnerMyPageTab, OWNER_MY_PAGE_TABS } from '../../../utils/clientMyPageRoute';
+import { useProfileImageUpload } from '../../../hooks/useProfileImageUpload';
+import { UPDATE_USER } from '../../../../apollo/user/profile';
+import { profileImageDraftVar } from '../../../../apollo/store';
+import { readStoredProfileImage, syncUserVarFromGraphqlUser } from '../../../auth/syncUserVar';
+import { hasRealProfileImage } from '../../../utils/profileImage';
+import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
 
 type PublicTab = 'repairHistory' | 'savedTechnicians' | 'following' | 'reviews';
 export type ClientMyPageTab = OwnerMyPageTab | PublicTab;
@@ -63,7 +70,11 @@ interface ClientMyPageViewProps {
 	settingsSection?: ClientSettingsSection;
 	onSelectTab: (tab: ClientMyPageTab) => void;
 	onSettingsSectionChange?: (section: ClientSettingsSection) => void;
+	onOpenSettingsSection?: (section: ClientSettingsSection) => void;
 	onRefetchBookings?: () => void;
+	onRefetchProfile?: () => void;
+	settingsUserId?: string;
+	profileLoading?: boolean;
 }
 
 const ClientMyPageView = ({
@@ -78,13 +89,67 @@ const ClientMyPageView = ({
 	settingsSection = 'menu',
 	onSelectTab,
 	onSettingsSectionChange,
+	onOpenSettingsSection,
 	onRefetchBookings,
+	onRefetchProfile,
+	settingsUserId,
+	profileLoading = false,
 }: ClientMyPageViewProps) => {
 	const { t } = useTranslation('common');
 	const router = useRouter();
 	const isPublic = mode === 'public';
+	const profileDraft = useReactiveVar(profileImageDraftVar);
+	const uploadInFlightRef = useRef(false);
+
+	const onUploadError = useCallback(
+		(key: string) => {
+			if (key === 'invalidType') void sweetMixinErrorAlert(t('mypage.settings.photoInvalidType'));
+			else if (key === 'tooLarge') void sweetMixinErrorAlert(t('mypage.settings.photoTooLarge'));
+		},
+		[t],
+	);
+
+	const avatar = useProfileImageUpload(onUploadError);
+	const [updateUser] = useMutation(UPDATE_USER);
+
+	useEffect(() => {
+		if (!profile?._id || isPublic) return;
+		const stored = readStoredProfileImage(profile._id);
+		const path = profile.userProfileImage ?? stored;
+		if (path && hasRealProfileImage(path)) {
+			avatar.setExistingImage(path);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate when profile image changes
+	}, [profile?._id, profile?.userProfileImage, isPublic]);
+
+	const persistPendingPhoto = useCallback(async () => {
+		if (!avatar.cover?.file || !profile?._id) return;
+		const path = await avatar.uploadProfileImage();
+		if (!path) throw new Error('Upload failed');
+		const { data } = await updateUser({
+			variables: { input: { _id: profile._id, userProfileImage: path } },
+		});
+		const savedPath = data?.updateUser?.userProfileImage ?? path;
+		avatar.clearDraftAfterSave(savedPath);
+		syncUserVarFromGraphqlUser({ _id: profile._id, userProfileImage: savedPath });
+		onRefetchProfile?.();
+	}, [avatar, onRefetchProfile, profile?._id, updateUser]);
+
+	useEffect(() => {
+		if (!avatar.cover?.file || uploadInFlightRef.current || isPublic) return;
+		uploadInFlightRef.current = true;
+		persistPendingPhoto()
+			.then(() => sweetTopSmallSuccessAlert(t('mypage.settings.photoSaved'), 800))
+			.catch(sweetErrorHandling)
+			.finally(() => {
+				uploadInFlightRef.current = false;
+			});
+	}, [avatar.cover?.file, isPublic, persistPendingPhoto, t]);
+
+	const headerImage = profileDraft ?? profile?.userProfileImage;
 	const tabs = isPublic ? PUBLIC_TABS : OWNER_MY_PAGE_TABS;
 	const displayName = profile?.userFullName || profile?.userNickname || '';
+	const settingsId = profile?._id ?? settingsUserId;
 	const completedBookings = bookings.filter((booking) => booking.bookingStatus === 'COMPLETED');
 
 	const ownerStats = stats ?? {
@@ -103,12 +168,18 @@ const ClientMyPageView = ({
 			<div className="container fixora-mypage">
 				<ProfileHeader
 					name={displayName}
-					image={profile?.userProfileImage}
+					image={headerImage}
 					readOnly={isPublic}
+					onChangePhoto={isPublic ? undefined : avatar.openPicker}
+					photoUploading={avatar.uploading}
 					onEditProfile={
 						isPublic
 							? undefined
 							: () => {
+									if (onOpenSettingsSection) {
+										onOpenSettingsSection('profile');
+										return;
+									}
 									onSelectTab('settings');
 									onSettingsSectionChange?.('profile');
 								}
@@ -142,6 +213,16 @@ const ClientMyPageView = ({
 					}
 				/>
 
+				{!isPublic && (
+					<input
+						ref={avatar.fileRef}
+						type="file"
+						accept="image/png,image/jpeg,image/jpg,image/webp"
+						hidden
+						onChange={avatar.pickFile}
+					/>
+				)}
+
 				<div className="fixora-mypage__tabs">
 					{tabs.map((item) => (
 						<button
@@ -166,16 +247,29 @@ const ClientMyPageView = ({
 					{!isPublic && activeTab === 'savedTechnicians' && <SavedTechniciansTab />}
 					{!isPublic && activeTab === 'following' && <FollowingTab />}
 					{!isPublic && activeTab === 'reviews' && <OwnerReviewsTab bookings={bookings} />}
-					{!isPublic && activeTab === 'settings' && profile?._id && (
-						<ClientSettingsTab
-							userId={profile._id}
-							userFullName={profile.userFullName}
-							userNickname={profile.userNickname}
-							userLocation={profile.userLocation}
-							userBio={profile.userBio}
-							section={settingsSection}
-							onSectionChange={onSettingsSectionChange}
-						/>
+					{!isPublic && activeTab === 'settings' && (
+						profileLoading && !settingsId ? (
+							<div className="fixora-mypage__settings-loading">{t('mypage.settings.loading')}</div>
+						) : settingsId ? (
+							<ClientSettingsTab
+								userId={settingsId}
+								userFullName={profile?.userFullName}
+								userNickname={profile?.userNickname}
+								userLocation={profile?.userLocation}
+								userBio={profile?.userBio}
+								section={settingsSection}
+								onSectionChange={onSettingsSectionChange}
+								onOpenPhotoPicker={avatar.openPicker}
+								photoUploading={avatar.uploading}
+								uploadPendingPhoto={
+									avatar.cover?.file
+										? async () => {
+												await persistPendingPhoto();
+											}
+										: undefined
+								}
+							/>
+						) : null
 					)}
 
 					{isPublic && activeTab === 'repairHistory' && <ClientRepairHistoryTab bookings={bookings} />}

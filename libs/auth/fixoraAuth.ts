@@ -20,9 +20,14 @@ import {
 	deriveSignupNickname,
 	isSignupConflictError,
 	isValidKrContactPhone,
+	normalizeSignupEmail,
 	normalizeSignupPhone,
 	throwSignupConflictFromMutation,
 } from './signupAvailability';
+import { readStoredUserEmail } from './technicianSettingsCache';
+import { getJwtToken } from './tokens';
+import decodeJWT from 'jwt-decode';
+import { CustomJwtPayload } from '../types/customJwtPayload';
 
 export { deriveSignupNickname, isSignupConflictError, SignupConflictError } from './signupAvailability';
 export type { SignupConflictField } from './signupAvailability';
@@ -96,13 +101,37 @@ export const validateOAuthCompleteInput = (
 	nickname: string,
 	phone: string,
 	termsAccepted: boolean,
+	options?: { email?: string; emailRequired?: boolean },
 ): AuthValidationResult => {
 	const errors: Record<string, string> = {};
 	if (!nickname.trim() || nickname.trim().length < 3) errors.nickname = 'nameRequired';
 	if (!phone.trim() || !isValidKrContactPhone(phone)) errors.phone = 'phoneInvalid';
 	if (!termsAccepted) errors.terms = 'termsRequired';
+	if (options?.emailRequired) {
+		const email = options.email?.trim() ?? '';
+		if (!email) errors.email = 'emailRequired';
+		else if (!validateEmail(email)) errors.email = 'emailInvalid';
+	}
 	return { valid: Object.keys(errors).length === 0, errors };
 };
+
+/** Email from OAuth stub (Kakao often omits it — backend requires userEmail on completeOAuthSignup). */
+export function resolveOAuthStubEmail(): string {
+	if (typeof window === 'undefined') return '';
+	const userId = userVar()._id;
+	if (userId) {
+		const stored = readStoredUserEmail(userId);
+		if (stored?.trim()) return stored.trim();
+	}
+	const jwt = getJwtToken();
+	if (!jwt) return '';
+	try {
+		const claims = decodeJWT<CustomJwtPayload>(jwt);
+		return claims.userEmail?.trim() ?? '';
+	} catch {
+		return '';
+	}
+}
 
 export interface FixoraAuthProfile {
 	_id?: string | null;
@@ -338,7 +367,10 @@ export const fixoraCompleteOAuthSignup = async (input: {
 			mutation: COMPLETE_OAUTH_SIGNUP,
 			variables: {
 				input: {
-					...input,
+					userNickname: input.userNickname.trim(),
+					userPhoneNumber: normalizeSignupPhone(input.userPhoneNumber),
+					userType: input.userType,
+					...(input.userEmail?.trim() ? { userEmail: normalizeSignupEmail(input.userEmail) } : {}),
 					termsAcceptedAt: new Date().toISOString(),
 				},
 			},

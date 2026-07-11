@@ -31,7 +31,11 @@ import {
 	prepareTechniciansQueryInput,
 	serializeSearchPageQueryInput,
 	techniciansInquiryEqual,
+	hasActiveGeoSearch,
 } from '../../libs/utils/technicianSearch';
+import { DEFAULT_GEO_SEARCH_RADIUS_KM } from '../../libs/kakao-maps';
+import type { LocationChangePayload } from '../../libs/kakao-maps';
+import { filterTechniciansWithinRadius } from '../../libs/utils/technicianMap';
 import { normalizeRoutePath } from '../../libs/utils/routePaths';
 
 const LocationCard = dynamic(() => import('../../libs/components/search/LocationCard'), { ssr: false });
@@ -60,6 +64,7 @@ const SearchPage: NextPage = () => {
 	const router = useRouter();
 	const [searchFilter, setSearchFilter] = useState<TechniciansInquiry>(DEFAULT_INPUT);
 	const [locationLabel, setLocationLabel] = useState('');
+	const [geoSearchCommitted, setGeoSearchCommitted] = useState(false);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [mapExpanded, setMapExpanded] = useState(false);
 	const [filtersOpen, setFiltersOpen] = useState(false);
@@ -84,8 +89,37 @@ const SearchPage: NextPage = () => {
 		notifyOnNetworkStatusChange: true,
 	});
 
-	const locationChangeHandler = ({ label }: { label: string; lat: number; lng: number }) => {
+	const locationChangeHandler = ({ label, lat, lng, commitGeo = false }: LocationChangePayload) => {
 		setLocationLabel(label);
+		if (commitGeo) {
+			setGeoSearchCommitted(true);
+			setSearchFilter((current) =>
+				normalizeTechniciansInquiry({
+					...current,
+					page: 1,
+					search: {
+						...current.search,
+						latitude: lat,
+						longitude: lng,
+						radiusKm: current.search.radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
+						userLocation: label,
+					},
+				}),
+			);
+			return;
+		}
+
+		if (!geoSearchCommitted) {
+			setSearchFilter((current) =>
+				normalizeTechniciansInquiry({
+					...current,
+					search: {
+						...current.search,
+						userLocation: label,
+					},
+				}),
+			);
+		}
 	};
 
 	const toggleFavoriteHandler = async (id: string) => {
@@ -122,9 +156,26 @@ const SearchPage: NextPage = () => {
 
 	const technicians = useMemo(() => {
 		const list = (data?.getTechnicians?.list ?? []) as TechnicianSummary[];
-		return sortTechniciansList(list, searchFilter);
-	}, [data, searchFilter]);
+		const sorted = sortTechniciansList(list, searchFilter);
+		const geoActive = geoSearchCommitted && hasActiveGeoSearch(searchFilter);
+		if (!geoActive) return sorted;
+
+		const { latitude, longitude, radiusKm } = searchFilter.search;
+		return filterTechniciansWithinRadius(
+			sorted,
+			{ lat: latitude!, lng: longitude! },
+			radiusKm ?? DEFAULT_GEO_SEARCH_RADIUS_KM,
+		);
+	}, [data, geoSearchCommitted, searchFilter]);
+
+	const geoActive = geoSearchCommitted && hasActiveGeoSearch(searchFilter);
 	const total = data?.getTechnicians?.metaCounter?.[0]?.total ?? 0;
+	const displayTotal = geoActive ? technicians.length : total;
+
+	useEffect(() => {
+		const label = searchFilter.search.userLocation?.trim();
+		if (label) setLocationLabel(label);
+	}, [searchFilter.search.userLocation]);
 
 	useEffect(() => {
 		if (!filtersOpen) return;
@@ -151,6 +202,9 @@ const SearchPage: NextPage = () => {
 		try {
 			const parsed = normalizeTechniciansInquiry(parseSearchPageQueryInput(router.query.input as string));
 			setSearchFilter((current) => (techniciansInquiryEqual(current, parsed) ? current : parsed));
+			if (hasActiveGeoSearch(parsed)) {
+				setGeoSearchCommitted(true);
+			}
 		} catch {
 			// ignore malformed query
 		}
@@ -252,7 +306,7 @@ const SearchPage: NextPage = () => {
 						)}
 
 						<SearchResultsHeader
-							total={total}
+							total={displayTotal}
 							searchFilter={searchFilter}
 							setSearchFilter={setSearchFilter}
 							viewMode={viewMode}
@@ -277,7 +331,7 @@ const SearchPage: NextPage = () => {
 							</Stack>
 						)}
 
-						{technicians.length !== 0 && Math.ceil(total / searchFilter.limit) > 1 && (
+						{technicians.length !== 0 && !geoActive && Math.ceil(total / searchFilter.limit) > 1 && (
 							<Stack className="fixora-search__pagination">
 								<Pagination
 									page={searchFilter.page}

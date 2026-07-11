@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { getTechniciansResultsInput, resolveTextSearchFilters } from './technicianSearch';
+import {
+	getTechniciansResultsInput,
+	prepareTechniciansQueryInput,
+	resolveTextSearchFilters,
+} from './technicianSearch';
 
 describe('resolveTextSearchFilters', () => {
 	it('maps partial screen keyword to SCREEN issue category', () => {
@@ -20,7 +24,7 @@ describe('resolveTextSearchFilters', () => {
 });
 
 describe('getTechniciansResultsInput', () => {
-	it('strips geo radius when text search is active', () => {
+	it('keeps geo radius when text search and map location are both active', () => {
 		const input = getTechniciansResultsInput({
 			page: 1,
 			limit: 10,
@@ -30,12 +34,43 @@ describe('getTechniciansResultsInput', () => {
 				latitude: 35.17,
 				longitude: 129.07,
 				radiusKm: 10,
+				userLocation: 'Busan',
+			},
+		});
+
+		expect(input.search.text).toBe('Screen');
+		expect(input.search.latitude).toBe(35.17);
+		expect(input.search.longitude).toBe(129.07);
+		expect(input.search.radiusKm).toBe(30);
+		expect(input.search.userLocation).toBeUndefined();
+	});
+
+	it('does not send userLocation label to GraphQL (display-only)', () => {
+		const input = prepareTechniciansQueryInput({
+			page: 1,
+			limit: 10,
+			search: {
+				isOnline: null,
+				userLocation: '경남, 양산시',
+			},
+		});
+
+		expect(input.search.userLocation).toBeUndefined();
+		expect(input.search.isOnline).toBeNull();
+	});
+
+	it('strips geo when only text search is active (no map point)', () => {
+		const input = getTechniciansResultsInput({
+			page: 1,
+			limit: 10,
+			search: {
+				isOnline: null,
+				text: 'Screen',
 			},
 		});
 
 		expect(input.search.text).toBe('Screen');
 		expect(input.search.latitude).toBeUndefined();
 		expect(input.search.longitude).toBeUndefined();
-		expect(input.search.radiusKm).toBeUndefined();
 	});
 });

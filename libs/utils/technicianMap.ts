@@ -34,6 +34,18 @@ export function formatDistanceKm(km: number): string {
 	return `${km.toFixed(km < 10 ? 1 : 0)} km`;
 }
 
+/** Keep only technicians with shop coords inside the radius (client-side guard when geo search is active). */
+export function filterTechniciansWithinRadius(
+	technicians: TechnicianSummary[],
+	point: MapPoint,
+	radiusKm: number,
+): TechnicianSummary[] {
+	return getPlottableTechnicians(technicians).filter(
+		(tech) =>
+			distanceKmBetween(point, { lat: tech.shopLatitude, lng: tech.shopLongitude }) <= radiusKm,
+	);
+}
+
 export function technicianDisplayName(tech: TechnicianSummary): string {
 	return tech.userNickname || tech.userFullName || tech.shopName || 'Technician';
 }

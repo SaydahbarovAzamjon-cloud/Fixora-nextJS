@@ -247,6 +247,14 @@
 		padding: 12px 14px;
 	}
 
+	.fixora-mypage__location-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.fixora-mypage__nearby-techs {
+		min-height: auto;
+	}
+
 	.fixora-mypage__request,
 	.fixora-mypage__following,
 	.fixora-mypage__saved-card,

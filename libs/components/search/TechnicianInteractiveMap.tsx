@@ -127,6 +127,7 @@ const TechnicianInteractiveMap = ({
 	const onSelectTechnicianRef = useRef(onSelectTechnician);
 	const suppressMapClickRef = useRef(false);
 	const refreshMarkerModeRef = useRef<() => void>(() => undefined);
+	const hasFittedMapRef = useRef(false);
 
 	const [locating, setLocating] = useState(false);
 	const [mapError, setMapError] = useState(false);
@@ -414,9 +415,6 @@ const TechnicianInteractiveMap = ({
 				avatarOverlayRefs.current[tech._id] = overlay;
 			});
 
-			if (!routeVisible) {
-				syncMapView(plottableTechnicians, userPoint);
-			}
 			return;
 		}
 
@@ -475,19 +473,13 @@ const TechnicianInteractiveMap = ({
 				logKakaoMapError('rebuildMarkers', err);
 			}
 		}
-
-		if (!routeVisible) {
-			syncMapView(plottableTechnicians, userPoint);
-		}
 	}, [
 		clearMarkerLayer,
 		hideHoverPreview,
 		plottableTechnicians,
 		routeVisible,
 		showHoverPreview,
-		syncMapView,
 		tilesReady,
-		userPoint,
 		t,
 	]);
 
@@ -512,7 +504,7 @@ const TechnicianInteractiveMap = ({
 	}, [refreshMarkerMode]);
 
 	const applyLocation = useCallback(
-		async (lat: number, lng: number, fallbackLabel?: string) => {
+		async (lat: number, lng: number, fallbackLabel?: string, commitGeo = true) => {
 			const kakao = kakaoRef.current;
 			const center = { lat, lng };
 			setUserPoint(center);
@@ -522,7 +514,9 @@ const TechnicianInteractiveMap = ({
 				const latlng = new kakao.maps.LatLng(lat, lng);
 				userMarkerRef.current?.setPosition(latlng);
 				if (!routeVisible) {
-					syncMapView(plottableTechnicians, center);
+					mapRef.current.setCenter(latlng);
+					mapRef.current.setLevel(variant === 'expanded' ? 6 : 7);
+					scheduleMapRelayout(mapRef.current);
 				}
 			}
 
@@ -538,29 +532,43 @@ const TechnicianInteractiveMap = ({
 				}
 			}
 
-			onLocationChangeRef.current?.({ label, lat, lng });
+			onLocationChangeRef.current?.({ label, lat, lng, commitGeo });
 		},
-		[plottableTechnicians, routeVisible, syncMapView, t],
+		[routeVisible, t, variant],
 	);
 
-	const detectLocation = useCallback(async () => {
-		setLocating(true);
-		try {
-			const position = await getCurrentPosition();
-			const { latitude: lat, longitude: lng } = position.coords;
+	const detectLocation = useCallback(
+		async (options?: { commitGeo?: boolean }) => {
+			const commitGeo = options?.commitGeo ?? true;
+			setLocating(true);
+			try {
+				const position = await getCurrentPosition();
+				const { latitude: lat, longitude: lng } = position.coords;
 
-			if (isWithinKorea(lat, lng)) {
-				await applyLocation(lat, lng);
-			} else {
-				await applyLocation(SEOUL_CENTER.lat, SEOUL_CENTER.lng, t('search.location.outsideKorea'));
+				if (isWithinKorea(lat, lng)) {
+					await applyLocation(lat, lng, undefined, commitGeo);
+				} else {
+					await applyLocation(
+						SEOUL_CENTER.lat,
+						SEOUL_CENTER.lng,
+						t('search.location.outsideKorea'),
+						false,
+					);
+				}
+			} catch (err) {
+				logKakaoMapError('geolocation', err);
+				await applyLocation(
+					SEOUL_CENTER.lat,
+					SEOUL_CENTER.lng,
+					t('search.location.placeholder'),
+					false,
+				);
+			} finally {
+				setLocating(false);
 			}
-		} catch (err) {
-			logKakaoMapError('geolocation', err);
-			await applyLocation(SEOUL_CENTER.lat, SEOUL_CENTER.lng, t('search.location.placeholder'));
-		} finally {
-			setLocating(false);
-		}
-	}, [applyLocation, t]);
+		},
+		[applyLocation, t],
+	);
 
 	useEffect(() => {
 		const generation = ++initGenerationRef.current;
@@ -638,6 +646,7 @@ const TechnicianInteractiveMap = ({
 					label: t('search.location.placeholder') ?? '',
 					lat: SEOUL_CENTER.lat,
 					lng: SEOUL_CENTER.lng,
+					commitGeo: false,
 				});
 			}
 		};
@@ -677,15 +686,23 @@ const TechnicianInteractiveMap = ({
 
 	useEffect(() => {
 		if (tilesReady && autoDetectLocation && recenterRequestId === 0) {
-			detectLocation();
+			detectLocation({ commitGeo: false });
 		}
 	}, [autoDetectLocation, detectLocation, recenterRequestId, tilesReady]);
 
 	useEffect(() => {
 		if (tilesReady && recenterRequestId > 0) {
-			detectLocation();
+			hasFittedMapRef.current = false;
+			detectLocation({ commitGeo: true });
 		}
 	}, [detectLocation, recenterRequestId, tilesReady]);
+
+	useEffect(() => {
+		if (!tilesReady || routeVisible || hasFittedMapRef.current) return;
+		if (!plottableTechnicians.length) return;
+		syncMapView(plottableTechnicians, userPoint);
+		hasFittedMapRef.current = true;
+	}, [plottableTechnicians, routeVisible, syncMapView, tilesReady, userPoint]);
 
 	useEffect(() => {
 		if (tilesReady) {

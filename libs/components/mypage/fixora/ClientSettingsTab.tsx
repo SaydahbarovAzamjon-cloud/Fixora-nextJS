@@ -78,6 +78,12 @@ interface ClientSettingsTabProps {
 
 	onSectionChange?: (section: ClientSettingsSection) => void;
 
+	onOpenPhotoPicker?: () => void;
+
+	photoUploading?: boolean;
+
+	uploadPendingPhoto?: () => Promise<void>;
+
 }
 
 
@@ -166,6 +172,12 @@ const ClientSettingsTab = ({
 
 	onSectionChange,
 
+	onOpenPhotoPicker,
+
+	photoUploading,
+
+	uploadPendingPhoto,
+
 }: ClientSettingsTabProps) => {
 
 	const { t } = useTranslation('common');
@@ -207,6 +219,12 @@ const ClientSettingsTab = ({
 					userLocation={userLocation}
 
 					userBio={userBio}
+
+					onOpenPhotoPicker={onOpenPhotoPicker}
+
+					photoUploading={photoUploading}
+
+					uploadPendingPhoto={uploadPendingPhoto}
 
 				/>
 
@@ -315,6 +333,8 @@ const ClientSettingsTab = ({
 					userLocation={userLocation}
 
 					userBio={userBio}
+
+					mode="location"
 
 				/>
 

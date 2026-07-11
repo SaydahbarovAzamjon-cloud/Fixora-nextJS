@@ -18,6 +18,8 @@ export interface ProfileHeaderProps {
 	avgRatingGiven?: number | null;
 	totalSpent?: number;
 	onEditProfile?: () => void;
+	onChangePhoto?: () => void;
+	photoUploading?: boolean;
 	/** Legacy public profile stats layout */
 	stats?: { label: string; value: React.ReactNode }[];
 	/** Legacy fields — ignored in owner layout */
@@ -39,6 +41,8 @@ const ProfileHeader = ({
 	avgRatingGiven,
 	totalSpent = 0,
 	onEditProfile,
+	onChangePhoto,
+	photoUploading = false,
 	stats,
 }: ProfileHeaderProps) => {
 	const { t } = useTranslation('common');
@@ -75,8 +79,14 @@ const ProfileHeader = ({
 				<div className="fixora-mypage__identity fixora-mypage__identity--owner">
 					<div className="fixora-mypage__avatar-wrap">
 						<img className="fixora-mypage__avatar-square" src={resolveProfileImageUrl(image)} alt="" />
-						{!readOnly && (
-							<button type="button" className="fixora-mypage__avatar-camera" aria-label={t('mypage.changePhoto')}>
+						{!readOnly && onChangePhoto && (
+							<button
+								type="button"
+								className="fixora-mypage__avatar-camera"
+								aria-label={t('mypage.changePhoto')}
+								onClick={onChangePhoto}
+								disabled={photoUploading}
+							>
 								<PhotoCameraOutlinedIcon fontSize="inherit" />
 							</button>
 						)}

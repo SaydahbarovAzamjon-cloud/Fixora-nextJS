@@ -9,6 +9,7 @@ export function syncUserVarFromGraphqlUser(u: {
 	userNickname?: string | null;
 	userProfileImage?: string | null;
 	userPhoneNumber?: string | null;
+	userLocation?: string | null;
 	userBio?: string | null;
 }) {
 	const current = userVar();
@@ -16,6 +17,7 @@ export function syncUserVarFromGraphqlUser(u: {
 	const nextNick = u.userNickname !== undefined ? (u.userNickname ?? '') : (current.memberNick ?? '');
 	const nextImage = u.userProfileImage !== undefined ? (u.userProfileImage ?? '') : (current.memberImage ?? '');
 	const nextPhone = u.userPhoneNumber !== undefined ? (u.userPhoneNumber ?? '') : (current.memberPhone ?? '');
+	const nextLocation = u.userLocation !== undefined ? (u.userLocation ?? '') : (current.memberAddress ?? '');
 	const nextBio = u.userBio !== undefined ? (u.userBio ?? '') : (current.memberDesc ?? '');
 
 	const unchanged =
@@ -23,6 +25,7 @@ export function syncUserVarFromGraphqlUser(u: {
 		nextNick === (current.memberNick ?? '') &&
 		nextImage === (current.memberImage ?? '') &&
 		nextPhone === (current.memberPhone ?? '') &&
+		nextLocation === (current.memberAddress ?? '') &&
 		nextBio === (current.memberDesc ?? '');
 
 	if (unchanged) return;
@@ -33,6 +36,7 @@ export function syncUserVarFromGraphqlUser(u: {
 		...(u.userNickname !== undefined ? { memberNick: nextNick } : {}),
 		...(u.userProfileImage !== undefined ? { memberImage: nextImage } : {}),
 		...(u.userPhoneNumber !== undefined ? { memberPhone: nextPhone } : {}),
+		...(u.userLocation !== undefined ? { memberAddress: nextLocation } : {}),
 		...(u.userBio !== undefined ? { memberDesc: nextBio } : {}),
 	});
 

@@ -26,7 +26,7 @@ const CustomerOnboardingForm = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
 	const user = userVar();
-	const [location, setLocation] = useState(user.userLocation ?? '');
+	const [location, setLocation] = useState(user.memberAddress ?? '');
 	const [bio, setBio] = useState('');
 	const [photoFile, setPhotoFile] = useState<File | null>(null);
 	const [photoPreview, setPhotoPreview] = useState<string | null>(null);

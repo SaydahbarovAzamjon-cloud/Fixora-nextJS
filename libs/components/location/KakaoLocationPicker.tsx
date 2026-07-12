@@ -191,8 +191,8 @@ const KakaoLocationPicker = ({ value, onChange, label, onPointChange, initialPoi
 				});
 				resizeObserverRef.current.observe(mapContainerRef.current);
 
-				kakao.maps.event.addListener(map, 'click', (mouseEvent: { latLng?: { getLat: () => number; getLng: () => number } }) => {
-					const latlng = mouseEvent?.latLng;
+				kakao.maps.event.addListener(map, 'click', (mouseEvent: unknown) => {
+					const latlng = (mouseEvent as { latLng?: { getLat: () => number; getLng: () => number } })?.latLng;
 					if (!latlng) return;
 					void applyPoint({ lat: latlng.getLat(), lng: latlng.getLng() });
 				});

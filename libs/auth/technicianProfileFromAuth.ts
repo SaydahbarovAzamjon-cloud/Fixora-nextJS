@@ -24,7 +24,7 @@ export function technicianProfileFromAuth(
 		userProfileImage: storedImage ?? auth.userProfileImage ?? auth.memberImage ?? '',
 		userBio: cached?.userBio ?? auth.memberDesc ?? '',
 		userLocation: cached?.userLocation ?? auth.memberAddress ?? '',
-		specialty: cached?.specialty ?? null,
+		specialty: cached?.specialty ?? undefined,
 		userType: 'TECHNICIAN',
 		verificationStatus: auth.verificationStatus ?? 'PENDING',
 		isVerified: auth.verificationStatus === 'APPROVED',

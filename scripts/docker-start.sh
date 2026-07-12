@@ -8,8 +8,8 @@ if [[ ! -d node_modules ]]; then
   yarn install --frozen-lockfile
 fi
 
-if [[ ! -d .next ]]; then
-  echo "[docker] .next missing — building on host first is faster: bash deploy.sh"
+if [[ ! -f .next/BUILD_ID ]]; then
+  echo "[docker] production build missing — run bash deploy.sh on host first (faster)"
   yarn build
 fi
 

@@ -122,7 +122,7 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 	const authorName = displayUserName(author);
 	const coverUrl = resolveArticleImageUrl(article?.articleImage);
 
-	return createPortal(
+	const modal = (
 		<div className="fixora-admin-modal-backdrop" role="presentation" onClick={onClose}>
 			<div
 				className="fixora-admin-modal fixora-admin-modal--article"
@@ -247,9 +247,10 @@ const AdminModerationArticleModal: React.FC<AdminModerationArticleModalProps> = 
 					</button>
 				</div>
 			</div>
-		</div>,
-		document.body,
+		</div>
 	);
+
+	return createPortal(modal as Parameters<typeof createPortal>[0], document.body);
 };
 
 export default AdminModerationArticleModal;

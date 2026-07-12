@@ -68,13 +68,18 @@ const NearbyTechniciansPreview = ({ point }: NearbyTechniciansPreviewProps) => {
 		const list = (data?.getTechnicians?.list ?? []) as TechnicianSummary[];
 		const nearby = filterTechniciansWithinRadius(list, point, DEFAULT_GEO_SEARCH_RADIUS_KM);
 		return nearby
-			.map((tech) => ({
-				tech,
-				distanceKm: distanceKmBetween(point, {
-					lat: tech.shopLatitude,
-					lng: tech.shopLongitude,
-				}),
-			}))
+			.flatMap((tech) => {
+				if (tech.shopLatitude == null || tech.shopLongitude == null) return [];
+				return [
+					{
+						tech,
+						distanceKm: distanceKmBetween(point, {
+							lat: tech.shopLatitude,
+							lng: tech.shopLongitude,
+						}),
+					},
+				];
+			})
 			.sort((a, b) => a.distanceKm - b.distanceKm)
 			.slice(0, PREVIEW_LIMIT);
 	}, [data, point]);

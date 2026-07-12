@@ -12,7 +12,7 @@ services:
       - .env.local
     environment:
       - NODE_ENV=production
-    command: bash scripts/docker-start.sh
+    command: ["/bin/bash", "scripts/docker-start.sh"]
     healthcheck:
       test:
         [

@@ -425,10 +425,12 @@ export function useTechnicianSettings(userId?: string) {
 					}
 
 					try {
-						client.cache.updateQuery({
-							query: GET_USER,
-							variables: { userId: resolvedId },
-							update: (existing) => {
+						client.cache.updateQuery(
+							{
+								query: GET_USER,
+								variables: { userId: resolvedId },
+							},
+							(existing) => {
 								if (!existing?.getUser) return existing;
 								return {
 									getUser: {
@@ -446,7 +448,7 @@ export function useTechnicianSettings(userId?: string) {
 									},
 								};
 							},
-						});
+						);
 					} catch {
 						// GET_USER may not be in cache yet — profile hook merges from local cache.
 					}

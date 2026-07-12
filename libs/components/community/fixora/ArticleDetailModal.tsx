@@ -165,7 +165,7 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 		? formatArticlePublishedAt(article.createdAt, i18n.language)
 		: '';
 
-	return createPortal(
+	const modal = (
 		<div className="fixora-article-modal__overlay" onClick={onClose} role="presentation">
 			<div
 				className="fixora-article-modal"
@@ -265,9 +265,10 @@ const ArticleDetailModal: React.FC<ArticleDetailModalProps> = ({
 					</div>
 				)}
 			</div>
-		</div>,
-		document.body,
+		</div>
 	);
+
+	return createPortal(modal as Parameters<typeof createPortal>[0], document.body);
 };
 
 export default ArticleDetailModal;

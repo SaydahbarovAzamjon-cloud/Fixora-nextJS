@@ -37,6 +37,8 @@ export interface TechnicianSettingsUser {
 	userPhoneNumber?: string | null;
 	userLocation?: string | null;
 	userBio?: string | null;
+	shopLatitude?: number | null;
+	shopLongitude?: number | null;
 	userProfileImage?: string | null;
 	userType?: string | null;
 	badgeLevel?: string | null;
@@ -53,6 +55,8 @@ export interface ProfileFormState {
 	email: string;
 	phone: string;
 	location: string;
+	shopLatitude: number | null;
+	shopLongitude: number | null;
 	bio: string;
 }
 
@@ -111,6 +115,8 @@ function mergeSettingsUser(
 		userPhoneNumber: pickText(graphqlUser?.userPhoneNumber, cachedUser?.userPhoneNumber, authUser?.userPhoneNumber),
 		userLocation: pickText(graphqlUser?.userLocation, cachedUser?.userLocation, authUser?.userLocation),
 		userBio: pickText(graphqlUser?.userBio, cachedUser?.userBio, authUser?.userBio),
+		shopLatitude: graphqlUser?.shopLatitude ?? cachedUser?.shopLatitude ?? authUser?.shopLatitude ?? null,
+		shopLongitude: graphqlUser?.shopLongitude ?? cachedUser?.shopLongitude ?? authUser?.shopLongitude ?? null,
 		userProfileImage: pickText(
 			graphqlUser?.userProfileImage,
 			cachedUser?.userProfileImage,
@@ -134,6 +140,8 @@ function toSettingsUser(raw: Record<string, unknown> | null | undefined, userId:
 		userPhoneNumber: (raw?.userPhoneNumber as string | null | undefined) ?? null,
 		userLocation: (raw?.userLocation as string | null | undefined) ?? null,
 		userBio: (raw?.userBio as string | null | undefined) ?? null,
+		shopLatitude: (raw?.shopLatitude as number | null | undefined) ?? null,
+		shopLongitude: (raw?.shopLongitude as number | null | undefined) ?? null,
 		userProfileImage: (raw?.userProfileImage as string | null | undefined) ?? null,
 		userType: (raw?.userType as string | null | undefined) ?? null,
 		badgeLevel: (raw?.badgeLevel as string | null | undefined) ?? null,
@@ -201,6 +209,8 @@ export function useTechnicianSettings(userId?: string) {
 		email: '',
 		phone: '',
 		location: '',
+		shopLatitude: null,
+		shopLongitude: null,
 		bio: '',
 	});
 	const [nickname, setNickname] = useState('');
@@ -222,6 +232,10 @@ export function useTechnicianSettings(userId?: string) {
 			email: pickText(next.userEmail, storedEmail),
 			phone: pickText(next.userPhoneNumber),
 			location: pickText(next.userLocation),
+			shopLatitude:
+				next.shopLatitude != null && Number.isFinite(next.shopLatitude) ? next.shopLatitude : null,
+			shopLongitude:
+				next.shopLongitude != null && Number.isFinite(next.shopLongitude) ? next.shopLongitude : null,
 			bio: pickText(next.userBio),
 		});
 		setNickname(next.userSlug ?? next.userNickname ?? '');
@@ -358,6 +372,12 @@ export function useTechnicianSettings(userId?: string) {
 							? { userPhoneNumber: String(input.userPhoneNumber) }
 							: {}),
 						...(input.userLocation !== undefined ? { userLocation: String(input.userLocation) } : {}),
+						...(input.shopLatitude !== undefined
+							? { shopLatitude: (input.shopLatitude as number | null) ?? null }
+							: {}),
+						...(input.shopLongitude !== undefined
+							? { shopLongitude: (input.shopLongitude as number | null) ?? null }
+							: {}),
 						...(input.userBio !== undefined ? { userBio: String(input.userBio) } : {}),
 						...(input.workingHours !== undefined
 							? { workingHours: input.workingHours as TechnicianSettingsUser['workingHours'] }
@@ -418,6 +438,10 @@ export function useTechnicianSettings(userId?: string) {
 				userLocation: profileForm.location.trim(),
 				userBio: profileForm.bio.trim(),
 			};
+			if (profileForm.shopLatitude != null && profileForm.shopLongitude != null) {
+				input.shopLatitude = profileForm.shopLatitude;
+				input.shopLongitude = profileForm.shopLongitude;
+			}
 			if (profileImagePath !== undefined) {
 				input.userProfileImage = profileImagePath || null;
 			}
@@ -446,6 +470,8 @@ export function useTechnicianSettings(userId?: string) {
 					userFullName: profileForm.fullName.trim(),
 					userPhoneNumber: profileForm.phone.trim(),
 					userLocation: profileForm.location.trim(),
+					shopLatitude: profileForm.shopLatitude,
+					shopLongitude: profileForm.shopLongitude,
 					userBio: profileForm.bio.trim(),
 					...(profileImagePath !== undefined ? { userProfileImage: profileImagePath || null } : {}),
 				});

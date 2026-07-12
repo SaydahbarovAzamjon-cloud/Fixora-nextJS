@@ -15,10 +15,12 @@ import { getGraphQLErrorMessage, isOAuthProviderMismatchError } from '../../util
 
 const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 	const { t } = useTranslation('auth');
+	const { t: tCommon } = useTranslation('common');
 	const router = useRouter();
 	const mountedRef = useRef(true);
 	const [loading, setLoading] = useState<'google' | 'kakao' | null>(null);
 	const kakaoKey = mode === 'register' ? 'ui.signUpWithKakao' : 'ui.continueWithKakao';
+	const googleKey = mode === 'register' ? 'ui.signUpWithGoogle' : 'ui.continueWithGoogle';
 
 	useEffect(() => {
 		mountedRef.current = true;
@@ -122,19 +124,24 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 		await sweetTopSmallSuccessAlert(t('oauth.comingSoon'), 1200);
 	}, [t]);
 
+	const googleButton = (
+		<button
+			type="button"
+			className={`auth-social__oauth${mode === 'register' ? ' auth-social__oauth--full' : ''}`}
+			onClick={handleGoogle}
+			disabled={loading !== null}
+		>
+			<GoogleIcon className="auth-social__oauth-icon" />
+			{tCommon(googleKey)}
+		</button>
+	);
+
 	return (
 		<div className="auth-social">
 			<FixoraKakaoButton labelKey={kakaoKey} onClick={handleKakao} disabled={loading !== null} />
+			{mode === 'register' ? googleButton : null}
 			<div className="auth-social__row">
-				<button
-					type="button"
-					className="auth-social__oauth"
-					onClick={handleGoogle}
-					disabled={loading !== null}
-				>
-					<GoogleIcon className="auth-social__oauth-icon" />
-					Google
-				</button>
+				{mode === 'login' ? googleButton : null}
 				<button type="button" className="auth-social__oauth" onClick={handleApple} disabled={loading !== null}>
 					<AppleIcon className="auth-social__oauth-icon auth-social__oauth-icon--apple" />
 					Apple

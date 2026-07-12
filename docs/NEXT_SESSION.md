@@ -18,7 +18,7 @@
 | ID | Area |
 |----|------|
 | P3-02 | Design system — dark/orange theme |
-| P3-03 / P3-03b | Auth UI + OAuth (Google GIS + Kakao → `loginWithOAuth`; Apple Coming Soon) |
+| P3-03 / P3-03b | Auth UI + OAuth (Google GIS + Kakao → `loginWithOAuth`; Google + Kakao on `/login` and `/register`; Apple Coming Soon) |
 | P3-04 | Homepage + Hero AI (`heroRepairSearch`) |
 | P3-05–P3-10 | Search, booking, messages, mypage, technician dashboard, community |
 | P3-13 (partial) | Public Profile + Stories create + Dashboard interactions (see DECISIONS UI-07…UI-11) |

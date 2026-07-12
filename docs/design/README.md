@@ -46,8 +46,8 @@ Choose Role ──► Customer ──► Sign Up ──► My Page
 
 | Screen | Route | Mockup reference |
 |--------|-------|------------------|
-| Login | `/login` | `auth-login-signup-hifi.png` (left), wireframe §3.1 |
-| Sign Up (Customer) | `/register` | `auth-login-signup-hifi.png` (right), wireframe §3.2 |
+| Login | `/login` | `auth-login-signup-hifi.png` (left), wireframe §3.1 — Kakao + Google OAuth (`SocialAuthRow` `mode="login"`) |
+| Sign Up (Customer) | `/register` | `auth-login-signup-hifi.png` (right), wireframe §3.2 — Kakao + **Google** sign up (`SocialAuthRow` `mode="register"`) |
 | Choose Role | `/register/role` | wireframe §3.3 |
 | Tech Onboarding Step 1 | `/register/technician/1` | wireframe §4.4 |
 | Tech ID Upload | `/register/technician/id` | wireframe §4.5 |

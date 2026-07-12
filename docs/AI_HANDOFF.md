@@ -4,9 +4,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-06-25 |
+| **Last updated** | 2026-07-12 |
 | **Last agent** | Cursor |
-| **Last session** | **Removed `ru` locale** — deleted `public/locales/ru/*`, config `en`+`kr` only, `normalizeAppLocale` fallback; prior CS/i18n + Nestar cleanup |
+| **Last session** | **Technician Profile Settings location map** — `KakaoLocationPicker` on `/technician/settings` (search + map pin); saves `userLocation` + `shopLatitude`/`shopLongitude` via `updateUser` |
 | **Next agent should start with** | Optional: remove unused legacy common.json keys, expand E2E |
 
 ---
@@ -22,7 +22,7 @@
 | Fixora UI migration | 🔄 In progress — burgundy customer theme shipped; auth UI done; technician portal stays orange |
 | Backend API (FIXORAB / FixoraB) | ✅ MVP ready — `http://localhost:2000/graphql`; see `FRONTEND_API.md` |
 | GraphQL contract sync | ✅ `FRONTEND_API.md`, `AUTH_API.md`, `schema.gql` in `docs/` |
-| OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Apple Coming Soon only |
+| OAuth (Google/Kakao) UI | ✅ Wired — `SocialAuthRow` + `loginWithOAuth`; Google + Kakao on `/login` and `/register`; Apple Coming Soon only |
 | Homepage Hero AI | ✅ `heroRepairSearch` in `HeroRepairSearch` component |
 | Homepage sections (P3-04) | ✅ TopTechnicians, HowItWorks, TechTips, Testimonials — cards link to profile/article; View all → `/technicians` + `/community` |
 | Technicians directory | ✅ `/technicians` — discovery page: 6 category carousels (Trending, Top Rated, Most Reviewed, Fast Responders, New, Verified) + stats KPIs; Home `TechnicianCard` 1:1 with optional Follow; no map/search UI |

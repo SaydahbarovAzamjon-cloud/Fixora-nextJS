@@ -26,9 +26,10 @@ interface KakaoLocationPickerProps {
 	onChange: (value: string) => void;
 	label?: string;
 	onPointChange?: (point: MapPoint | null) => void;
+	initialPoint?: MapPoint | null;
 }
 
-const KakaoLocationPicker = ({ value, onChange, label, onPointChange }: KakaoLocationPickerProps) => {
+const KakaoLocationPicker = ({ value, onChange, label, onPointChange, initialPoint = null }: KakaoLocationPickerProps) => {
 	const { t } = useTranslation('common');
 	const [searchText, setSearchText] = useState(value);
 	const [results, setResults] = useState<LocationSearchResult[]>([]);
@@ -47,6 +48,11 @@ const KakaoLocationPicker = ({ value, onChange, label, onPointChange }: KakaoLoc
 	const onChangeRef = useRef(onChange);
 	const onPointChangeRef = useRef(onPointChange);
 	const valueRef = useRef(value);
+	const initialPointRef = useRef(initialPoint);
+
+	useEffect(() => {
+		initialPointRef.current = initialPoint;
+	}, [initialPoint]);
 
 	useEffect(() => {
 		onChangeRef.current = onChange;
@@ -195,7 +201,14 @@ const KakaoLocationPicker = ({ value, onChange, label, onPointChange }: KakaoLoc
 				setTilesVisible(false);
 
 				const initial = valueRef.current.trim();
-				if (initial) {
+				const savedPoint = initialPointRef.current;
+				if (
+					savedPoint &&
+					Number.isFinite(savedPoint.lat) &&
+					Number.isFinite(savedPoint.lng)
+				) {
+					await applyPoint(savedPoint, initial || undefined);
+				} else if (initial) {
 					const found = await searchLocations(kakao, initial);
 					if (found[0]) {
 						const point = { lat: found[0].lat, lng: found[0].lng };

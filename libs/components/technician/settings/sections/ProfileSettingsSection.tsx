@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslation } from 'next-i18next';
 import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
 import SettingsSectionHead from '../SettingsSectionHead';
@@ -9,6 +10,17 @@ import { useProfileImageUpload } from '../../../../hooks/useProfileImageUpload';
 import { sweetMixinErrorAlert } from '../../../../sweetAlert';
 import { hasRealProfileImage } from '../../../../utils/profileImage';
 import { readStoredProfileImage } from '../../../../auth/syncUserVar';
+import type { MapPoint } from '../../../../kakao-maps';
+
+const KakaoLocationPicker = dynamic(() => import('../../../location/KakaoLocationPicker'), {
+	ssr: false,
+	loading: () => (
+		<div className="fts-location-picker fts-location-picker--loading" aria-hidden="true">
+			<div className="fts-location-picker__search" />
+			<div className="fts-location-picker__map" />
+		</div>
+	),
+});
 
 interface ProfileSettingsSectionProps {
 	user: TechnicianSettingsUser | null;
@@ -58,6 +70,18 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 		: user?.userNickname
 			? `${user.userNickname}.fixora.io`
 			: '';
+
+	const locationPoint = useMemo<MapPoint | null>(() => {
+		if (form.shopLatitude == null || form.shopLongitude == null) return null;
+		return { lat: form.shopLatitude, lng: form.shopLongitude };
+	}, [form.shopLatitude, form.shopLongitude]);
+
+	const handleLocationPointChange = (point: MapPoint | null) => {
+		onChange({
+			shopLatitude: point?.lat ?? null,
+			shopLongitude: point?.lng ?? null,
+		});
+	};
 
 	const handleSave = async () => {
 		let imagePath: string | undefined;
@@ -143,12 +167,12 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 						onChange={(e) => onChange({ fullName: e.target.value })}
 					/>
 				</SettingsField>
-				<SettingsField label={t('settings.profile.location')}>
-					<input
-						className="fts-input"
+				<SettingsField label={t('settings.profile.location')} className="fts-grid__full">
+					<KakaoLocationPicker
 						value={form.location}
-						placeholder={user?.userLocation ?? t('settings.profile.locationPlaceholder')}
-						onChange={(e) => onChange({ location: e.target.value })}
+						onChange={(location) => onChange({ location })}
+						onPointChange={handleLocationPointChange}
+						initialPoint={locationPoint}
 					/>
 				</SettingsField>
 				<SettingsField label={t('settings.profile.email')}>

@@ -286,6 +286,28 @@ $text-dim: var(--fixora-text-muted);
 	}
 }
 
+.fts-location-picker {
+	&--loading {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	&__search {
+		height: 44px;
+		border-radius: 10px;
+		background: $bg-input;
+		border: 1px solid $border;
+	}
+
+	&__map {
+		height: 220px;
+		border-radius: 12px;
+		background: $bg-input;
+		border: 1px solid $border;
+	}
+}
+
 /* Cards */
 .fts-card {
 	background: $bg-card;

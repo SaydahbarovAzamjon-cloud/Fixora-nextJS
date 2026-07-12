@@ -12,6 +12,8 @@ export const GET_TECHNICIAN_SETTINGS = gql`
 			userLocation
 			userBio
 			shopName
+			shopLatitude
+			shopLongitude
 			userProfileImage
 			userType
 			badgeLevel

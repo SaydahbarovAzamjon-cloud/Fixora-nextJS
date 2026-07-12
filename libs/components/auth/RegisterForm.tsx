@@ -22,7 +22,7 @@ import {
 import { useApolloClient } from '@apollo/client';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
-import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 
 const RegisterForm = () => {
 	const { t } = useTranslation('auth');
@@ -80,7 +80,7 @@ const RegisterForm = () => {
 			const userId = userVar()._id;
 			if (userId) await applyNotificationPreferences(apolloClient, userId, notificationPrefs);
 			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
-			await router.push(getPostAuthRoute(userVar(), referrer));
+			await router.push(resolvePostAuthDestination(userVar(), referrer));
 		} catch (err: unknown) {
 			if (isSignupConflictError(err)) {
 				setErrors(err.conflicts);

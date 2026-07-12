@@ -30,6 +30,8 @@ export function settingsUserFromAuth(auth: Partial<CustomJwtPayload> | null | un
 		userProfileImage: firstNonEmpty(storedImage, cached?.userProfileImage, auth.memberImage, auth.userProfileImage),
 		userType: cached?.userType ?? auth.userType ?? auth.memberType ?? '',
 		badgeLevel: cached?.badgeLevel ?? null,
+		specialty: cached?.specialty ?? null,
+		services: cached?.services ?? null,
 		workingHours: cached?.workingHours ?? null,
 	};
 }

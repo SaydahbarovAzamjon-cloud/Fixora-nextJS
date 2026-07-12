@@ -3,22 +3,24 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { FixoraKakaoButton } from '../ui';
 import { GoogleIcon, AppleIcon } from '../brand';
-import { fixoraOAuthLogin } from '../../auth/fixoraAuth';
+import { fixoraOAuthLogin, revertOAuthSignupSession } from '../../auth/fixoraAuth';
+import { readOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { getJwtToken } from '../../auth/tokens';
 import { requestGoogleAuthCode } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
-import { userVar } from '../../../apollo/store';
 import { resolveAuthUser } from '../../utils/authSession';
-import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { getGraphQLErrorMessage, isOAuthProviderMismatchError } from '../../utils/oauthErrors';
+
+type OAuthProvider = 'google' | 'kakao';
 
 const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 	const { t } = useTranslation('auth');
 	const { t: tCommon } = useTranslation('common');
 	const router = useRouter();
 	const mountedRef = useRef(true);
-	const [loading, setLoading] = useState<'google' | 'kakao' | null>(null);
+	const [loading, setLoading] = useState<OAuthProvider | null>(null);
 	const kakaoKey = mode === 'register' ? 'ui.signUpWithKakao' : 'ui.continueWithKakao';
 	const googleKey = mode === 'register' ? 'ui.signUpWithGoogle' : 'ui.continueWithGoogle';
 
@@ -29,19 +31,40 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 		};
 	}, []);
 
+	const ensureSignupRole = useCallback(async (): Promise<boolean> => {
+		if (mode !== 'register') return true;
+		if (readOAuthSignupRole()) return true;
+		await sweetMixinErrorAlert(t('oauth.chooseRoleFirst'));
+		await router.push('/register/role');
+		return false;
+	}, [mode, router, t]);
+
 	const routeAfterOAuth = useCallback(
-		async (needsOnboarding: boolean, userType?: string) => {
+		async (needsOnboarding: boolean, provider: OAuthProvider, userType?: string) => {
+			if (mode === 'register' && !needsOnboarding) {
+				revertOAuthSignupSession();
+				await sweetMixinErrorAlert(
+					provider === 'google'
+						? t('oauth.googleAlreadyRegistered')
+						: t('oauth.kakaoAlreadyRegistered'),
+				);
+				return;
+			}
+
 			if (needsOnboarding) {
 				await router.push('/register/role?oauth=1');
 				return;
 			}
-			await router.push(getPostAuthRoute(resolveAuthUser() ?? { userType, memberType: userType }));
+
+			await router.push(
+				resolvePostAuthDestination(resolveAuthUser() ?? { userType, memberType: userType }),
+			);
 		},
-		[router],
+		[mode, router, t],
 	);
 
 	const oauthErrorMessage = useCallback(
-		(err: unknown, provider: 'google' | 'kakao') => {
+		(err: unknown, provider: OAuthProvider) => {
 			const message = getGraphQLErrorMessage(err);
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
 			if (/timed out/i.test(message)) return t('oauth.kakaoFailed');
@@ -57,7 +80,11 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 				return mode === 'login' ? t('oauth.providerMismatchUseEmail') : t('oauth.providerMismatch');
 			}
 			if (/OAUTH_ACCOUNT_EXISTS|already exist/i.test(message)) {
-				return t('oauth.accountExists');
+				return mode === 'register'
+					? provider === 'google'
+						? t('oauth.googleAlreadyRegistered')
+						: t('oauth.kakaoAlreadyRegistered')
+					: t('oauth.accountExists');
 			}
 			if (message && !/^OAuth login failed/i.test(message) && message !== 'Request failed') {
 				return message;
@@ -74,15 +101,31 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 	}, [mode, router]);
 
 	const showOAuthError = useCallback(
-		async (err: unknown, provider: 'google' | 'kakao') => {
-			// Stale OAuth attempt after email login or leaving /login — do not flash a false error.
-			if (!mountedRef.current || getJwtToken()) return;
+		async (err: unknown, provider: OAuthProvider) => {
+			if (!mountedRef.current) return;
+			if (mode === 'register') {
+				revertOAuthSignupSession();
+			} else if (getJwtToken()) {
+				return;
+			}
 			if (isOAuthProviderMismatchError(err)) {
 				await handleProviderMismatch();
 			}
 			await sweetMixinErrorAlert(oauthErrorMessage(err, provider));
 		},
-		[handleProviderMismatch, oauthErrorMessage],
+		[handleProviderMismatch, mode, oauthErrorMessage],
+	);
+
+	const runOAuth = useCallback(
+		async (provider: OAuthProvider, token: string) => {
+			const result = await fixoraOAuthLogin(
+				provider === 'google' ? 'GOOGLE' : 'KAKAO',
+				token,
+				{ registerMode: mode === 'register' },
+			);
+			await routeAfterOAuth(result.needsOnboarding, provider, result.userType);
+		},
+		[mode, routeAfterOAuth],
 	);
 
 	const handleGoogle = useCallback(async () => {
@@ -91,34 +134,36 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 			await sweetMixinErrorAlert(t('oauth.googleNotConfigured'));
 			return;
 		}
+		if (!(await ensureSignupRole())) return;
+
 		setLoading('google');
 		try {
 			const code = await requestGoogleAuthCode(clientId);
-			const result = await fixoraOAuthLogin('GOOGLE', code);
-			await routeAfterOAuth(result.needsOnboarding, result.userType);
+			await runOAuth('google', code);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');
 		} finally {
 			setLoading(null);
 		}
-	}, [oauthErrorMessage, routeAfterOAuth, showOAuthError, t]);
+	}, [ensureSignupRole, runOAuth, showOAuthError, t]);
 
 	const handleKakao = useCallback(async () => {
 		if (!process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {
 			await sweetMixinErrorAlert(t('oauth.kakaoNotConfigured'));
 			return;
 		}
+		if (!(await ensureSignupRole())) return;
+
 		setLoading('kakao');
 		try {
 			const token = await requestKakaoAccessToken();
-			const result = await fixoraOAuthLogin('KAKAO', token);
-			await routeAfterOAuth(result.needsOnboarding, result.userType);
+			await runOAuth('kakao', token);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'kakao');
 		} finally {
 			setLoading(null);
 		}
-	}, [oauthErrorMessage, routeAfterOAuth, showOAuthError, t]);
+	}, [ensureSignupRole, runOAuth, showOAuthError, t]);
 
 	const handleApple = useCallback(async () => {
 		await sweetTopSmallSuccessAlert(t('oauth.comingSoon'), 1200);

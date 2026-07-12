@@ -26,9 +26,10 @@ import HowToRegOutlined from '@mui/icons-material/HowToRegOutlined';
 import PhotoLibraryOutlined from '@mui/icons-material/PhotoLibraryOutlined';
 import RateReviewOutlined from '@mui/icons-material/RateReviewOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
+import WatchOutlined from '@mui/icons-material/WatchOutlined';
 import { profileImageDraftVar, userVar } from '../../../apollo/store';
 import { GET_ARTICLES, GET_TECHNICIAN_REVIEWS, GET_USER } from '../../../apollo/user/query';
-import { GET_MY_ARTICLES, GET_USER_FOLLOWERS } from '../../../apollo/user/profile';
+import { GET_MY_ARTICLES, GET_USER_FOLLOWERS, GET_TECHNICIAN_BOOKINGS } from '../../../apollo/user/profile';
 import { GET_TECHNICIAN_STORIES } from '../../../apollo/user/story';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../../apollo/user/mutation';
 import { LIKE_TARGET_ARTICLE } from '../../../apollo/user/article';
@@ -50,6 +51,12 @@ import {
 import { resolveProfileImageUrl } from '../../utils/profileImage';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
+import type { DeviceCategory } from '../../types/fixora/fixora';
+import {
+	countCompletedJobsByCategory,
+	parseTechnicianDeviceCategories,
+} from '../../utils/technicianDeviceCategory';
+import { TECHNICIAN_PORTAL_QUERY_CONTEXT } from '../../apollo/technicianQueryContext';
 
 export type TechnicianPublicProfileVariant = 'owner' | 'visitor';
 
@@ -75,11 +82,41 @@ const CREDENTIALS = [
 	{ color: '#3B82F6', verified: true, titleKey: 'technicianProfile.pp.cred.certified', subKey: 'technicianProfile.pp.cred.certifiedSub', icon: <GppGoodOutlined style={{ fontSize: 20 }} /> },
 ];
 
-const SPECIALIZATIONS = [
-	{ color: ACCENT_PRIMARY, titleKey: 'technicianProfile.pp.spec.iphone', subKey: 'technicianProfile.pp.spec.iphoneSub', jobsKey: 'technicianProfile.pp.spec.iphoneJobs', icon: <SmartphoneOutlined style={{ fontSize: 20 }} /> },
-	{ color: '#C8C8C8', titleKey: 'technicianProfile.pp.spec.macbook', subKey: 'technicianProfile.pp.spec.macbookSub', jobsKey: 'technicianProfile.pp.spec.macbookJobs', icon: <LaptopMacOutlined style={{ fontSize: 20 }} /> },
-	{ color: ACCENT_PRIMARY, titleKey: 'technicianProfile.pp.spec.ipad', subKey: 'technicianProfile.pp.spec.ipadSub', jobsKey: 'technicianProfile.pp.spec.ipadJobs', icon: <TabletMacOutlined style={{ fontSize: 20 }} /> },
-];
+const specSubKey = (category: DeviceCategory): string => {
+	switch (category) {
+		case 'IPHONE':
+			return 'technicianProfile.pp.spec.iphoneSub';
+		case 'MACBOOK':
+			return 'technicianProfile.pp.spec.macbookSub';
+		case 'IPAD':
+			return 'technicianProfile.pp.spec.ipadSub';
+		case 'APPLE_WATCH':
+			return 'technicianProfile.pp.spec.watchSub';
+		default:
+			return 'technicianProfile.pp.spec.emptySub';
+	}
+};
+
+const specIcon = (category: DeviceCategory, color: string) => {
+	const style = { fontSize: 20 } as const;
+	switch (category) {
+		case 'IPHONE':
+			return <SmartphoneOutlined style={style} />;
+		case 'MACBOOK':
+			return <LaptopMacOutlined style={style} />;
+		case 'IPAD':
+			return <TabletMacOutlined style={style} />;
+		case 'APPLE_WATCH':
+			return <WatchOutlined style={style} />;
+		default:
+			return <BuildOutlined style={style} />;
+	}
+};
+
+const specColor = (category: DeviceCategory): string => {
+	if (category === 'MACBOOK') return '#C8C8C8';
+	return ACCENT_PRIMARY;
+};
 
 const iconSoftBg = (color: string) => (color === ACCENT_PRIMARY ? 'var(--fixora-primary-soft)' : `${color}1f`);
 
@@ -188,6 +225,17 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	});
 	const stories: Story[] = (storiesData as T)?.getTechnicianStories?.list ?? [];
 
+	const { data: ownerBookingsData } = useQuery(GET_TECHNICIAN_BOOKINGS, {
+		variables: { input: { page: 1, limit: 200, search: {} } },
+		skip: !technicianId || !isOwner,
+		fetchPolicy: 'cache-and-network',
+		context: TECHNICIAN_PORTAL_QUERY_CONTEXT,
+	});
+	const specializationJobCounts = useMemo(
+		() => countCompletedJobsByCategory((ownerBookingsData as T)?.getTechnicianBookings?.list ?? []),
+		[ownerBookingsData],
+	);
+
 	const displayName = getTechnicianDisplayName(profile);
 	const ownerSubtitle = getTechnicianOwnerSubtitle(profile);
 	const profileImageSrc = isOwner
@@ -207,6 +255,16 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	const isFollowing = !!profile?.meFollowed?.[0]?.myFollowing;
 	const services = profile?.services ?? [];
 	const portfolioImages = profile?.portfolioImages ?? [];
+	const deviceCategories = useMemo(
+		() => parseTechnicianDeviceCategories({ specialty: profile?.specialty, services }),
+		[profile?.specialty, services],
+	);
+	const specialtyLabel = useMemo(() => {
+		if (deviceCategories.length > 0) {
+			return deviceCategories.map((category) => t(`booking.device.categories.${category}`)).join(', ');
+		}
+		return specialty.trim();
+	}, [deviceCategories, specialty, t]);
 	const canCreateStory =
 		isOwner && profile?.userType === 'TECHNICIAN' && profile?.verificationStatus === 'APPROVED';
 
@@ -332,7 +390,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 						{ownerSubtitle && <div className="fixora-pp-header__owner">{ownerSubtitle}</div>}
 						<div className="fixora-pp-header__role">
 							{t('technicianProfile.pp.proTechnician')}
-							{specialty ? ` · ${specialty}` : ''}
+							{specialtyLabel ? ` · ${specialtyLabel}` : ''}
 						</div>
 						{location && (
 							<div className="fixora-pp-header__loc">
@@ -530,20 +588,36 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 
 							<div className="fixora-pp-panel">
 								<h3 className="fixora-pp-panel__title">{t('technicianProfile.pp.specializationsTitle')}</h3>
-								<div className="fixora-pp-specs">
-									{SPECIALIZATIONS.map((s) => (
-										<div key={s.titleKey} className="fixora-pp-spec">
-											<div className="fixora-pp-spec__icon" style={{ background: iconSoftBg(s.color), color: s.color }}>
-												{s.icon}
-											</div>
-											<div className="fixora-pp-spec__body">
-												<div className="fixora-pp-spec__title">{t(s.titleKey)}</div>
-												<div className="fixora-pp-spec__sub">{t(s.subKey)}</div>
-											</div>
-											<div className="fixora-pp-spec__jobs">{t(s.jobsKey)}</div>
-										</div>
-									))}
-								</div>
+								{deviceCategories.length > 0 ? (
+									<div className="fixora-pp-specs">
+										{deviceCategories.map((category) => {
+											const color = specColor(category);
+											const jobCount = specializationJobCounts[category];
+											return (
+												<div key={category} className="fixora-pp-spec">
+													<div className="fixora-pp-spec__icon" style={{ background: iconSoftBg(color), color }}>
+														{specIcon(category, color)}
+													</div>
+													<div className="fixora-pp-spec__body">
+														<div className="fixora-pp-spec__title">
+															{t(`booking.device.categories.${category}`)}
+														</div>
+														<div className="fixora-pp-spec__sub">{t(specSubKey(category))}</div>
+													</div>
+													{isOwner && jobCount != null && jobCount > 0 && (
+														<div className="fixora-pp-spec__jobs">
+															{t('technicianProfile.pp.spec.jobsCount', { count: jobCount })}
+														</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+								) : (
+									<div className="fixora-pp-empty fixora-pp-empty--compact">
+										<div className="fixora-pp-empty__sub">{t('technicianProfile.pp.spec.empty')}</div>
+									</div>
+								)}
 							</div>
 						</div>
 					</>

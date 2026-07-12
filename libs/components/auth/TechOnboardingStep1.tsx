@@ -9,6 +9,8 @@ import AddAPhotoOutlined from '@mui/icons-material/AddAPhotoOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
+import AuthDivider from './AuthDivider';
+import SocialAuthRow from './SocialAuthRow';
 import { loadTechDraft, saveTechDraft, validateTechStep1, isSignupConflictError } from '../../auth/fixoraAuth';
 import { assertSignupFieldsAvailable, deriveSignupNickname } from '../../auth/signupAvailability';
 import { initializeApollo } from '../../../apollo/client';
@@ -225,6 +227,8 @@ const TechOnboardingStep1 = () => {
 					</FixoraButton>
 				</div>
 			</div>
+			<AuthDivider />
+			<SocialAuthRow mode="register" />
 		</>
 	);
 };

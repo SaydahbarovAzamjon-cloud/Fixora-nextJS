@@ -38,7 +38,8 @@
 
 | ID | Task | Status | Notes |
 |----|------|--------|-------|
-| P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech onboarding — mockup-based |
+| P3-03 | Auth flow UI | ✅ Done | `/login`, `/register`, role, tech signup steps — mockup-based |
+| P3-03c | Post-signup profile onboarding | ✅ Done | `/onboarding/customer`, `/onboarding/technician` — after auth; skip/complete; `docs/ONBOARDING.md` |
 | P3-03b | OAuth wiring (Google + Kakao) | ✅ Done | GIS `initCodeClient` + Kakao SDK → `loginWithOAuth`; Google + Kakao on login **and** customer sign up (`SocialAuthRow` `mode="register"`) |
 | P3-04 | Homepage | ✅ Done | Hero AI + TopTechnicians, HowItWorks, TechTips, Testimonials per mockup |
 | P3-05 | Search + Technician Profile | ✅ Done | `/search` + `/technicians/[id]` + **`/technicians`** directory (stats, top/new, filters) |

@@ -26,6 +26,8 @@ import { logOut } from '../../../auth';
 
 import SettingsTab from './SettingsTab';
 
+import { OnboardingReminderBanner } from '../../onboarding';
+
 import ClientSecurityPanel from './ClientSecurityPanel';
 
 import ClientAccountPanel from './ClientAccountPanel';
@@ -207,6 +209,8 @@ const ClientSettingsTab = ({
 		return (
 
 			<SettingsPanel onBack={back}>
+
+				<OnboardingReminderBanner />
 
 				<SettingsTab
 

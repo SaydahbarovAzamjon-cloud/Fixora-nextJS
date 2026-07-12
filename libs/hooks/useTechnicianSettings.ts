@@ -23,9 +23,18 @@ import { resolveTechnicianEmailSave } from '../utils/technicianEmailSave';
 import { getGraphQLErrorMessage } from '../utils/oauthErrors';
 import { isNoDataFoundGraphQLError } from '../utils/graphqlErrors';
 import { syncUserVarFromGraphqlUser } from '../auth/syncUserVar';
+import {
+	isPostSignupOnboardingIncomplete,
+	markPostSignupOnboardingCompleted,
+} from '../auth/postSignupOnboarding';
 import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../sweetAlert';
 import { useTranslation } from 'next-i18next';
 import { useIsClientReady } from './useIsClientReady';
+import type { DeviceCategory } from '../types/fixora/fixora';
+import {
+	formatTechnicianSpecialtyField,
+	parseTechnicianDeviceCategories,
+} from '../utils/technicianDeviceCategory';
 
 export interface TechnicianSettingsUser {
 	_id: string;
@@ -42,6 +51,8 @@ export interface TechnicianSettingsUser {
 	userProfileImage?: string | null;
 	userType?: string | null;
 	badgeLevel?: string | null;
+	specialty?: string | null;
+	services?: { title: string; basePrice: number }[] | null;
 	workingHours?: {
 		days?: string[] | null;
 		startTime?: string | null;
@@ -58,6 +69,7 @@ export interface ProfileFormState {
 	shopLatitude: number | null;
 	shopLongitude: number | null;
 	bio: string;
+	deviceCategories: DeviceCategory[];
 }
 
 export interface AvailabilityFormState {
@@ -86,6 +98,10 @@ export const SETTINGS_HOURS = [
 
 const defaultDays = (): Record<string, boolean> =>
 	Object.fromEntries(SETTINGS_DAYS.map((d) => [d, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(d)]));
+
+export function createDefaultAvailabilityDays(): Record<string, boolean> {
+	return defaultDays();
+}
 
 function pickText(...values: (string | null | undefined)[]): string {
 	for (const value of values) {
@@ -124,6 +140,8 @@ function mergeSettingsUser(
 		),
 		userType: graphqlUser?.userType ?? cachedUser?.userType ?? authUser?.userType ?? null,
 		badgeLevel: graphqlUser?.badgeLevel ?? cachedUser?.badgeLevel ?? authUser?.badgeLevel ?? null,
+		specialty: graphqlUser?.specialty ?? cachedUser?.specialty ?? authUser?.specialty ?? null,
+		services: graphqlUser?.services ?? cachedUser?.services ?? authUser?.services ?? null,
 		workingHours: graphqlUser?.workingHours ?? cachedUser?.workingHours ?? authUser?.workingHours ?? null,
 	};
 }
@@ -145,6 +163,8 @@ function toSettingsUser(raw: Record<string, unknown> | null | undefined, userId:
 		userProfileImage: (raw?.userProfileImage as string | null | undefined) ?? null,
 		userType: (raw?.userType as string | null | undefined) ?? null,
 		badgeLevel: (raw?.badgeLevel as string | null | undefined) ?? null,
+		specialty: (raw?.specialty as string | null | undefined) ?? null,
+		services: (raw?.services as TechnicianSettingsUser['services']) ?? null,
 		workingHours: (raw?.workingHours as TechnicianSettingsUser['workingHours']) ?? null,
 	};
 }
@@ -212,6 +232,7 @@ export function useTechnicianSettings(userId?: string) {
 		shopLatitude: null,
 		shopLongitude: null,
 		bio: '',
+		deviceCategories: [],
 	});
 	const [nickname, setNickname] = useState('');
 	const [availability, setAvailability] = useState<AvailabilityFormState>({
@@ -237,6 +258,10 @@ export function useTechnicianSettings(userId?: string) {
 			shopLongitude:
 				next.shopLongitude != null && Number.isFinite(next.shopLongitude) ? next.shopLongitude : null,
 			bio: pickText(next.userBio),
+			deviceCategories: parseTechnicianDeviceCategories({
+				specialty: next.specialty,
+				services: next.services,
+			}),
 		});
 		setNickname(next.userSlug ?? next.userNickname ?? '');
 		const wh = next.workingHours;
@@ -379,6 +404,7 @@ export function useTechnicianSettings(userId?: string) {
 							? { shopLongitude: (input.shopLongitude as number | null) ?? null }
 							: {}),
 						...(input.userBio !== undefined ? { userBio: String(input.userBio) } : {}),
+						...(input.specialty !== undefined ? { specialty: (input.specialty as string | null) ?? null } : {}),
 						...(input.workingHours !== undefined
 							? { workingHours: input.workingHours as TechnicianSettingsUser['workingHours'] }
 							: {}),
@@ -431,13 +457,14 @@ export function useTechnicianSettings(userId?: string) {
 				return false;
 			}
 
-			const input: Record<string, unknown> = {
-				shopName: profileForm.shopName.trim() || null,
-				userFullName: profileForm.fullName.trim(),
-				userPhoneNumber: profileForm.phone.trim(),
-				userLocation: profileForm.location.trim(),
-				userBio: profileForm.bio.trim(),
-			};
+				const input: Record<string, unknown> = {
+					shopName: profileForm.shopName.trim() || null,
+					userFullName: profileForm.fullName.trim(),
+					userPhoneNumber: profileForm.phone.trim(),
+					userLocation: profileForm.location.trim(),
+					userBio: profileForm.bio.trim(),
+					specialty: formatTechnicianSpecialtyField(profileForm.deviceCategories) || null,
+				};
 			if (profileForm.shopLatitude != null && profileForm.shopLongitude != null) {
 				input.shopLatitude = profileForm.shopLatitude;
 				input.shopLongitude = profileForm.shopLongitude;
@@ -464,6 +491,9 @@ export function useTechnicianSettings(userId?: string) {
 
 			const ok = await saveUpdate(input, t('settings.profile.saved'));
 			if (ok && resolvedId) {
+				if (isPostSignupOnboardingIncomplete(resolvedId)) {
+					markPostSignupOnboardingCompleted(resolvedId);
+				}
 				mergeTechnicianSettingsCache(resolvedId, {
 					userEmail: emailSave.nextEmail || knownEmail || null,
 					shopName: profileForm.shopName.trim() || null,
@@ -473,6 +503,7 @@ export function useTechnicianSettings(userId?: string) {
 					shopLatitude: profileForm.shopLatitude,
 					shopLongitude: profileForm.shopLongitude,
 					userBio: profileForm.bio.trim(),
+					specialty: formatTechnicianSpecialtyField(profileForm.deviceCategories) || null,
 					...(profileImagePath !== undefined ? { userProfileImage: profileImagePath || null } : {}),
 				});
 				await safeRefetchSettings();

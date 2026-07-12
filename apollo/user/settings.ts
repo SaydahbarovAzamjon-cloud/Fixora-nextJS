@@ -14,6 +14,11 @@ export const GET_TECHNICIAN_SETTINGS = gql`
 			shopName
 			shopLatitude
 			shopLongitude
+			specialty
+			services {
+				title
+				basePrice
+			}
 			userProfileImage
 			userType
 			badgeLevel
@@ -39,6 +44,7 @@ export const UPDATE_TECHNICIAN_SETTINGS = gql`
 			userLocation
 			userPhoneNumber
 			userProfileImage
+			specialty
 			userSlug
 			accessToken
 			workingHours {

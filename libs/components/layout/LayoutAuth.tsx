@@ -7,7 +7,7 @@ import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { getNeedsOnboarding } from '../../auth/fixoraAuth';
 import { resolveAuthUser } from '../../utils/authSession';
-import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
 
 const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
@@ -30,7 +30,7 @@ const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 			const authUser = resolveAuthUser();
 			if (!authUser?._id) return;
 
-			const target = getPostAuthRoute(authUser, referrer);
+			const target = resolvePostAuthDestination(authUser, referrer);
 			if (routePathsEqual(router.pathname, target)) return;
 
 			redirectingRef.current = true;

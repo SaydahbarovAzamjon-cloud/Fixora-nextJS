@@ -212,7 +212,7 @@ const Notifications: NextPage = () => {
 
 	const notifications = useMemo(
 		() =>
-			(data?.getNotifications?.list ?? []).sort(
+			[...(data?.getNotifications?.list ?? [])].sort(
 				(a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 			),
 		[data],

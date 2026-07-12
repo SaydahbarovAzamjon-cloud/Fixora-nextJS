@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useApolloClient } from '@apollo/client';
@@ -17,6 +17,7 @@ import {
 	resolveOAuthStubEmail,
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
+import { readOAuthSignupRole, saveOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { applyNotificationPreferences } from '../../auth/applyNotificationPreferences';
 import {
 	DEFAULT_NOTIFICATION_PREFERENCES,
@@ -45,11 +46,18 @@ const RoleSelect = () => {
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 
+	useEffect(() => {
+		if (!isOAuth) return;
+		const savedRole = readOAuthSignupRole();
+		if (savedRole) setSelectedType(savedRole);
+	}, [isOAuth]);
+
 	const applyNotificationPrefs = async (userId: string) => {
 		await applyNotificationPreferences(apolloClient, userId, notificationPrefs);
 	};
 
 	const handleRolePick = (type: 'USER' | 'TECHNICIAN') => {
+		saveOAuthSignupRole(type);
 		if (isOAuth) {
 			setSelectedType(type);
 			return;
@@ -80,9 +88,9 @@ const RoleSelect = () => {
 			const userId = userVar()._id;
 			if (userId) await applyNotificationPrefs(userId);
 			if (userType === 'TECHNICIAN') {
-				await router.push('/register/technician/id');
+				await router.push('/onboarding/technician');
 			} else {
-				await router.push('/');
+				await router.push('/onboarding/customer');
 			}
 		} catch (err: unknown) {
 			if (isSignupConflictError(err)) {

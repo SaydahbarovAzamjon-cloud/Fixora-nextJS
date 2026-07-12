@@ -347,6 +347,10 @@
   "technicianProfile.pp.spec.ipad": "iPad",
   "technicianProfile.pp.spec.ipadSub": "Pro 포함 모든 iPad 모델",
   "technicianProfile.pp.spec.ipadJobs": "24건",
+  "technicianProfile.pp.spec.watchSub": "모든 Apple Watch 모델 및 밴드",
+  "technicianProfile.pp.spec.jobsCount": "작업 {{count}}건",
+  "technicianProfile.pp.spec.empty": "등록된 전문 분야가 없습니다",
+  "technicianProfile.pp.spec.emptySub": "프로필 설정에서 기기 유형을 추가하세요",
 
   "booking.title": "{{technician}} 예약하기",
   "booking.subtitle": "{{technician}}에게 수리 예약을 요청합니다.",

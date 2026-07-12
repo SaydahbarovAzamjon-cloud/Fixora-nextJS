@@ -838,6 +838,12 @@
 		color: #808080;
 		font-size: 14px;
 	}
+
+	&--compact {
+		padding: 20px 16px;
+		border: none;
+		background: transparent;
+	}
 }
 
 /* -------- Followers list -------- */

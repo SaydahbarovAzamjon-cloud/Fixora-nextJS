@@ -8,12 +8,14 @@ import {
 } from '../../apollo/user/auth';
 import { UPDATE_USER } from '../../apollo/user/profile';
 import { userVar } from '../../apollo/store';
-import { updateUserInfo } from './userInfo';
+import { updateUserInfo, deleteUserInfo } from './userInfo';
 import { clearTechOnboardingFiles, getTechIdFile, getTechPhotoFile } from './techOnboardingFiles';
 import { uploadImageFile } from '../utils/uploadImageFile';
 import { syncUserVarFromGraphqlUser, writeStoredProfileImage } from './syncUserVar';
 import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
 import { dataUrlToFile } from '../utils/onboardingFileStorage';
+import { markPostSignupOnboardingPending } from './postSignupOnboarding';
+import { clearOAuthSignupRole } from './oauthSignupRole';
 import { getGraphQLErrorMessage } from '../utils/oauthErrors';
 import {
 	assertSignupFieldsAvailable,
@@ -186,6 +188,15 @@ export function getNeedsOnboarding(): boolean {
 	return localStorage.getItem('needsOnboarding') === '1';
 }
 
+/** Undo tokens set during a failed OAuth *sign-up* attempt (existing account on register page). */
+export function revertOAuthSignupSession(): void {
+	if (typeof window === 'undefined') return;
+	localStorage.removeItem('accessToken');
+	localStorage.removeItem('refreshToken');
+	localStorage.removeItem('needsOnboarding');
+	deleteUserInfo();
+}
+
 export const fixoraLogin = async (userEmail: string, userPassword: string): Promise<void> => {
 	const apolloClient = initializeApollo();
 	try {
@@ -304,6 +315,7 @@ export const fixoraCustomerSignup = async (
 		if (userId && user.userEmail) {
 			writeStoredUserEmail(userId, user.userEmail);
 		}
+		markPostSignupOnboardingPending(userId);
 		setNeedsOnboarding(false);
 	} catch (err) {
 		if (isSignupConflictError(err)) throw err;
@@ -314,6 +326,7 @@ export const fixoraCustomerSignup = async (
 export const fixoraOAuthLogin = async (
 	authProvider: AuthProvider,
 	token: string,
+	options?: { registerMode?: boolean },
 ): Promise<OAuthLoginResult> => {
 	const apolloClient = await initializeApollo();
 	try {
@@ -328,6 +341,17 @@ export const fixoraOAuthLogin = async (
 			throw new Error('OAuth login failed — no access token returned');
 		}
 
+		const needsOnboarding = !!payload.needsOnboarding;
+
+		// Register page + existing account: backend returns tokens but we must not
+		// establish a session — LayoutAuth would flash-redirect before we can revert.
+		if (options?.registerMode && !needsOnboarding) {
+			return {
+				needsOnboarding: false,
+				userType: payload.user?.userType,
+			};
+		}
+
 		setAuthTokens(payload.accessToken, payload.refreshToken ?? '', {
 			_id: payload.user?._id,
 			userEmail: payload.user?.userEmail,
@@ -337,10 +361,10 @@ export const fixoraOAuthLogin = async (
 			userType: payload.user?.userType,
 			verificationStatus: payload.user?.verificationStatus,
 		});
-		setNeedsOnboarding(!!payload.needsOnboarding);
+		setNeedsOnboarding(needsOnboarding);
 
 		return {
-			needsOnboarding: !!payload.needsOnboarding,
+			needsOnboarding,
 			userType: payload.user?.userType,
 		};
 	} catch (err) {
@@ -387,6 +411,10 @@ export const fixoraCompleteOAuthSignup = async (input: {
 			userType: user.userType,
 			verificationStatus: user.verificationStatus,
 		});
+		if (user._id) {
+			markPostSignupOnboardingPending(user._id);
+		}
+		clearOAuthSignupRole();
 		setNeedsOnboarding(false);
 		return user.userType;
 	} catch (err) {
@@ -557,6 +585,7 @@ export const fixoraTechnicianSignup = async (draft: TechOnboardingDraft): Promis
 			userProfileImage: profileImagePath ?? user.userProfileImage ?? null,
 			userType: user.userType,
 		});
+		markPostSignupOnboardingPending(userId);
 		setNeedsOnboarding(false);
 
 		if (typeof window !== 'undefined') {

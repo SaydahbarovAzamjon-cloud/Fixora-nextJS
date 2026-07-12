@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { getJwtToken, updateUserInfo } from '../../auth';
+import { needsPostSignupOnboarding } from '../../auth/postSignupOnboarding';
 import { useTechnicianPortalRedirect } from '../../hooks/useTechnicianPortalRedirect';
 import { resolveAuthUser } from '../../utils/authSession';
 import {
@@ -9,6 +10,8 @@ import {
 	isTechnicianPortalRedirectRoute,
 	redirectTechnicianToPortal,
 } from '../../utils/customerRoutes';
+import { getPostSignupOnboardingPath } from '../../utils/postAuthDestination';
+import { isOnboardingGuardExemptRoute } from '../../utils/onboardingRoutes';
 import { isTechnicianUser } from '../../utils/userRole';
 
 type AppShellProps = Pick<AppProps, 'Component' | 'pageProps'>;
@@ -22,6 +25,22 @@ const AppShell = ({ Component, pageProps }: AppShellProps) => {
 		const jwt = getJwtToken();
 		if (jwt) updateUserInfo(jwt);
 	}, []);
+
+	useEffect(() => {
+		const enforceOnboarding = (url: string) => {
+			const pathname = url.split('?')[0];
+			const authUser = resolveAuthUser();
+			if (!authUser?._id || !needsPostSignupOnboarding(authUser._id)) return;
+			if (isOnboardingGuardExemptRoute(pathname)) return;
+			const target = getPostSignupOnboardingPath(authUser);
+			if (pathname === target) return;
+			void router.replace(target);
+		};
+
+		enforceOnboarding(router.asPath);
+		router.events.on('routeChangeStart', enforceOnboarding);
+		return () => router.events.off('routeChangeStart', enforceOnboarding);
+	}, [router]);
 
 	useEffect(() => {
 		const guardRouteChange = (url: string) => {

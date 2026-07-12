@@ -145,10 +145,25 @@ Same token fields as `signup`. Rejects accounts with `authProvider !== EMAIL` or
 
 | `needsOnboarding` | `profileComplete` | Frontend route |
 |-------------------|-------------------|----------------|
-| `true` | `false` | `/register/role?oauth=1` → `completeOAuthSignup` |
-| `false` | `true` | Main app (`/my-page` or role dashboard) |
+| `true` | `false` | `/register/role?oauth=1` → `completeOAuthSignup` (role from `sessionStorage`) |
+| `false` | `true` | Login: main app. **Register OAuth:** error — account exists; do not redirect |
 
 Returning user with completed profile receives full tokens without onboarding.
+
+**Register-page OAuth (`SocialAuthRow mode="register"`):** If `needsOnboarding === false`, the frontend treats the account as already registered, clears tokens, and shows a provider-specific message (`oauth.googleAlreadyRegistered` / `oauth.kakaoAlreadyRegistered`). Role must be chosen at `/register/role` first (`fixora_oauth_signup_role` in `sessionStorage`).
+
+### Post-signup profile onboarding (FixoraF)
+
+After **email signup** or **`completeOAuthSignup`**, the frontend sets client-side onboarding state (`pending`) and routes to:
+
+| `userType` | Route |
+|------------|-------|
+| `USER` | `/onboarding/customer` |
+| `TECHNICIAN` | `/onboarding/technician` |
+
+See **`docs/ONBOARDING.md`** for fields, skip behavior, guards, and GraphQL mutations (`updateUser` / `UPDATE_TECHNICIAN_SETTINGS`).
+
+This is separate from OAuth stub onboarding (`needsOnboarding` → `/register/role?oauth=1`).
 
 ---
 

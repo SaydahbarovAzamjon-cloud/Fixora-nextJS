@@ -3,6 +3,8 @@ import BoltOutlined from '@mui/icons-material/BoltOutlined';
 import { useQuery } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import { GET_STORIES_CAROUSEL } from '../../../apollo/user/story';
+import { getJwtToken } from '../../auth/tokens';
+import { useIsClientReady } from '../../hooks/useIsClientReady';
 import { Story } from '../../types/fixora/fixora';
 import { groupStoriesByUser, isStoryGroupSeen } from '../../utils/storyGroups';
 import { storyImageUrl } from '../story/storyImageUrl';
@@ -16,12 +18,15 @@ const truncateLabel = (value: string): string =>
 
 const HomepageStoriesCarousel = () => {
 	const { t } = useTranslation('common');
+	const isClientReady = useIsClientReady();
+	const isLoggedIn = isClientReady && !!getJwtToken();
 	const [viewer, setViewer] = useState<{ groupIndex: number; storyIndex: number } | null>(null);
 	const [seenIds, setSeenIds] = useState<Set<string>>(() => new Set());
 
 	const { data } = useQuery(GET_STORIES_CAROUSEL, {
 		variables: { input: { limit: 24 } },
 		fetchPolicy: 'cache-and-network',
+		skip: !isLoggedIn,
 	});
 
 	const stories: Story[] = data?.getStoriesCarousel?.list ?? [];
@@ -38,7 +43,7 @@ const HomepageStoriesCarousel = () => {
 		[seenIds],
 	);
 
-	if (groups.length === 0) return null;
+	if (!isLoggedIn || groups.length === 0) return null;
 
 	const activeGroup = viewer !== null ? groups[viewer.groupIndex] : null;
 

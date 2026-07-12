@@ -11,7 +11,7 @@ import SocialAuthRow from './SocialAuthRow';
 import { fixoraLogin, validateLoginInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
-import { getPostAuthRoute } from '../../utils/postAuthRoute';
+import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
 
 const LoginForm = () => {
@@ -35,7 +35,7 @@ const LoginForm = () => {
 		try {
 			await fixoraLogin(email, password);
 			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
-			const target = getPostAuthRoute(resolveAuthUser(), referrer);
+			const target = resolvePostAuthDestination(resolveAuthUser(), referrer);
 			if (!routePathsEqual(router.pathname, target)) {
 				await router.replace(target);
 			}

@@ -14,7 +14,9 @@ export function isCustomerOnlyRoute(pathname: string): boolean {
 
 export function isTechnicianAllowedRoute(pathname: string): boolean {
 	if (isAdminRoute(pathname)) return true;
-	return ['/technician', '/login', '/register', '/account'].some((prefix) => pathname.startsWith(prefix));
+	return ['/technician', '/login', '/register', '/account', '/onboarding'].some((prefix) =>
+		pathname.startsWith(prefix),
+	);
 }
 
 /** Logged-in technicians may only use the technician portal (+ auth routes). */

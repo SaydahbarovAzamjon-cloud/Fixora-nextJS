@@ -5,6 +5,10 @@ import { useTranslation } from 'next-i18next';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { UPDATE_USER } from '../../../../apollo/user/profile';
 import { syncUserVarFromGraphqlUser } from '../../../auth/syncUserVar';
+import {
+	isPostSignupOnboardingIncomplete,
+	markPostSignupOnboardingCompleted,
+} from '../../../auth/postSignupOnboarding';
 import type { MapPoint } from '../../../kakao-maps';
 import { FixoraButton, FixoraInput } from '../../ui';
 import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
@@ -89,6 +93,9 @@ const SettingsTab = ({
 				userLocation: saved?.userLocation ?? location,
 				userBio: saved?.userBio ?? (mode === 'full' ? bio : undefined),
 			});
+			if (isPostSignupOnboardingIncomplete(userId)) {
+				markPostSignupOnboardingCompleted(userId);
+			}
 			await sweetTopSmallSuccessAlert(t('mypage.settings.saved'), 800);
 		} catch (err: any) {
 			await sweetErrorHandling(err);

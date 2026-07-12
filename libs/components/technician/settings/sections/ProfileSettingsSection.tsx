@@ -5,6 +5,7 @@ import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
 import SettingsSectionHead from '../SettingsSectionHead';
 import SettingsField from '../SettingsField';
 import SettingsSaveButton from '../SettingsSaveButton';
+import DeviceCategoryPicker from '../../../onboarding/DeviceCategoryPicker';
 import { ProfileFormState, TechnicianSettingsUser } from '../../../../hooks/useTechnicianSettings';
 import { useProfileImageUpload } from '../../../../hooks/useProfileImageUpload';
 import { sweetMixinErrorAlert } from '../../../../sweetAlert';
@@ -149,6 +150,14 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					</div>
 				</div>
 			</div>
+
+			<DeviceCategoryPicker
+				variant="settings"
+				label={t('settings.profile.specializations')}
+				hint={t('settings.profile.specializationsDesc')}
+				value={form.deviceCategories}
+				onChange={(deviceCategories) => onChange({ deviceCategories })}
+			/>
 
 			<div className="fts-grid fts-grid--2">
 				<SettingsField label={t('settings.profile.shopName')}>

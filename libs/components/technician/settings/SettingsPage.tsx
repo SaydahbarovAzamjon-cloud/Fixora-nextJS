@@ -15,6 +15,7 @@ import AvailabilitySection from './sections/AvailabilitySection';
 import PreferencesSection from './sections/PreferencesSection';
 import DeleteAccountSection from './sections/DeleteAccountSection';
 import SettingsEmptyBackend from './SettingsEmptyBackend';
+import { OnboardingReminderBanner } from '../../onboarding';
 
 const SettingsPage: React.FC = () => {
 	const { t } = useTranslation('technician');
@@ -93,13 +94,16 @@ const SettingsPage: React.FC = () => {
 						</div>
 					)}
 					{activeSection === 'profile' && (
-						<ProfileSettingsSection
-							user={settingsUser}
-							form={profileForm}
-							onChange={patchProfile}
-							onSave={saveProfile}
-							saving={saving}
-						/>
+						<>
+							<OnboardingReminderBanner />
+							<ProfileSettingsSection
+								user={settingsUser}
+								form={profileForm}
+								onChange={patchProfile}
+								onSave={saveProfile}
+								saving={saving}
+							/>
+						</>
 					)}
 					{activeSection === 'account' && (
 						<AccountSettingsSection

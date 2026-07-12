@@ -36,9 +36,9 @@
 Login / Sign Up
       │
       ▼
-Choose Role ──► Customer ──► Sign Up ──► My Page
+Choose Role ──► Customer ──► Sign Up ──► /onboarding/customer ──► My Page
       │
-      └──► Technician ──► Onboarding (6 steps) ──► ID Upload
+      └──► Technician ──► Signup steps (profile + ID) ──► /onboarding/technician
                               │
                               ▼
                         Under Review ──► Admin approves ──► Tenant Dashboard
@@ -51,6 +51,8 @@ Choose Role ──► Customer ──► Sign Up ──► My Page
 | Choose Role | `/register/role` | wireframe §3.3 |
 | Tech Onboarding Step 1 | `/register/technician/1` | wireframe §4.4 |
 | Tech ID Upload | `/register/technician/id` | wireframe §4.5 |
+| Post-signup onboarding (customer) | `/onboarding/customer` | Auth layout — photo, location, bio (`docs/ONBOARDING.md`) |
+| Post-signup onboarding (technician) | `/onboarding/technician` | Auth layout — full technician profile fields from `UserUpdate` |
 | Under Review | `/register/technician/pending` | wireframe §4.6 |
 
 ### Technician badges (wireframe §2, §5)

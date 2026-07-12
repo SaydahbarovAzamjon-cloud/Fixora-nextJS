@@ -337,6 +337,10 @@
   "technicianProfile.pp.spec.ipad": "iPad",
   "technicianProfile.pp.spec.ipadSub": "All iPad models including Pro",
   "technicianProfile.pp.spec.ipadJobs": "24 jobs",
+  "technicianProfile.pp.spec.watchSub": "All Apple Watch models and bands",
+  "technicianProfile.pp.spec.jobsCount": "{{count}} jobs",
+  "technicianProfile.pp.spec.empty": "No specializations added yet",
+  "technicianProfile.pp.spec.emptySub": "Add device types in profile settings",
 
   "booking.title": "Book {{technician}}",
   "booking.subtitle": "You're requesting a repair booking with {{technician}}.",

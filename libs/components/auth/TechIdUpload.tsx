@@ -94,7 +94,7 @@ const TechIdUpload = () => {
 			};
 			saveTechDraft(draft);
 			await fixoraTechnicianSignup(draft);
-			await router.push('/register/technician/pending');
+			await router.push('/onboarding/technician');
 		} catch (err: unknown) {
 			if (isSignupConflictError(err)) {
 				const messages = Object.values(err.conflicts)

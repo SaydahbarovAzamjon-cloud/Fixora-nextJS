@@ -46,6 +46,8 @@ import {
 	getTechnicianAvatarUrl,
 	getTechnicianDisplayName,
 	getTechnicianOwnerSubtitle,
+	getTechnicianSelfAvatarUrl,
+	getTechnicianSelfDisplayName,
 	initialsOf,
 } from '../../utils/technicianProfileDisplay';
 import { resolveProfileImageUrl } from '../../utils/profileImage';
@@ -236,10 +238,10 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 		[ownerBookingsData],
 	);
 
-	const displayName = getTechnicianDisplayName(profile);
+	const displayName = isOwner ? getTechnicianSelfDisplayName(profile) : getTechnicianDisplayName(profile);
 	const ownerSubtitle = getTechnicianOwnerSubtitle(profile);
 	const profileImageSrc = isOwner
-		? getTechnicianAvatarUrl(profile, profileDraft)
+		? getTechnicianSelfAvatarUrl(profile, profileDraft, technicianId, authUser?.memberImage)
 		: getTechnicianAvatarUrl(profile);
 	const specialty = profile?.specialty || '';
 	const location = profile?.userLocation || '';

@@ -798,74 +798,58 @@ $border-orange: var(--fixora-border);
 	justify-content: center;
 	gap: 7px;
 	flex-shrink: 0;
-	background: #161616;
-	border: 1px solid rgba(255, 107, 0, 0.3);
+	background: var(--fixora-surface-elevated);
+	border: 1px solid var(--fixora-border-subtle);
 	border-radius: 12px;
 	padding: 13px 14px;
 	cursor: pointer;
-	color: $primary-orange;
 	font-size: 11px;
 	font-weight: 600;
-	transition: all 0.2s ease;
+	transition: var(--fixora-transition);
 	min-width: 96px;
+	box-shadow: var(--fixora-card-shadow);
 
 	svg {
 		flex-shrink: 0;
+		color: inherit;
 	}
 
 	span {
 		white-space: nowrap;
 		line-height: 1;
+		color: inherit;
 	}
 
-	&:hover {
-		box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
-		border-color: rgba(255, 107, 0, 0.6);
-		background: rgba(255, 107, 0, 0.12);
+	&:hover:not(:disabled) {
+		background: var(--fixora-primary-soft-bg);
+		border-color: var(--fixora-border);
+		box-shadow: var(--fixora-card-shadow-hover);
+		transform: translateY(-1px);
+	}
+
+	&:active:not(:disabled) {
+		transform: translateY(0);
+	}
+
+	&:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
 	}
 
 	&--orange {
 		color: #FF6B00;
-		border-color: rgba(255, 107, 0, 0.3);
-
-		&:hover {
-			box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
-			border-color: rgba(255, 107, 0, 0.6);
-			background: rgba(255, 107, 0, 0.12);
-		}
 	}
 
 	&--green {
 		color: #22C55E;
-		border-color: rgba(34, 197, 94, 0.3);
-
-		&:hover {
-			box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
-			border-color: rgba(34, 197, 94, 0.6);
-			background: rgba(34, 197, 94, 0.12);
-		}
 	}
 
 	&--blue {
 		color: #3B82F6;
-		border-color: rgba(59, 130, 246, 0.3);
-
-		&:hover {
-			box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
-			border-color: rgba(59, 130, 246, 0.6);
-			background: rgba(59, 130, 246, 0.12);
-		}
 	}
 
 	&--purple {
 		color: #A855F7;
-		border-color: rgba(168, 85, 247, 0.3);
-
-		&:hover {
-			box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
-			border-color: rgba(168, 85, 247, 0.6);
-			background: rgba(168, 85, 247, 0.12);
-		}
 	}
 }
 

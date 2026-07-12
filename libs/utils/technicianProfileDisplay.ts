@@ -1,5 +1,6 @@
 import { TechnicianProfile } from '../types/fixora/fixora';
-import { resolveProfileImageUrl } from './profileImage';
+import { readStoredProfileImage } from '../auth/syncUserVar';
+import { hasRealProfileImage, resolveProfileImageUrl } from './profileImage';
 
 const DEFAULT_NAME = 'Technician';
 
@@ -12,6 +13,12 @@ export type TechnicianNameFields = Pick<
 export function getTechnicianDisplayName(profile?: TechnicianNameFields | null): string {
 	if (!profile) return DEFAULT_NAME;
 	return profile.shopName || profile.userNickname || profile.userFullName || DEFAULT_NAME;
+}
+
+/** Owner portal display name — matches technician header/sidebar (full name first). */
+export function getTechnicianSelfDisplayName(profile?: TechnicianNameFields | null): string {
+	if (!profile) return DEFAULT_NAME;
+	return profile.userFullName?.trim() || profile.shopName?.trim() || profile.userNickname?.trim() || DEFAULT_NAME;
 }
 
 /** Person name under shop title when both exist and differ. */
@@ -39,6 +46,23 @@ export function getTechnicianAvatarUrl(
 	draftPreview?: string | null,
 ): string {
 	if (draftPreview) return draftPreview;
+	return resolveProfileImageUrl(profile?.userProfileImage);
+}
+
+/** Owner portal avatar — draft, profile, localStorage, then auth session fallback. */
+export function getTechnicianSelfAvatarUrl(
+	profile?: TechnicianProfile | null,
+	draftPreview?: string | null,
+	userId?: string | null,
+	authImage?: string | null,
+): string {
+	if (draftPreview) return draftPreview;
+	if (hasRealProfileImage(profile?.userProfileImage)) {
+		return resolveProfileImageUrl(profile?.userProfileImage);
+	}
+	const stored = userId ? readStoredProfileImage(userId) : null;
+	if (hasRealProfileImage(stored)) return resolveProfileImageUrl(stored);
+	if (hasRealProfileImage(authImage)) return resolveProfileImageUrl(authImage);
 	return resolveProfileImageUrl(profile?.userProfileImage);
 }
 

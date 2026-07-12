@@ -16,9 +16,11 @@ const GRAPHQL_URI =
 const isProd = process.env.NODE_ENV === 'production';
 
 function getHeaders() {
-	const headers = {} as HeadersInit;
+	const headers: Record<string, string> = {
+		// Apollo Server 4 CSRF prevention — required for login and other mutations
+		'apollo-require-preflight': 'true',
+	};
 	const token = getJwtToken();
-	// @ts-ignore
 	if (token) headers['Authorization'] = `Bearer ${token}`;
 	return headers;
 }

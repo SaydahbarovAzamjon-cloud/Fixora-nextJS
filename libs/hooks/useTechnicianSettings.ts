@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useApolloClient, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import {
 	CHANGE_PASSWORD,
 	GET_TECHNICIAN_SETTINGS,
@@ -7,6 +7,7 @@ import {
 	UPDATE_TECHNICIAN_SETTINGS,
 	UPDATE_USER_SLUG,
 } from '../../apollo/user/settings';
+import { GET_USER } from '../../apollo/user/query';
 import { profileImageDraftVar, userVar } from '../../apollo/store';
 import { getJwtToken, setJwtToken, updateStorage, updateUserInfo } from '../auth';
 import { settingsUserFromAuth } from '../auth/settingsUserFallback';
@@ -22,7 +23,7 @@ import { resolveAuthUser } from '../utils/authSession';
 import { resolveTechnicianEmailSave } from '../utils/technicianEmailSave';
 import { getGraphQLErrorMessage } from '../utils/oauthErrors';
 import { isNoDataFoundGraphQLError } from '../utils/graphqlErrors';
-import { syncUserVarFromGraphqlUser } from '../auth/syncUserVar';
+import { syncUserVarFromGraphqlUser, writeStoredProfileImage } from '../auth/syncUserVar';
 import {
 	isPostSignupOnboardingIncomplete,
 	markPostSignupOnboardingCompleted,
@@ -171,6 +172,7 @@ function toSettingsUser(raw: Record<string, unknown> | null | undefined, userId:
 
 export function useTechnicianSettings(userId?: string) {
 	const { t } = useTranslation('technician');
+	const client = useApolloClient();
 	const isClientReady = useIsClientReady();
 	const authUser = useReactiveVar(userVar);
 	const sessionUser = authUser?._id ? authUser : isClientReady ? resolveAuthUser() : null;
@@ -418,6 +420,37 @@ export function useTechnicianSettings(userId?: string) {
 						userPhoneNumber: merged.userPhoneNumber,
 						userBio: merged.userBio,
 					});
+					if (merged.userProfileImage !== undefined) {
+						writeStoredProfileImage(resolvedId, merged.userProfileImage);
+					}
+
+					try {
+						client.cache.updateQuery({
+							query: GET_USER,
+							variables: { userId: resolvedId },
+							update: (existing) => {
+								if (!existing?.getUser) return existing;
+								return {
+									getUser: {
+										...existing.getUser,
+										userFullName: merged.userFullName ?? existing.getUser.userFullName,
+										userNickname: merged.userNickname ?? existing.getUser.userNickname,
+										userProfileImage: merged.userProfileImage ?? existing.getUser.userProfileImage,
+										userPhoneNumber: merged.userPhoneNumber ?? existing.getUser.userPhoneNumber,
+										userBio: merged.userBio ?? existing.getUser.userBio,
+										userLocation: merged.userLocation ?? existing.getUser.userLocation,
+										shopName: merged.shopName ?? existing.getUser.shopName,
+										specialty: merged.specialty ?? existing.getUser.specialty,
+										services: merged.services ?? existing.getUser.services,
+										workingHours: merged.workingHours ?? existing.getUser.workingHours,
+									},
+								};
+							},
+						});
+					} catch {
+						// GET_USER may not be in cache yet — profile hook merges from local cache.
+					}
+
 					if (merged.userEmail) writeStoredUserEmail(resolvedId, merged.userEmail);
 					syncProfileFormFromUser(merged);
 				} else if (updatedRaw?.accessToken) {
@@ -439,7 +472,7 @@ export function useTechnicianSettings(userId?: string) {
 				return false;
 			}
 		},
-		[refetch, resolvedId, syncProfileFormFromUser, t, updateUser],
+		[client, refetch, resolvedId, syncProfileFormFromUser, t, updateUser],
 	);
 
 	const saveProfile = useCallback(

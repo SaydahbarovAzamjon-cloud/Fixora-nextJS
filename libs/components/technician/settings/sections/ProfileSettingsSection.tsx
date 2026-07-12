@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslation } from 'next-i18next';
 import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
@@ -46,12 +46,14 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 	};
 
 	const avatar = useProfileImageUpload(onUploadError);
+	const [imageRemoved, setImageRemoved] = useState(false);
 
 	React.useEffect(() => {
 		const storedImage = user?._id ? readStoredProfileImage(user._id) : null;
 		const imagePath = user?.userProfileImage ?? storedImage;
 		if (imagePath && hasRealProfileImage(imagePath)) {
 			avatar.setExistingImage(imagePath);
+			setImageRemoved(false);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate avatar once per profile image path
 	}, [user?._id, user?.userProfileImage]);
@@ -93,12 +95,14 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 					await sweetMixinErrorAlert(t('settings.profile.uploadFailed'));
 					return;
 				}
-			} else if (!avatar.hasImage && user?.userProfileImage) {
+				setImageRemoved(false);
+			} else if (imageRemoved) {
 				imagePath = '';
 			}
 			const ok = await onSave(imagePath);
 			if (ok) {
 				avatar.clearDraftAfterSave(imagePath === '' ? null : imagePath ?? user?.userProfileImage);
+				if (imagePath === '') setImageRemoved(false);
 			}
 		} catch {
 			await sweetMixinErrorAlert(t('settings.profile.uploadFailed'));
@@ -142,7 +146,10 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
 								<button type="button" className="fts-avatar-block__link" onClick={avatar.openPicker}>
 									{t('settings.profile.replacePhoto')}
 								</button>
-								<button type="button" className="fts-avatar-block__link fts-avatar-block__link--danger" onClick={avatar.clearCover}>
+								<button type="button" className="fts-avatar-block__link fts-avatar-block__link--danger" onClick={() => {
+									avatar.clearCover();
+									setImageRemoved(true);
+								}}>
 									{t('settings.profile.removePhoto')}
 								</button>
 							</>

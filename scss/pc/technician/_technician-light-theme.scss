@@ -137,24 +137,13 @@
 
 		/* ── Dashboard ── */
 		.fixora-tech-quick-action {
-			background: var(--fixora-surface);
-			border-color: var(--fixora-border);
+			background: var(--fixora-surface-elevated);
+			border-color: var(--fixora-border-subtle);
 
-			&:hover {
+			&:hover:not(:disabled) {
 				background: var(--fixora-primary-soft-bg);
-				border-color: var(--fixora-primary);
-				box-shadow: var(--fixora-glow);
-			}
-
-			&--orange {
-				color: var(--fixora-primary);
 				border-color: var(--fixora-border);
-
-				&:hover {
-					background: var(--fixora-primary-soft-bg);
-					border-color: var(--fixora-primary);
-					box-shadow: var(--fixora-glow);
-				}
+				box-shadow: var(--fixora-glow);
 			}
 		}
 

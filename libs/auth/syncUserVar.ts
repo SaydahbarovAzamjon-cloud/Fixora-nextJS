@@ -12,13 +12,28 @@ export function syncUserVarFromGraphqlUser(u: {
 	userBio?: string | null;
 }) {
 	const current = userVar();
+	const nextFullName = u.userFullName !== undefined ? (u.userFullName ?? '') : (current.memberFullName ?? '');
+	const nextNick = u.userNickname !== undefined ? (u.userNickname ?? '') : (current.memberNick ?? '');
+	const nextImage = u.userProfileImage !== undefined ? (u.userProfileImage ?? '') : (current.memberImage ?? '');
+	const nextPhone = u.userPhoneNumber !== undefined ? (u.userPhoneNumber ?? '') : (current.memberPhone ?? '');
+	const nextBio = u.userBio !== undefined ? (u.userBio ?? '') : (current.memberDesc ?? '');
+
+	const unchanged =
+		nextFullName === (current.memberFullName ?? '') &&
+		nextNick === (current.memberNick ?? '') &&
+		nextImage === (current.memberImage ?? '') &&
+		nextPhone === (current.memberPhone ?? '') &&
+		nextBio === (current.memberDesc ?? '');
+
+	if (unchanged) return;
+
 	userVar({
 		...current,
-		...(u.userFullName !== undefined ? { memberFullName: u.userFullName ?? '' } : {}),
-		...(u.userNickname !== undefined ? { memberNick: u.userNickname ?? '' } : {}),
-		...(u.userProfileImage !== undefined ? { memberImage: u.userProfileImage ?? '' } : {}),
-		...(u.userPhoneNumber !== undefined ? { memberPhone: u.userPhoneNumber ?? '' } : {}),
-		...(u.userBio !== undefined ? { memberDesc: u.userBio ?? '' } : {}),
+		...(u.userFullName !== undefined ? { memberFullName: nextFullName } : {}),
+		...(u.userNickname !== undefined ? { memberNick: nextNick } : {}),
+		...(u.userProfileImage !== undefined ? { memberImage: nextImage } : {}),
+		...(u.userPhoneNumber !== undefined ? { memberPhone: nextPhone } : {}),
+		...(u.userBio !== undefined ? { memberDesc: nextBio } : {}),
 	});
 
 	if (typeof window !== 'undefined' && u._id && u.userProfileImage !== undefined) {

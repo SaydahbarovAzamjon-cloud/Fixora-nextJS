@@ -11,7 +11,7 @@ import { userVar } from '../../apollo/store';
 import { updateUserInfo, deleteUserInfo } from './userInfo';
 import { clearTechOnboardingFiles, getTechIdFile, getTechPhotoFile } from './techOnboardingFiles';
 import { uploadImageFile } from '../utils/uploadImageFile';
-import { syncUserVarFromGraphqlUser, writeStoredProfileImage } from './syncUserVar';
+import { syncUserVarFromGraphqlUser, writeStoredProfileImage, readStoredProfileImage } from './syncUserVar';
 import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
 import { dataUrlToFile } from '../utils/onboardingFileStorage';
 import { markPostSignupOnboardingPending } from './postSignupOnboarding';
@@ -150,6 +150,17 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 	localStorage.setItem('accessToken', accessToken);
 	localStorage.setItem('refreshToken', refreshToken);
 	localStorage.setItem('login', Date.now().toString());
+
+	const storedImage = profile?._id ? readStoredProfileImage(profile._id) : null;
+	const incomingImage = profile?.userProfileImage?.trim() || '';
+	// Keep a user-uploaded Fixora path; do not let OAuth CDN avatars overwrite it on login.
+	const preferStoredUpload =
+		Boolean(storedImage) &&
+		!storedImage!.startsWith('http://') &&
+		!storedImage!.startsWith('https://') &&
+		(incomingImage.startsWith('http://') || incomingImage.startsWith('https://') || !incomingImage);
+	const resolvedImage = preferStoredUpload ? storedImage! : incomingImage || storedImage || '';
+
 	updateUserInfo(accessToken);
 
 	if (!profile) return;
@@ -158,7 +169,7 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 	userVar({
 		...current,
 		...(profile._id ? { _id: profile._id } : {}),
-		...(profile.userProfileImage ? { memberImage: profile.userProfileImage } : {}),
+		...(resolvedImage ? { memberImage: resolvedImage } : {}),
 		...(profile.userNickname ? { memberNick: profile.userNickname } : {}),
 		...(profile.userFullName ? { memberFullName: profile.userFullName } : {}),
 		...(profile.userType ? { memberType: profile.userType, userType: profile.userType } : {}),
@@ -169,8 +180,8 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 				: {}),
 	});
 
-	if (profile._id && profile.userProfileImage) {
-		writeStoredProfileImage(profile._id, profile.userProfileImage);
+	if (profile._id && resolvedImage) {
+		writeStoredProfileImage(profile._id, resolvedImage);
 	}
 	if (profile._id && profile.userEmail) {
 		writeStoredUserEmail(profile._id, profile.userEmail);

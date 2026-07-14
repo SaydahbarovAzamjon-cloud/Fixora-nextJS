@@ -26,9 +26,12 @@ export async function maybeConfirmAuthSession(params: {
 	if (!isAuthSettledLandingPath(pathname)) return;
 
 	try {
-		await client.mutate({ mutation: CONFIRM_AUTH_SESSION });
+		await client.mutate({
+			mutation: CONFIRM_AUTH_SESSION,
+			context: { suppressErrorAlert: true },
+		});
 	} catch {
-		/* non-blocking — admin alert is best-effort */
+		/* non-blocking — admin alert is best-effort (backend may lag deploy) */
 		return;
 	}
 	clearAuthConfirmPending();

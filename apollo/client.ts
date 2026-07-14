@@ -8,11 +8,8 @@ import { sweetErrorAlert } from '../libs/sweetAlert';
 import { isNoDataFoundGraphQLError } from '../libs/utils/graphqlErrors';
 import { isRoleRestrictedError, isMissingTokenError, shouldRedirectToLogin } from '../libs/utils/userRole';
 import { handleSessionExpired } from '../libs/auth/sessionExpiry';
+import { getGraphqlUrl } from '../libs/env/publicEnv';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
-const GRAPHQL_URI =
-	process.env.REACT_APP_API_GRAPHQL_URL ||
-	process.env.NEXT_PUBLIC_GRAPHQL_URL ||
-	'http://localhost:2000/graphql';
 const isProd = process.env.NODE_ENV === 'production';
 
 function getHeaders() {
@@ -52,7 +49,7 @@ function createIsomorphicLink() {
 
 	// @ts-ignore
 	const httpLink = new createUploadLink({
-		uri: GRAPHQL_URI,
+		uri: getGraphqlUrl(),
 	});
 
 	const errorLink = onError(({ graphQLErrors, networkError, operation }) => {

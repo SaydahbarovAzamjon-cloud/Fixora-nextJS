@@ -23,8 +23,18 @@ const nextConfig = {
 	},
 	async rewrites() {
 		// Local UI → remote GraphQL without CORS (browser hits same-origin /graphql).
+		// Only active when GRAPHQL_PROXY_TARGET is set AND GraphQL URL points at localhost.
 		const target = (process.env.GRAPHQL_PROXY_TARGET || '').replace(/\/$/, '');
 		if (!target) return [];
+
+		const graphqlUrl =
+			process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+			process.env.REACT_APP_API_GRAPHQL_URL ||
+			'';
+		const usesLocalProxy =
+			graphqlUrl.includes('localhost') || graphqlUrl.includes('127.0.0.1');
+		if (!usesLocalProxy) return [];
+
 		return [
 			{
 				source: '/graphql',

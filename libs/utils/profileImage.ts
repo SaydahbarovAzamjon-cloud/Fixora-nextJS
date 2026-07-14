@@ -5,8 +5,7 @@ const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 export function apiBaseUrl(): string {
 	const fromConfig = REACT_APP_API_URL?.replace(/\/$/, '');
 	if (fromConfig && fromConfig !== 'undefined') return fromConfig;
-	const graphql = process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.REACT_APP_API_GRAPHQL_URL || '';
-	return graphql.replace(/\/graphql\/?$/, '');
+	return '';
 }
 
 export function hasRealProfileImage(image?: string | null): boolean {

@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-14 |
+| **Last updated** | 2026-07-15 |
 | **Last agent** | Cursor |
-| **Last session** | **Notification Phase 5 (Telegram)** — Settings language/channels + Connect/poll/Disconnect; signup `notificationSetup` soft card; schema + FRONTEND_API synced from FixoraB; hook `useNotificationPreferences` |
-| **Next agent should start with** | Manual E2E checklist in `docs/NOTIFICATIONS.md` (Telegram link via prod GraphQL); only then push `develop` |
+| **Last session** | **Nearby + Kakao route (local)** — homepage nearby fix; copied `KAKAO_REST_API_KEY` from FixoraB into FixoraF `.env.local`; `/api/map/directions` verified (road path + ETA). Map panel hides literal `"null"` shop names. |
+| **Next agent should start with** | Browser retest **Show Route** on `/search`; manual Telegram checklist in `docs/NOTIFICATIONS.md`; do not commit/push unless requested |
 
 ---
 

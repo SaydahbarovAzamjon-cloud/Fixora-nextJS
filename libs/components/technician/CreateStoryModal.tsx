@@ -6,6 +6,7 @@ import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutl
 import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import { CREATE_STORY } from '../../../apollo/user/story';
 import { getJwtToken } from '../../auth';
+import { getGraphqlUrl } from '../../env/publicEnv';
 import { sweetMixinErrorAlert, sweetMixinSuccessAlert } from '../../sweetAlert';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,7 +99,7 @@ const CreateStoryModal = ({ open, onClose, onCreated }: CreateStoryModalProps) =
 		formData.append('map', JSON.stringify(map));
 		files.forEach((file, i) => formData.append(String(i), file));
 
-		const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+		const response = await axios.post(getGraphqlUrl(), formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 				'apollo-require-preflight': true,

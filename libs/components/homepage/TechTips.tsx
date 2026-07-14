@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Stack, Box } from '@mui/material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
@@ -12,27 +12,42 @@ import TechTipCard from './TechTipCard';
 import { T } from '../../types/common';
 import { sweetErrorHandling } from '../../sweetAlert';
 
+type TipsFilter = 'newest' | 'top';
+
 interface TechTipsProps {
 	initialInput?: ArticlesInquiry;
 }
 
-const DEFAULT_INPUT: ArticlesInquiry = {
+const BASE_INPUT: Omit<ArticlesInquiry, 'sort'> = {
 	page: 1,
 	limit: 3,
-	sort: 'articleViews',
 	direction: 'DESC',
 	search: {},
 };
 
-const TechTips = ({ initialInput = DEFAULT_INPUT }: TechTipsProps) => {
+const SORT_BY_FILTER: Record<TipsFilter, string> = {
+	newest: 'createdAt',
+	top: 'articleViews',
+};
+
+const TechTips = ({ initialInput }: TechTipsProps) => {
 	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
+	const [tipsFilter, setTipsFilter] = useState<TipsFilter>('top');
 	const [articles, setArticles] = useState<ArticleSummary[]>([]);
 	const [likePendingId, setLikePendingId] = useState<string | null>(null);
 
+	const queryInput = useMemo<ArticlesInquiry>(() => {
+		if (initialInput) return initialInput;
+		return {
+			...BASE_INPUT,
+			sort: SORT_BY_FILTER[tipsFilter],
+		};
+	}, [initialInput, tipsFilter]);
+
 	useQuery(GET_ARTICLES, {
 		fetchPolicy: 'network-only',
-		variables: { input: initialInput },
+		variables: { input: queryInput },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
 			setArticles(data?.getArticles?.list ?? []);
@@ -80,9 +95,29 @@ const TechTips = ({ initialInput = DEFAULT_INPUT }: TechTipsProps) => {
 			<Stack className="container">
 				<Box component="div" className="fixora-home-section__head">
 					<h2>{t('homepage.tips.title')}</h2>
-					<Link href="/community" className="fixora-home-section__view-all">
-						{t('homepage.viewAll')} <EastIcon fontSize="inherit" />
-					</Link>
+					<Box component="div" className="fixora-home-tips__head-actions">
+						{!initialInput && (
+							<div className="fixora-home-tips__filter" role="group" aria-label={t('homepage.tips.title')}>
+								<button
+									type="button"
+									className={`fixora-home-tips__filter-btn${tipsFilter === 'newest' ? ' is-active' : ''}`}
+									onClick={() => setTipsFilter('newest')}
+								>
+									{t('homepage.tips.filterNewest')}
+								</button>
+								<button
+									type="button"
+									className={`fixora-home-tips__filter-btn${tipsFilter === 'top' ? ' is-active' : ''}`}
+									onClick={() => setTipsFilter('top')}
+								>
+									{t('homepage.tips.filterTop')}
+								</button>
+							</div>
+						)}
+						<Link href="/community" className="fixora-home-section__view-all">
+							{t('homepage.viewAll')} <EastIcon fontSize="inherit" />
+						</Link>
+					</Box>
 				</Box>
 				<Box component="div" className="fixora-home-tips__grid">
 					{articles.map((article) => (

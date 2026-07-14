@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { getJwtToken } from '../auth';
 import { REACT_APP_API_URL } from '../config';
+import { getGraphqlUrl } from '../env/publicEnv';
 import { sweetMixinErrorAlert } from '../sweetAlert';
 import { resolveArticleImageUrl } from '../utils/articleImage';
 
@@ -122,7 +123,7 @@ export function useArticleCoverUpload(onError?: (key: string) => void) {
 
 		setUploading(true);
 		try {
-			const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+			const response = await axios.post(getGraphqlUrl(), formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 					'apollo-require-preflight': true,

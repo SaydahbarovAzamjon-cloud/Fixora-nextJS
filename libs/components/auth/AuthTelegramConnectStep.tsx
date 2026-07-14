@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
@@ -8,15 +8,19 @@ import { isNetworkFetchError } from '../../utils/oauthErrors';
 import { sweetErrorHandling } from '../../sweetAlert';
 
 interface AuthTelegramConnectStepProps {
-	/** Called when user finishes (connected or skips) */
-	onContinue: () => void;
+	/** Called when user finishes (connected or skips). Ignored when `embedded`. */
+	onContinue?: () => void;
+	/**
+	 * Embed under signup fields (after notification prefs).
+	 * Hides Skip/Continue — parent keeps its own submit / next CTA.
+	 */
+	embedded?: boolean;
 }
 
 /**
- * Post-auth inline Connect Telegram — stays on login/signup page (no Settings redirect).
- * Requires Bearer session already set.
+ * Connect Telegram — requires Bearer session (OAuth stub or post-signup).
  */
-const AuthTelegramConnectStep = ({ onContinue }: AuthTelegramConnectStepProps) => {
+const AuthTelegramConnectStep = ({ onContinue, embedded = false }: AuthTelegramConnectStepProps) => {
 	const { t } = useTranslation('auth');
 	const {
 		preferences,
@@ -32,13 +36,6 @@ const AuthTelegramConnectStep = ({ onContinue }: AuthTelegramConnectStepProps) =
 	const status = preferences?.telegramStatus ?? 'NOT_CONNECTED';
 	const linked = status === 'LINKED';
 	const username = preferences?.telegramUsername?.replace(/^@/, '');
-
-	useEffect(() => {
-		if (linked) {
-			const timer = window.setTimeout(() => onContinue(), 1200);
-			return () => window.clearTimeout(timer);
-		}
-	}, [linked, onContinue]);
 
 	const handleConnect = useCallback(async () => {
 		setConnectError(null);
@@ -57,7 +54,7 @@ const AuthTelegramConnectStep = ({ onContinue }: AuthTelegramConnectStepProps) =
 	}, [connectTelegram, t]);
 
 	return (
-		<div className="auth-telegram-step">
+		<div className={`auth-telegram-step${embedded ? ' auth-telegram-step--embedded' : ''}`}>
 			<div className="auth-telegram-step__head">
 				<TelegramIcon />
 				<strong>{t('authTelegram.title')}</strong>
@@ -87,7 +84,7 @@ const AuthTelegramConnectStep = ({ onContinue }: AuthTelegramConnectStepProps) =
 						</p>
 					)}
 					<FixoraButton
-						variant="primary"
+						variant={embedded ? 'secondary' : 'primary'}
 						fullWidth
 						disabled={linking || polling}
 						onClick={() => void handleConnect()}
@@ -101,11 +98,13 @@ const AuthTelegramConnectStep = ({ onContinue }: AuthTelegramConnectStepProps) =
 				</>
 			)}
 
-			<div className="auth-telegram-step__actions">
-				<button type="button" className="auth-form__link" onClick={onContinue} disabled={linked && loading}>
-					{linked ? t('authTelegram.continue') : t('authTelegram.skip')}
-				</button>
-			</div>
+			{!embedded && onContinue && (
+				<div className="auth-telegram-step__actions">
+					<button type="button" className="auth-form__link" onClick={onContinue}>
+						{linked ? t('authTelegram.continue') : t('authTelegram.skip')}
+					</button>
+				</div>
+			)}
 		</div>
 	);
 };

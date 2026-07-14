@@ -1,4 +1,6 @@
-export const REACT_APP_API_URL = `${process.env.REACT_APP_API_URL}`;
+import { getApiBaseUrl } from './env/publicEnv';
+
+export const REACT_APP_API_URL = getApiBaseUrl();
 
 export const Messages = {
 	error1: 'Something went wrong!',

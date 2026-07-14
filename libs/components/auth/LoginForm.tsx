@@ -14,8 +14,7 @@ import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
-import { initializeApollo } from '../../../apollo/client';
-import { GET_NOTIFICATION_PREFERENCES } from '../../../apollo/user/settings';
+import { clearAuthTelegramPending, setAuthTelegramPending } from '../../auth/authTelegramFlow';
 
 const LoginForm = () => {
 	const { t } = useTranslation('auth');
@@ -29,6 +28,7 @@ const LoginForm = () => {
 	const oauthHint = router.query.oauthError === 'provider_mismatch';
 
 	const finishAuth = useCallback(async () => {
+		clearAuthTelegramPending();
 		const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
 		const target = resolvePostAuthDestination(resolveAuthUser(), referrer);
 		if (!routePathsEqual(router.pathname, target)) {
@@ -36,25 +36,11 @@ const LoginForm = () => {
 		}
 	}, [router]);
 
-	/** After token is set — stay on page for Connect if not already LINKED */
-	const enterTelegramStepOrFinish = useCallback(async () => {
-		try {
-			const apollo = await initializeApollo();
-			const result = await apollo.query({
-				query: GET_NOTIFICATION_PREFERENCES,
-				fetchPolicy: 'network-only',
-				errorPolicy: 'ignore',
-			});
-			const status = result.data?.getNotificationPreferences?.telegramStatus;
-			if (status === 'LINKED') {
-				await finishAuth();
-				return;
-			}
-		} catch {
-			/* soft — still show connect step */
-		}
+	/** After token is set — stay on page for optional Telegram connect */
+	const enterTelegramStepOrFinish = useCallback(() => {
+		setAuthTelegramPending();
 		setShowTelegramStep(true);
-	}, [finishAuth]);
+	}, []);
 
 	const handleSubmit = useCallback(async () => {
 		const result = validateLoginInput(email, password);
@@ -64,15 +50,17 @@ const LoginForm = () => {
 		}
 		setErrors({});
 		setLoading(true);
+		setAuthTelegramPending();
 		try {
 			await fixoraLogin(email, password);
-			await enterTelegramStepOrFinish();
+			setShowTelegramStep(true);
 		} catch (err: any) {
+			clearAuthTelegramPending();
 			await sweetMixinErrorAlert(err?.message ?? 'Login failed');
 		} finally {
 			setLoading(false);
 		}
-	}, [email, password, enterTelegramStepOrFinish]);
+	}, [email, password]);
 
 	if (showTelegramStep) {
 		return (
@@ -141,7 +129,7 @@ const LoginForm = () => {
 				</FixoraButton>
 			</div>
 			<AuthDivider />
-			<SocialAuthRow mode="login" onLoginSuccess={() => enterTelegramStepOrFinish()} />
+			<SocialAuthRow mode="login" onLoginSuccess={enterTelegramStepOrFinish} />
 			<div className="auth-footer">
 				{t('login.noAccount')}{' '}
 				<button type="button" onClick={() => router.push('/register/role')}>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useApolloClient, useQuery } from '@apollo/client';
-import { GET_TECHNICIAN_REVIEWS, GET_TECHNICIAN_TRENDING } from '../../apollo/user/query';
+import { GET_TECHNICIAN_REVIEWS, GET_TECHNICIANS } from '../../apollo/user/query';
 import { TechnicianReview } from '../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 
-const TECHNICIAN_POOL = 8;
-const REVIEWS_PER_TECHNICIAN = 3;
-const MAX_TESTIMONIALS = 9;
+/** Broader pool so brand-new reviews (any tech) can surface in the last 3. */
+const TECHNICIAN_POOL = 24;
+const REVIEWS_PER_TECHNICIAN = 2;
+const MAX_TESTIMONIALS = 3;
 
 export interface HomepageTestimonial {
 	id: string;
@@ -48,13 +49,21 @@ export function useHomepageTestimonials() {
 	const [testimonials, setTestimonials] = useState<HomepageTestimonial[]>([]);
 	const [loadingReviews, setLoadingReviews] = useState(false);
 
-	const { data, loading: loadingTechnicians } = useQuery(GET_TECHNICIAN_TRENDING, {
-		variables: { limit: TECHNICIAN_POOL },
-		fetchPolicy: 'cache-and-network',
+	const { data, loading: loadingTechnicians } = useQuery(GET_TECHNICIANS, {
+		variables: {
+			input: {
+				page: 1,
+				limit: TECHNICIAN_POOL,
+				sort: 'averageRating',
+				direction: 'DESC',
+				search: {},
+			},
+		},
+		fetchPolicy: 'network-only',
 	});
 
 	useEffect(() => {
-		const technicians = (data?.getTechnicianTrending?.list ?? []).filter(
+		const technicians = (data?.getTechnicians?.list ?? []).filter(
 			(tech: { reviewCount?: number }) => (tech.reviewCount ?? 0) > 0,
 		);
 

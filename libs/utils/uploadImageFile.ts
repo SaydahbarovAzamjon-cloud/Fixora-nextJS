@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getGraphqlUrl } from '../env/publicEnv';
 
 const DEFAULT_TARGETS = ['user', 'member'] as const;
 
@@ -27,7 +28,7 @@ export async function uploadImageFile(
 			formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
 			formData.append('0', file);
 
-			const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+			const response = await axios.post(getGraphqlUrl(), formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 					'apollo-require-preflight': true,

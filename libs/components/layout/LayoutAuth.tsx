@@ -9,6 +9,7 @@ import { getNeedsOnboarding } from '../../auth/fixoraAuth';
 import { resolveAuthUser } from '../../utils/authSession';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
+import { isAuthTelegramPending } from '../../auth/authTelegramFlow';
 
 const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 	return (props: any) => {
@@ -26,6 +27,7 @@ const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 
 		useEffect(() => {
 			if (getNeedsOnboarding() || !authUserId || redirectingRef.current) return;
+			if (isAuthTelegramPending()) return;
 
 			const authUser = resolveAuthUser();
 			if (!authUser?._id) return;

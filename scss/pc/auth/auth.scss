@@ -190,8 +190,9 @@
 			align-items: flex-start;
 			gap: 10px;
 			font-size: 13px;
-			color: var(--fixora-text-secondary);
-			line-height: 1.4;
+			color: var(--fixora-text-primary);
+			line-height: 1.45;
+			opacity: 0.92;
 
 			input[type='checkbox'] {
 				margin-top: 3px;
@@ -203,6 +204,9 @@
 
 			a {
 				color: var(--fixora-primary);
+				font-weight: 600;
+				text-decoration: underline;
+				text-underline-offset: 2px;
 			}
 		}
 
@@ -615,6 +619,10 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		background: rgba(255, 255, 255, 0.03);
 
+		&--embedded {
+			margin-top: 4px;
+		}
+
 		&__head {
 			display: flex;
 			align-items: center;
@@ -710,6 +718,7 @@
 		}
 
 		&__field {
+			position: relative;
 			display: flex;
 			flex-direction: column;
 			gap: 6px;
@@ -727,6 +736,89 @@
 			color: var(--fixora-text-primary);
 			font-size: 13px;
 			font-family: inherit;
+		}
+
+		&__lang-btn {
+			appearance: none;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			padding: 10px 12px;
+			border-radius: 10px;
+			border: 1px solid rgba(255, 255, 255, 0.14);
+			background: rgba(0, 0, 0, 0.35);
+			color: var(--fixora-text-primary);
+			font-size: 13px;
+			font-family: inherit;
+			font-weight: 600;
+			cursor: pointer;
+			transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+			svg {
+				color: var(--fixora-text-secondary);
+				transition: transform 0.15s ease;
+			}
+
+			&:hover,
+			&.is-open {
+				border-color: rgba(255, 107, 0, 0.45);
+				box-shadow: 0 0 0 1px rgba(255, 107, 0, 0.2);
+			}
+
+			&.is-open svg {
+				transform: rotate(180deg);
+				color: var(--fixora-primary);
+			}
+		}
+
+		&__lang-menu {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: calc(100% + 6px);
+			z-index: 20;
+			margin: 0;
+			padding: 6px;
+			list-style: none;
+			border-radius: 12px;
+			border: 1px solid rgba(255, 255, 255, 0.12);
+			background: rgba(28, 8, 12, 0.96);
+			backdrop-filter: blur(12px);
+			box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+		}
+
+		&__lang-option {
+			appearance: none;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			padding: 10px 12px;
+			border: none;
+			border-radius: 8px;
+			background: transparent;
+			color: var(--fixora-text-primary);
+			font-size: 13px;
+			font-family: inherit;
+			font-weight: 500;
+			cursor: pointer;
+			text-align: left;
+
+			svg {
+				color: var(--fixora-primary);
+			}
+
+			&:hover {
+				background: rgba(255, 107, 0, 0.12);
+			}
+
+			&.is-selected {
+				background: rgba(255, 107, 0, 0.18);
+				font-weight: 700;
+			}
 		}
 
 		&__hint {

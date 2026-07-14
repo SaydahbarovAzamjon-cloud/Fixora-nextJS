@@ -44,13 +44,19 @@ const TechnicianMapProfilePanel = ({
 	const { t } = useTranslation('common');
 	const router = useRouter();
 
-	const personName = technician.userNickname || technician.userFullName || '';
-	const shopName = technician.shopName?.trim() || '';
+	const clean = (value?: string | null) => {
+		const trimmed = value?.trim() || '';
+		return !trimmed || trimmed.toLowerCase() === 'null' || trimmed.toLowerCase() === 'undefined'
+			? ''
+			: trimmed;
+	};
+	const personName = clean(technician.userNickname) || clean(technician.userFullName);
+	const shopName = clean(technician.shopName);
 	const headline = personName || shopName || t('search.map.unknownTechnician');
 	const rating = technician.averageRating ?? 0;
 	const reviewCount = technician.reviewCount ?? 0;
-	const address = technician.userLocation?.trim();
-	const bio = technician.specialty?.trim();
+	const address = clean(technician.userLocation);
+	const bio = clean(technician.specialty);
 	const avatarSrc = resolveProfileImageUrl(technician.userProfileImage);
 	const displayDistanceKm = routeInfo?.distanceKm ?? distanceKm;
 

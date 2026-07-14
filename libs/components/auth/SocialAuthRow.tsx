@@ -12,6 +12,7 @@ import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAler
 import { resolveAuthUser } from '../../utils/authSession';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { getGraphQLErrorMessage, isOAuthProviderMismatchError } from '../../utils/oauthErrors';
+import { setAuthTelegramPending } from '../../auth/authTelegramFlow';
 
 type OAuthProvider = 'google' | 'kakao';
 
@@ -130,6 +131,7 @@ const SocialAuthRow = ({
 
 	const runOAuth = useCallback(
 		async (provider: OAuthProvider, token: string) => {
+			if (mode === 'login') setAuthTelegramPending();
 			const result = await fixoraOAuthLogin(
 				provider === 'google' ? 'GOOGLE' : 'KAKAO',
 				token,

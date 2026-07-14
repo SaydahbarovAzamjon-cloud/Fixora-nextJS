@@ -1,12 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { getJwtToken } from '../auth/tokens';
+import { getGraphqlUrl } from '../env/publicEnv';
 import { MAX_DEVICE_IMAGES } from '../utils/deviceImage';
 
-const GRAPHQL_URI =
-	process.env.REACT_APP_API_GRAPHQL_URL ||
-	process.env.NEXT_PUBLIC_GRAPHQL_URL ||
-	'http://localhost:2000/graphql';
+const GRAPHQL_URI = getGraphqlUrl();
 import { validateCoverFile } from './useArticleCoverUpload';
 
 /** FixoraB allowedUploadTargets — `device` whitelisted (GAP-112). */

@@ -1,4 +1,5 @@
 import { fixoraWsConnectedVar, socketVar } from '../../apollo/store';
+import { getWsUrl } from '../env/publicEnv';
 
 export type FixoraWsEvent = 'notificationReceived' | 'messageReceived';
 
@@ -18,11 +19,7 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let intentionalClose = false;
 
 export function getFixoraWsBaseUrl(): string {
-	const base =
-		(typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL) ||
-		(typeof process !== 'undefined' && process.env.REACT_APP_API_WS) ||
-		'ws://localhost:2000';
-	return base.replace(/\/$/, '');
+	return getWsUrl();
 }
 
 /** Parse FixoraB WS payloads (`event` / `type` + optional `data`). Ignores legacy chat frames. */

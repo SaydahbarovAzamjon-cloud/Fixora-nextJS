@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useMutation } from '@apollo/client';
 import { useTranslation } from 'next-i18next';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckIcon from '@mui/icons-material/Check';
 import {
 	DEFAULT_NOTIFICATION_SETUP,
-	isValidTelegramUsernameFormat,
+	DEFAULT_NOTIFICATION_PREFERENCES,
+	NotificationLocale,
 	NotificationSetupInput,
-	normalizeTelegramUsername,
+	writeNotificationPreferencesCache,
 } from '../../auth/notificationPreferencesCache';
+import { UPDATE_NOTIFICATION_PREFERENCES } from '../../../apollo/user/settings';
+import { getJwtToken } from '../../auth/tokens';
+import { resolveAuthUser } from '../../utils/authSession';
 
 interface NotificationSetupCardProps {
 	value: NotificationSetupInput;
@@ -14,9 +21,15 @@ interface NotificationSetupCardProps {
 	hasEmail?: boolean;
 }
 
+const LANGUAGE_OPTIONS: { value: NotificationLocale; label: string }[] = [
+	{ value: 'ko', label: '한국어' },
+	{ value: 'en', label: 'English' },
+];
+
 /**
- * Signup / OAuth soft preferences — language, email, optional Telegram username (intent only).
- * Delivery requires Connect Telegram in Settings after signup.
+ * Signup / OAuth soft preferences — language + email only.
+ * Telegram Connect sits below this card on the same form.
+ * When a Bearer session exists, language changes persist immediately (Telegram templates).
  */
 const NotificationSetupCard = ({
 	value,
@@ -24,19 +37,58 @@ const NotificationSetupCard = ({
 	hasEmail = true,
 }: NotificationSetupCardProps) => {
 	const { t } = useTranslation('auth');
-	const [usernameError, setUsernameError] = useState(false);
-
 	const setup = { ...DEFAULT_NOTIFICATION_SETUP, ...value };
+	const [open, setOpen] = useState(false);
+	const rootRef = useRef<HTMLDivElement>(null);
+	const [updatePrefs] = useMutation(UPDATE_NOTIFICATION_PREFERENCES);
 
-	const handleUsername = (raw: string) => {
-		const cleaned = raw.replace(/^@+/, '');
-		onChange({
-			...setup,
-			telegramUsername: cleaned,
-			telegramEnabled: Boolean(normalizeTelegramUsername(cleaned)),
-		});
-		setUsernameError(cleaned.length > 0 && !isValidTelegramUsernameFormat(cleaned));
+	useEffect(() => {
+		if (!open) return;
+		const onDoc = (e: MouseEvent) => {
+			if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+		};
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setOpen(false);
+		};
+		document.addEventListener('mousedown', onDoc);
+		document.addEventListener('keydown', onKey);
+		return () => {
+			document.removeEventListener('mousedown', onDoc);
+			document.removeEventListener('keydown', onKey);
+		};
+	}, [open]);
+
+	const persistLanguage = async (notificationLanguage: NotificationLocale) => {
+		const token = getJwtToken();
+		if (!token) return;
+		const userId = resolveAuthUser()?._id;
+		try {
+			await updatePrefs({
+				variables: { input: { notificationLanguage } },
+			});
+			if (userId) {
+				writeNotificationPreferencesCache(userId, {
+					...DEFAULT_NOTIFICATION_PREFERENCES,
+					...setup,
+					notificationLanguage,
+					emailEnabled: Boolean(setup.emailEnabled ?? true),
+					telegramEnabled: Boolean(setup.telegramEnabled),
+				});
+			}
+		} catch {
+			/* soft — signup payload still carries language */
+		}
 	};
+
+	const handleLanguage = (notificationLanguage: NotificationLocale) => {
+		onChange({ ...setup, notificationLanguage });
+		setOpen(false);
+		void persistLanguage(notificationLanguage);
+	};
+
+	const current =
+		LANGUAGE_OPTIONS.find((o) => o.value === (setup.notificationLanguage ?? 'ko')) ??
+		LANGUAGE_OPTIONS[0];
 
 	return (
 		<div className="auth-notif-setup">
@@ -46,22 +98,39 @@ const NotificationSetupCard = ({
 			</div>
 			<p className="auth-notif-setup__desc">{t('notificationSetup.desc')}</p>
 
-			<label className="auth-notif-setup__field">
-				<span>{t('notificationSetup.language')}</span>
-				<select
-					className="auth-notif-setup__select"
-					value={setup.notificationLanguage ?? 'ko'}
-					onChange={(e) =>
-						onChange({
-							...setup,
-							notificationLanguage: e.target.value as 'ko' | 'en',
-						})
-					}
+			<div className="auth-notif-setup__field" ref={rootRef}>
+				<span id="notif-lang-label">{t('notificationSetup.language')}</span>
+				<button
+					type="button"
+					className={`auth-notif-setup__lang-btn${open ? ' is-open' : ''}`}
+					aria-haspopup="listbox"
+					aria-expanded={open}
+					aria-labelledby="notif-lang-label"
+					onClick={() => setOpen((v) => !v)}
 				>
-					<option value="ko">한국어</option>
-					<option value="en">English</option>
-				</select>
-			</label>
+					<span>{current.label}</span>
+					<ExpandMoreIcon fontSize="small" />
+				</button>
+				{open && (
+					<ul className="auth-notif-setup__lang-menu" role="listbox">
+						{LANGUAGE_OPTIONS.map((opt) => {
+							const selected = opt.value === current.value;
+							return (
+								<li key={opt.value} role="option" aria-selected={selected}>
+									<button
+										type="button"
+										className={`auth-notif-setup__lang-option${selected ? ' is-selected' : ''}`}
+										onClick={() => handleLanguage(opt.value)}
+									>
+										<span>{opt.label}</span>
+										{selected && <CheckIcon fontSize="small" />}
+									</button>
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</div>
 
 			{hasEmail && (
 				<label className="auth-notif-setup__row">
@@ -73,24 +142,6 @@ const NotificationSetupCard = ({
 					/>
 				</label>
 			)}
-
-			<label className="auth-notif-setup__field">
-				<span>{t('notificationSetup.telegramUsername')}</span>
-				<input
-					type="text"
-					className="auth-notif-setup__input"
-					placeholder={t('notificationSetup.telegramPlaceholder')}
-					value={setup.telegramUsername ?? ''}
-					onChange={(e) => handleUsername(e.target.value)}
-					autoComplete="off"
-				/>
-			</label>
-			{usernameError ? (
-				<p className="auth-notif-setup__error">{t('notificationSetup.telegramInvalid')}</p>
-			) : (
-				<p className="auth-notif-setup__hint">{t('notificationSetup.telegramHint')}</p>
-			)}
-			<p className="auth-notif-setup__steps">{t('notificationSetup.telegramSteps')}</p>
 		</div>
 	);
 };
@@ -100,19 +151,15 @@ export default NotificationSetupCard;
 export function buildNotificationSetupPayload(
 	setup: NotificationSetupInput,
 ): NotificationSetupInput | undefined {
-	const username = normalizeTelegramUsername(setup.telegramUsername ?? '');
-	if (username && !isValidTelegramUsernameFormat(username)) {
-		return undefined;
-	}
-	const payload: NotificationSetupInput = {
+	const notificationLanguage: NotificationLocale =
+		setup.notificationLanguage === 'en' ? 'en' : 'ko';
+	return {
 		emailEnabled: setup.emailEnabled ?? true,
-		notificationLanguage: setup.notificationLanguage ?? 'ko',
-		telegramEnabled: Boolean(username) || Boolean(setup.telegramEnabled),
+		notificationLanguage,
+		telegramEnabled: false,
 	};
-	if (username) payload.telegramUsername = username;
-	return payload;
 }
 
-export function isNotificationSetupValid(setup: NotificationSetupInput): boolean {
-	return isValidTelegramUsernameFormat(setup.telegramUsername ?? '');
+export function isNotificationSetupValid(_setup: NotificationSetupInput): boolean {
+	return true;
 }

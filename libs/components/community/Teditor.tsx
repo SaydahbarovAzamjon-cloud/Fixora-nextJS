@@ -4,6 +4,7 @@ import { ArticleCategory } from '../../types/fixora/fixora';
 import { Editor } from '@toast-ui/react-editor';
 import { getJwtToken } from '../../auth';
 import { REACT_APP_API_URL } from '../../config';
+import { getGraphqlUrl } from '../../env/publicEnv';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { T } from '../../types/common';
@@ -54,7 +55,7 @@ const [createArticle] = useMutation(CREATE_ARTICLE);
 			);
 			formData.append('0', image);
 
-			const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
+			const response = await axios.post(getGraphqlUrl(), formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 					'apollo-require-preflight': true,

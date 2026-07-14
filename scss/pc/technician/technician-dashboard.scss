@@ -1606,4 +1606,35 @@ $border-orange: var(--fixora-border);
 			display: none;
 		}
 	}
+
+	.fixora-tech-dashboard {
+		&__welcome {
+			flex-direction: column;
+			align-items: stretch;
+			padding: 16px;
+			gap: 14px;
+			min-height: 0;
+		}
+
+		&__quick-actions {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			width: 100%;
+			gap: 8px;
+			justify-content: stretch;
+		}
+	}
+
+	.fixora-tech-quick-action {
+		min-width: 0;
+		width: 100%;
+		padding: 12px 8px;
+
+		span {
+			white-space: normal;
+			text-align: center;
+			font-size: 10px;
+			line-height: 1.25;
+		}
+	}
 }

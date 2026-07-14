@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 			<NavThemeToggle compact className="fixora-tech-header__theme-toggle" />
 
 			<button
-				className="fixora-tech-header__icon-btn"
+				className="fixora-tech-header__icon-btn fixora-tech-header__icon-btn--messages"
 				title={t('nav.messages')}
 				onClick={() => router.push('/technician/messages')}
 			>
@@ -127,7 +127,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 			</button>
 
 			<button
-				className="fixora-tech-header__icon-btn"
+				className="fixora-tech-header__icon-btn fixora-tech-header__icon-btn--notifications"
 				title={t('nav.notifications')}
 				onClick={() => router.push('/technician/notifications')}
 			>
@@ -140,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({ activePage }) => {
 			</button>
 
 			<button
-				className="fixora-tech-header__icon-btn"
+				className="fixora-tech-header__icon-btn fixora-tech-header__icon-btn--settings"
 				title={t('nav.settings')}
 				onClick={() => router.push('/technician/settings')}
 			>

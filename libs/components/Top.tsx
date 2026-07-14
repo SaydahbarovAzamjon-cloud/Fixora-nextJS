@@ -23,7 +23,7 @@ import { userVar } from '../../apollo/store';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 import { isTechnicianUser } from '../utils/userRole';
 import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute';
-import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
+import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
@@ -88,6 +88,7 @@ const Top = () => {
 	);
 
 	const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
+	const [markAllNotificationsRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 	const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
 
 	/** LIFECYCLES **/
@@ -166,6 +167,16 @@ const Top = () => {
 			await deleteNotification({ variables: { notificationId: notification._id } });
 			if (!notification.isRead) notifCtx?.decrementUnread();
 			await refetchNotifications();
+		} catch {
+			/* ignore */
+		}
+	};
+
+	const handleMarkAllNotificationsRead = async () => {
+		try {
+			await markAllNotificationsRead();
+			notifCtx?.clearUnread();
+			await Promise.all([refetchNotifications(), notifCtx?.refetchNotifications()]);
 		} catch {
 			/* ignore */
 		}
@@ -456,6 +467,7 @@ const Top = () => {
 											notifications={recentNotifications}
 											onItemClick={handleNotificationClick}
 											onDelete={handleNotificationDelete}
+											onMarkAllRead={handleMarkAllNotificationsRead}
 											onViewAll={() => setNotifOpen(false)}
 											viewAllHref={isTechnician ? '/technician/notifications' : '/notifications'}
 										/>

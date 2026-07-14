@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { technicianPageProps } from '../../../libs/i18n/technicianPageProps';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { useApolloClient, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import MoveToInboxRounded from '@mui/icons-material/MoveToInboxRounded';
 import Inventory2Rounded from '@mui/icons-material/Inventory2Rounded';
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
@@ -30,6 +30,7 @@ import {
 	isAdminWarningNotification,
 } from '../../../libs/utils/notifications';
 import { sweetErrorHandling } from '../../../libs/sweetAlert';
+import { useNotificationContextOptional } from '../../../libs/context/NotificationContext';
 
 export const getServerSideProps = async ({ locale }: { locale?: string }) => ({
 	props: await technicianPageProps(locale),
@@ -196,6 +197,8 @@ const Notifications: NextPage = () => {
 	const { t } = useTranslation('technician');
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
+	const client = useApolloClient();
+	const notifCtx = useNotificationContextOptional();
 	const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 
 	const FILTERS: FilterId[] = ['all', 'requests', 'messages', 'payments', 'reviews', 'likes', 'follows'];
@@ -233,8 +236,17 @@ const Notifications: NextPage = () => {
 	}, [filtered]);
 
 	const handleMarkAllRead = async () => {
-		await markAllRead();
-		refetch();
+		try {
+			await markAllRead();
+			notifCtx?.clearUnread();
+			await Promise.all([
+				refetch(),
+				client.refetchQueries({ include: [GET_NOTIFICATIONS] }),
+				notifCtx?.refetchNotifications(),
+			]);
+		} catch (err: unknown) {
+			await sweetErrorHandling(err);
+		}
 	};
 
 	const handleOpen = async (n: any) => {

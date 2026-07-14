@@ -20,6 +20,7 @@ export interface NotificationDropdownProps {
 	onItemClick: (notification: Notification) => void;
 	onViewAll: () => void;
 	onDelete?: (notification: Notification) => void;
+	onMarkAllRead?: () => void;
 	viewAllHref?: string;
 	getDisplayText?: (notification: Notification) => string;
 	skipBookingLookup?: (notification: Notification) => boolean;
@@ -30,6 +31,7 @@ export interface NotificationDropdownProps {
 	loading?: boolean;
 	loadingLabel?: string;
 	viewAllLabel?: string;
+	markAllLabel?: string;
 }
 
 const NotificationDropdownItem = ({
@@ -101,6 +103,7 @@ const NotificationDropdown = ({
 	onItemClick,
 	onViewAll,
 	onDelete,
+	onMarkAllRead,
 	viewAllHref = '/notifications',
 	getDisplayText,
 	skipBookingLookup,
@@ -109,14 +112,21 @@ const NotificationDropdown = ({
 	loading = false,
 	loadingLabel,
 	viewAllLabel,
+	markAllLabel,
 }: NotificationDropdownProps) => {
 	const { t } = useTranslation('common');
 	const hasListContent = Boolean(listPrefix) || notifications.length > 0;
+	const hasUnread = notifications.some((n) => !n.isRead);
 
 	return (
 		<div className={`fixora-notif-dropdown${embedded ? ' fixora-notif-dropdown--embedded' : ''}`}>
 			<div className="fixora-notif-dropdown__header">
 				<strong>{t('notifications.title')}</strong>
+				{hasUnread && onMarkAllRead && (
+					<button type="button" className="fixora-notif-dropdown__mark-all" onClick={onMarkAllRead}>
+						{markAllLabel ?? t('notifications.markAllRead')}
+					</button>
+				)}
 			</div>
 
 			<div className="fixora-notif-dropdown__list">

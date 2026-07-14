@@ -163,6 +163,13 @@ export const GET_TECHNICIAN_REVIEWS = gql`
 					userFullName
 					userProfileImage
 				}
+				technicianData {
+					_id
+					userNickname
+					userFullName
+					userProfileImage
+					shopName
+				}
 				deviceData {
 					deviceBrand
 					deviceModel

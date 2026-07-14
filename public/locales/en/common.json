@@ -105,6 +105,7 @@
   "homepage.testimonials.loading": "Loading customer reviews…",
   "homepage.testimonials.prev": "Previous testimonials",
   "homepage.testimonials.next": "Next testimonials",
+  "homepage.testimonials.forTechnician": "for {{name}}",
   "homepage.testimonials.items.t1.text": "Fixed my iPhone in 20 minutes. Amazing service!",
   "homepage.testimonials.items.t1.name": "John D.",
   "homepage.testimonials.items.t1.rating": "5.0",

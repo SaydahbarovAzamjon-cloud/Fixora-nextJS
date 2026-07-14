@@ -3,6 +3,7 @@
 .fixora-tech-profile-page {
 	background: transparent;
 	width: 100%;
+	min-width: 0;
 	box-sizing: border-box;
 	padding: 108px 0 60px;
 
@@ -13,17 +14,43 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		min-width: 0;
+		box-sizing: border-box;
 	}
 }
 
 #pc-wrap .fixora-tech-profile-page,
-#mobile-wrap .fixora-tech-profile-page {
+#pc-wrap-full .fixora-tech-profile-page {
 	padding-top: 108px;
 }
 
-@media (max-width: 768px) {
+/* Mobile shell already pads #main — avoid double top/side gutters */
+#mobile-wrap .fixora-tech-profile-page {
+	padding: 0 0 calc(24px + var(--fixora-safe-bottom));
+	width: 100%;
+
+	.container {
+		width: 100%;
+		max-width: 100%;
+		margin: 0;
+		padding: 0 var(--fixora-mobile-gutter);
+	}
+}
+
+@media (max-width: 639px) {
 	.fixora-tech-profile-page {
-		padding: 96px 16px 40px;
+		padding: 88px 0 40px;
+
+		.container {
+			width: 100%;
+			max-width: 100%;
+			padding: 0 var(--fixora-mobile-gutter);
+			box-sizing: border-box;
+		}
+	}
+
+	#mobile-wrap .fixora-tech-profile-page {
+		padding: 0 0 calc(24px + var(--fixora-safe-bottom));
 	}
 }
 

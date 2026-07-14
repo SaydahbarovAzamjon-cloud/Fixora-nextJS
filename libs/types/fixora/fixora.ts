@@ -134,6 +134,13 @@ export interface TechnicianReview {
 		userFullName?: string;
 		userProfileImage?: string;
 	};
+	technicianData?: {
+		_id: string;
+		userNickname?: string;
+		userFullName?: string;
+		userProfileImage?: string;
+		shopName?: string;
+	};
 	deviceData?: {
 		deviceBrand?: string;
 		deviceModel?: string;

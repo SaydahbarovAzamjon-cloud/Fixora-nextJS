@@ -21,6 +21,17 @@ const nextConfig = {
 		NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
 		NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '',
 	},
+	async rewrites() {
+		// Local UI → remote GraphQL without CORS (browser hits same-origin /graphql).
+		const target = (process.env.GRAPHQL_PROXY_TARGET || '').replace(/\/$/, '');
+		if (!target) return [];
+		return [
+			{
+				source: '/graphql',
+				destination: `${target}/graphql`,
+			},
+		];
+	},
 	async redirects() {
 		return [
 			{

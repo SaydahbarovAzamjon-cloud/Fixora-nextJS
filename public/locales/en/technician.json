@@ -367,10 +367,44 @@
     },
     "notifications": {
       "title": "Notifications",
-      "desc": "Choose what you get notified about",
+      "desc": "Channels, language, and what you get notified about",
       "saved": "Notification preferences saved.",
       "savedOffline": "Saved on this device. Sync when you're back online.",
       "offlineBanner": "Showing saved preferences from this device. Changes will sync when the server is available.",
+      "loadError": "Could not load notification preferences. Try refreshing the page.",
+      "languageTitle": "Notification language",
+      "language": "Language",
+      "languageHint": "Email and Telegram copy use this language (separate from app UI language).",
+      "channelsTitle": "Channels",
+      "eventsTitle": "Event categories",
+      "channels": {
+        "inApp": "In-app",
+        "inAppHint": "Always on — bell and notification feed",
+        "email": "Email",
+        "emailWithAddress": "Email ({{email}})",
+        "emailHint": "Send important alerts to your account email",
+        "emailUnavailable": "Add an email in account settings first",
+        "telegram": "Telegram",
+        "telegramHint": "Send alerts to your linked Telegram account",
+        "telegramConnectFirst": "Connect Telegram below before enabling"
+      },
+      "telegram": {
+        "title": "Telegram",
+        "connect": "Connect Telegram",
+        "connecting": "Opening…",
+        "disconnect": "Disconnect",
+        "disconnecting": "Disconnecting…",
+        "disconnected": "Telegram disconnected.",
+        "waiting": "Waiting for Telegram… open the bot and tap Start.",
+        "linkFailed": "Could not open Telegram link. Try again.",
+        "networkError": "Couldn't connect to Fixora right now. Check your connection and try again.",
+        "status": {
+          "notConnected": "Not connected",
+          "pending": "Pending — finish Start in the bot",
+          "linked": "Connected",
+          "unlinked": "Disconnected"
+        }
+      },
       "prefs": {
         "bookingUpdates": "Booking updates",
         "bookingUpdatesHint": "Status changes on your active jobs",

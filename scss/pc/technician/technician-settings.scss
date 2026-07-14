@@ -315,6 +315,7 @@ $text-dim: var(--fixora-text-muted);
 	border-radius: 14px;
 	padding: 20px;
 	box-shadow: $tech-card-shadow;
+	margin-bottom: 16px;
 
 	&--spaced {
 		margin-bottom: 16px;
@@ -325,6 +326,14 @@ $text-dim: var(--fixora-text-muted);
 		color: $text-secondary;
 		font-size: 14px;
 		font-weight: 600;
+	}
+
+	&__subtitle {
+		margin: 0 0 8px;
+		color: $text-secondary;
+		font-size: 14px;
+		font-weight: 600;
+		font-family: inherit;
 	}
 
 	&__label {
@@ -342,9 +351,25 @@ $text-dim: var(--fixora-text-muted);
 	font-size: 11px;
 	line-height: 1.5;
 
+	&--tight {
+		margin-bottom: 12px;
+	}
+
 	&--muted {
 		margin-top: 12px;
 	}
+}
+
+.fts-telegram-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+.fts-telegram-wait {
+	margin-top: 8px;
+	margin-bottom: 12px;
 }
 
 /* Avatar block */
@@ -691,6 +716,18 @@ $text-dim: var(--fixora-text-muted);
 	&:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	&--ghost {
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		box-shadow: none;
+		color: $text-secondary;
+
+		&:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.06);
+			box-shadow: none;
+		}
 	}
 
 	&__spinner {

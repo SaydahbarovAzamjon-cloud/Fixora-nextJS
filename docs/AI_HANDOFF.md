@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-12 |
+| **Last updated** | 2026-07-14 |
 | **Last agent** | Cursor |
-| **Last session** | **Technician onboarding completion** — single profile photo; ID image preview; device-category specializations (`specialty` field); profile page reads live specializations + job counts |
-| **Next agent should start with** | Manual QA: technician onboarding specializations save → profile cards; settings edit updates profile |
+| **Last session** | **Notification Phase 5 (Telegram)** — Settings language/channels + Connect/poll/Disconnect; signup `notificationSetup` soft card; schema + FRONTEND_API synced from FixoraB; hook `useNotificationPreferences` |
+| **Next agent should start with** | Manual E2E checklist in `docs/NOTIFICATIONS.md` (Telegram link via prod GraphQL); only then push `develop` |
 
 ---
 
@@ -29,6 +29,7 @@
 | Technicians directory | ✅ `/technicians` — discovery page: 6 category carousels (Trending, Top Rated, Most Reviewed, Fast Responders, New, Verified) + stats KPIs; Home `TechnicianCard` 1:1 with optional Follow; no map/search UI |
 | Messages UI (P3-07) | ✅ `/messages` — chat list + thread + request details, sender avatars, `scss/pc/messages/messages.scss` |
 | My Page + Notifications (P3-08) | ✅ `/client/my-page` owner 6-tab dashboard + `/mypage` redirect + `/notifications` — mockup screenshots 2026-06-21 |
+| Telegram prefs (Phase 5) | ✅ Settings language/channels + Connect/poll/Disconnect; signup `notificationSetup`; see `docs/NOTIFICATIONS.md` |
 | Technician Dashboard (P3-13) | ✅ `/technician/dashboard` — quick actions functional (New Quote/Mark Available/View Schedule/Export Report); Weekly Earnings Week/Month/Year real with smart default; Today's Schedule **Add** (localStorage, device-only — no backend schedule model) merged with bookings (DECISIONS UI-11) |
 | Public Client Profile | ✅ `/technician/client/[clientId]` — technician-viewed, read-only My Page reuse inside technician shell; repair history from technician-visible bookings, following via `getUserFollowings`, reviews via visible completed booking reviews; saved/full history needs GAP-063 |
 | Public Profile live data (P3-13) | ✅ `/technician/profile` — header, About, My Articles, Services, Portfolio, Reviews, Followers, **Repair Stories (display + create)** all wired to live API; functional Message/View-Live/Follow buttons; empty states; stats → 0 when DB empty (DECISIONS UI-07…UI-10) |

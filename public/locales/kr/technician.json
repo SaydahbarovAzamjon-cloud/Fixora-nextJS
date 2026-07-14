@@ -367,10 +367,44 @@
     },
     "notifications": {
       "title": "알림",
-      "desc": "알림 받을 항목 선택",
+      "desc": "채널, 언어, 알림 받을 항목을 설정하세요",
       "saved": "알림 설정이 저장되었습니다.",
       "savedOffline": "이 기기에 저장되었습니다. 온라인 시 동기화됩니다.",
       "offlineBanner": "이 기기에 저장된 설정을 표시 중입니다. 서버 연결 시 변경 사항이 동기화됩니다.",
+      "loadError": "알림 설정을 불러오지 못했습니다. 페이지를 새로고침해 주세요.",
+      "languageTitle": "알림 언어",
+      "language": "언어",
+      "languageHint": "이메일·텔레그램 알림 본문 언어입니다 (앱 UI 언어와 별개).",
+      "channelsTitle": "채널",
+      "eventsTitle": "알림 유형",
+      "channels": {
+        "inApp": "앱 내 알림",
+        "inAppHint": "항상 켜짐 — 벨과 알림 피드",
+        "email": "이메일",
+        "emailWithAddress": "이메일 ({{email}})",
+        "emailHint": "계정 이메일로 중요 알림 전송",
+        "emailUnavailable": "먼저 계정 설정에서 이메일을 추가하세요",
+        "telegram": "텔레그램",
+        "telegramHint": "연결된 텔레그램으로 알림 전송",
+        "telegramConnectFirst": "아래에서 텔레그램을 먼저 연결하세요"
+      },
+      "telegram": {
+        "title": "텔레그램",
+        "connect": "텔레그램 연결",
+        "connecting": "여는 중…",
+        "disconnect": "연결 해제",
+        "disconnecting": "해제 중…",
+        "disconnected": "텔레그램 연결이 해제되었습니다.",
+        "waiting": "텔레그램 연결 대기 중… 봇에서 시작을 눌러주세요.",
+        "linkFailed": "텔레그램 링크를 열 수 없습니다. 다시 시도하세요.",
+        "networkError": "지금 Fixora 서버에 연결할 수 없습니다. 연결을 확인한 후 다시 시도해 주세요.",
+        "status": {
+          "notConnected": "연결되지 않음",
+          "pending": "대기 중 — 봇에서 시작을 완료하세요",
+          "linked": "연결됨",
+          "unlinked": "연결 해제됨"
+        }
+      },
       "prefs": {
         "bookingUpdates": "예약 업데이트",
         "bookingUpdatesHint": "진행 중인 작업 상태 변경",

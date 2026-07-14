@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
 import 'animate.css';
 import { Messages } from './config';
+import { toUserFacingErrorMessage } from './utils/oauthErrors';
 
 const fixoraSwal = Swal.mixin({
 	customClass: {
@@ -30,7 +31,7 @@ const fixoraToast = Swal.mixin({
 export const sweetErrorHandling = async (err: any) => {
 	await fixoraSwal.fire({
 		icon: 'error',
-		text: err.message,
+		text: toUserFacingErrorMessage(err),
 		showConfirmButton: true,
 		confirmButtonText: 'OK',
 	});
@@ -72,6 +73,33 @@ export const sweetConfirmAlert = (msg: string) => {
 		}).then((response) => {
 			resolve(response?.isConfirmed ?? false);
 		});
+	});
+};
+
+/** Confirm with custom title + button labels (i18n-friendly). */
+export const sweetConfirmWithLabels = (opts: {
+	title?: string;
+	text: string;
+	confirmButtonText: string;
+	cancelButtonText: string;
+}): Promise<boolean> => {
+	return new Promise(async (resolve) => {
+		await fixoraSwal
+			.fire({
+				icon: 'question',
+				title: opts.title,
+				text: opts.text,
+				showClass: {
+					popup: 'animate__bounceIn',
+				},
+				showCancelButton: true,
+				showConfirmButton: true,
+				confirmButtonText: opts.confirmButtonText,
+				cancelButtonText: opts.cancelButtonText,
+			})
+			.then((response) => {
+				resolve(response?.isConfirmed ?? false);
+			});
 	});
 };
 
@@ -124,10 +152,9 @@ export const sweetBasicAlert = async (text: string) => {
 };
 
 export const sweetErrorHandlingForAdmin = async (err: any) => {
-	const errorMessage = err.message ?? Messages.error1;
 	await fixoraSwal.fire({
 		icon: 'error',
-		text: errorMessage,
+		text: toUserFacingErrorMessage(err, Messages.error1),
 		showConfirmButton: true,
 		confirmButtonText: 'OK',
 	});

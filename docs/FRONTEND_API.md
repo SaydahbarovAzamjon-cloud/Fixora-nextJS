@@ -396,6 +396,51 @@ Pre-booking chat: `bookingId` nullable on messages.
 
 Collection: `user_payment_methods` (operational, not ER entity).
 
+### Notification preferences (Phase 2 — NOTIF)
+
+`getNotificationPreferences` returns:
+
+| Field | Writable | Notes |
+|-------|----------|-------|
+| `bookingUpdates`, `messages`, `payments`, `reviews`, `marketing`, `followAlerts`, `emailDigest` | ✅ | Event category toggles |
+| `notificationLanguage` | ✅ | `ko` \| `en` (default `ko`) |
+| `emailEnabled` | ✅ | Requires `connectedEmail` |
+| `telegramEnabled` | ✅ | Requires `telegramStatus: LINKED` |
+| `smsEnabled`, `pushEnabled` | ✅ | Phase 7 stubs — delivery logs only until provider wired |
+| `inAppEnabled` | ❌ | Always `true` |
+| `connectedEmail` | ❌ | From `user.userEmail` |
+| `emailSource` | ❌ | `EMAIL` \| `GOOGLE` \| `KAKAO` \| `APPLE` |
+| `telegramStatus` | ❌ | `NOT_CONNECTED` \| `PENDING` \| `LINKED` \| `UNLINKED` |
+| `telegramUsername` | ❌ | From `telegramLink` |
+
+Signup / OAuth complete optional input:
+
+```graphql
+notificationSetup: {
+  emailEnabled: Boolean
+  telegramEnabled: Boolean   # stored intent only until bot link
+  telegramUsername: String     # sets PENDING link
+  notificationLanguage: String # ko | en
+}
+```
+
+Errors: `NOTIFICATION_EMAIL_UNAVAILABLE`, `NOTIFICATION_TELEGRAM_NOT_LINKED`, `NOTIFICATION_INVALID_LANGUAGE`
+
+### Multi-channel API (Phases 3–4 — NOTIF)
+
+| Operation | Auth | Notes |
+|-----------|------|-------|
+| `requestTelegramLink` | Bearer | Returns `{ linkUrl, expiresAt }` — open in Telegram |
+| `disconnectTelegram` | Bearer | Clears link + disables `telegramEnabled` |
+| `sendPlatformAnnouncement(input)` | ADMIN | `{ titleKo, titleEn, bodyKo, bodyEn, actionUrl? }` |
+| `registerPushToken(input)` | Bearer | `{ pushToken, platform: IOS }` — enables `pushEnabled` |
+| `sendSupportNotification(input)` | ADMIN | Support reply to user |
+| `sendCriticalSystemAlert(input)` | ADMIN | Broadcast or single-user critical alert |
+
+Webhook (server): `POST /webhooks/telegram` — Telegram bot `/start <token>` linking
+
+Email/Telegram delivery is automatic when preferences allow; in-app always created first.
+
 ---
 
 ## Social & profiles (Phase 4)

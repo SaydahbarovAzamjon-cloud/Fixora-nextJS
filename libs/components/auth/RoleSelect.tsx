@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
-import { useApolloClient } from '@apollo/client';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
@@ -9,7 +8,11 @@ import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import AuthHeading from './AuthHeading';
 import { FixoraButton, FixoraInput } from '../ui';
-import NotificationSetupCard from '../notifications/NotificationSetupCard';
+import AuthTelegramConnectStep from './AuthTelegramConnectStep';
+import NotificationSetupCard, {
+	buildNotificationSetupPayload,
+	isNotificationSetupValid,
+} from '../notifications/NotificationSetupCard';
 import {
 	fixoraCompleteOAuthSignup,
 	getNeedsOnboarding,
@@ -18,20 +21,15 @@ import {
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole, saveOAuthSignupRole } from '../../auth/oauthSignupRole';
-import { applyNotificationPreferences } from '../../auth/applyNotificationPreferences';
 import {
-	DEFAULT_NOTIFICATION_PREFERENCES,
-	NotificationPreferences,
-	writeNotificationPreferencesCache,
+	DEFAULT_NOTIFICATION_SETUP,
+	NotificationSetupInput,
 } from '../../auth/notificationPreferencesCache';
-import { UPDATE_NOTIFICATION_PREFERENCES } from '../../../apollo/user/settings';
-import { userVar } from '../../../apollo/store';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 
 const RoleSelect = () => {
 	const { t } = useTranslation('auth');
 	const router = useRouter();
-	const apolloClient = useApolloClient();
 	const isOAuth = router.query.oauth === '1' || getNeedsOnboarding();
 	const oauthStubEmail = useMemo(() => (isOAuth ? resolveOAuthStubEmail() : ''), [isOAuth]);
 	const needsEmail = isOAuth && !oauthStubEmail;
@@ -40,21 +38,19 @@ const RoleSelect = () => {
 	const [email, setEmail] = useState(oauthStubEmail);
 	const [phone, setPhone] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
-	const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(
-		DEFAULT_NOTIFICATION_PREFERENCES,
+	const [notificationSetup, setNotificationSetup] = useState<NotificationSetupInput>(
+		DEFAULT_NOTIFICATION_SETUP,
 	);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
+	const [showTelegramStep, setShowTelegramStep] = useState(false);
+	const [pendingUserType, setPendingUserType] = useState<'USER' | 'TECHNICIAN' | null>(null);
 
 	useEffect(() => {
 		if (!isOAuth) return;
 		const savedRole = readOAuthSignupRole();
 		if (savedRole) setSelectedType(savedRole);
 	}, [isOAuth]);
-
-	const applyNotificationPrefs = async (userId: string) => {
-		await applyNotificationPreferences(apolloClient, userId, notificationPrefs);
-	};
 
 	const handleRolePick = (type: 'USER' | 'TECHNICIAN') => {
 		saveOAuthSignupRole(type);
@@ -66,6 +62,15 @@ const RoleSelect = () => {
 		else router.push('/register/technician/1');
 	};
 
+	const finishOAuth = useCallback(async () => {
+		const userType = pendingUserType ?? selectedType;
+		if (userType === 'TECHNICIAN') {
+			await router.push('/onboarding/technician');
+		} else {
+			await router.push('/onboarding/customer');
+		}
+	}, [pendingUserType, selectedType, router]);
+
 	const handleOAuthComplete = useCallback(async () => {
 		if (!selectedType) return;
 		const result = validateOAuthCompleteInput(nickname, phone, termsAccepted, {
@@ -76,22 +81,23 @@ const RoleSelect = () => {
 			setErrors(result.errors);
 			return;
 		}
+		if (!isNotificationSetupValid(notificationSetup)) {
+			setErrors({ telegramUsername: 'telegramInvalid' });
+			return;
+		}
 		setErrors({});
 		setLoading(true);
 		try {
+			const setupPayload = buildNotificationSetupPayload(notificationSetup);
 			const userType = await fixoraCompleteOAuthSignup({
 				userNickname: nickname.trim(),
 				userPhoneNumber: phone.trim(),
 				userType: selectedType,
 				...(needsEmail || email.trim() ? { userEmail: email.trim() } : {}),
+				...(setupPayload ? { notificationSetup: setupPayload } : {}),
 			});
-			const userId = userVar()._id;
-			if (userId) await applyNotificationPrefs(userId);
-			if (userType === 'TECHNICIAN') {
-				await router.push('/onboarding/technician');
-			} else {
-				await router.push('/onboarding/customer');
-			}
+			setPendingUserType(userType as 'USER' | 'TECHNICIAN');
+			setShowTelegramStep(true);
 		} catch (err: unknown) {
 			if (isSignupConflictError(err)) {
 				setErrors(err.conflicts);
@@ -107,7 +113,20 @@ const RoleSelect = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [email, needsEmail, nickname, phone, termsAccepted, selectedType, router, notificationPrefs, apolloClient, t]);
+	}, [email, needsEmail, nickname, phone, termsAccepted, selectedType, notificationSetup, t]);
+
+	if (showTelegramStep) {
+		return (
+			<>
+				<AuthHeading
+					titleBefore={t('authTelegram.headingBefore')}
+					titleAccent={t('authTelegram.headingAccent')}
+					subtitle={t('authTelegram.headingSubtitle')}
+				/>
+				<AuthTelegramConnectStep onContinue={() => void finishOAuth()} />
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -188,7 +207,11 @@ const RoleSelect = () => {
 							{t(`validation.${errors.terms}`)}
 						</span>
 					)}
-					<NotificationSetupCard prefs={notificationPrefs} onChange={setNotificationPrefs} />
+					<NotificationSetupCard
+						value={notificationSetup}
+						onChange={setNotificationSetup}
+						hasEmail={Boolean(oauthStubEmail || email.trim() || needsEmail)}
+					/>
 					<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleOAuthComplete}>
 						{t('oauthComplete.submit')}
 						<ArrowForward fontSize="small" />

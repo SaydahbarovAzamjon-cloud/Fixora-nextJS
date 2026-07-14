@@ -123,6 +123,16 @@ export const GET_NOTIFICATION_PREFERENCES = gql`
 			marketing
 			followAlerts
 			emailDigest
+			notificationLanguage
+			emailEnabled
+			inAppEnabled
+			telegramEnabled
+			smsEnabled
+			pushEnabled
+			connectedEmail
+			emailSource
+			telegramStatus
+			telegramUsername
 		}
 	}
 `;
@@ -137,6 +147,43 @@ export const UPDATE_NOTIFICATION_PREFERENCES = gql`
 			marketing
 			followAlerts
 			emailDigest
+			notificationLanguage
+			emailEnabled
+			inAppEnabled
+			telegramEnabled
+			smsEnabled
+			pushEnabled
+			connectedEmail
+			emailSource
+			telegramStatus
+			telegramUsername
+		}
+	}
+`;
+
+export const REQUEST_TELEGRAM_LINK = gql`
+	mutation RequestTelegramLink {
+		requestTelegramLink {
+			linkUrl
+			expiresAt
+		}
+	}
+`;
+
+export const DISCONNECT_TELEGRAM = gql`
+	mutation DisconnectTelegram {
+		disconnectTelegram {
+			_id
+			telegramLink {
+				status
+				username
+				linkedAt
+			}
+			notificationPreferences {
+				telegramEnabled
+				telegramStatus
+				telegramUsername
+			}
 		}
 	}
 `;

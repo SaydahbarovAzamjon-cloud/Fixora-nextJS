@@ -15,7 +15,14 @@ import { getGraphQLErrorMessage, isOAuthProviderMismatchError } from '../../util
 
 type OAuthProvider = 'google' | 'kakao';
 
-const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
+const SocialAuthRow = ({
+	mode = 'login',
+	onLoginSuccess,
+}: {
+	mode?: 'login' | 'register';
+	/** Login mode: after OAuth session is set — return true if you handled navigation */
+	onLoginSuccess?: () => void | Promise<void>;
+}) => {
 	const { t } = useTranslation('auth');
 	const { t: tCommon } = useTranslation('common');
 	const router = useRouter();
@@ -56,11 +63,16 @@ const SocialAuthRow = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
 				return;
 			}
 
+			if (mode === 'login' && onLoginSuccess) {
+				await onLoginSuccess();
+				return;
+			}
+
 			await router.push(
 				resolvePostAuthDestination(resolveAuthUser() ?? { userType, memberType: userType }),
 			);
 		},
-		[mode, router, t],
+		[mode, onLoginSuccess, router, t],
 	);
 
 	const oauthErrorMessage = useCallback(

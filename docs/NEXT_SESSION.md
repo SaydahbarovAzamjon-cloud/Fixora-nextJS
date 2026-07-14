@@ -27,7 +27,15 @@
 
 ## Next task (pick one — see `AI_HANDOFF.md`)
 
-### Option A — `PM-01` Mobile foundation (recommended)
+### Option A — Manual E2E: Telegram Phase 5 (recommended before push)
+
+**Goal:** Verify Telegram connect against prod GraphQL; do **not** push until checklist passes.
+
+1. `.env.local`: `NEXT_PUBLIC_GRAPHQL_URL=https://fixoranext.com/graphql`, `NEXT_PUBLIC_WS_URL=wss://fixoranext.com/graphql/ws`
+2. `yarn dev` → login → Settings → Notifications → Connect Telegram → bot Start → LINKED
+3. Full checklist in `docs/NOTIFICATIONS.md`
+
+### Option B — `PM-01` Mobile foundation
 
 **Goal:** Fixora mobile SCSS foundation before per-route polish.
 

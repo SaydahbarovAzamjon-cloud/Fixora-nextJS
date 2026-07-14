@@ -8,11 +8,14 @@ import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
+import AuthTelegramConnectStep from './AuthTelegramConnectStep';
 import { fixoraLogin, validateLoginInput } from '../../auth/fixoraAuth';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
+import { initializeApollo } from '../../../apollo/client';
+import { GET_NOTIFICATION_PREFERENCES } from '../../../apollo/user/settings';
 
 const LoginForm = () => {
 	const { t } = useTranslation('auth');
@@ -22,7 +25,36 @@ const LoginForm = () => {
 	const [remember, setRemember] = useState(true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
+	const [showTelegramStep, setShowTelegramStep] = useState(false);
 	const oauthHint = router.query.oauthError === 'provider_mismatch';
+
+	const finishAuth = useCallback(async () => {
+		const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
+		const target = resolvePostAuthDestination(resolveAuthUser(), referrer);
+		if (!routePathsEqual(router.pathname, target)) {
+			await router.replace(target);
+		}
+	}, [router]);
+
+	/** After token is set — stay on page for Connect if not already LINKED */
+	const enterTelegramStepOrFinish = useCallback(async () => {
+		try {
+			const apollo = await initializeApollo();
+			const result = await apollo.query({
+				query: GET_NOTIFICATION_PREFERENCES,
+				fetchPolicy: 'network-only',
+				errorPolicy: 'ignore',
+			});
+			const status = result.data?.getNotificationPreferences?.telegramStatus;
+			if (status === 'LINKED') {
+				await finishAuth();
+				return;
+			}
+		} catch {
+			/* soft — still show connect step */
+		}
+		setShowTelegramStep(true);
+	}, [finishAuth]);
 
 	const handleSubmit = useCallback(async () => {
 		const result = validateLoginInput(email, password);
@@ -34,17 +66,26 @@ const LoginForm = () => {
 		setLoading(true);
 		try {
 			await fixoraLogin(email, password);
-			const referrer = typeof router.query.referrer === 'string' ? router.query.referrer : null;
-			const target = resolvePostAuthDestination(resolveAuthUser(), referrer);
-			if (!routePathsEqual(router.pathname, target)) {
-				await router.replace(target);
-			}
+			await enterTelegramStepOrFinish();
 		} catch (err: any) {
 			await sweetMixinErrorAlert(err?.message ?? 'Login failed');
 		} finally {
 			setLoading(false);
 		}
-	}, [email, password, router]);
+	}, [email, password, enterTelegramStepOrFinish]);
+
+	if (showTelegramStep) {
+		return (
+			<>
+				<AuthHeading
+					titleBefore={t('authTelegram.headingBefore')}
+					titleAccent={t('authTelegram.headingAccent')}
+					subtitle={t('authTelegram.headingSubtitle')}
+				/>
+				<AuthTelegramConnectStep onContinue={() => void finishAuth()} />
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -100,7 +141,7 @@ const LoginForm = () => {
 				</FixoraButton>
 			</div>
 			<AuthDivider />
-			<SocialAuthRow mode="login" />
+			<SocialAuthRow mode="login" onLoginSuccess={() => enterTelegramStepOrFinish()} />
 			<div className="auth-footer">
 				{t('login.noAccount')}{' '}
 				<button type="button" onClick={() => router.push('/register/role')}>

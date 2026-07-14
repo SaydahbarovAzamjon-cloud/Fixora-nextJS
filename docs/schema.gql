@@ -428,6 +428,15 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+input CheckSignupAvailabilityInput {
+  """Exclude this user id (OAuth stub completion or profile edit)"""
+  excludeUserId: String
+  userEmail: String
+  userFullName: String
+  userNickname: String
+  userPhoneNumber: String
+}
+
 enum ClassificationProviderType {
   GEMINI
   RULE_BASED
@@ -491,15 +500,8 @@ input CompleteBookingInput {
   finalPrice: Float
 }
 
-input CheckSignupAvailabilityInput {
-  excludeUserId: String
-  userEmail: String
-  userFullName: String
-  userNickname: String
-  userPhoneNumber: String
-}
-
 input CompleteOAuthSignupInput {
+  notificationSetup: NotificationSetupInput
   termsAcceptedAt: DateTime!
   userEmail: String
   userNickname: String!
@@ -894,6 +896,7 @@ type Mutation {
   deleteScheduleItem(scheduleItemId: String!): TechnicianScheduleItem!
   deleteStory(storyId: String!): Story!
   disable2FA(input: DisableTwoFactorInput!): Boolean!
+  disconnectTelegram: User!
   enable2FA: TwoFactorSetup!
   imageUploader(file: Upload!, target: String!): String!
   imagesUploader(files: [Upload!]!, target: String!): [String!]!
@@ -910,6 +913,7 @@ type Mutation {
   markNotificationRead(input: MarkNotificationReadInput!): Notification!
   refreshToken(input: RefreshTokenInput!): User!
   refundPayment(paymentId: String!): Payment!
+  registerPushToken(input: RegisterPushTokenInput!): Boolean!
   rejectBooking(bookingId: String!): Booking!
   rejectTechnician(reason: String, userId: String!): User!
   removeArticleByAdmin(articleId: String!): Article!
@@ -920,11 +924,15 @@ type Mutation {
   reportStory(input: ReportStoryInput!): String!
   requestPasswordReset(userEmail: String!): PasswordResetRequestResult!
   requestPayout(input: RequestPayoutInput!): Payout!
+  requestTelegramLink: TelegramLinkRequest!
   resetPassword(input: ResetPasswordInput!): PasswordResetRequestResult!
   reviewStoryReport(input: ReviewStoryReportInput!): StoryReport!
   revokeTechnicianVerification(reason: String, userId: String!): User!
   saveArticle(articleId: String!): Article!
+  sendCriticalSystemAlert(input: SendCriticalSystemAlertInput!): Boolean!
   sendMessage(input: SendMessageInput!): Message!
+  sendPlatformAnnouncement(input: SendPlatformAnnouncementInput!): Boolean!
+  sendSupportNotification(input: SendSupportNotificationInput!): Boolean!
   setTechnicianBadgeLevel(badgeLevel: BadgeLevel!, userId: String!): User!
   signup(input: UserInput!): User!
   submitTechnicianVerification: User!
@@ -977,11 +985,18 @@ input MyReviewsSearch {
 
 type Notification {
   _id: String!
+  actor: NotificationActor
+  channelsPlanned: [String!]
+  channelsSent: [String!]
   createdAt: DateTime!
+  eventAt: DateTime
+  eventType: NotificationEventType
   isRead: Boolean!
   notificationDescription: String
   notificationTitle: String!
   notificationType: NotificationType!
+  priority: NotificationPriority
+  readAt: DateTime
   receiverId: String!
   referenceId: String
   referenceType: NotificationReferenceType
@@ -989,24 +1004,97 @@ type Notification {
   userId: String!
 }
 
+type NotificationActor {
+  displayName: String!
+  role: NotificationActorRole!
+  shopName: String
+  userId: String
+}
+
+enum NotificationActorRole {
+  ADMIN
+  SYSTEM
+  TECHNICIAN
+  USER
+}
+
+enum NotificationEmailSource {
+  APPLE
+  EMAIL
+  GOOGLE
+  KAKAO
+}
+
+enum NotificationEventType {
+  ACCOUNT_WARNING
+  BOOKING_ACCEPTED
+  BOOKING_CANCELLED
+  BOOKING_REJECTED
+  BOOKING_REQUEST
+  BOOKING_SUBMITTED
+  COMMENT_RECEIVED
+  CRITICAL_SYSTEM_ALERT
+  DEPOSIT_RECEIVED
+  DEPOSIT_REQUIRED
+  FINAL_PAYMENT_REQUIRED
+  FOLLOW_RECEIVED
+  MESSAGE_RECEIVED
+  NEW_TECHNICIAN_REGISTRATION
+  PAYMENT_RECEIVED
+  PAYMENT_SUCCESSFUL
+  PLATFORM_ANNOUNCEMENT
+  REPAIR_COMPLETED
+  REPAIR_STARTED
+  REPORT
+  REVIEW_RECEIVED
+  REVIEW_REMINDER
+  SUPPORT_TICKET
+  TECHNICIAN_APPROVED
+  TECHNICIAN_REJECTED
+  VERIFICATION_REQUEST
+  VERIFICATION_UPDATE
+}
+
 type NotificationPreferences {
   bookingUpdates: Boolean!
+  connectedEmail: String
   emailDigest: Boolean!
+  emailEnabled: Boolean!
+  emailSource: NotificationEmailSource
   followAlerts: Boolean!
+  inAppEnabled: Boolean!
   marketing: Boolean!
   messages: Boolean!
+  notificationLanguage: String!
   payments: Boolean!
+  pushEnabled: Boolean!
   reviews: Boolean!
+  smsEnabled: Boolean!
+  telegramEnabled: Boolean!
+  telegramStatus: TelegramLinkStatus
+  telegramUsername: String
 }
 
 input NotificationPreferencesInput {
   bookingUpdates: Boolean
   emailDigest: Boolean
+  emailEnabled: Boolean
   followAlerts: Boolean
   marketing: Boolean
   messages: Boolean
+  notificationLanguage: String
   payments: Boolean
+  pushEnabled: Boolean
   reviews: Boolean
+  smsEnabled: Boolean
+  telegramEnabled: Boolean
+}
+
+enum NotificationPriority {
+  CRITICAL
+  HIGH
+  LOW
+  MEDIUM
 }
 
 enum NotificationReferenceType {
@@ -1015,12 +1103,21 @@ enum NotificationReferenceType {
   MESSAGE
   PAYMENT
   REVIEW
+  STORY
+  SYSTEM
   USER
 }
 
 input NotificationSearch {
   isRead: Boolean
   notificationType: NotificationType
+}
+
+input NotificationSetupInput {
+  emailEnabled: Boolean
+  notificationLanguage: String
+  telegramEnabled: Boolean
+  telegramUsername: String
 }
 
 enum NotificationType {
@@ -1031,6 +1128,7 @@ enum NotificationType {
   MESSAGE
   PAYMENT
   REVIEW
+  SYSTEM
 }
 
 type Notifications {
@@ -1186,6 +1284,10 @@ type PublicClientProfile {
   totalSpent: Float!
 }
 
+enum PushPlatform {
+  IOS
+}
+
 type Query {
   adminGlobalSearch(limit: Int! = 5, query: String!): AdminGlobalSearchResult!
   checkAuth: String!
@@ -1263,6 +1365,11 @@ input RecommendTechniciansInput {
 
 input RefreshTokenInput {
   refreshToken: String!
+}
+
+input RegisterPushTokenInput {
+  platform: PushPlatform!
+  pushToken: String!
 }
 
 enum RepairComplexity {
@@ -1382,6 +1489,12 @@ input ScheduleSearch {
   to: DateTime
 }
 
+input SendCriticalSystemAlertInput {
+  messageEn: String!
+  messageKo: String!
+  userId: String
+}
+
 input SendMessageInput {
   bookingId: String
   messageContent: String!
@@ -1389,16 +1502,32 @@ input SendMessageInput {
   receiverId: String!
 }
 
-enum SignupConflictField {
-  EMAIL
-  FULL_NAME
-  NICKNAME
-  PHONE
+input SendPlatformAnnouncementInput {
+  actionUrl: String
+  bodyEn: String!
+  bodyKo: String!
+  titleEn: String!
+  titleKo: String!
+}
+
+input SendSupportNotificationInput {
+  bodyEn: String!
+  bodyKo: String!
+  subjectEn: String!
+  subjectKo: String!
+  userId: String!
 }
 
 type SignupAvailabilityResult {
   available: Boolean!
   conflicts: [SignupFieldConflict!]!
+}
+
+enum SignupConflictField {
+  EMAIL
+  FULL_NAME
+  NICKNAME
+  PHONE
 }
 
 type SignupFieldConflict {
@@ -1563,6 +1692,18 @@ input TechniciansInquiry {
   sort: String
 }
 
+type TelegramLinkRequest {
+  expiresAt: DateTime!
+  linkUrl: String!
+}
+
+enum TelegramLinkStatus {
+  LINKED
+  NOT_CONNECTED
+  PENDING
+  UNLINKED
+}
+
 type TotalCounter {
   total: Int
 }
@@ -1649,6 +1790,7 @@ type User {
   shopLongitude: Float
   shopName: String
   specialty: String
+  telegramLink: UserTelegramLink
   termsAcceptedAt: DateTime
   twoFactorEnabled: Boolean
   updatedAt: DateTime!
@@ -1677,6 +1819,7 @@ type User {
 }
 
 input UserInput {
+  notificationSetup: NotificationSetupInput
   termsAcceptedAt: DateTime!
   userEmail: String!
   userNickname: String!
@@ -1750,6 +1893,13 @@ enum UserStatus {
   ACTIVE
   BLOCK
   DELETE
+}
+
+type UserTelegramLink {
+  linkedAt: DateTime
+  status: TelegramLinkStatus!
+  unlinkedAt: DateTime
+  username: String
 }
 
 enum UserType {

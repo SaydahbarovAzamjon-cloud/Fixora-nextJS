@@ -1,8 +1,8 @@
 # FixoraF — Notifications + Messages Wiring
 
-> **Status:** Implemented 2026-06-25  
-> **Contract:** [`docs/FRONTEND_API.md`](../FRONTEND_API.md) (Message + Notifications + WebSocket)  
-> **Schema:** [`docs/schema.gql`](../schema.gql)
+> **Status:** Implemented 2026-06-25 · **Telegram Phase 5 UI** 2026-07-14  
+> **Contract:** [`docs/FRONTEND_API.md`](./FRONTEND_API.md) (Message + Notifications + WebSocket + Telegram)  
+> **Schema:** [`docs/schema.gql`](./schema.gql)
 
 This document is the integration checklist for real-time notifications and chat in FixoraF (`fixora-next`).
 
@@ -16,12 +16,15 @@ This document is the integration checklist for real-time notifications and chat 
 | Realtime context | `libs/context/NotificationContext.tsx` | Connect/disconnect on login/logout; `notificationReceived` + `messageReceived` |
 | App mount | `pages/_app.tsx` | `NotificationProvider` wraps authenticated shell |
 | GraphQL — notifications | `apollo/user/notification.ts` | `getNotifications`, `markNotificationRead`, … |
-| GraphQL — messages | `apollo/user/message.ts` | `getMyConversations`, `getMessages`, `sendMessage`, `markMessagesAsRead` |
+| GraphQL — prefs / Telegram | `apollo/user/settings.ts` | `getNotificationPreferences`, `requestTelegramLink`, `disconnectTelegram` |
+| Hook | `libs/hooks/useNotificationPreferences.ts` | Prefs + connect/poll (4s) / disconnect |
+| Settings UI | `NotificationsSettingsSection` | Language, channels, Telegram link, event toggles (customer + technician) |
+| Signup soft card | `NotificationSetupCard` | `notificationSetup` on signup / OAuth complete |
+| GraphQL — messages | `apollo/user/message.ts` | Conversations, messages, mark read |
 | Navbar bell | `libs/components/layout/NotificationBell.tsx` | Badge from `NotificationContext.unreadCount` |
-| Customer notifications | `pages/notifications/index.tsx` | Feed + tabs (All \| Messages \| Bookings) |
+| Customer notifications | `pages/notifications/index.tsx` | Feed + tabs |
 | Technician notifications | `pages/technician/notifications/index.tsx` | Full feed incl. `MESSAGE` |
 | Messages UI | `pages/messages/index.tsx`, `pages/technician/messages/index.tsx` | `?peerId=` deep link |
-| Deep links | `libs/utils/notifications.ts` → `getNotificationLink()` | `MESSAGE` → `/messages?peerId={notification.userId}` |
 
 ### WebSocket events (frozen)
 
@@ -49,55 +52,54 @@ Gated server-side by `notificationPreferences.messages`.
 
 ---
 
-## Integration checklist
+## Telegram (Phase 5)
 
-- [x] **Global realtime** — `NotificationContext` handles both WS events; reconnect on login, close on logout
-- [x] **Bell badge** — `NotificationBell` + `Top.tsx`; count updates on `notificationReceived` without visiting `/notifications`
-- [x] **Messages module** — GraphQL ops in `apollo/user/message.ts`; hooks `usePeerMessages`; pages `/messages`, `/technician/messages`
-- [x] **MESSAGE deep link** — Tap notification → `/messages?peerId={userId}` + `markNotificationRead`; thread open → `markMessagesAsRead({ peerId })`
-- [x] **Live thread** — `usePeerMessages` subscribes to `messageReceived`; conversation list refetches on WS
-- [x] **Email register** — `NotificationSetupCard` on `/register` → `updateNotificationPreferences` after `signup`
-- [x] **Customer feed tabs** — All \| Messages \| Bookings on `/notifications`
-- [x] **Technician routes** — `/technician/messages`, `/technician/notifications` (existing aliases)
-- [x] **OAuth signup** — `NotificationSetupCard` on `/register/role?oauth=1` → `updateNotificationPreferences` after `completeOAuthSignup`
-- [x] **Technician chat WS** — `/technician/messages` uses `usePeerMessages` + conversation refetch on `messageReceived`
-- [x] **Technician bell** — header/sidebar badge via `NotificationContext.unreadCount`
-- [x] **Automated tests** — `libs/utils/notifications.test.ts` + `scripts/test-message-notifications.mjs`
+| Step | Behavior |
+|------|----------|
+| Connect | `requestTelegramLink` → `window.open(linkUrl)` → poll prefs every 4s until `LINKED` or expiry |
+| Toggle | `telegramEnabled` only when `telegramStatus === LINKED` |
+| Disconnect | `disconnectTelegram` → `UNLINKED` |
+| Signup | Optional `notificationSetup` (language, email, telegram username intent) — bot must still be linked in Settings |
+
+### E2E checklist (before push)
+
+1. Login works  
+2. Settings → Connect opens bot link  
+3. User taps Start in bot → welcome message  
+4. UI shows LINKED / connected as `@username`  
+5. Telegram toggle can be enabled  
+6. Trigger event (e.g. receive message) → Telegram notification arrives  
+7. Disconnect → UNLINKED / delivery stops  
+8. Signup soft prefs save without blocking registration  
+
+Prefer localhost UI + `https://fixoranext.com/graphql` / `wss://…` so the production webhook receives `/start`.
 
 ---
 
-## Automated verification
+## Integration checklist
 
-```bash
-npm run typecheck
-npm run test -- libs/utils/notifications.test.ts
-npm run test:messages   # GraphQL + WebSocket against FixoraB :2000
-```
-
-**Last run (2026-06-25):** `test:messages` PASSED — signup → sendMessage → WS `messageReceived` + `notificationReceived` → unread MESSAGE in API → `peerId` deep link → mark read.
-
-**Known backend note:** With `updateNotificationPreferences({ messages: false })`, FixoraB may still persist/emit MESSAGE notifications (frontend prefs UI is wired correctly).
-
-1. Two browsers: customer (USER) + technician (TECHNICIAN)
-2. Customer sends message → technician sees `messageReceived` + `notificationReceived`
-3. Bell badge increments without opening `/notifications`
-4. Tap MESSAGE notification → correct chat thread with sender
-5. Mark read → badge decrements
-6. Disable **Messages** in settings → no new `MESSAGE` notifications (backend gate — ⚠️ verify on FixoraB; frontend calls `updateNotificationPreferences` correctly)
+- [x] Global realtime — `NotificationContext`
+- [x] Bell badge
+- [x] Messages module + MESSAGE deep link
+- [x] Email / OAuth register — `notificationSetup` on signup
+- [x] Customer + technician notification feeds
+- [x] Telegram Settings UI — Connect / poll / Disconnect + channel toggles (Phase 5)
 
 ---
 
 ## Env
 
 ```bash
-NEXT_PUBLIC_GRAPHQL_URL=http://localhost:2000/graphql
-NEXT_PUBLIC_WS_URL=ws://localhost:2000
+NEXT_PUBLIC_GRAPHQL_URL=https://fixoranext.com/graphql
+NEXT_PUBLIC_WS_URL=wss://fixoranext.com/graphql/ws
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+(Or local FixoraB: `http://localhost:2000/graphql` + `ws://localhost:2000` — Telegram bot link then needs a reachable webhook.)
 
 ---
 
-## Notes / blockers
+## Notes
 
-- `CompleteOAuthSignupInput` has **no** `notificationSetup` field in `schema.gql`; prefs are applied via `updateNotificationPreferences` immediately after OAuth completion.
-- Notification actor is schema field `userId` (not a nested `actor` object).
-- Legacy `FixoraWebSocketBridge` / `useFixoraWebSocket` superseded by `NotificationContext` (safe to remove in a later cleanup).
+- Username format validation only on signup — do not pretend Telegram Bot API can verify delivery by username alone.
+- Soft signup prefs never block registration if the API rejects optional fields (wrap failures carefully in callers).

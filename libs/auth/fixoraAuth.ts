@@ -233,6 +233,12 @@ export const fixoraCustomerSignup = async (
 	userPassword: string,
 	userPhone: string,
 	photoFile?: File | null,
+	notificationSetup?: {
+		emailEnabled?: boolean;
+		telegramEnabled?: boolean;
+		telegramUsername?: string;
+		notificationLanguage?: 'ko' | 'en';
+	},
 ): Promise<void> => {
 	const nickname = deriveSignupNickname(fullName, userEmail);
 	const normalizedPhone = normalizeSignupPhone(userPhone);
@@ -255,6 +261,7 @@ export const fixoraCustomerSignup = async (
 					userPhoneNumber: normalizedPhone,
 					userType: 'USER',
 					termsAcceptedAt: new Date().toISOString(),
+					...(notificationSetup ? { notificationSetup } : {}),
 				},
 			},
 			fetchPolicy: 'network-only',
@@ -377,6 +384,12 @@ export const fixoraCompleteOAuthSignup = async (input: {
 	userPhoneNumber: string;
 	userType: 'USER' | 'TECHNICIAN';
 	userEmail?: string;
+	notificationSetup?: {
+		emailEnabled?: boolean;
+		telegramEnabled?: boolean;
+		telegramUsername?: string;
+		notificationLanguage?: 'ko' | 'en';
+	};
 }): Promise<string> => {
 	const apolloClient = await initializeApollo();
 	try {
@@ -396,6 +409,7 @@ export const fixoraCompleteOAuthSignup = async (input: {
 					userType: input.userType,
 					...(input.userEmail?.trim() ? { userEmail: normalizeSignupEmail(input.userEmail) } : {}),
 					termsAcceptedAt: new Date().toISOString(),
+					...(input.notificationSetup ? { notificationSetup: input.notificationSetup } : {}),
 				},
 			},
 			fetchPolicy: 'network-only',

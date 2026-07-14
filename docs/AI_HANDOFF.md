@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-07-15 |
 | **Last agent** | Cursor |
-| **Last session** | **Nearby + Kakao route (local)** — homepage nearby fix; copied `KAKAO_REST_API_KEY` from FixoraB into FixoraF `.env.local`; `/api/map/directions` verified (road path + ETA). Map panel hides literal `"null"` shop names. |
-| **Next agent should start with** | Browser retest **Show Route** on `/search`; manual Telegram checklist in `docs/NOTIFICATIONS.md`; do not commit/push unless requested |
+| **Last session** | **Auth admin notify deferral** — admin Telegram/new-user alerts wait for `confirmAuthSession` after home/dashboard landing (not mid Telegram/onboarding). Backend FixoraB + FixoraF AppShell wired. |
+| **Next agent should start with** | Deploy FixoraB `confirmAuthSession` to VPS, then frontend; smoke-test signup → Telegram step should NOT notify admin until `/` or `/technician/dashboard` |
 
 ---
 

@@ -9,9 +9,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import AuthHeading from './AuthHeading';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthTelegramConnectStep from './AuthTelegramConnectStep';
-import NotificationSetupCard, {
-	buildNotificationSetupPayload,
-} from '../notifications/NotificationSetupCard';
+import { buildNotificationSetupPayload } from '../notifications/NotificationSetupCard';
 import {
 	fixoraCompleteOAuthSignup,
 	getNeedsOnboarding,
@@ -20,13 +18,11 @@ import {
 	validateOAuthCompleteInput,
 } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole, saveOAuthSignupRole } from '../../auth/oauthSignupRole';
-import {
-	DEFAULT_NOTIFICATION_SETUP,
-	NotificationSetupInput,
-} from '../../auth/notificationPreferencesCache';
+import { DEFAULT_NOTIFICATION_SETUP } from '../../auth/notificationPreferencesCache';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { getJwtToken } from '../../auth/tokens';
 import { clearAuthTelegramPending, setAuthTelegramPending } from '../../auth/authTelegramFlow';
+import { setAuthConfirmPending } from '../../auth/authConfirmFlow';
 
 const RoleSelect = () => {
 	const { t } = useTranslation('auth');
@@ -39,9 +35,6 @@ const RoleSelect = () => {
 	const [email, setEmail] = useState(oauthStubEmail);
 	const [phone, setPhone] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
-	const [notificationSetup, setNotificationSetup] = useState<NotificationSetupInput>(
-		DEFAULT_NOTIFICATION_SETUP,
-	);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 	const canConnectTelegram = isOAuth && Boolean(getJwtToken());
@@ -50,7 +43,10 @@ const RoleSelect = () => {
 		if (!isOAuth) return;
 		const savedRole = readOAuthSignupRole();
 		if (savedRole) setSelectedType(savedRole);
-		if (getJwtToken()) setAuthTelegramPending();
+		if (getJwtToken()) {
+			setAuthTelegramPending();
+			setAuthConfirmPending();
+		}
 	}, [isOAuth]);
 
 	const handleRolePick = (type: 'USER' | 'TECHNICIAN') => {
@@ -76,7 +72,7 @@ const RoleSelect = () => {
 		setErrors({});
 		setLoading(true);
 		try {
-			const setupPayload = buildNotificationSetupPayload(notificationSetup);
+			const setupPayload = buildNotificationSetupPayload(DEFAULT_NOTIFICATION_SETUP);
 			const userType = await fixoraCompleteOAuthSignup({
 				userNickname: nickname.trim(),
 				userPhoneNumber: phone.trim(),
@@ -84,6 +80,7 @@ const RoleSelect = () => {
 				...(needsEmail || email.trim() ? { userEmail: email.trim() } : {}),
 				...(setupPayload ? { notificationSetup: setupPayload } : {}),
 			});
+			setAuthConfirmPending();
 			clearAuthTelegramPending();
 			if (userType === 'TECHNICIAN') {
 				await router.push('/onboarding/technician');
@@ -105,7 +102,7 @@ const RoleSelect = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [email, needsEmail, nickname, phone, termsAccepted, selectedType, notificationSetup, t, router]);
+	}, [email, needsEmail, nickname, phone, termsAccepted, selectedType, t, router]);
 
 	return (
 		<>
@@ -186,11 +183,6 @@ const RoleSelect = () => {
 							{t(`validation.${errors.terms}`)}
 						</span>
 					)}
-					<NotificationSetupCard
-						value={notificationSetup}
-						onChange={setNotificationSetup}
-						hasEmail={Boolean(oauthStubEmail || email.trim() || needsEmail)}
-					/>
 					{canConnectTelegram && <AuthTelegramConnectStep embedded />}
 					<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleOAuthComplete}>
 						{t('oauthComplete.submit')}

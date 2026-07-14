@@ -59,7 +59,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 	marketing: false,
 	followAlerts: true,
 	emailDigest: false,
-	notificationLanguage: 'ko',
+	notificationLanguage: 'en',
 	emailEnabled: true,
 	inAppEnabled: true,
 	telegramEnabled: false,
@@ -71,7 +71,7 @@ export const DEFAULT_NOTIFICATION_SETUP: NotificationSetupInput = {
 	emailEnabled: true,
 	telegramEnabled: false,
 	telegramUsername: '',
-	notificationLanguage: 'ko',
+	notificationLanguage: 'en',
 };
 
 export function normalizeTelegramUsername(raw: string): string {

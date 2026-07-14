@@ -33,6 +33,7 @@ This document is the **single integration reference** for the separate frontend 
 | `login` | Public | `LoginInput.userEmail` + `userPassword` only |
 | `loginWithOAuth` | Public | `KAKAO`, `GOOGLE`, `APPLE` — requires provider env (`APPLE_CLIENT_ID`, etc.) |
 | `completeOAuthSignup` | Bearer | Mandatory phone for new OAuth users |
+| `confirmAuthSession` | Bearer | Call after user lands on home/dashboard — gates admin Telegram signup/login alerts |
 | `refreshToken` | Public | Rotation via `refreshTokenVersion` |
 | `requestPasswordReset` / `resetPassword` | Public | Email only — no SMS |
 | `logout` | Bearer | Revokes refresh sessions |

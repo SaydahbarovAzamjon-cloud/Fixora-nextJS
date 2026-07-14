@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
+import { useApolloClient } from '@apollo/client';
 import { getJwtToken, updateUserInfo } from '../../auth';
+import { maybeConfirmAuthSession } from '../../auth/maybeConfirmAuthSession';
 import { needsPostSignupOnboarding } from '../../auth/postSignupOnboarding';
 import { useTechnicianPortalRedirect } from '../../hooks/useTechnicianPortalRedirect';
 import { resolveAuthUser } from '../../utils/authSession';
@@ -18,6 +20,7 @@ type AppShellProps = Pick<AppProps, 'Component' | 'pageProps'>;
 
 const AppShell = ({ Component, pageProps }: AppShellProps) => {
 	const router = useRouter();
+	const client = useApolloClient();
 	const blockedForTechnician = useTechnicianPortalRedirect();
 	const layoutScope = getRouteLayoutScope(router.pathname);
 
@@ -25,6 +28,15 @@ const AppShell = ({ Component, pageProps }: AppShellProps) => {
 		const jwt = getJwtToken();
 		if (jwt) updateUserInfo(jwt);
 	}, []);
+
+	useEffect(() => {
+		const authUser = resolveAuthUser();
+		void maybeConfirmAuthSession({
+			client,
+			pathname: router.pathname,
+			userId: authUser?._id,
+		});
+	}, [client, router.pathname]);
 
 	useEffect(() => {
 		const enforceOnboarding = (url: string) => {

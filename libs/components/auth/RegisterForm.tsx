@@ -12,19 +12,15 @@ import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
-import NotificationSetupCard, {
-	buildNotificationSetupPayload,
-} from '../notifications/NotificationSetupCard';
+import { buildNotificationSetupPayload } from '../notifications/NotificationSetupCard';
 import AuthTelegramConnectStep from './AuthTelegramConnectStep';
 import { fixoraCustomerSignup, isSignupConflictError, validateRegisterInput } from '../../auth/fixoraAuth';
-import {
-	DEFAULT_NOTIFICATION_SETUP,
-	NotificationSetupInput,
-} from '../../auth/notificationPreferencesCache';
+import { DEFAULT_NOTIFICATION_SETUP } from '../../auth/notificationPreferencesCache';
 import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { clearAuthTelegramPending, setAuthTelegramPending } from '../../auth/authTelegramFlow';
+import { setAuthConfirmPending } from '../../auth/authConfirmFlow';
 
 const RegisterForm = () => {
 	const { t } = useTranslation('auth');
@@ -39,9 +35,6 @@ const RegisterForm = () => {
 	const [photoFileName, setPhotoFileName] = useState('');
 	const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 	const [termsAccepted, setTermsAccepted] = useState(false);
-	const [notificationSetup, setNotificationSetup] = useState<NotificationSetupInput>(
-		DEFAULT_NOTIFICATION_SETUP,
-	);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [loading, setLoading] = useState(false);
 	const [showTelegramStep, setShowTelegramStep] = useState(false);
@@ -84,8 +77,9 @@ const RegisterForm = () => {
 		setErrors({});
 		setLoading(true);
 		setAuthTelegramPending();
+		setAuthConfirmPending();
 		try {
-			const setupPayload = buildNotificationSetupPayload(notificationSetup);
+			const setupPayload = buildNotificationSetupPayload(DEFAULT_NOTIFICATION_SETUP);
 			await fixoraCustomerSignup(fullName, email, password, phone, photoFile, setupPayload);
 			setShowTelegramStep(true);
 		} catch (err: unknown) {
@@ -98,16 +92,7 @@ const RegisterForm = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [
-		fullName,
-		email,
-		phone,
-		password,
-		confirmPassword,
-		termsAccepted,
-		photoFile,
-		notificationSetup,
-	]);
+	}, [fullName, email, phone, password, confirmPassword, termsAccepted, photoFile]);
 
 	return (
 		<>
@@ -241,11 +226,6 @@ const RegisterForm = () => {
 									{t(`validation.${errors.terms}`)}
 								</span>
 							)}
-							<NotificationSetupCard
-								value={notificationSetup}
-								onChange={setNotificationSetup}
-								hasEmail
-							/>
 							<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleSubmit}>
 								{t('register.submit')}
 								<ArrowForward fontSize="small" />
@@ -253,14 +233,7 @@ const RegisterForm = () => {
 						</>
 					)}
 					{showTelegramStep && (
-						<>
-							<NotificationSetupCard
-								value={notificationSetup}
-								onChange={setNotificationSetup}
-								hasEmail
-							/>
-							<AuthTelegramConnectStep onContinue={() => void finishRegister()} />
-						</>
+						<AuthTelegramConnectStep onContinue={() => void finishRegister()} />
 					)}
 				</div>
 			</div>

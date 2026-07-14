@@ -879,6 +879,7 @@ type Mutation {
   changePassword(input: ChangePasswordInput!): Boolean!
   completeBooking(input: CompleteBookingInput!): Booking!
   completeOAuthSignup(input: CompleteOAuthSignupInput!): User!
+  confirmAuthSession: User!
   confirmCashPayment(paymentId: String!): Payment!
   confirmPayment(input: ConfirmPaymentInput!): Payment!
   createArticle(input: ArticleInput!): Article!

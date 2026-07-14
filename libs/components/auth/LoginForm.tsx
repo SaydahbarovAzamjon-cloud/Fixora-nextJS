@@ -15,6 +15,7 @@ import { resolveAuthUser } from '../../utils/authSession';
 import { resolvePostAuthDestination } from '../../utils/postAuthDestination';
 import { routePathsEqual } from '../../utils/routePaths';
 import { clearAuthTelegramPending, setAuthTelegramPending } from '../../auth/authTelegramFlow';
+import { setAuthConfirmPending } from '../../auth/authConfirmFlow';
 
 const LoginForm = () => {
 	const { t } = useTranslation('auth');
@@ -39,6 +40,7 @@ const LoginForm = () => {
 	/** After token is set — stay on page for optional Telegram connect */
 	const enterTelegramStepOrFinish = useCallback(() => {
 		setAuthTelegramPending();
+		setAuthConfirmPending();
 		setShowTelegramStep(true);
 	}, []);
 
@@ -51,6 +53,7 @@ const LoginForm = () => {
 		setErrors({});
 		setLoading(true);
 		setAuthTelegramPending();
+		setAuthConfirmPending();
 		try {
 			await fixoraLogin(email, password);
 			setShowTelegramStep(true);

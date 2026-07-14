@@ -152,7 +152,7 @@ export function buildNotificationSetupPayload(
 	setup: NotificationSetupInput,
 ): NotificationSetupInput | undefined {
 	const notificationLanguage: NotificationLocale =
-		setup.notificationLanguage === 'en' ? 'en' : 'ko';
+		setup.notificationLanguage === 'ko' ? 'ko' : 'en';
 	return {
 		emailEnabled: setup.emailEnabled ?? true,
 		notificationLanguage,

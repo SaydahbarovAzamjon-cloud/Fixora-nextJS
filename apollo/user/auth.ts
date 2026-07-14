@@ -97,3 +97,14 @@ export const SUBMIT_TECHNICIAN_VERIFICATION = gql`
 		}
 	}
 `;
+
+/** After Telegram/onboarding — notifies admin only when client has landed. */
+export const CONFIRM_AUTH_SESSION = gql`
+	mutation ConfirmAuthSession {
+		confirmAuthSession {
+			_id
+			userType
+			profileComplete
+		}
+	}
+`;

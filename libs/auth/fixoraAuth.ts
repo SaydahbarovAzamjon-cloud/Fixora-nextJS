@@ -11,6 +11,7 @@ import { userVar } from '../../apollo/store';
 import { updateUserInfo, deleteUserInfo } from './userInfo';
 import { clearTechOnboardingFiles, getTechIdFile, getTechPhotoFile } from './techOnboardingFiles';
 import { uploadImageFile } from '../utils/uploadImageFile';
+import { resolvePreferredProfileImage } from '../utils/profileImage';
 import { syncUserVarFromGraphqlUser, writeStoredProfileImage, readStoredProfileImage } from './syncUserVar';
 import { writeStoredUserEmail, writeTechnicianSettingsCache } from './technicianSettingsCache';
 import { dataUrlToFile } from '../utils/onboardingFileStorage';
@@ -153,13 +154,8 @@ export function setAuthTokens(accessToken: string, refreshToken: string, profile
 
 	const storedImage = profile?._id ? readStoredProfileImage(profile._id) : null;
 	const incomingImage = profile?.userProfileImage?.trim() || '';
-	// Keep a user-uploaded Fixora path; do not let OAuth CDN avatars overwrite it on login.
-	const preferStoredUpload =
-		Boolean(storedImage) &&
-		!storedImage!.startsWith('http://') &&
-		!storedImage!.startsWith('https://') &&
-		(incomingImage.startsWith('http://') || incomingImage.startsWith('https://') || !incomingImage);
-	const resolvedImage = preferStoredUpload ? storedImage! : incomingImage || storedImage || '';
+	// Keep a user-uploaded Fixora path; never let Gmail/Kakao CDN overwrite it on login.
+	const resolvedImage = resolvePreferredProfileImage(incomingImage, storedImage);
 
 	updateUserInfo(accessToken);
 

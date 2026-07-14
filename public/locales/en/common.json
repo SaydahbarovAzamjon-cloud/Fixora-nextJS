@@ -715,7 +715,7 @@
   "mypage.settings.saved": "Profile updated",
   "mypage.settings.uploadPhoto": "Upload Photo",
   "mypage.settings.photoSaved": "Profile photo updated",
-  "mypage.settings.photoInvalidType": "Please choose a PNG, JPEG, or WebP image.",
+  "mypage.settings.photoInvalidType": "Please choose a PNG or JPEG image.",
   "mypage.settings.photoTooLarge": "Image must be 5 MB or smaller.",
   "mypage.technicianRedirect.title": "Technician account",
   "mypage.technicianRedirect.message": "My Page is for customer accounts. Manage your jobs and earnings from the technician dashboard.",

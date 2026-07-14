@@ -70,17 +70,22 @@ const SettingsTab = ({
 			if (uploadPendingPhoto) {
 				await uploadPendingPhoto();
 			}
+			const trimmedFullName = fullName.trim();
+			const trimmedNickname = nickname.trim();
+			const trimmedLocation = location.trim();
+			const trimmedBio = bio.trim();
+			// Omit empty Length() fields — backend UserUpdate rejects "" for fullName (3–100) / nickname (3–12).
 			const { data } = await updateUser({
 				variables: {
 					input: {
 						_id: userId,
 						...(mode === 'location'
-							? { userLocation: location }
+							? { ...(trimmedLocation ? { userLocation: trimmedLocation } : {}) }
 							: {
-									userFullName: fullName,
-									userNickname: nickname,
-									userLocation: location,
-									userBio: bio,
+									...(trimmedFullName ? { userFullName: trimmedFullName } : {}),
+									...(trimmedNickname ? { userNickname: trimmedNickname } : {}),
+									...(trimmedLocation ? { userLocation: trimmedLocation } : {}),
+									...(trimmedBio ? { userBio: trimmedBio } : {}),
 								}),
 					},
 				},

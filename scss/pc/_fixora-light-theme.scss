@@ -2,6 +2,32 @@
 
 [data-theme='light'],
 .theme-light {
+	/* Public technician profile — hardcoded dark text must remap to tokens */
+	.fixora-pp-header__name,
+	.fixora-pp-stat__value,
+	.fixora-pp-stories-card__title,
+	.fixora-pp-panel__title,
+	.fixora-pp-cred__title,
+	.fixora-pp-spec__title,
+	.fixora-pp-service__title,
+	.fixora-pp-port__title,
+	.fixora-pp-review__name,
+	.fixora-pp-articles-empty__title {
+		color: var(--fixora-text-primary);
+	}
+
+	.fixora-pp-stat__unit,
+	.fixora-pp-stat__label,
+	.fixora-pp-header__loc,
+	.fixora-pp-header__owner,
+	.fixora-pp-cred__sub,
+	.fixora-pp-spec__sub,
+	.fixora-pp-spec__jobs,
+	.fixora-pp-panel__text,
+	.fixora-pp-articles-empty__desc {
+		color: var(--fixora-text-secondary);
+	}
+
 	#pc-wrap #footer,
 	#pc-wrap-home #footer,
 	#pc-wrap-full #footer,

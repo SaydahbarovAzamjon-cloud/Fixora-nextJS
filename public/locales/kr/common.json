@@ -725,7 +725,7 @@
   "mypage.settings.saved": "프로필이 업데이트되었습니다",
   "mypage.settings.uploadPhoto": "사진 업로드",
   "mypage.settings.photoSaved": "프로필 사진이 업데이트되었습니다",
-  "mypage.settings.photoInvalidType": "PNG, JPEG 또는 WebP 이미지를 선택해 주세요.",
+  "mypage.settings.photoInvalidType": "PNG 또는 JPEG 이미지를 선택해 주세요.",
   "mypage.settings.photoTooLarge": "이미지는 5MB 이하여야 합니다.",
   "mypage.technicianRedirect.title": "기술자 계정",
   "mypage.technicianRedirect.message": "마이페이지는 고객 계정용입니다. 작업 및 수익은 기술자 대시보드에서 관리하세요.",

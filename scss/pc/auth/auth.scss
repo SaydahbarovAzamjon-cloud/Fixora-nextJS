@@ -54,6 +54,46 @@
 		width: 100%;
 		margin-bottom: 4px;
 		overflow: visible;
+
+		&--link {
+			text-decoration: none;
+			color: inherit;
+			cursor: pointer;
+
+			&:hover,
+			&:focus-visible {
+				opacity: 0.92;
+			}
+		}
+	}
+
+	.auth-nav-back {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: fit-content;
+		max-width: 100%;
+		margin: 0 0 14px;
+		padding: 0;
+		border: none;
+		background: none;
+		color: var(--fixora-text-secondary);
+		font-family: $font;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1.2;
+		cursor: pointer;
+		transition: color 0.15s ease;
+
+		svg {
+			font-size: 18px;
+			flex-shrink: 0;
+		}
+
+		&:hover,
+		&:focus-visible {
+			color: var(--fixora-primary);
+		}
 	}
 
 	.auth-card {
@@ -358,6 +398,8 @@
 		gap: 16px;
 
 		&__step {
+			display: block;
+			margin-bottom: 4px;
 			font-size: 12px;
 			font-weight: 600;
 			color: var(--fixora-primary);

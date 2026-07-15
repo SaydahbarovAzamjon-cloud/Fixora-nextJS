@@ -1322,10 +1322,96 @@
 }
 
 .fixora-nav__lang {
+	position: relative;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	gap: 8px;
+}
+
+.fixora-nav__lang--dropdown {
+	gap: 0;
+}
+
+.fixora-nav__lang-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	min-width: 44px;
+	min-height: 36px;
+	padding: 4px 8px;
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 9px;
+	background: var(--fixora-surface-elevated, transparent);
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--fixora-text-primary);
+	cursor: pointer;
+	transition:
+		color 0.2s ease,
+		border-color 0.2s ease,
+		background 0.2s ease;
+
+	&:hover {
+		border-color: var(--fixora-primary);
+		color: var(--fixora-primary);
+	}
+}
+
+.fixora-nav__lang-chevron {
+	font-size: 18px !important;
+	opacity: 0.75;
+	transition: transform 0.2s ease;
+}
+
+.fixora-nav__lang--open .fixora-nav__lang-chevron {
+	transform: rotate(180deg);
+}
+
+.fixora-nav__lang-menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: 40;
+	min-width: 88px;
+	padding: 6px;
+	border: 1px solid var(--fixora-border-subtle);
+	border-radius: 10px;
+	background: var(--fixora-surface-elevated, var(--fixora-surface));
+	box-shadow: var(--fixora-card-shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.fixora-nav__lang-option {
+	display: block;
+	width: 100%;
+	padding: 8px 12px;
+	border: none;
+	border-radius: 7px;
+	background: transparent;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--fixora-text-secondary);
+	text-align: left;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		background: var(--fixora-primary-soft-bg);
+		color: var(--fixora-primary);
+	}
+
+	&--active {
+		color: var(--fixora-primary);
+		background: var(--fixora-primary-soft-bg);
+	}
 }
 
 .fixora-nav__lang-btn {
@@ -1396,6 +1482,27 @@
 
 	&:hover {
 		border-color: var(--fixora-primary);
+	}
+}
+
+.fixora-nav__signup {
+	padding: 9px 20px;
+	border-radius: 9px;
+	border: 1px solid var(--fixora-primary);
+	background: transparent;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--fixora-primary);
+	text-decoration: none;
+	transition:
+		background 0.2s ease,
+		color 0.2s ease,
+		border-color 0.2s ease;
+
+	&:hover {
+		background: var(--fixora-primary-soft-bg);
+		border-color: var(--fixora-primary-hover);
+		color: var(--fixora-primary-hover);
 	}
 }
 

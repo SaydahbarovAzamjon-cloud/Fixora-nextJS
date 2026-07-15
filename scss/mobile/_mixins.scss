@@ -19,9 +19,20 @@
 
 @mixin fixora-touch-active {
 	-webkit-tap-highlight-color: transparent;
+	/* Keep pan scrolls free; avoid 300ms click delay on links/buttons. */
+	touch-action: manipulation;
 
-	&:active {
-		opacity: 0.85;
-		transform: scale(0.97);
+	/* Transform on :active traps finger-scroll on touch devices. */
+	@media (hover: hover) and (pointer: fine) {
+		&:active {
+			opacity: 0.85;
+			transform: scale(0.97);
+		}
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		&:active {
+			opacity: 0.88;
+		}
 	}
 }

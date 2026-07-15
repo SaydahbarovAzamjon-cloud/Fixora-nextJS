@@ -56,28 +56,74 @@
 	}
 
 	.fixora-nav-mobile__lang {
-		display: flex;
-		align-items: center;
-		gap: 2px;
+		position: relative;
+		flex-shrink: 0;
 
-		.fixora-nav__lang-btn {
+		.fixora-nav__lang-trigger {
 			@include fixora-tap-target;
 			@include fixora-touch-active;
-			min-width: 36px;
+			min-width: 44px;
 			min-height: 36px;
-			padding: 0 6px;
+			padding: 0 8px;
 			font-size: 12px;
+			border-radius: 8px;
 		}
 
-		.fixora-nav__lang-divider {
-			color: var(--fixora-text-muted);
-			font-size: 12px;
+		.fixora-nav__lang-menu {
+			right: 0;
+			left: auto;
+			z-index: 60;
 		}
 	}
 
 	.fixora-nav__theme-toggle {
 		@include fixora-tap-target;
 		@include fixora-touch-active;
+	}
+
+	.fixora-nav-mobile__drawer-footer--guest {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding-top: 16px;
+	}
+
+	.fixora-nav-mobile__drawer-login,
+	.fixora-nav-mobile__drawer-signup,
+	.fixora-nav-mobile__drawer-cta {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		min-height: 44px;
+		padding: 0 16px;
+		border-radius: 10px;
+		font-size: 14px;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.fixora-nav-mobile__drawer-login {
+		border: 1px solid var(--fixora-border-subtle);
+		color: var(--fixora-text-primary);
+		background: transparent;
+	}
+
+	.fixora-nav-mobile__drawer-signup {
+		border: 1px solid var(--fixora-primary);
+		color: var(--fixora-primary);
+		background: transparent;
+	}
+
+	.fixora-nav-mobile__drawer-cta {
+		color: #fff;
+		background: var(--fixora-primary);
+
+		&:active {
+			background: var(--fixora-primary-hover);
+		}
 	}
 
 	.fixora-nav-mobile__login {
@@ -92,6 +138,21 @@
 
 		&:active {
 			color: var(--fixora-primary);
+		}
+	}
+
+	.fixora-nav-mobile__signup {
+		@include fixora-tap-target;
+		@include fixora-touch-active;
+		padding: 0 10px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--fixora-primary);
+		text-decoration: none;
+		white-space: nowrap;
+
+		&:active {
+			color: var(--fixora-primary-hover);
 		}
 	}
 
@@ -197,6 +258,12 @@
 		flex-direction: column;
 		width: min(320px, calc(100vw - 48px));
 		height: 100dvh;
+		max-height: 100dvh;
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
+		touch-action: pan-y;
 		padding:
 			calc(12px + var(--fixora-safe-top))
 			var(--fixora-mobile-gutter)

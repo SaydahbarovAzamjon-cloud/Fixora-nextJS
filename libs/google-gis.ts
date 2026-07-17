@@ -99,7 +99,14 @@ function getOrCreateCodeClient(clientId: string): { requestCode: () => void } {
 		callback: (response) => {
 			window.__fixoraGoogleAuthInFlight__ = false;
 			if (response.error || !response.code) {
-				pendingReject?.(new Error(response.error || 'Google sign-in cancelled'));
+				const code = (response.error || '').toLowerCase();
+				if (code === 'access_denied' || code === 'popup_closed_by_user') {
+					pendingReject?.(new Error('Google sign-in cancelled'));
+				} else if (code) {
+					pendingReject?.(new Error(`Google sign-in failed: ${response.error}`));
+				} else {
+					pendingReject?.(new Error('Google sign-in cancelled'));
+				}
 				clearPending();
 				return;
 			}
@@ -108,9 +115,23 @@ function getOrCreateCodeClient(clientId: string): { requestCode: () => void } {
 			pendingResolve?.(response.code);
 			clearPending();
 		},
-		error_callback: () => {
+		error_callback: (error) => {
 			window.__fixoraGoogleAuthInFlight__ = false;
-			pendingReject?.(new Error('Google sign-in cancelled'));
+			const type = (error?.type || '').toLowerCase();
+			if (type === 'popup_failed_to_open') {
+				pendingReject?.(new Error('Google sign-in popup blocked'));
+			} else if (type === 'popup_closed') {
+				// Often: user closed popup, OR Google rejected the origin and closed it.
+				pendingReject?.(
+					new Error(
+						'Google sign-in popup closed — check Authorized JavaScript origins for this site URL',
+					),
+				);
+			} else if (error?.message) {
+				pendingReject?.(new Error(`Google sign-in failed: ${error.message}`));
+			} else {
+				pendingReject?.(new Error('Google sign-in cancelled'));
+			}
 			clearPending();
 		},
 	});

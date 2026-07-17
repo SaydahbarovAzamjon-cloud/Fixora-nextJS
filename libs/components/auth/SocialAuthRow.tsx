@@ -80,6 +80,10 @@ const SocialAuthRow = ({
 	const oauthErrorMessage = useCallback(
 		(err: unknown, provider: OAuthProvider) => {
 			const message = getGraphQLErrorMessage(err);
+			if (/popup blocked/i.test(message)) return t('oauth.googlePopupBlocked');
+			if (/Authorized JavaScript origins|popup closed/i.test(message)) {
+				return t('oauth.googlePopupClosed');
+			}
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
 			if (/timed out/i.test(message)) return t('oauth.kakaoFailed');
 			if (/NEXT_PUBLIC_GOOGLE_CLIENT_ID|GOOGLE_NOT_CONFIGURED/i.test(message)) return t('oauth.googleNotConfigured');

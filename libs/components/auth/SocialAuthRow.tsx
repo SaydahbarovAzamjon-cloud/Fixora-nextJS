@@ -6,7 +6,7 @@ import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin, revertOAuthSignupSession } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { getJwtToken } from '../../auth/tokens';
-import { requestGoogleAuthCode } from '../../google-gis';
+import { requestGoogleCredential } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
@@ -81,7 +81,7 @@ const SocialAuthRow = ({
 		(err: unknown, provider: OAuthProvider) => {
 			const message = getGraphQLErrorMessage(err);
 			if (/popup blocked/i.test(message)) return t('oauth.googlePopupBlocked');
-			if (/Authorized JavaScript origins|popup closed/i.test(message)) {
+			if (/consent screen|test users|popup closed|Authorized JavaScript origins/i.test(message)) {
 				return t('oauth.googlePopupClosed');
 			}
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
@@ -160,8 +160,9 @@ const SocialAuthRow = ({
 
 		setLoading('google');
 		try {
-			const code = await requestGoogleAuthCode(clientId);
-			await runOAuth('google', code);
+			// Prefer Google ID token (JWT); auth-code popup is fallback only.
+			const token = await requestGoogleCredential(clientId);
+			await runOAuth('google', token);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');
 		} finally {

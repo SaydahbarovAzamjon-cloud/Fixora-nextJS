@@ -104,7 +104,12 @@ const TechIdUpload = () => {
 				await router.push('/register/technician/1');
 				return;
 			}
-			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Submission failed');
+			const raw = err instanceof Error ? err.message : String(err ?? '');
+			if (/PHOTO_TOO_LARGE|413|payload too large|entity too large/i.test(raw)) {
+				await sweetMixinErrorAlert(t('validation.photoTooLarge'));
+				return;
+			}
+			await sweetMixinErrorAlert(raw || 'Submission failed');
 		} finally {
 			setLoading(false);
 		}

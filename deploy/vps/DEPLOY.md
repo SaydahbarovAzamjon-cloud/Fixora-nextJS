@@ -61,6 +61,14 @@ sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d fixoranext.com -d www.fixoranext.com -d api.fixoranext.com
 ```
 
+After Certbot, confirm **every** `server { ... }` block (including `:443`) has:
+
+```nginx
+client_max_body_size 12m;
+```
+
+Without this, phone profile photos on signup return **HTTP 413** (`Request failed with status code 413`). Frontend also compresses images before upload.
+
 ## 8) Firewall
 
 ```bash

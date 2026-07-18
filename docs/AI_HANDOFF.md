@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-15 |
+| **Last updated** | 2026-07-18 |
 | **Last agent** | Cursor |
-| **Last session** | **Auth admin notify deferral** — admin Telegram/new-user alerts wait for `confirmAuthSession` after home/dashboard landing (not mid Telegram/onboarding). Backend FixoraB + FixoraF AppShell wired. |
-| **Next agent should start with** | Deploy FixoraB `confirmAuthSession` to VPS, then frontend; smoke-test signup → Telegram step should NOT notify admin until `/` or `/technician/dashboard` |
+| **Last session** | **Mobile Google OAuth fix** — phones/in-app use GIS `ux_mode: redirect` → `/oauth/google`; desktop keeps popup+`postmessage`. Backend `oauth.service` exchanges code with redirect URIs incl. `NOTIFICATION_APP_URL` + prod URL. |
+| **Next agent should start with** | (1) Google Cloud Console → Authorized redirect URIs: `https://fixoranext.com/oauth/google` (+ localhost). (2) Deploy FixoraB then FixoraF. (3) Smoke-test Google login/signup on a real phone. |
 
 ---
 

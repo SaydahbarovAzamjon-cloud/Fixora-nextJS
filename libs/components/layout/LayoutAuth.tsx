@@ -25,6 +25,7 @@ const withLayoutAuth = (Component: any, pageTitleKey = 'auth.meta.title') => {
 		}, []);
 
 		useEffect(() => {
+			if (router.pathname.startsWith('/oauth/')) return;
 			if (getNeedsOnboarding() || !authUserId || redirectingRef.current) return;
 			if (isAuthTelegramPending()) return;
 

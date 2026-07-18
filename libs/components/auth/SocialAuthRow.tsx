@@ -6,7 +6,7 @@ import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin, revertOAuthSignupSession } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { getJwtToken } from '../../auth/tokens';
-import { requestGoogleAuthCode } from '../../google-gis';
+import { startGoogleAuth } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
@@ -156,14 +156,19 @@ const SocialAuthRow = ({
 
 		setLoading('google');
 		try {
-			const code = await requestGoogleAuthCode(clientId);
-			await runOAuth('google', code);
+			const result = await startGoogleAuth(clientId, {
+				mode,
+				returnTo: router.asPath || (mode === 'register' ? '/register' : '/login'),
+			});
+			// Mobile / in-app: full-page redirect — callback page finishes OAuth.
+			if (result.type === 'redirect') return;
+			await runOAuth('google', result.code);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');
 		} finally {
 			setLoading(null);
 		}
-	}, [ensureSignupRole, runOAuth, showOAuthError, t]);
+	}, [ensureSignupRole, mode, router.asPath, runOAuth, showOAuthError, t]);
 
 	const handleKakao = useCallback(async () => {
 		if (!process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {

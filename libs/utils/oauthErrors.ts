@@ -63,12 +63,12 @@ export function toUserFacingErrorMessage(err: unknown, fallback?: string): strin
 		.replace(/^ApolloError:\s*/i, '')
 		.replace(/^Error:\s*/i, '')
 		.trim();
-	if (
-		!raw ||
-		/^failed to fetch$/i.test(raw) ||
-		/is not a function|Cannot read propert|TypeError|ReferenceError|undefined is not/i.test(raw)
-	) {
-		return prefersKoreanUi() ? Messages.errorNetworkKo : fallback || Messages.error1;
+	if (!raw || /^failed to fetch$/i.test(raw)) {
+		return prefersKoreanUi() ? Messages.errorNetworkKo : Messages.errorNetwork;
+	}
+	// Hide minified / runtime JS noise from end users.
+	if (/is not a function|Cannot read propert|TypeError|ReferenceError|undefined is not/i.test(raw)) {
+		return fallback || Messages.error1;
 	}
 	return raw || fallback || Messages.error1;
 }

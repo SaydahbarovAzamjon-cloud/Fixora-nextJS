@@ -27,17 +27,6 @@ function revokePreviewUrl(url: string) {
 	if (url.startsWith('blob:')) URL.revokeObjectURL(url);
 }
 
-function uploadErrorMessage(err: unknown): string {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const anyErr = err as any;
-	return (
-		anyErr?.errors?.[0]?.message ||
-		anyErr?.response?.data?.errors?.[0]?.message ||
-		anyErr?.message ||
-		'Upload failed'
-	);
-}
-
 async function uploadDeviceFileWithTarget(file: File, target: string, token: string): Promise<string> {
 	const formData = new FormData();
 	formData.append(
@@ -198,7 +187,8 @@ export function useDeviceImageUpload(onError?: (key: string) => void, existingCo
 			}
 			return paths;
 		} catch (err) {
-			throw new Error(uploadErrorMessage(err));
+			// Preserve Axios status (e.g. 413) so UI can show a clear image-size message.
+			throw err;
 		} finally {
 			setUploading(false);
 		}

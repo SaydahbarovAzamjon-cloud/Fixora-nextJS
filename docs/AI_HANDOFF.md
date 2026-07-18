@@ -7,7 +7,7 @@
 | **Last updated** | 2026-07-18 |
 | **Last agent** | Cursor |
 | **Last session** | **Mobile Google OAuth fix** — phones/in-app use GIS `ux_mode: redirect` → `/oauth/google`; desktop keeps popup+`postmessage`. Backend `oauth.service` exchanges code with redirect URIs incl. `NOTIFICATION_APP_URL` + prod URL. |
-| **Next agent should start with** | (1) Google Cloud Console → Authorized redirect URIs: `https://fixoranext.com/oauth/google` (+ localhost). (2) Deploy FixoraB then FixoraF. (3) Smoke-test Google login/signup on a real phone. |
+| **Next agent should start with** | Smoke-test Google login/signup on a real phone at https://fixoranext.com/login — redirect URI already in Google Console; FixoraB+F deployed 2026-07-18. |
 
 ---
 

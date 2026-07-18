@@ -1,4 +1,5 @@
 import { Messages } from '../config';
+import { classifyUserFacingError, getHttpStatusFromError } from './userFacingErrors';
 
 export interface GraphQLErrorDetails {
 	message: string;
@@ -10,11 +11,22 @@ export function getGraphQLErrorDetails(err: unknown): GraphQLErrorDetails {
 		graphQLErrors?: { message?: string; extensions?: { code?: string } }[];
 		networkError?: { message?: string };
 		message?: string;
+		response?: { status?: number; data?: { errors?: { message?: string }[]; message?: string } };
 	};
 	const gqlError = anyErr?.graphQLErrors?.[0];
 	const networkMessage = anyErr?.networkError?.message;
+	const axiosMessage =
+		anyErr?.response?.data?.errors?.[0]?.message || anyErr?.response?.data?.message;
+	const status = getHttpStatusFromError(err);
+	const statusHint = status ? `Request failed with status code ${status}` : undefined;
 	return {
-		message: gqlError?.message ?? networkMessage ?? anyErr?.message ?? 'Request failed',
+		message:
+			gqlError?.message ??
+			networkMessage ??
+			axiosMessage ??
+			anyErr?.message ??
+			statusHint ??
+			'Request failed',
 		code: typeof gqlError?.extensions?.code === 'string' ? gqlError.extensions.code : undefined,
 	};
 }
@@ -56,19 +68,35 @@ function prefersKoreanUi(): boolean {
  * Prefer component-level `t()` when available; this is the global fallback.
  */
 export function toUserFacingErrorMessage(err: unknown, fallback?: string): string {
-	if (isNetworkFetchError(err)) {
+	const kind = classifyUserFacingError(err);
+	if (kind === 'payload_too_large') {
+		return prefersKoreanUi()
+			? '사진 용량이 너무 큽니다. 5MB 이하 이미지로 다시 시도해주세요.'
+			: 'This photo is too large. Please use an image under 5 MB and try again.';
+	}
+	if (kind === 'network' || isNetworkFetchError(err)) {
 		return prefersKoreanUi() ? Messages.errorNetworkKo : Messages.errorNetwork;
 	}
+	if (kind === 'timeout') {
+		return prefersKoreanUi()
+			? '요청 시간이 초과되었습니다. 다시 시도해주세요.'
+			: 'The request took too long. Please try again.';
+	}
+	if (kind === 'unauthorized') {
+		return prefersKoreanUi()
+			? '다시 로그인한 후 시도해주세요.'
+			: 'Please log in again and try again.';
+	}
+	if (kind === 'technical') {
+		return fallback || Messages.error1;
+	}
+
 	const raw = getGraphQLErrorMessage(err)
 		.replace(/^ApolloError:\s*/i, '')
 		.replace(/^Error:\s*/i, '')
 		.trim();
-	if (!raw || /^failed to fetch$/i.test(raw)) {
+	if (!raw || /^failed to fetch$/i.test(raw) || /status code\s+\d+/i.test(raw)) {
 		return prefersKoreanUi() ? Messages.errorNetworkKo : Messages.errorNetwork;
-	}
-	// Hide minified / runtime JS noise from end users.
-	if (/is not a function|Cannot read propert|TypeError|ReferenceError|undefined is not/i.test(raw)) {
-		return fallback || Messages.error1;
 	}
 	return raw || fallback || Messages.error1;
 }

@@ -89,11 +89,23 @@ const GoogleOAuthCallbackPage: NextPage = () => {
 				if (mode === 'register') {
 					revertOAuthSignupSession();
 				}
-				const message = isOAuthProviderMismatchError(err)
-					? mode === 'login'
-						? t('oauth.providerMismatchUseEmail')
-						: t('oauth.providerMismatch')
-					: getGraphQLErrorMessage(err) || t('oauth.googleFailed');
+				let message = t('oauth.googleFailed');
+				if (isOAuthProviderMismatchError(err)) {
+					message =
+						mode === 'login' ? t('oauth.providerMismatchUseEmail') : t('oauth.providerMismatch');
+				} else {
+					const raw = getGraphQLErrorMessage(err);
+					if (
+						raw &&
+						!/^OAuth login failed/i.test(raw) &&
+						raw !== 'Request failed' &&
+						!/is not a function|Cannot read|TypeError|ReferenceError|requestCode|undefined is not/i.test(
+							raw,
+						)
+					) {
+						message = raw;
+					}
+				}
 				await sweetMixinErrorAlert(message);
 				await router.replace(pending?.returnTo || (mode === 'register' ? '/register' : '/login'));
 			}

@@ -227,7 +227,9 @@ function getOrCreateCodeClient(
 					},
 				});
 
-	window.__fixoraGoogleCodeClient__ = { ...client, mode: uxMode };
+	// Do NOT object-spread GIS clients — `requestCode` is often non-enumerable and gets dropped.
+	(client as { requestCode: () => void; mode?: GoogleAuthUxMode }).mode = uxMode;
+	window.__fixoraGoogleCodeClient__ = client as { requestCode: () => void; mode?: GoogleAuthUxMode };
 	return window.__fixoraGoogleCodeClient__;
 }
 

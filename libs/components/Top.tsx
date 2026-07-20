@@ -19,8 +19,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Logout } from '@mui/icons-material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { userVar } from '../../apollo/store';
-import { resolveProfileImageUrl } from '../utils/profileImage';
+import { userVar, profileImageDraftVar } from '../../apollo/store';
+import { hasRealProfileImage, resolvePreferredProfileImage, resolveProfileImageUrl } from '../utils/profileImage';
+import { readStoredProfileImage } from '../auth/syncUserVar';
 import { isTechnicianUser } from '../utils/userRole';
 import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
@@ -44,6 +45,7 @@ const formatNavBadge = (count: number) => (count > 99 ? '99+' : count);
 const Top = () => {
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
+	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const isTechnician = isTechnicianUser(user);
 	const { t } = useTranslation('common');
 	const router = useRouter();
@@ -56,6 +58,15 @@ const Top = () => {
 	const notifRef = useRef<HTMLDivElement>(null);
 	const notifCtx = useNotificationContextOptional();
 	const navPollMs = useRealtimePollInterval(30000);
+
+	const storedAvatar = user?._id ? readStoredProfileImage(user._id) : null;
+	const navAvatarPath =
+		profileDraft ||
+		resolvePreferredProfileImage(
+			hasRealProfileImage(user?.memberImage) ? user?.memberImage : null,
+			storedAvatar,
+		);
+	const navAvatarSrc = resolveProfileImageUrl(navAvatarPath);
 
 	const { data: notificationsData, refetch: refetchNotifications } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
@@ -326,7 +337,7 @@ const Top = () => {
 										className="fixora-nav-mobile__avatar"
 										onClick={(event) => setLogoutAnchor(event.currentTarget)}
 									>
-										<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+										<img src={navAvatarSrc} alt="" />
 									</button>
 								</>
 							) : null}
@@ -455,7 +466,7 @@ const Top = () => {
 									className={'fixora-nav__avatar'}
 									onClick={(event) => setLogoutAnchor(event.currentTarget)}
 								>
-									<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+									<img src={navAvatarSrc} alt="" />
 								</button>
 								<Menu
 									anchorEl={logoutAnchor}

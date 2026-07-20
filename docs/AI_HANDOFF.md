@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-18 |
+| **Last updated** | 2026-07-20 |
 | **Last agent** | Cursor |
-| **Last session** | **Mobile Google OAuth fix** — phones/in-app use GIS `ux_mode: redirect` → `/oauth/google`; desktop keeps popup+`postmessage`. Backend `oauth.service` exchanges code with redirect URIs incl. `NOTIFICATION_APP_URL` + prod URL. |
-| **Next agent should start with** | Smoke-test Google login/signup on a real phone at https://fixoranext.com/login — redirect URI already in Google Console; FixoraB+F deployed 2026-07-18. |
+| **Last session** | **Client navbar avatar desync** — My Page showed new upload while Top used stale JWT `memberImage`. Fixed Top to use draft + stored + preferred path; local uploads prefer stored over stale JWT. |
+| **Next agent should start with** | Smoke-test: client My Page change photo → navbar avatar updates immediately (no commit/deploy yet unless asked). |
 
 ---
 

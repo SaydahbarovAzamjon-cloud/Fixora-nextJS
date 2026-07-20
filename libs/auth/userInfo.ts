@@ -1,7 +1,7 @@
 import decodeJWT from 'jwt-decode';
 import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
-import { resolvePreferredProfileImage } from '../utils/profileImage';
+import { isLocalUploadedProfileImage, resolvePreferredProfileImage } from '../utils/profileImage';
 import { readStoredProfileImage } from './syncUserVar';
 
 export const updateUserInfo = (jwtToken: string | null | undefined): boolean => {
@@ -13,10 +13,12 @@ export const updateUserInfo = (jwtToken: string | null | undefined): boolean => 
 		const userId = claims._id ?? (claims as { sub?: string }).sub ?? current._id ?? '';
 		const role = claims.userType ?? claims.memberType ?? current.userType ?? current.memberType ?? '';
 		const storedImage = userId ? readStoredProfileImage(userId) : null;
-		const profileImage = resolvePreferredProfileImage(
-			claims.userProfileImage ?? claims.memberImage ?? current.memberImage,
-			storedImage,
-		);
+		const jwtImage = claims.userProfileImage ?? claims.memberImage ?? '';
+		// JWT is often stale after a photo upload (still Google CDN or an older path).
+		// A client-saved Fixora upload in localStorage always wins over JWT.
+		const profileImage = isLocalUploadedProfileImage(storedImage)
+			? storedImage!.trim()
+			: resolvePreferredProfileImage(jwtImage || current.memberImage, current.memberImage);
 
 		userVar({
 			...current,

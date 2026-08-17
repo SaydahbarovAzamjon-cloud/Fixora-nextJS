@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	buildRecommendTechniciansInput,
 	getTechniciansResultsInput,
 	prepareTechniciansQueryInput,
 	resolveTextSearchFilters,
@@ -23,6 +24,33 @@ describe('resolveTextSearchFilters', () => {
 	});
 });
 
+describe('buildRecommendTechniciansInput', () => {
+	it('maps issue-only filter for recommendTechnicians', () => {
+		expect(
+			buildRecommendTechniciansInput({
+				isOnline: null,
+				issueCategory: 'SCREEN',
+			}),
+		).toEqual({
+			issueCategory: 'SCREEN',
+			limit: 5,
+		});
+	});
+
+	it('includes problemText when search text is long enough', () => {
+		expect(
+			buildRecommendTechniciansInput({
+				isOnline: null,
+				text: 'broken screen',
+				issueCategory: 'SCREEN',
+			}),
+		).toEqual({
+			problemText: 'broken screen',
+			issueCategory: 'SCREEN',
+			limit: 5,
+		});
+	});
+});
 describe('getTechniciansResultsInput', () => {
 	it('keeps geo radius when text search and map location are both active', () => {
 		const input = getTechniciansResultsInput({

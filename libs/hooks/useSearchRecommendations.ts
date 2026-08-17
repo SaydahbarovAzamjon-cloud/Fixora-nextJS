@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { RECOMMEND_TECHNICIANS } from '../../apollo/user/ai';
 import type { TechnicianRecommendation, TechniciansInquiry } from '../types/fixora/fixora';
+import { buildRecommendTechniciansInput } from '../utils/technicianSearch';
 
 const MIN_TEXT_LENGTH = 3;
 const TEXT_DEBOUNCE_MS = 500;
@@ -68,15 +69,23 @@ export function useSearchRecommendations(searchFilter: TechniciansInquiry) {
 			issueCategory: string | null;
 		};
 
-		fetchRecommendations({
-			variables: {
-				input: {
-					problemText: parsed.text || undefined,
-					deviceType: parsed.deviceCategory || undefined,
-					issueCategory: parsed.issueCategory || undefined,
-					limit: 5,
-				},
+		const input = buildRecommendTechniciansInput(
+			{
+				text: parsed.text,
+				deviceCategory: parsed.deviceCategory ?? undefined,
+				issueCategory: parsed.issueCategory ?? undefined,
 			},
+			5,
+		);
+
+		if (!input.problemText && !input.deviceType && !input.issueCategory) {
+			setRecommendations([]);
+			return;
+		}
+
+		fetchRecommendations({
+			variables: { input },
+			context: { suppressErrorAlert: true },
 		});
 	}, [visible, requestKey, fetchRecommendations]);
 

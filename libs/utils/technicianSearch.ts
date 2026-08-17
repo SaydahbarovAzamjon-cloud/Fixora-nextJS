@@ -197,3 +197,27 @@ export function parseSearchPageQueryInput(raw: string): TechniciansInquiry {
 export function serializeSearchPageQueryInput(filter: TechniciansInquiry): string {
 	return encodeURIComponent(JSON.stringify(normalizeTechniciansInquiry(filter)));
 }
+
+const RECOMMEND_TEXT_MIN_LENGTH = 3;
+
+/** Variables for `recommendTechnicians` from search filter state. */
+export function buildRecommendTechniciansInput(
+	search: TechniciansInquiry['search'],
+	limit = 5,
+): {
+	problemText?: string;
+	deviceType?: string;
+	issueCategory?: string;
+	limit: number;
+} {
+	const trimmedText = search.text?.trim() ?? '';
+	const problemText =
+		trimmedText.length >= RECOMMEND_TEXT_MIN_LENGTH ? trimmedText : undefined;
+
+	return {
+		...(problemText ? { problemText } : {}),
+		...(search.deviceCategory ? { deviceType: search.deviceCategory } : {}),
+		...(search.issueCategory ? { issueCategory: search.issueCategory } : {}),
+		limit,
+	};
+}

@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-20 |
+| **Last updated** | 2026-08-17 |
 | **Last agent** | Cursor |
-| **Last session** | **Client navbar avatar desync** — My Page showed new upload while Top used stale JWT `memberImage`. Fixed Top to use draft + stored + preferred path; local uploads prefer stored over stale JWT. |
-| **Next agent should start with** | Smoke-test: client My Page change photo → navbar avatar updates immediately (no commit/deploy yet unless asked). |
+| **Last session** | **Community page spacing fix** — pushed `/community` header below the fixed navbar and kept article-empty logic untouched. Default theme is light unless a saved dark preference exists; footer phone number updated to `+82 10 8349 4111`. |
+| **Next agent should start with** | P3-10 — verify `/community` header spacing in browser and confirm any empty article state is backend data, not frontend view logic. |
 
 ---
 

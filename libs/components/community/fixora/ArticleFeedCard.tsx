@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'next-i18next';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
@@ -8,7 +8,7 @@ import BookmarkBorderRoundedIcon from '@mui/icons-material/BookmarkBorderRounded
 import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import { Article } from '../../../types/fixora/fixora';
-import { resolveArticleImageUrl } from '../../../utils/articleImage';
+import { useArticleCoverSrc } from '../../../hooks/useArticleCoverSrc';
 import { estimateArticleReadMinutes } from '../../../utils/articleReadTime';
 import { articleCategoryToCommunityFilter } from '../../../utils/communityCategories';
 import { formatArticleCount, formatArticlePublishedAt } from '../../../utils/communityArticleDisplay';
@@ -32,9 +32,9 @@ const ArticleFeedCard: React.FC<ArticleFeedCardProps> = ({
 	likePending = false,
 }) => {
 	const { t, i18n } = useTranslation('common');
-	const coverUrl = resolveArticleImageUrl(article.articleImage);
-	const [imgFailed, setImgFailed] = useState(false);
-	const showCover = !!coverUrl && !imgFailed;
+	const { src: coverUrl, show: showCover, onError: onCoverError } = useArticleCoverSrc(
+		article.articleImage,
+	);
 	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
 	const readMinutes = estimateArticleReadMinutes(article);
 	const categoryKey = article.articleCategory
@@ -80,10 +80,11 @@ const ArticleFeedCard: React.FC<ArticleFeedCardProps> = ({
 			<div className="fixora-community__feed-card__media">
 				{showCover ? (
 					<img
+						key={coverUrl}
 						src={coverUrl}
 						alt=""
 						loading="lazy"
-						onError={() => setImgFailed(true)}
+						onError={onCoverError}
 					/>
 				) : (
 					<div className="fixora-community__feed-card__media-empty" aria-hidden="true">

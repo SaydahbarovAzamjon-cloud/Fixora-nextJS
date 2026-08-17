@@ -1,4 +1,5 @@
 import { REACT_APP_API_URL } from '../config';
+import { resolveUploadAssetUrl } from './uploadAssetUrl';
 
 const DEFAULT_AVATAR = '/img/profile/defaultUser.svg';
 
@@ -54,7 +55,5 @@ export function resolveProfileImageUrl(image?: string | null): string {
 	if (image!.startsWith('/img/') || image!.startsWith('/public/')) return image!;
 	if (image === DEFAULT_AVATAR) return DEFAULT_AVATAR;
 
-	const base = apiBaseUrl();
-	if (!base) return image!.startsWith('/') ? image! : `/${image!}`;
-	return `${base}/${image!.replace(/^\//, '')}`;
+	return resolveUploadAssetUrl(image) ?? DEFAULT_AVATAR;
 }

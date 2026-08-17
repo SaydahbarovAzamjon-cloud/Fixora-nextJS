@@ -6,6 +6,7 @@ import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
 import Moment from 'react-moment';
 import { Article } from '../../../types/fixora/fixora';
+import { resolveArticleImageUrl } from '../../../utils/articleImage';
 
 interface ArticleCardProps {
 	article: Article;
@@ -14,6 +15,7 @@ interface ArticleCardProps {
 }
 
 const ArticleCard = ({ article, onLike, likePending = false }: ArticleCardProps) => {
+	const coverUrl = resolveArticleImageUrl(article.articleImage);
 	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
 
 	const handleLike = (e: React.MouseEvent) => {
@@ -26,8 +28,8 @@ const ArticleCard = ({ article, onLike, likePending = false }: ArticleCardProps)
 		<Link href={`/community/${article._id}`} className="fixora-community__card">
 			{/* Thumbnail */}
 			<div className="fixora-community__card__thumb">
-				{article.articleImage ? (
-					<img src={article.articleImage} alt={article.articleTitle} />
+				{coverUrl ? (
+					<img src={coverUrl} alt={article.articleTitle} />
 				) : (
 					<div className="fixora-community__card__thumb--placeholder" />
 				)}

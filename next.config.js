@@ -22,25 +22,39 @@ const nextConfig = {
 		NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '',
 	},
 	async rewrites() {
-		// Local UI → remote GraphQL without CORS (browser hits same-origin /graphql).
-		// Only active when GRAPHQL_PROXY_TARGET is set AND GraphQL URL points at localhost.
-		const target = (process.env.GRAPHQL_PROXY_TARGET || '').replace(/\/$/, '');
-		if (!target) return [];
-
+		const rules = [];
 		const graphqlUrl =
 			process.env.NEXT_PUBLIC_GRAPHQL_URL ||
 			process.env.REACT_APP_API_GRAPHQL_URL ||
 			'';
+
+		// yarn dev: <img src="/uploads/..."> → API. Production nginx already proxies /uploads.
+		if (process.env.NODE_ENV !== 'production') {
+			const apiBase = (
+				process.env.NEXT_PUBLIC_API_URL ||
+				process.env.GRAPHQL_PROXY_TARGET ||
+				(graphqlUrl || 'http://localhost:2000/graphql').replace(/\/graphql\/?$/, '')
+			).replace(/\/$/, '');
+			if (apiBase && apiBase !== 'undefined') {
+				rules.push({
+					source: '/uploads/:path*',
+					destination: `${apiBase}/uploads/:path*`,
+				});
+			}
+		}
+
+		// Local UI → remote GraphQL without CORS (browser hits same-origin /graphql).
+		const target = (process.env.GRAPHQL_PROXY_TARGET || '').replace(/\/$/, '');
 		const usesLocalProxy =
 			graphqlUrl.includes('localhost') || graphqlUrl.includes('127.0.0.1');
-		if (!usesLocalProxy) return [];
-
-		return [
-			{
+		if (target && usesLocalProxy) {
+			rules.push({
 				source: '/graphql',
 				destination: `${target}/graphql`,
-			},
-		];
+			});
+		}
+
+		return rules;
 	},
 	async redirects() {
 		return [

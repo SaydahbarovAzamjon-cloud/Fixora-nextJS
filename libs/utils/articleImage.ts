@@ -1,14 +1,16 @@
-import { REACT_APP_API_URL } from '../config';
+import { memberFallbackUploadPath, resolveUploadAssetUrl } from './uploadAssetUrl';
+
+export { encodeUploadAssetPath, resolveUploadAssetUrl } from './uploadAssetUrl';
 
 /** Resolve article cover path from GraphQL (relative or absolute). Returns null when missing. */
 export function resolveArticleImageUrl(image?: string | null): string | null {
-	if (!image || image.trim() === '') return null;
-	if (image.startsWith('http://') || image.startsWith('https://')) return image;
-	if (image.startsWith('/img/') || image.startsWith('/public/')) return image;
+	return resolveUploadAssetUrl(image);
+}
 
-	const base = REACT_APP_API_URL?.replace(/\/$/, '') ?? '';
-	if (!base || base === 'undefined') {
-		return image.startsWith('/') ? image : `/${image.replace(/^\//, '')}`;
-	}
-	return `${base}/${image.replace(/^\//, '')}`;
+/** Same filename under uploads/member when the article folder 404s. */
+export function articleImageFallbackUrl(image?: string | null): string | null {
+	if (!image || image.trim() === '') return null;
+	const fallbackPath = memberFallbackUploadPath(image.trim());
+	if (!fallbackPath) return null;
+	return resolveUploadAssetUrl(fallbackPath);
 }

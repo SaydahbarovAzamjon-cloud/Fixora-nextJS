@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'next-i18next';
 import LocalFireDepartmentOutlined from '@mui/icons-material/LocalFireDepartmentOutlined';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -9,7 +9,7 @@ import BookmarkBorderRoundedIcon from '@mui/icons-material/BookmarkBorderRounded
 import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import { Article } from '../../../types/fixora/fixora';
-import { resolveArticleImageUrl } from '../../../utils/articleImage';
+import { useArticleCoverSrc } from '../../../hooks/useArticleCoverSrc';
 import { estimateArticleReadMinutes } from '../../../utils/articleReadTime';
 import { formatArticleCount, formatArticlePublishedAt, getArticleTagKeys } from '../../../utils/communityArticleDisplay';
 import ArticleAuthorLink from './ArticleAuthorLink';
@@ -32,9 +32,9 @@ const FeaturedArticleCard: React.FC<FeaturedArticleCardProps> = ({
 	likePending = false,
 }) => {
 	const { t, i18n } = useTranslation('common');
-	const coverUrl = resolveArticleImageUrl(article.articleImage);
-	const [imgFailed, setImgFailed] = useState(false);
-	const showCover = !!coverUrl && !imgFailed;
+	const { src: coverUrl, show: showCover, onError: onCoverError } = useArticleCoverSrc(
+		article.articleImage,
+	);
 	const isLiked = article.meLiked?.[0]?.myFavorite ?? false;
 	const readMinutes = estimateArticleReadMinutes(article);
 	const tagKeys = getArticleTagKeys(article);
@@ -77,10 +77,11 @@ const FeaturedArticleCard: React.FC<FeaturedArticleCardProps> = ({
 			<div className="fixora-community__featured__media">
 				{showCover ? (
 					<img
+						key={coverUrl}
 						src={coverUrl}
 						alt=""
 						loading="lazy"
-						onError={() => setImgFailed(true)}
+						onError={onCoverError}
 					/>
 				) : (
 					<div className="fixora-community__featured__media-empty" aria-hidden="true">

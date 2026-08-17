@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import { GET_MY_ARTICLES } from '../../../../apollo/user/profile';
 import { Article } from '../../../types/fixora/fixora';
+import { resolveArticleImageUrl } from '../../../utils/articleImage';
 
 const RepairStoriesTab = () => {
 	const { t } = useTranslation('common');
@@ -23,23 +24,26 @@ const RepairStoriesTab = () => {
 
 	return (
 		<div className="fixora-mypage__stories">
-			{articles.map((article) => (
-				<button
-					key={article._id}
-					type="button"
-					className="fixora-mypage__story"
-					onClick={() => router.push(`/community/${article._id}`)}
-				>
-					{article.articleImage && <img className="fixora-mypage__story-image" src={article.articleImage} alt="" />}
-					<div className="fixora-mypage__story-info">
-						<strong>{article.articleTitle}</strong>
-						{article.articleExcerpt && <p>{article.articleExcerpt}</p>}
-						<Moment format="MMM D, YYYY" className="fixora-mypage__story-date">
-							{article.createdAt}
-						</Moment>
-					</div>
-				</button>
-			))}
+			{articles.map((article) => {
+				const coverUrl = resolveArticleImageUrl(article.articleImage);
+				return (
+					<button
+						key={article._id}
+						type="button"
+						className="fixora-mypage__story"
+						onClick={() => router.push(`/community/${article._id}`)}
+					>
+						{coverUrl && <img className="fixora-mypage__story-image" src={coverUrl} alt="" />}
+						<div className="fixora-mypage__story-info">
+							<strong>{article.articleTitle}</strong>
+							{article.articleExcerpt && <p>{article.articleExcerpt}</p>}
+							<Moment format="MMM D, YYYY" className="fixora-mypage__story-date">
+								{article.createdAt}
+							</Moment>
+						</div>
+					</button>
+				);
+			})}
 		</div>
 	);
 };

@@ -6,8 +6,8 @@
 |-------|-------|
 | **Last updated** | 2026-08-17 |
 | **Last agent** | Cursor |
-| **Last session** | **Community page spacing fix** — pushed `/community` header below the fixed navbar and kept article-empty logic untouched. Default theme is light unless a saved dark preference exists; footer phone number updated to `+82 10 8349 4111`. |
-| **Next agent should start with** | P3-10 — verify `/community` header spacing in browser and confirm any empty article state is backend data, not frontend view logic. |
+| **Last session** | **Upload images on localhost** — same-origin `/uploads` + Next rewrite to `GRAPHQL_PROXY_TARGET` so profile/article photos saved against production no longer 404 on `localhost:3000`. Community covers already use the same resolver. |
+| **Next agent should start with** | Verify technician Public Profile avatar on localhost after `yarn dev` restart; confirm `/uploads/member/...` returns 200. |
 
 ---
 

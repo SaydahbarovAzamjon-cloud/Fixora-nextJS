@@ -33,6 +33,15 @@ describe('resolveArticleImageUrl', () => {
 		expect(resolveArticleImageUrl('')).toBeNull();
 	});
 
+	it('strips localhost API origin from upload URLs', () => {
+		expect(
+			resolveArticleImageUrl('http://localhost:2000/uploads/member/photo.jpg'),
+		).toBe('/uploads/member/photo.jpg');
+		expect(
+			resolveArticleImageUrl('http://localhost:3000/uploads/member/photo.jpg'),
+		).toBe('/uploads/member/photo.jpg');
+	});
+
 	it('encodes relative upload paths', () => {
 		const resolved = resolveArticleImageUrl('uploads/article/IMG_6084.PNG');
 		expect(resolved).toMatch(/uploads\/article\/IMG_6084\.PNG$/);

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
@@ -148,6 +148,7 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	const [activeTab, setActiveTab] = useState<TabId>('overview');
 	const [likePendingId, setLikePendingId] = useState<string | null>(null);
 	const [articleOverrides, setArticleOverrides] = useState<Record<string, Partial<Article>>>({});
+	const [avatarFailed, setAvatarFailed] = useState(false);
 	const isOwner = variant === 'owner';
 
 	const [subscribe] = useMutation(SUBSCRIBE);
@@ -170,6 +171,12 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 	const profile = (isOwner ? ownerProfile : (visitorUserData as T)?.getUser) as TechnicianProfile | undefined;
 	const userLoading = isOwner ? ownerProfileLoading : visitorUserLoading;
 	const refetchUser = isOwner ? refetchOwnerProfile : refetchVisitorUser;
+	const profileImageSrc = isOwner
+		? getTechnicianSelfAvatarUrl(profile, profileDraft, technicianId, authUser?.memberImage)
+		: getTechnicianAvatarUrl(profile);
+	useEffect(() => {
+		setAvatarFailed(false);
+	}, [profileImageSrc]);
 
 	const { data: ownerArticlesData } = useQuery(GET_MY_ARTICLES, {
 		variables: { input: { page: 1, limit: 6, search: {} } },
@@ -240,9 +247,8 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 
 	const displayName = isOwner ? getTechnicianSelfDisplayName(profile) : getTechnicianDisplayName(profile);
 	const ownerSubtitle = getTechnicianOwnerSubtitle(profile);
-	const profileImageSrc = isOwner
-		? getTechnicianSelfAvatarUrl(profile, profileDraft, technicianId, authUser?.memberImage)
-		: getTechnicianAvatarUrl(profile);
+	const showProfileImage =
+		!!profileImageSrc && profileImageSrc !== '/img/profile/defaultUser.svg' && !avatarFailed;
 	const specialty = profile?.specialty || '';
 	const location = profile?.userLocation || '';
 	const rating = profile?.averageRating ?? 0;
@@ -375,8 +381,12 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 				<div className="fixora-pp-header">
 					<div className="fixora-pp-header__avatar-wrap">
 						<div className="fixora-pp-header__avatar">
-							{profileImageSrc && profileImageSrc !== '/img/profile/defaultUser.svg' ? (
-								<img src={profileImageSrc} alt={displayName} />
+							{showProfileImage ? (
+								<img
+									src={profileImageSrc}
+									alt={displayName}
+									onError={() => setAvatarFailed(true)}
+								/>
 							) : (
 								initials
 							)}

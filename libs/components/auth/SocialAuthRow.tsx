@@ -6,11 +6,7 @@ import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin, revertOAuthSignupSession } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { getJwtToken } from '../../auth/tokens';
-<<<<<<< HEAD
-import { startGoogleAuth } from '../../google-gis';
-=======
 import { requestGoogleCredential } from '../../google-gis';
->>>>>>> origin/cursor/fix-google-oauth-cancel-73f3
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
@@ -84,14 +80,12 @@ const SocialAuthRow = ({
 	const oauthErrorMessage = useCallback(
 		(err: unknown, provider: OAuthProvider) => {
 			const message = getGraphQLErrorMessage(err);
-<<<<<<< HEAD
-			const fallback = provider === 'google' ? t('oauth.googleFailed') : t('oauth.kakaoFailed');
-=======
+			const fallback =
+    	provider === 'google' ? t('oauth.googleFailed') : t('oauth.kakaoFailed');
 			if (/popup blocked/i.test(message)) return t('oauth.googlePopupBlocked');
 			if (/consent screen|test users|popup closed|Authorized JavaScript origins/i.test(message)) {
 				return t('oauth.googlePopupClosed');
 			}
->>>>>>> origin/cursor/fix-google-oauth-cancel-73f3
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
 			if (/timed out/i.test(message)) return t('oauth.kakaoFailed');
 			if (/NEXT_PUBLIC_GOOGLE_CLIENT_ID|GOOGLE_NOT_CONFIGURED/i.test(message)) return t('oauth.googleNotConfigured');
@@ -176,19 +170,9 @@ const SocialAuthRow = ({
 
 		setLoading('google');
 		try {
-<<<<<<< HEAD
-			const result = await startGoogleAuth(clientId, {
-				mode,
-				returnTo: router.asPath || (mode === 'register' ? '/register' : '/login'),
-			});
-			// Mobile / in-app: full-page redirect — callback page finishes OAuth.
-			if (result.type === 'redirect') return;
-			await runOAuth('google', result.code);
-=======
 			// Prefer Google ID token (JWT); auth-code popup is fallback only.
 			const token = await requestGoogleCredential(clientId);
 			await runOAuth('google', token);
->>>>>>> origin/cursor/fix-google-oauth-cancel-73f3
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');
 		} finally {

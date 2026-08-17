@@ -170,8 +170,12 @@ const SocialAuthRow = ({
 
 		setLoading('google');
 		try {
-			// Prefer Google ID token (JWT); auth-code popup is fallback only.
-			const token = await requestGoogleCredential(clientId);
+			// Popup returns auth code; mobile/in-app starts redirect and callback page completes login.
+			const token = await requestGoogleCredential(clientId, {
+				mode,
+				returnTo: router.asPath || (mode === 'register' ? '/register' : '/login'),
+			});
+			if (!token) return;
 			await runOAuth('google', token);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');

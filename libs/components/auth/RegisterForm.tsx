@@ -93,11 +93,16 @@ const RegisterForm = () => {
 				setErrors(err.conflicts);
 				return;
 			}
-			await sweetMixinErrorAlert(err instanceof Error ? err.message : 'Sign up failed');
+			const raw = err instanceof Error ? err.message : String(err ?? '');
+			if (/PHOTO_TOO_LARGE|413|payload too large|entity too large/i.test(raw)) {
+				await sweetMixinErrorAlert(t('validation.photoTooLarge'));
+				return;
+			}
+			await sweetMixinErrorAlert(raw || 'Sign up failed');
 		} finally {
 			setLoading(false);
 		}
-	}, [fullName, email, phone, password, confirmPassword, termsAccepted, photoFile]);
+	}, [fullName, email, phone, password, confirmPassword, termsAccepted, photoFile, t]);
 
 	return (
 		<>

@@ -76,6 +76,10 @@ sudo ufw enable
 - `https://fixoranext.com`
 - `https://www.fixoranext.com`
 
+**Google Cloud** → OAuth consent screen:
+- If status is **Testing**, add every Google account that should log in under **Test users** (or publish the app). Testing mode blocks other accounts and often looks like a cancelled popup.
+- Frontend prefers Google **ID token** (`loginWithOAuth` token = JWT); auth-code popup is fallback only.
+
 **Kakao Developers** → Platform → Web → Site domain:
 - `https://fixoranext.com`
 

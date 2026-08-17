@@ -1,4 +1,5 @@
 import { userVar } from '../../apollo/store';
+import { isLocalUploadedProfileImage, resolvePreferredProfileImage } from '../utils/profileImage';
 
 const PROFILE_IMAGE_STORAGE_PREFIX = 'fixora_profile_image:';
 
@@ -15,7 +16,14 @@ export function syncUserVarFromGraphqlUser(u: {
 	const current = userVar();
 	const nextFullName = u.userFullName !== undefined ? (u.userFullName ?? '') : (current.memberFullName ?? '');
 	const nextNick = u.userNickname !== undefined ? (u.userNickname ?? '') : (current.memberNick ?? '');
-	const nextImage = u.userProfileImage !== undefined ? (u.userProfileImage ?? '') : (current.memberImage ?? '');
+	const storedImage = u._id ? readStoredProfileImage(u._id) : null;
+	// Explicit GraphQL/save path: trust a new Fixora upload over stale localStorage/JWT.
+	const nextImage =
+		u.userProfileImage !== undefined
+			? isLocalUploadedProfileImage(u.userProfileImage)
+				? (u.userProfileImage ?? '').trim()
+				: resolvePreferredProfileImage(u.userProfileImage, storedImage ?? current.memberImage)
+			: (current.memberImage ?? '');
 	const nextPhone = u.userPhoneNumber !== undefined ? (u.userPhoneNumber ?? '') : (current.memberPhone ?? '');
 	const nextLocation = u.userLocation !== undefined ? (u.userLocation ?? '') : (current.memberAddress ?? '');
 	const nextBio = u.userBio !== undefined ? (u.userBio ?? '') : (current.memberDesc ?? '');
@@ -42,7 +50,7 @@ export function syncUserVarFromGraphqlUser(u: {
 
 	if (typeof window !== 'undefined' && u._id && u.userProfileImage !== undefined) {
 		const key = `${PROFILE_IMAGE_STORAGE_PREFIX}${u._id}`;
-		if (u.userProfileImage) localStorage.setItem(key, u.userProfileImage);
+		if (nextImage) localStorage.setItem(key, nextImage);
 		else localStorage.removeItem(key);
 	}
 }

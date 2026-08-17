@@ -110,7 +110,12 @@ const Testimonials = () => {
 															}
 														}}
 													/>
-													<span className="fixora-testimonial-card__name">{item.name}</span>
+													<div className="fixora-testimonial-card__author-meta">
+														<span className="fixora-testimonial-card__name">{item.name}</span>
+														<span className="fixora-testimonial-card__technician">
+															{t('homepage.testimonials.forTechnician', { name: item.technicianName })}
+														</span>
+													</div>
 												</div>
 												<span className="fixora-testimonial-card__rating">
 													<StarIcon fontSize="inherit" />

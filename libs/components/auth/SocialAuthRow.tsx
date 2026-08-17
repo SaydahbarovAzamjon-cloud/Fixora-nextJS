@@ -6,7 +6,7 @@ import { GoogleIcon, AppleIcon } from '../brand';
 import { fixoraOAuthLogin, revertOAuthSignupSession } from '../../auth/fixoraAuth';
 import { readOAuthSignupRole } from '../../auth/oauthSignupRole';
 import { getJwtToken } from '../../auth/tokens';
-import { requestGoogleAuthCode } from '../../google-gis';
+import { startGoogleAuth } from '../../google-gis';
 import { requestKakaoAccessToken } from '../../kakao-sdk';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { resolveAuthUser } from '../../utils/authSession';
@@ -80,6 +80,7 @@ const SocialAuthRow = ({
 	const oauthErrorMessage = useCallback(
 		(err: unknown, provider: OAuthProvider) => {
 			const message = getGraphQLErrorMessage(err);
+			const fallback = provider === 'google' ? t('oauth.googleFailed') : t('oauth.kakaoFailed');
 			if (/cancel/i.test(message)) return t('oauth.cancelled');
 			if (/timed out/i.test(message)) return t('oauth.kakaoFailed');
 			if (/NEXT_PUBLIC_GOOGLE_CLIENT_ID|GOOGLE_NOT_CONFIGURED/i.test(message)) return t('oauth.googleNotConfigured');
@@ -100,10 +101,18 @@ const SocialAuthRow = ({
 						: t('oauth.kakaoAlreadyRegistered')
 					: t('oauth.accountExists');
 			}
-			if (message && !/^OAuth login failed/i.test(message) && message !== 'Request failed') {
-				return message;
+			// Never surface raw JS / minified runtime errors to users.
+			if (
+				!message ||
+				/^OAuth login failed/i.test(message) ||
+				message === 'Request failed' ||
+				/is not a function|Cannot read|TypeError|ReferenceError|requestCode|undefined is not/i.test(
+					message,
+				)
+			) {
+				return fallback;
 			}
-			return provider === 'google' ? t('oauth.googleFailed') : t('oauth.kakaoFailed');
+			return message;
 		},
 		[mode, t],
 	);
@@ -156,14 +165,19 @@ const SocialAuthRow = ({
 
 		setLoading('google');
 		try {
-			const code = await requestGoogleAuthCode(clientId);
-			await runOAuth('google', code);
+			const result = await startGoogleAuth(clientId, {
+				mode,
+				returnTo: router.asPath || (mode === 'register' ? '/register' : '/login'),
+			});
+			// Mobile / in-app: full-page redirect — callback page finishes OAuth.
+			if (result.type === 'redirect') return;
+			await runOAuth('google', result.code);
 		} catch (err: unknown) {
 			await showOAuthError(err, 'google');
 		} finally {
 			setLoading(null);
 		}
-	}, [ensureSignupRole, runOAuth, showOAuthError, t]);
+	}, [ensureSignupRole, mode, router.asPath, runOAuth, showOAuthError, t]);
 
 	const handleKakao = useCallback(async () => {
 		if (!process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {

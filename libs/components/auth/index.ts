@@ -1,5 +1,6 @@
 export { default as AuthShell } from './AuthShell';
 export { default as AuthHeading } from './AuthHeading';
+export { default as AuthNavBack } from './AuthNavBack';
 export { default as AuthDivider } from './AuthDivider';
 export { default as LoginForm } from './LoginForm';
 export { default as RegisterForm } from './RegisterForm';

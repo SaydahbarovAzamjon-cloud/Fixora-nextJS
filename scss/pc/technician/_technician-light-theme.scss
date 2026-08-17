@@ -973,6 +973,8 @@
 		.fixora-pp-stat__value,
 		.fixora-pp-stories-card__title,
 		.fixora-pp-panel__title,
+		.fixora-pp-cred__title,
+		.fixora-pp-spec__title,
 		.fixora-pp-service__title,
 		.fixora-pp-port__title,
 		.fixora-pp-review__name,
@@ -993,6 +995,12 @@
 		}
 
 		.fixora-pp-stat__label,
+		.fixora-pp-stat__unit,
+		.fixora-pp-header__loc,
+		.fixora-pp-header__owner,
+		.fixora-pp-cred__sub,
+		.fixora-pp-spec__sub,
+		.fixora-pp-spec__jobs,
 		.fixora-pp-panel__text,
 		.fixora-pp-articles-empty__desc {
 			color: var(--fixora-text-secondary);

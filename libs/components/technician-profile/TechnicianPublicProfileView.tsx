@@ -440,7 +440,11 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 					</div>
 
 					<div className="fixora-pp-header__actions">
-						<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={messageHandler}>
+						<button
+							className={`fixora-pp-btn fixora-pp-btn--primary${variant === 'visitor' && !isOwner && device === 'mobile' ? ' fixora-pp-btn--mobile-sticky-dupe' : ''}`}
+							type="button"
+							onClick={messageHandler}
+						>
 							<ChatBubbleOutlineOutlined style={{ fontSize: 17 }} /> {t('technicianProfile.pp.messageMe')}
 						</button>
 						{!isOwner && (
@@ -461,7 +465,11 @@ const TechnicianPublicProfileView: React.FC<TechnicianPublicProfileViewProps> = 
 							</button>
 						)}
 						{!isOwner && (
-							<button className="fixora-pp-btn fixora-pp-btn--primary" type="button" onClick={bookServiceHandler}>
+							<button
+								className={`fixora-pp-btn fixora-pp-btn--primary${variant === 'visitor' && device === 'mobile' ? ' fixora-pp-btn--mobile-sticky-dupe' : ''}`}
+								type="button"
+								onClick={bookServiceHandler}
+							>
 								<BuildOutlined style={{ fontSize: 16 }} /> {t('technicianProfile.sidebar.bookCta')}
 							</button>
 						)}

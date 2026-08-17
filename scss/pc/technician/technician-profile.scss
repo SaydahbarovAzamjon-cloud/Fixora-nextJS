@@ -1124,12 +1124,19 @@
 		&__actions {
 			width: 100%;
 			flex-direction: row;
+
+			.fixora-pp-btn {
+				flex: 1;
+				min-width: 0;
+			}
 		}
 	}
 
 	.fixora-pp-stats {
-		gap: 28px;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px 16px;
+		width: 100%;
 	}
 }
 
@@ -1585,5 +1592,195 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: 24px;
+	}
+}
+
+/* Phone — reflow public profile without redesign (DECISIONS MOB-03: 639px) */
+@media (max-width: 639px) {
+	.fixora-pp-visitor-wrap {
+		max-width: 100%;
+		width: 100%;
+		margin: 0;
+		padding: 8px 0 28px;
+		box-sizing: border-box;
+	}
+
+	.fixora-pp-page {
+		max-width: 100%;
+		width: 100%;
+		padding: 0 0 96px;
+		gap: 14px;
+		box-sizing: border-box;
+
+		.fixora-home-tips__grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.fixora-pp-header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 14px;
+		padding: 18px 16px;
+		overflow: visible;
+
+		&__avatar-wrap {
+			align-self: center;
+		}
+
+		&__avatar {
+			width: 88px;
+			height: 88px;
+			font-size: 32px;
+			border-radius: 22px;
+
+			img {
+				border-radius: 22px;
+			}
+		}
+
+		&__main {
+			padding-top: 0;
+			text-align: center;
+		}
+
+		&__name-row {
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+
+		&__name {
+			font-size: 22px;
+			line-height: 1.3;
+			word-break: break-word;
+		}
+
+		&__owner,
+		&__role {
+			font-size: 14px;
+		}
+
+		&__loc {
+			justify-content: center;
+			flex-wrap: wrap;
+		}
+
+		&__actions {
+			width: 100%;
+			flex-direction: column;
+		}
+	}
+
+	.fixora-pp-stats {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px 14px;
+		margin-top: 16px;
+		text-align: left;
+	}
+
+	.fixora-pp-stat {
+		min-width: 0;
+
+		&__value {
+			font-size: 18px;
+		}
+
+		&__label {
+			font-size: 12px;
+		}
+	}
+
+	.fixora-pp-stories-card {
+		padding: 16px;
+	}
+
+	.fixora-pp-stories {
+		gap: 14px;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 4px;
+	}
+
+	.fixora-pp-tabs {
+		gap: 18px;
+		overflow-x: auto;
+		flex-wrap: nowrap;
+		-webkit-overflow-scrolling: touch;
+		padding: 0 2px;
+	}
+
+	.fixora-pp-tab {
+		flex: 0 0 auto;
+		white-space: nowrap;
+		font-size: 14px;
+		padding: 10px 2px;
+	}
+
+	.fixora-pp-panel {
+		padding: 16px;
+		width: 100%;
+		box-sizing: border-box;
+
+		&__title {
+			font-size: 16px;
+			margin-bottom: 12px;
+		}
+	}
+
+	.fixora-pp-row {
+		grid-template-columns: 1fr;
+		gap: 14px;
+		width: 100%;
+	}
+
+	.fixora-pp-cred,
+	.fixora-pp-spec {
+		gap: 10px;
+		min-width: 0;
+
+		&__title {
+			font-size: 14px;
+		}
+
+		&__sub {
+			font-size: 12px;
+		}
+	}
+
+	.fixora-pp-services {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.fixora-pp-service {
+		padding: 16px;
+	}
+
+	.fixora-pp-portfolio {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.fixora-pp-btn {
+		width: 100%;
+		min-height: 44px;
+	}
+
+	.fixora-booking-service-types--inline {
+		padding: 16px;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.fixora-booking-service-types__chips {
+		flex-direction: column;
+	}
+
+	.fixora-booking-service-types__chip {
+		width: 100%;
+		justify-content: center;
+		box-sizing: border-box;
 	}
 }

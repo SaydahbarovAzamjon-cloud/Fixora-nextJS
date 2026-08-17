@@ -17,7 +17,7 @@ import { useDeviceImageUpload } from '../../hooks/useDeviceImageUpload';
 import {
 	serializeDeviceImages,
 } from '../../utils/deviceImage';
-import { getGraphQLErrorMessage } from '../../utils/oauthErrors';
+import { resolveUserFacingErrorMessage } from '../../utils/userFacingErrors';
 import type { Device, DeviceCategory } from '../../types/fixora/fixora';
 import { bookingDevicePlaceholderKey } from '../../utils/bookingDevicePlaceholders';
 import { ownerMyPageHref } from '../../utils/clientMyPageRoute';
@@ -32,10 +32,16 @@ const DEVICE_CATEGORIES: DeviceCategory[] = ['IPHONE', 'IPAD', 'MACBOOK', 'APPLE
 
 const MUTATION_CONTEXT = { suppressErrorAlert: true } as const;
 
-function formatBookingSubmitError(err: unknown, fallback: string): string {
-	const message = getGraphQLErrorMessage(err).trim();
-	if (!message || /maximum call stack/i.test(message)) return fallback;
-	return message;
+function formatBookingSubmitError(err: unknown, t: (key: string) => string): string {
+	return resolveUserFacingErrorMessage(err, t, {
+		payloadTooLarge: 'booking.errors.imageTooLarge',
+		network: 'booking.errors.network',
+		timeout: 'booking.errors.timeout',
+		unauthorized: 'booking.errors.unauthorized',
+		forbidden: 'booking.errors.forbidden',
+		technical: 'booking.errors.generic',
+		fallback: 'booking.errors.generic',
+	});
 }
 
 const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }: BookingFormProps) => {
@@ -173,7 +179,6 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 		submittingRef.current = true;
 		setSubmitting(true);
 		const upload = deviceImageUploadRef.current;
-		const genericError = t('booking.errors.generic');
 
 		try {
 			let deviceId = selectedDeviceId;
@@ -218,7 +223,7 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 			}
 
 			if (!deviceId || deviceId === 'new') {
-				throw new Error(genericError);
+				throw new Error(t('booking.errors.generic'));
 			}
 
 			const bookingResult = await createBooking({
@@ -236,11 +241,11 @@ const BookingForm = ({ technicianId, technicianName, technicianDeviceCategory }:
 			});
 
 			const bookingId = bookingResult.data?.createBooking?._id as string | undefined;
-			if (!bookingId) throw new Error(genericError);
+			if (!bookingId) throw new Error(t('booking.errors.generic'));
 			upload.clearImages();
 			setCreatedBookingId(bookingId);
 		} catch (err: unknown) {
-			await sweetMixinErrorAlert(formatBookingSubmitError(err, genericError));
+			await sweetMixinErrorAlert(formatBookingSubmitError(err, t));
 		} finally {
 			submittingRef.current = false;
 			setSubmitting(false);

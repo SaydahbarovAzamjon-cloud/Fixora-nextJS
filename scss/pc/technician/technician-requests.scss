@@ -610,3 +610,27 @@ $border-subtle: var(--fixora-border-subtle);
 		border-bottom: 1px solid $border-subtle;
 	}
 }
+
+@media (max-width: 639px) {
+	.fixora-requests-actionbar {
+		flex-wrap: wrap;
+		gap: 8px;
+		padding: 12px 16px;
+	}
+
+	.fixora-requests-detail__btn {
+		min-width: 0;
+		padding: 12px 14px;
+		font-size: 13px;
+
+		&--accept {
+			flex: 1 1 100%;
+			order: -1;
+		}
+
+		&--message,
+		&--decline {
+			flex: 1 1 calc(50% - 4px);
+		}
+	}
+}

@@ -10,6 +10,7 @@ import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
+import AuthNavBack from './AuthNavBack';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
 import { buildNotificationSetupPayload } from '../notifications/NotificationSetupCard';
@@ -62,6 +63,10 @@ const RegisterForm = () => {
 	}, [router]);
 
 	const handleSubmit = useCallback(async () => {
+		if (!termsAccepted) {
+			setErrors({ terms: 'termsRequired' });
+			return;
+		}
 		const result = validateRegisterInput(
 			fullName,
 			email,
@@ -96,6 +101,9 @@ const RegisterForm = () => {
 
 	return (
 		<>
+			{!showTelegramStep && (
+				<AuthNavBack label={t('register.backToRole')} onClick={() => void router.push('/register/role')} />
+			)}
 			<AuthHeading
 				titleBefore={
 					showTelegramStep ? t('authTelegram.headingBefore') : t('register.titleBefore')
@@ -207,7 +215,7 @@ const RegisterForm = () => {
 										? t(`validation.${errors.confirmPassword}`)
 										: undefined
 								}
-								onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+								onKeyDown={(e) => e.key === 'Enter' && !loading && termsAccepted && handleSubmit()}
 							/>
 							<label className="auth-form__checkbox">
 								<input
@@ -226,7 +234,12 @@ const RegisterForm = () => {
 									{t(`validation.${errors.terms}`)}
 								</span>
 							)}
-							<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleSubmit}>
+							<FixoraButton
+								variant="primary"
+								fullWidth
+								disabled={loading || !termsAccepted}
+								onClick={handleSubmit}
+							>
 								{t('register.submit')}
 								<ArrowForward fontSize="small" />
 							</FixoraButton>
@@ -242,9 +255,8 @@ const RegisterForm = () => {
 					<AuthDivider />
 					<SocialAuthRow mode="register" />
 					<div className="auth-footer">
-						{t('register.hasAccount')}{' '}
-						<button type="button" onClick={() => router.push('/login')}>
-							{t('register.logIn')}
+						<button type="button" onClick={() => void router.push('/login')}>
+							{t('register.backToLogin')}
 						</button>
 					</div>
 				</>

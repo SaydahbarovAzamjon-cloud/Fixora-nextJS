@@ -991,3 +991,35 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+@media (max-width: 639px) {
+	.fixora-jobs-page {
+		flex-direction: column;
+		height: auto;
+	}
+
+	.fixora-jobs-left {
+		width: 100%;
+		border-right: none;
+	}
+
+	.fixora-jobs-filterbar {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.fixora-jobs-filter {
+		flex: 0 0 auto;
+		white-space: nowrap;
+	}
+
+	.fixora-jobs-right {
+		width: 100%;
+	}
+
+	.fixora-jobs-actionbar {
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+}

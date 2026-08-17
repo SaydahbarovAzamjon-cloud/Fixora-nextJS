@@ -9,6 +9,7 @@ import AddAPhotoOutlined from '@mui/icons-material/AddAPhotoOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthHeading from './AuthHeading';
+import AuthNavBack from './AuthNavBack';
 import AuthDivider from './AuthDivider';
 import SocialAuthRow from './SocialAuthRow';
 import { loadTechDraft, saveTechDraft, validateTechStep1, isSignupConflictError } from '../../auth/fixoraAuth';
@@ -132,6 +133,7 @@ const TechOnboardingStep1 = () => {
 
 	return (
 		<>
+			<AuthNavBack label={t('register.backToRole')} onClick={() => void router.push('/register/role')} />
 			<span className="auth-tech__step">{t('tech.step1Label')}</span>
 			<AuthHeading
 				titleBefore={t('tech.step1Title')}
@@ -229,6 +231,11 @@ const TechOnboardingStep1 = () => {
 			</div>
 			<AuthDivider />
 			<SocialAuthRow mode="register" />
+			<div className="auth-footer">
+				<button type="button" onClick={() => void router.push('/login')}>
+					{t('register.backToLogin')}
+				</button>
+			</div>
 		</>
 	);
 };

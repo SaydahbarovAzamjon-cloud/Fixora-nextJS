@@ -19,11 +19,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Logout } from '@mui/icons-material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { userVar } from '../../apollo/store';
-import { resolveProfileImageUrl } from '../utils/profileImage';
+import { userVar, profileImageDraftVar } from '../../apollo/store';
+import { hasRealProfileImage, resolvePreferredProfileImage, resolveProfileImageUrl } from '../utils/profileImage';
+import { readStoredProfileImage } from '../auth/syncUserVar';
 import { isTechnicianUser } from '../utils/userRole';
 import { CLIENT_MY_PAGE, isClientMyPageRoute } from '../utils/clientMyPageRoute';
-import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
+import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ, MARK_ALL_NOTIFICATIONS_READ, DELETE_NOTIFICATION } from '../../apollo/user/notification';
 import { GET_MY_CONVERSATIONS } from '../../apollo/user/message';
 import { Notification } from '../types/fixora/fixora';
 import { getNotificationLink, filterNavbarNotifications } from '../utils/notifications';
@@ -31,12 +32,12 @@ import NotificationDropdown from './notifications/NotificationDropdown';
 import NotificationBell from './layout/NotificationBell';
 import NavSearchInput from './nav/NavSearchInput';
 import NavThemeToggle from './nav/NavThemeToggle';
+import LanguageToggle from './common/LanguageToggle';
 import useRealtimePollInterval from '../hooks/useRealtimePollInterval';
 import { normalizeAppLocale } from '../utils/i18nLocale';
 import { normalizeRoutePath } from '../utils/routePaths';
 import { useNotificationContextOptional } from '../context/NotificationContext';
 
-const LANGS = ['en', 'kr'] as const;
 const NAV_ICON_SIZE = 18;
 
 const formatNavBadge = (count: number) => (count > 99 ? '99+' : count);
@@ -44,10 +45,10 @@ const formatNavBadge = (count: number) => (count > 99 ? '99+' : count);
 const Top = () => {
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
+	const profileDraft = useReactiveVar(profileImageDraftVar);
 	const isTechnician = isTechnicianUser(user);
 	const { t } = useTranslation('common');
 	const router = useRouter();
-	const [lang, setLang] = useState<string>('en');
 	const [colorChange, setColorChange] = useState(false);
 	const [logoutAnchor, setLogoutAnchor] = useState<null | HTMLElement>(null);
 	const logoutOpen = Boolean(logoutAnchor);
@@ -57,6 +58,15 @@ const Top = () => {
 	const notifRef = useRef<HTMLDivElement>(null);
 	const notifCtx = useNotificationContextOptional();
 	const navPollMs = useRealtimePollInterval(30000);
+
+	const storedAvatar = user?._id ? readStoredProfileImage(user._id) : null;
+	const navAvatarPath =
+		profileDraft ||
+		resolvePreferredProfileImage(
+			hasRealProfileImage(user?.memberImage) ? user?.memberImage : null,
+			storedAvatar,
+		);
+	const navAvatarSrc = resolveProfileImageUrl(navAvatarPath);
 
 	const { data: notificationsData, refetch: refetchNotifications } = useQuery(GET_NOTIFICATIONS, {
 		skip: !user?._id,
@@ -88,13 +98,13 @@ const Top = () => {
 	);
 
 	const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
+	const [markAllNotificationsRead] = useMutation(MARK_ALL_NOTIFICATIONS_READ);
 	const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
 		const stored = normalizeAppLocale(localStorage.getItem('locale'));
 		localStorage.setItem('locale', stored);
-		setLang(stored);
 		if (router.locale && router.locale !== stored) {
 			void router.replace(router.asPath, router.asPath, { locale: stored });
 		}
@@ -125,9 +135,12 @@ const Top = () => {
 	useEffect(() => {
 		if (!menuOpen) return;
 		const previousOverflow = document.body.style.overflow;
+		const previousTouchAction = document.body.style.touchAction;
 		document.body.style.overflow = 'hidden';
+		document.body.style.touchAction = 'none';
 		return () => {
-			document.body.style.overflow = previousOverflow;
+			document.body.style.overflow = previousOverflow || '';
+			document.body.style.touchAction = previousTouchAction || '';
 		};
 	}, [menuOpen]);
 
@@ -143,15 +156,6 @@ const Top = () => {
 	}, [router.events, router.pathname]);
 
 	/** HANDLERS **/
-	const langChoice = useCallback(
-		async (locale: string) => {
-			setLang(locale);
-			localStorage.setItem('locale', locale);
-			await router.push(router.asPath, router.asPath, { locale });
-		},
-		[router],
-	);
-
 	const isActive = (path: string) =>
 		path === '/' ? router.pathname === '/' : router.pathname.startsWith(path);
 
@@ -166,6 +170,16 @@ const Top = () => {
 			await deleteNotification({ variables: { notificationId: notification._id } });
 			if (!notification.isRead) notifCtx?.decrementUnread();
 			await refetchNotifications();
+		} catch {
+			/* ignore */
+		}
+	};
+
+	const handleMarkAllNotificationsRead = async () => {
+		try {
+			await markAllNotificationsRead();
+			notifCtx?.clearUnread();
+			await Promise.all([refetchNotifications(), notifCtx?.refetchNotifications()]);
 		} catch {
 			/* ignore */
 		}
@@ -281,23 +295,6 @@ const Top = () => {
 
 	const navLinks = renderNavLinks();
 
-	const langToggle = (compact = false) => (
-		<div className={compact ? 'fixora-nav-mobile__lang' : 'fixora-nav__lang'}>
-			{LANGS.map((code, idx) => (
-				<React.Fragment key={code}>
-					{idx > 0 && <span className="fixora-nav__lang-divider">|</span>}
-					<button
-						type="button"
-						className={`fixora-nav__lang-btn ${lang === code ? 'fixora-nav__lang-btn--active' : ''}`}
-						onClick={() => langChoice(code)}
-					>
-						{code.toUpperCase()}
-					</button>
-				</React.Fragment>
-			))}
-		</div>
-	);
-
 	if (device == 'mobile') {
 		const messagesHref = isTechnician ? '/technician/messages' : '/messages';
 		const notificationsHref = isTechnician ? '/technician/notifications' : '/notifications';
@@ -322,7 +319,7 @@ const Top = () => {
 
 						<div className="fixora-nav-mobile__actions">
 							<NavThemeToggle compact />
-							{langToggle(true)}
+							<LanguageToggle compact className="fixora-nav-mobile__lang" />
 
 							{user?._id ? (
 								<>
@@ -340,19 +337,10 @@ const Top = () => {
 										className="fixora-nav-mobile__avatar"
 										onClick={(event) => setLogoutAnchor(event.currentTarget)}
 									>
-										<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+										<img src={navAvatarSrc} alt="" />
 									</button>
 								</>
-							) : (
-								<>
-									<Link href={'/login'} className="fixora-nav-mobile__login">
-										{t('nav.login')}
-									</Link>
-									<Link href={'/search'} className="fixora-nav-mobile__cta">
-										{t('nav.findTechnician')}
-									</Link>
-								</>
-							)}
+							) : null}
 						</div>
 					</div>
 				</Stack>
@@ -362,7 +350,6 @@ const Top = () => {
 						<button
 							type="button"
 							className="fixora-nav-mobile__backdrop"
-							onPointerDown={(event) => event.preventDefault()}
 							onClick={closeMenu}
 							aria-label={t('nav.closeMenu')}
 						/>
@@ -387,7 +374,7 @@ const Top = () => {
 								{renderNavLinks(true, closeMenu)}
 							</nav>
 
-							{user?._id && (
+							{user?._id ? (
 								<div className="fixora-nav-mobile__drawer-footer">
 									<button
 										type="button"
@@ -400,6 +387,18 @@ const Top = () => {
 										<Logout fontSize="small" />
 										{t('nav.logout')}
 									</button>
+								</div>
+							) : (
+								<div className="fixora-nav-mobile__drawer-footer fixora-nav-mobile__drawer-footer--guest">
+									<Link href="/login" className="fixora-nav-mobile__drawer-login" onClick={closeMenu}>
+										{t('nav.login')}
+									</Link>
+									<Link href="/register/role" className="fixora-nav-mobile__drawer-signup" onClick={closeMenu}>
+										{t('nav.signUp')}
+									</Link>
+									<Link href="/search" className="fixora-nav-mobile__drawer-cta" onClick={closeMenu}>
+										{t('nav.findTechnician')}
+									</Link>
 								</div>
 							)}
 						</aside>
@@ -434,7 +433,7 @@ const Top = () => {
 
 					<Box component={'div'} className={'fixora-nav__actions'}>
 						<NavThemeToggle />
-						{langToggle()}
+						<LanguageToggle />
 
 						{user?._id ? (
 							<>
@@ -456,6 +455,7 @@ const Top = () => {
 											notifications={recentNotifications}
 											onItemClick={handleNotificationClick}
 											onDelete={handleNotificationDelete}
+											onMarkAllRead={handleMarkAllNotificationsRead}
 											onViewAll={() => setNotifOpen(false)}
 											viewAllHref={isTechnician ? '/technician/notifications' : '/notifications'}
 										/>
@@ -466,7 +466,7 @@ const Top = () => {
 									className={'fixora-nav__avatar'}
 									onClick={(event) => setLogoutAnchor(event.currentTarget)}
 								>
-									<img src={resolveProfileImageUrl(user?.memberImage)} alt="" />
+									<img src={navAvatarSrc} alt="" />
 								</button>
 								<Menu
 									anchorEl={logoutAnchor}
@@ -484,6 +484,9 @@ const Top = () => {
 							<>
 								<Link href={'/login'} className={'fixora-nav__login'}>
 									{t('nav.login')}
+								</Link>
+								<Link href={'/register/role'} className={'fixora-nav__signup'}>
+									{t('nav.signUp')}
 								</Link>
 								<Link href={'/search'} className={'fixora-nav__cta'}>
 									{t('nav.findTechnician')}

@@ -4,15 +4,24 @@ import { GET_TECHNICIAN_REVIEWS, GET_TECHNICIANS } from '../../apollo/user/query
 import { TechnicianReview } from '../types/fixora/fixora';
 import { resolveProfileImageUrl } from '../utils/profileImage';
 
-/** Broader pool so brand-new reviews (any tech) can surface in the last 3. */
-const TECHNICIAN_POOL = 24;
-const REVIEWS_PER_TECHNICIAN = 2;
+/** Prefer recently active techs so brand-new reviews surface in the carousel. */
+const TECHNICIAN_POOL = 40;
+const REVIEWS_PER_TECHNICIAN = 3;
 const MAX_TESTIMONIALS = 3;
+
+type TechnicianPoolItem = {
+	_id: string;
+	userNickname?: string;
+	userFullName?: string;
+	shopName?: string;
+	reviewCount?: number;
+};
 
 export interface HomepageTestimonial {
 	id: string;
 	text: string;
 	name: string;
+	technicianName: string;
 	avatar: string;
 	rating: number;
 }
@@ -36,10 +45,27 @@ const formatCustomerName = (customer?: TechnicianReview['customerData']): string
 	return `${parts[0]} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
 };
 
-const mapReviewToTestimonial = (review: TechnicianReview): HomepageTestimonial => ({
+const formatTechnicianName = (
+	technician?: TechnicianReview['technicianData'],
+	fallback?: TechnicianPoolItem,
+): string => {
+	const shop = technician?.shopName?.trim() || fallback?.shopName?.trim();
+	if (shop) return shop;
+	const nickname = technician?.userNickname?.trim() || fallback?.userNickname?.trim();
+	if (nickname) return nickname;
+	const fullName = technician?.userFullName?.trim() || fallback?.userFullName?.trim();
+	if (fullName) return fullName;
+	return 'Technician';
+};
+
+const mapReviewToTestimonial = (
+	review: TechnicianReview,
+	fallbackTech?: TechnicianPoolItem,
+): HomepageTestimonial => ({
 	id: review._id,
 	text: review.reviewContent!.trim(),
 	name: formatCustomerName(review.customerData),
+	technicianName: formatTechnicianName(review.technicianData, fallbackTech),
 	avatar: resolveProfileImageUrl(review.customerData?.userProfileImage),
 	rating: averageReviewScore(review),
 });
@@ -54,7 +80,7 @@ export function useHomepageTestimonials() {
 			input: {
 				page: 1,
 				limit: TECHNICIAN_POOL,
-				sort: 'averageRating',
+				sort: 'updatedAt',
 				direction: 'DESC',
 				search: {},
 			},
@@ -63,9 +89,7 @@ export function useHomepageTestimonials() {
 	});
 
 	useEffect(() => {
-		const technicians = (data?.getTechnicians?.list ?? []).filter(
-			(tech: { reviewCount?: number }) => (tech.reviewCount ?? 0) > 0,
-		);
+		const technicians = (data?.getTechnicians?.list ?? []) as TechnicianPoolItem[];
 
 		if (!technicians.length) {
 			setTestimonials([]);
@@ -73,13 +97,14 @@ export function useHomepageTestimonials() {
 			return;
 		}
 
+		const techById = new Map(technicians.map((tech) => [tech._id, tech]));
 		let cancelled = false;
 		setLoadingReviews(true);
 
 		void (async () => {
 			try {
 				const results = await Promise.all(
-					technicians.map((tech: { _id: string }) =>
+					technicians.map((tech) =>
 						client.query({
 							query: GET_TECHNICIAN_REVIEWS,
 							variables: {
@@ -103,7 +128,12 @@ export function useHomepageTestimonials() {
 					.filter((review) => review.reviewContent?.trim())
 					.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 					.slice(0, MAX_TESTIMONIALS)
-					.map(mapReviewToTestimonial);
+					.map((review) =>
+						mapReviewToTestimonial(
+							review,
+							review.technicianId ? techById.get(review.technicianId) : undefined,
+						),
+					);
 
 				setTestimonials(merged);
 			} catch {

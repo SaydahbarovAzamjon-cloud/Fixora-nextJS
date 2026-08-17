@@ -28,8 +28,8 @@ import { OwnerMyPageTab, OWNER_MY_PAGE_TABS } from '../../../utils/clientMyPageR
 import { useProfileImageUpload } from '../../../hooks/useProfileImageUpload';
 import { UPDATE_USER } from '../../../../apollo/user/profile';
 import { profileImageDraftVar } from '../../../../apollo/store';
-import { readStoredProfileImage, syncUserVarFromGraphqlUser } from '../../../auth/syncUserVar';
-import { hasRealProfileImage } from '../../../utils/profileImage';
+import { readStoredProfileImage, syncUserVarFromGraphqlUser, writeStoredProfileImage } from '../../../auth/syncUserVar';
+import { hasRealProfileImage, resolvePreferredProfileImage } from '../../../utils/profileImage';
 import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
 
 type PublicTab = 'repairHistory' | 'savedTechnicians' | 'following' | 'reviews';
@@ -115,28 +115,39 @@ const ClientMyPageView = ({
 	useEffect(() => {
 		if (!profile?._id || isPublic) return;
 		const stored = readStoredProfileImage(profile._id);
-		const path = profile.userProfileImage ?? stored;
+		const path = resolvePreferredProfileImage(profile.userProfileImage, stored);
 		if (path && hasRealProfileImage(path)) {
 			avatar.setExistingImage(path);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate when profile image changes
 	}, [profile?._id, profile?.userProfileImage, isPublic]);
 
+	const uploadProfileImage = avatar.uploadProfileImage;
+	const clearDraftAfterSave = avatar.clearDraftAfterSave;
+	const coverFile = avatar.cover?.file;
+
 	const persistPendingPhoto = useCallback(async () => {
-		if (!avatar.cover?.file || !profile?._id) return;
-		const path = await avatar.uploadProfileImage();
+		if (!coverFile || !profile?._id) return;
+		const path = await uploadProfileImage();
 		if (!path) throw new Error('Upload failed');
 		const { data } = await updateUser({
 			variables: { input: { _id: profile._id, userProfileImage: path } },
 		});
-		const savedPath = data?.updateUser?.userProfileImage ?? path;
-		avatar.clearDraftAfterSave(savedPath);
-		syncUserVarFromGraphqlUser({ _id: profile._id, userProfileImage: savedPath });
+		// Always keep the uploaded Fixora path — do not fall back to OAuth CDN from stale profile.
+		const savedPath = path;
+		const serverPath = data?.updateUser?.userProfileImage as string | undefined;
+		const finalPath =
+			serverPath && !serverPath.startsWith('http://') && !serverPath.startsWith('https://')
+				? serverPath
+				: savedPath;
+		clearDraftAfterSave(finalPath);
+		writeStoredProfileImage(profile._id, finalPath);
+		syncUserVarFromGraphqlUser({ _id: profile._id, userProfileImage: finalPath });
 		onRefetchProfile?.();
-	}, [avatar, onRefetchProfile, profile?._id, updateUser]);
+	}, [clearDraftAfterSave, coverFile, onRefetchProfile, profile?._id, updateUser, uploadProfileImage]);
 
 	useEffect(() => {
-		if (!avatar.cover?.file || uploadInFlightRef.current || isPublic) return;
+		if (!coverFile || uploadInFlightRef.current || isPublic) return;
 		uploadInFlightRef.current = true;
 		persistPendingPhoto()
 			.then(() => sweetTopSmallSuccessAlert(t('mypage.settings.photoSaved'), 800))
@@ -144,9 +155,11 @@ const ClientMyPageView = ({
 			.finally(() => {
 				uploadInFlightRef.current = false;
 			});
-	}, [avatar.cover?.file, isPublic, persistPendingPhoto, t]);
+	}, [coverFile, isPublic, persistPendingPhoto, t]);
 
-	const headerImage = profileDraft ?? profile?.userProfileImage;
+	const storedHeader = profile?._id ? readStoredProfileImage(profile._id) : null;
+	const headerImage =
+		profileDraft ?? resolvePreferredProfileImage(profile?.userProfileImage, storedHeader);
 	const tabs = isPublic ? PUBLIC_TABS : OWNER_MY_PAGE_TABS;
 	const displayName = profile?.userFullName || profile?.userNickname || '';
 	const settingsId = profile?._id ?? settingsUserId;

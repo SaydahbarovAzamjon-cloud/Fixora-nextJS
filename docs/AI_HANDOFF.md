@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-07-15 |
+| **Last updated** | 2026-08-17 |
 | **Last agent** | Cursor |
-| **Last session** | **Auth admin notify deferral** — admin Telegram/new-user alerts wait for `confirmAuthSession` after home/dashboard landing (not mid Telegram/onboarding). Backend FixoraB + FixoraF AppShell wired. |
-| **Next agent should start with** | Deploy FixoraB `confirmAuthSession` to VPS, then frontend; smoke-test signup → Telegram step should NOT notify admin until `/` or `/technician/dashboard` |
+| **Last session** | **Community page spacing fix** — pushed `/community` header below the fixed navbar and kept article-empty logic untouched. Default theme is light unless a saved dark preference exists; footer phone number updated to `+82 10 8349 4111`. |
+| **Next agent should start with** | P3-10 — verify `/community` header spacing in browser and confirm any empty article state is backend data, not frontend view logic. |
 
 ---
 

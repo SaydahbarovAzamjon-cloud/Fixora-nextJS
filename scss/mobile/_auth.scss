@@ -4,16 +4,21 @@
 
 #mobile-wrap {
 	.auth-page {
-		min-height: calc(100dvh - var(--fixora-safe-top) - var(--fixora-safe-bottom));
+		/* Document/#mobile-wrap scrolls — nested overflow-y:auto feels "stuck" on iOS. */
+		min-height: auto;
+		height: auto;
+		max-height: none;
 		align-items: flex-start;
 		justify-content: flex-start;
 		padding:
 			calc(12px + var(--fixora-safe-top))
 			var(--fixora-mobile-gutter)
 			calc(24px + var(--fixora-safe-bottom));
+		overflow: visible;
 		overflow-x: hidden;
-		overflow-y: auto;
-		@include fixora-scrollbar;
+		overflow-y: visible;
+		touch-action: pan-y;
+		-webkit-overflow-scrolling: touch;
 
 		&::before,
 		&::after {
@@ -34,8 +39,18 @@
 
 		.auth-page__inner {
 			max-width: 100%;
+			width: 100%;
 			gap: 16px;
 		}
+	}
+
+	/* Auth layout has no #main — allow the wrap itself to grow with the form. */
+	&:has(> .auth-page) {
+		height: auto;
+		min-height: 100dvh;
+		overflow: visible;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.auth-brand {

@@ -1,19 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import { profileImageDraftVar } from '../../apollo/store';
 import { getJwtToken } from '../auth';
 import { resolveProfileImageUrl } from '../utils/profileImage';
-import { getGraphqlUrl } from '../env/publicEnv';
-import { formatFileSize, validateCoverFile } from './useArticleCoverUpload';
+import { uploadImageFile } from '../utils/uploadImageFile';
+import { formatFileSize } from './useArticleCoverUpload';
 
 export { formatFileSize };
+
+/** Backend `validMimeTypes`: png / jpg / jpeg only. */
+const PROFILE_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/pjpeg'];
+const PROFILE_ACCEPTED_EXTENSIONS = ['.png', '.jpg', '.jpeg'];
+const MAX_BYTES = 5 * 1024 * 1024;
+
+function validateProfileFile(file: File): string | null {
+	const type = file.type.toLowerCase();
+	const name = file.name.toLowerCase();
+	const typeOk =
+		(type && PROFILE_ACCEPTED_TYPES.includes(type)) ||
+		PROFILE_ACCEPTED_EXTENSIONS.some((ext) => name.endsWith(ext));
+	if (!typeOk) return 'invalidType';
+	if (file.size > MAX_BYTES) return 'tooLarge';
+	return null;
+}
 
 export interface ProfileFileState {
 	file: File;
 	previewUrl: string;
 }
-
-const UPLOAD_TARGETS = ['user', 'member'] as const;
 
 export function useProfileImageUpload(onError?: (key: string) => void) {
 	const [cover, setCover] = useState<ProfileFileState | null>(null);
@@ -52,7 +65,7 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 
 	const applyFile = useCallback(
 		(file: File) => {
-			const err = validateCoverFile(file);
+			const err = validateProfileFile(file);
 			if (err) {
 				onError?.(err);
 				return false;
@@ -87,33 +100,6 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 		[applyFile],
 	);
 
-	const uploadWithTarget = async (file: File, target: string, token: string): Promise<string> => {
-		const formData = new FormData();
-		formData.append(
-			'operations',
-			JSON.stringify({
-				query: `mutation ImageUploader($file: Upload!, $target: String!) {
-					imageUploader(file: $file, target: $target)
-				}`,
-				variables: { file: null, target },
-			}),
-		);
-		formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
-		formData.append('0', file);
-
-		const response = await axios.post(getGraphqlUrl(), formData, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-				'apollo-require-preflight': true,
-				Authorization: `Bearer ${token}`,
-			},
-		});
-		if (response.data?.errors?.length) throw response.data;
-		const path: string | undefined = response.data?.data?.imageUploader;
-		if (!path) throw new Error('Upload failed');
-		return path.startsWith('http') ? path : path.replace(/^\//, '');
-	};
-
 	const uploadProfileImage = useCallback(async (): Promise<string | undefined> => {
 		if (!cover?.file) return existingPath ?? undefined;
 		const token = getJwtToken();
@@ -121,15 +107,7 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 
 		setUploading(true);
 		try {
-			let lastErr: unknown;
-			for (const target of UPLOAD_TARGETS) {
-				try {
-					return await uploadWithTarget(cover.file, target, token);
-				} catch (err) {
-					lastErr = err;
-				}
-			}
-			throw lastErr ?? new Error('Upload failed');
+			return await uploadImageFile(cover.file, token);
 		} finally {
 			setUploading(false);
 		}
@@ -165,4 +143,4 @@ export function useProfileImageUpload(onError?: (key: string) => void) {
 		openPicker: () => fileRef.current?.click(),
 		hasImage: !!(cover || remoteUrl),
 	};
-};
+}

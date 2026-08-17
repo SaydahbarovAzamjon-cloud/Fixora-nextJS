@@ -4,7 +4,7 @@ export type FixoraThemeMode = 'dark' | 'light';
 
 export const FIXORA_THEME_STORAGE_KEY = 'fixora_theme_mode';
 
-export const DEFAULT_FIXORA_THEME_MODE: FixoraThemeMode = 'dark';
+export const DEFAULT_FIXORA_THEME_MODE: FixoraThemeMode = 'light';
 
 export function isFixoraThemeMode(value: unknown): value is FixoraThemeMode {
 	return value === 'dark' || value === 'light';
@@ -49,4 +49,4 @@ export function setStoredFixoraThemeMode(mode: FixoraThemeMode): void {
 }
 
 /** Inline bootstrap for _document.tsx — prevents theme flash on load */
-export const FIXORA_THEME_BOOTSTRAP_SCRIPT = `(function(){try{var m=localStorage.getItem('${FIXORA_THEME_STORAGE_KEY}');if(m==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.classList.add('theme-light');}}catch(e){}})();`;
+export const FIXORA_THEME_BOOTSTRAP_SCRIPT = `(function(){try{var m=localStorage.getItem('${FIXORA_THEME_STORAGE_KEY}');if(m==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.classList.remove('theme-light');}else{document.documentElement.setAttribute('data-theme','light');document.documentElement.classList.add('theme-light');}}catch(e){}})();`;

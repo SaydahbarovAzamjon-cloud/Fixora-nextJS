@@ -7,6 +7,7 @@ import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import AuthHeading from './AuthHeading';
+import AuthNavBack from './AuthNavBack';
 import { FixoraButton, FixoraInput } from '../ui';
 import AuthTelegramConnectStep from './AuthTelegramConnectStep';
 import { buildNotificationSetupPayload } from '../notifications/NotificationSetupCard';
@@ -55,12 +56,21 @@ const RoleSelect = () => {
 			setSelectedType(type);
 			return;
 		}
-		if (type === 'USER') router.push('/register');
-		else router.push('/register/technician/1');
+		if (type === 'USER') void router.push('/register');
+		else void router.push('/register/technician/1');
+	};
+
+	const handleBackToRoles = () => {
+		setSelectedType(null);
+		setErrors({});
 	};
 
 	const handleOAuthComplete = useCallback(async () => {
 		if (!selectedType) return;
+		if (!termsAccepted) {
+			setErrors({ terms: 'termsRequired' });
+			return;
+		}
 		const result = validateOAuthCompleteInput(nickname, phone, termsAccepted, {
 			email,
 			emailRequired: needsEmail,
@@ -106,6 +116,9 @@ const RoleSelect = () => {
 
 	return (
 		<>
+			{selectedType && (
+				<AuthNavBack label={t('role.backToRoles')} onClick={handleBackToRoles} />
+			)}
 			<AuthHeading
 				titleBefore={t('role.titleBefore')}
 				titleAccent={t('role.titleAccent')}
@@ -184,15 +197,20 @@ const RoleSelect = () => {
 						</span>
 					)}
 					{canConnectTelegram && <AuthTelegramConnectStep embedded />}
-					<FixoraButton variant="primary" fullWidth disabled={loading} onClick={handleOAuthComplete}>
+					<FixoraButton
+						variant="primary"
+						fullWidth
+						disabled={loading || !termsAccepted}
+						onClick={handleOAuthComplete}
+					>
 						{t('oauthComplete.submit')}
 						<ArrowForward fontSize="small" />
 					</FixoraButton>
 				</div>
 			)}
 			<div className="auth-footer">
-				<button type="button" onClick={() => router.push('/login')}>
-					{t('register.logIn')}
+				<button type="button" onClick={() => void router.push('/login')}>
+					{t('role.backToLogin')}
 				</button>
 			</div>
 		</>

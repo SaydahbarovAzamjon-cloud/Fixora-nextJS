@@ -486,6 +486,32 @@ $border-orange: var(--fixora-border);
 		flex-shrink: 0;
 		margin: 0 2px;
 
+		.fixora-nav__lang-trigger {
+			border-color: $tech-input-border;
+			background: $tech-surface;
+			color: #f0f0f0;
+
+			&:hover {
+				border-color: rgba(115, 12, 30, 0.45);
+				color: $tech-primary;
+			}
+		}
+
+		.fixora-nav__lang-menu {
+			background: $tech-surface;
+			border-color: $tech-input-border;
+		}
+
+		.fixora-nav__lang-option {
+			color: $tech-text-muted;
+
+			&:hover,
+			&--active {
+				color: $tech-primary;
+				background: rgba(115, 12, 30, 0.12);
+			}
+		}
+
 		.fixora-nav__lang-btn {
 			color: $tech-text-muted;
 
@@ -1604,6 +1630,37 @@ $border-orange: var(--fixora-border);
 	.fixora-technician-layout {
 		#pc-wrap & {
 			display: none;
+		}
+	}
+
+	.fixora-tech-dashboard {
+		&__welcome {
+			flex-direction: column;
+			align-items: stretch;
+			padding: 16px;
+			gap: 14px;
+			min-height: 0;
+		}
+
+		&__quick-actions {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			width: 100%;
+			gap: 8px;
+			justify-content: stretch;
+		}
+	}
+
+	.fixora-tech-quick-action {
+		min-width: 0;
+		width: 100%;
+		padding: 12px 8px;
+
+		span {
+			white-space: normal;
+			text-align: center;
+			font-size: 10px;
+			line-height: 1.25;
 		}
 	}
 }

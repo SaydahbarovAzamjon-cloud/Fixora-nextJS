@@ -50,7 +50,7 @@
 | P3-08 | My Page + Notifications | ✅ Done | `/client/my-page` (6-tab owner view) + `/mypage` redirect + `/notifications` — real API; GAP-098 saved technicians |
 | P3-08b | Booking detail + final payment | ✅ Done | `/mypage/bookings/[id]` — detail view, deposit + final mock payment, cancel, review; wired from Messages/My Page/notifications |
 | P3-09 | Tenant Dashboard (§9.3) | ✅ Done | 8 screens incl. Settings 1:1 (`libs/components/technician/settings/`); Profile/Account/Security/Availability GraphQL; GAP-090…096 in BACKEND_SETTINGS.md |
-| P3-10 | Community + Post Detail | ✅ Done | `/community` feed + `/community/[id]` detail + `/community/write`; 4 components; 6 GraphQL ops; route migration from `?id=` to `[id]` |
+| P3-10 | Community + Post Detail | ✅ Done | `/community` feed + `/community/[id]` detail + `/community/write`; 4 components; 6 GraphQL ops; route migration from `?id=` to `[id]`; header spacing tuned below fixed navbar; empty article state is backend/data dependent and left unchanged |
 
 > **During Phase 2:** build **responsive-safe** (flex/grid, `@media`, both `#pc-wrap` / `#mobile-wrap`) — not full mobile polish. See `MOB-01` in `DECISIONS.md`.
 

@@ -158,6 +158,7 @@ const NotificationsPage: NextPage = () => {
 	const markAllRead = async () => {
 		try {
 			await markAllNotificationsRead();
+			notifCtx?.clearUnread();
 			setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 			await notifCtx?.refetchNotifications();
 		} catch {
@@ -228,6 +229,15 @@ const NotificationsPage: NextPage = () => {
 	return (
 		<div className="fixora-notifications-page">
 			<div className="container fixora-notifications">
+				<div className="fixora-notifications__page-head">
+					<h1 className="fixora-notifications__page-title">{t('notifications.title')}</h1>
+					{notifications.some((n) => !n.isRead) && (
+						<button type="button" className="fixora-notifications__mark-all-top" onClick={markAllRead}>
+							{t('notifications.markAllRead')}
+						</button>
+					)}
+				</div>
+
 				<div className="fixora-notifications__tabs">
 					{(['all', 'messages', 'bookings'] as NotifTab[]).map((tab) => (
 						<button
@@ -254,12 +264,6 @@ const NotificationsPage: NextPage = () => {
 				{hasMore && (
 					<FixoraButton variant="outline" className="fixora-notifications__load-more" onClick={loadMore}>
 						{t('notifications.loadMore')}
-					</FixoraButton>
-				)}
-
-				{tabbedNotifications.some((n) => !n.isRead) && (
-					<FixoraButton variant="outline" className="fixora-notifications__mark-all" onClick={markAllRead}>
-						{t('notifications.markAllRead')}
 					</FixoraButton>
 				)}
 			</div>

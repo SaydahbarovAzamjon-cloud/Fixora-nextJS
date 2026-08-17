@@ -793,10 +793,10 @@
 		width: 36px;
 		height: 36px;
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid var(--fixora-border-subtle);
 		border-radius: 8px;
 		background: transparent;
-		color: #fff;
+		color: var(--fixora-text-muted);
 		cursor: pointer;
 		transition:
 			border-color 0.15s ease,
@@ -807,21 +807,23 @@
 		svg {
 			font-size: 20px;
 			pointer-events: none;
+			color: inherit;
 		}
 
 		&:hover {
-			border-color: rgba(255, 255, 255, 0.45);
-			background: rgba(255, 255, 255, 0.06);
+			border-color: var(--fixora-primary);
+			background: var(--fixora-primary-soft);
+			color: var(--fixora-primary);
 		}
 
 		&--active {
 			border-color: var(--fixora-primary);
-			background: rgba(115, 12, 30, 0.2);
+			background: var(--fixora-primary-soft);
 			color: var(--fixora-primary);
 
 			&:hover {
 				border-color: var(--fixora-primary-hover);
-				background: rgba(115, 12, 30, 0.28);
+				background: var(--fixora-primary-soft-bg);
 				color: var(--fixora-primary-hover);
 			}
 		}

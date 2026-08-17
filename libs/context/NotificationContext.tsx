@@ -24,6 +24,7 @@ interface NotificationContextValue {
 	refetchNotifications: () => Promise<void>;
 	refetchConversations: () => Promise<void>;
 	decrementUnread: (by?: number) => void;
+	clearUnread: () => void;
 	subscribeMessageReceived: (handler: MessageReceivedHandler) => () => void;
 }
 
@@ -79,6 +80,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
 	const decrementUnread = useCallback((by = 1) => {
 		setUnreadCount((prev) => Math.max(0, prev - by));
+	}, []);
+
+	const clearUnread = useCallback(() => {
+		setUnreadCount(0);
 	}, []);
 
 	const subscribeMessageReceived = useCallback((handler: MessageReceivedHandler) => {
@@ -156,9 +161,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 			refetchNotifications,
 			refetchConversations,
 			decrementUnread,
+			clearUnread,
 			subscribeMessageReceived,
 		}),
-		[unreadCount, wsConnected, refetchNotifications, refetchConversations, decrementUnread, subscribeMessageReceived],
+		[unreadCount, wsConnected, refetchNotifications, refetchConversations, decrementUnread, clearUnread, subscribeMessageReceived],
 	);
 
 	return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;

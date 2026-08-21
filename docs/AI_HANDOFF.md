@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Last updated** | 2026-08-17 |
+| **Last updated** | 2026-08-21 |
 | **Last agent** | Cursor |
-| **Last session** | **Upload images on localhost** — same-origin `/uploads` + Next rewrite to `GRAPHQL_PROXY_TARGET` so profile/article photos saved against production no longer 404 on `localhost:3000`. Community covers already use the same resolver. |
-| **Next agent should start with** | Verify technician Public Profile avatar on localhost after `yarn dev` restart; confirm `/uploads/member/...` returns 200. |
+| **Last session** | **Search layout + theme** — replaced MUI Stack on `/search` layout with `div` so SCSS `row` wins on all PCs; app always boots in light mode (bootstrap + provider reset); Preferences no longer force dark on open. Not committed. |
+| **Next agent should start with** | Verify `/search` sidebar+results row on a second browser/PC; confirm hard refresh always opens light theme. |
 
 ---
 

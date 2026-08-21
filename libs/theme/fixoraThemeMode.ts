@@ -10,6 +10,7 @@ export function isFixoraThemeMode(value: unknown): value is FixoraThemeMode {
 	return value === 'dark' || value === 'light';
 }
 
+/** Session toggle may persist dark; every fresh page load still starts light. */
 export function getStoredFixoraThemeMode(): FixoraThemeMode {
 	if (typeof window === 'undefined') return DEFAULT_FIXORA_THEME_MODE;
 
@@ -48,5 +49,14 @@ export function setStoredFixoraThemeMode(mode: FixoraThemeMode): void {
 	applyFixoraThemeMode(mode);
 }
 
-/** Inline bootstrap for _document.tsx — prevents theme flash on load */
-export const FIXORA_THEME_BOOTSTRAP_SCRIPT = `(function(){try{var m=localStorage.getItem('${FIXORA_THEME_STORAGE_KEY}');if(m==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.classList.remove('theme-light');}else{document.documentElement.setAttribute('data-theme','light');document.documentElement.classList.add('theme-light');}}catch(e){}})();`;
+/** Force light on open — clears a previous dark preference so PCs stay consistent. */
+export function resetFixoraThemeModeToLight(): FixoraThemeMode {
+	setStoredFixoraThemeMode(DEFAULT_FIXORA_THEME_MODE);
+	return DEFAULT_FIXORA_THEME_MODE;
+}
+
+/**
+ * Inline bootstrap for _document.tsx — always light on first paint (no dark flash
+ * from a stale localStorage value on another PC / profile).
+ */
+export const FIXORA_THEME_BOOTSTRAP_SCRIPT = `(function(){try{localStorage.setItem('${FIXORA_THEME_STORAGE_KEY}','${DEFAULT_FIXORA_THEME_MODE}');document.documentElement.setAttribute('data-theme','${DEFAULT_FIXORA_THEME_MODE}');document.documentElement.classList.add('theme-light');}catch(e){try{document.documentElement.setAttribute('data-theme','light');document.documentElement.classList.add('theme-light');}catch(e2){}}})();`;

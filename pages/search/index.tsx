@@ -251,7 +251,8 @@ const SearchPage: NextPage = () => {
 					/>
 				)}
 
-				<Stack className={`fixora-search__layout${mapExpanded ? ' fixora-search__layout--map-expanded' : ''}`}>
+				{/* Native divs — MUI Stack defaults to column and fights SCSS row/media queries. */}
+				<div className={`fixora-search__layout${mapExpanded ? ' fixora-search__layout--map-expanded' : ''}`}>
 					{isMobile && filtersOpen && (
 						<button
 							type="button"
@@ -261,7 +262,7 @@ const SearchPage: NextPage = () => {
 						/>
 					)}
 
-					<Stack
+					<div
 						className={`fixora-search__sidebar${isMobile ? ' fixora-search__sidebar--drawer' : ''}${filtersOpen ? ' fixora-search__sidebar--open' : ''}`}
 					>
 						{isMobile && (
@@ -291,9 +292,9 @@ const SearchPage: NextPage = () => {
 							setSearchFilter={setSearchFilter}
 							onApplied={() => setFiltersOpen(false)}
 						/>
-					</Stack>
+					</div>
 
-					<Stack className="fixora-search__results">
+					<div className="fixora-search__results">
 						{isMobile && !mapExpanded && (
 							<button
 								type="button"
@@ -316,7 +317,7 @@ const SearchPage: NextPage = () => {
 						{technicians.length === 0 ? (
 							<div className="fixora-search__no-results">{t('search.results.noResults')}</div>
 						) : (
-							<Stack className={`fixora-search__results-list fixora-search__results-list--${viewMode}`}>
+							<div className={`fixora-search__results-list fixora-search__results-list--${viewMode}`}>
 								{technicians.map((technician) => (
 									<TechnicianResultCard
 										key={technician._id}
@@ -328,11 +329,11 @@ const SearchPage: NextPage = () => {
 										onToggleFollow={toggleFollowHandler}
 									/>
 								))}
-							</Stack>
+							</div>
 						)}
 
 						{technicians.length !== 0 && !geoActive && Math.ceil(total / searchFilter.limit) > 1 && (
-							<Stack className="fixora-search__pagination">
+							<div className="fixora-search__pagination">
 								<Pagination
 									page={searchFilter.page}
 									count={Math.ceil(total / searchFilter.limit)}
@@ -340,10 +341,10 @@ const SearchPage: NextPage = () => {
 									shape="circular"
 									color="primary"
 								/>
-							</Stack>
+							</div>
 						)}
-					</Stack>
-				</Stack>
+					</div>
+				</div>
 
 				<SearchTrustBar />
 			</Stack>

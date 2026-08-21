@@ -18,7 +18,7 @@ const PreferencesSection: React.FC = () => {
 	const [language, setLanguage] = useState('en');
 	const [currency, setCurrency] = useState('KRW');
 	const [timezone, setTimezone] = useState('Asia/Seoul');
-	const [darkMode, setDarkMode] = useState(true);
+	const [darkMode, setDarkMode] = useState(false);
 
 	useEffect(() => {
 		const remote = data?.getUserPreferences;
@@ -26,9 +26,9 @@ const PreferencesSection: React.FC = () => {
 		setLanguage(remote.language || 'en');
 		setCurrency(remote.currency || 'KRW');
 		setTimezone(remote.timezone || 'Asia/Seoul');
-		setDarkMode(remote.darkMode ?? true);
-		setMode(remote.darkMode === false ? 'light' : 'dark');
-	}, [data, setMode]);
+		// Form only — do not push remote darkMode into global theme on open (causes light/dark mix).
+		setDarkMode(remote.darkMode === true);
+	}, [data]);
 
 	const handleSave = async () => {
 		try {

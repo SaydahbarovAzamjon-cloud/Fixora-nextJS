@@ -2,10 +2,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { ThemeProvider, createTheme, Theme, ThemeOptions } from '@mui/material/styles';
 import { fixoraDark, fixoraLight, fixoraTechnicianOrange } from '../../../scss/MaterialTheme';
 import {
-	applyFixoraThemeMode,
 	DEFAULT_FIXORA_THEME_MODE,
 	FixoraThemeMode,
-	getStoredFixoraThemeMode,
+	resetFixoraThemeModeToLight,
 	setStoredFixoraThemeMode,
 } from '../../theme/fixoraThemeMode';
 
@@ -41,9 +40,9 @@ export const FixoraThemeProvider: React.FC<Props> = ({ children, pathname }) => 
 	const isTechnicianRoute = pathname.startsWith('/technician');
 
 	useEffect(() => {
-		const stored = getStoredFixoraThemeMode();
-		setModeState(stored);
-		applyFixoraThemeMode(stored);
+		// Always open the app in light mode (product rule); toggle still works in-session.
+		const mode = resetFixoraThemeModeToLight();
+		setModeState(mode);
 	}, []);
 
 	const setMode = useCallback((next: FixoraThemeMode) => {
